@@ -28,7 +28,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.use('/users', users);
 
-//to setup docker mysql: docker run --name episql -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3307 mysql
+//to setup docker mysql: docker run --name episql -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql
 //this port is in use according to Docker, how can I make sure that a port is valid for me to use?
 
 // required for passport
@@ -38,13 +38,22 @@ app.use(passport.session()); // persistent login sessions
 
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
-    host     : 'localhost:3307',
+    host     : 'localhost',
     user     : 'root',
     password : 'my-secret-pw',
-    database : 'databasename'
+    database : 'epistemolog'
 });
 
 connection.connect();
+
+connection.query('SELECT * from Users', function(err, rows, fields) {
+    if (!err)
+        console.log('The solution is: ', rows);
+    else
+        console.log('Error while performing Query.');
+});
+
+connection.end();
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
