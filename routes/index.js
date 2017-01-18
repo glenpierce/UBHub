@@ -1,9 +1,30 @@
 var express = require('express');
+var mysql = require('mysql');
 var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+    var connection = mysql.createConnection({
+        host     : 'localhost',
+        user     : 'root',
+        password : 'my-secret-pw',
+        database : 'epistemolog'
+    });
+
+    connection.connect();
+
+      var query = connection.query('SELECT * FROM Users',function(err, rows){
+          if(err)
+              console.log("Error Selecting : %s ", err );
+
+          for (var i in rows) {
+              console.log(rows[i].email);
+          }
+
+          res.render('index',{title:"Users - Node.js", data:rows});
+      });
+
+    connection.end();
 });
 
 module.exports = router;
