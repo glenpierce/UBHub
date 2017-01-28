@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+var bcrypt = require('bcryptjs');
 var passport = require('passport');
 var session = require('express-session');
 
@@ -32,15 +33,28 @@ app.use('/users', users);
 //this port is in use according to Docker, how can I make sure that a port is valid for me to use?
 
 // required for passport
-app.use(session({ secret: 'DONt COMMIT THE REAL SECRET TO GITHUB OR RHINOS WILL EAT YOUR BABY' })); // session secret
+app.use(session({ secret: process.argv[2] })); // session secret
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
+
+// process.argv.forEach(function (val, index, array) {
+//     console.log(index + ': ' + val);
+// });
+
+const then = new Date().getTime();
+var salt = bcrypt.genSaltSync(10);
+var hash = bcrypt.hashSync("password", salt);
+console.log(bcrypt.compareSync("password", hash)); // true
+console.log(bcrypt.compareSync("not_bacon", hash)); // false
+console.log(new Date().getTime() - then);
+
+// console.log(process.env)
 
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
     host     : 'localhost',
     user     : 'root',
-    password : 'my-secret-pw',
+    password : process.argv[2],
     database : 'epistemolog'
 });
 
