@@ -5,7 +5,30 @@ body
 
     script.
         var submitLogin = function() {
-            console.log('something')
+            console.log('submitting login')
+            var options = {
+                url : '/users/login',
+                path : '',
+                method : 'GET',
+                port: 443,
+                authorization : {
+                    username: user,
+                    password: pass
+                }
+            }
+        }
+
+        function httpGetAsync(theUrl, callback){
+            var xmlHttp = new XMLHttpRequest();
+            console.log("made var");
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                    callback(xmlHttp.responseText);
+            }
+            xmlHttp.open("GET", theUrl, true); // true for asynchronous
+            console.log("opened http");
+            xmlHttp.send(null);
+            console.log("sent");
         }
 
     h1= title
@@ -14,4 +37,4 @@ body
       input(type="text", name="username")
     div.input
       input(type="text", name="password")
-    button(onclick='submitLogin()') Click
+    button(onclick='httpGetAsync("/users", console.log)') Click
