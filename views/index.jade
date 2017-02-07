@@ -4,37 +4,27 @@ body
   block content
 
     script.
-        var submitLogin = function() {
-            console.log('submitting login')
-            var options = {
-                url : '/users/login',
-                path : '',
-                method : 'GET',
-                port: 443,
-                authorization : {
-                    username: user,
-                    password: pass
-                }
-            }
-        }
-
         function httpGetAsync(theUrl, callback){
+            let user = document.getElementById('username').value;
+            let pass = document.getElementById('password').value;
+            let data = {
+                username: user,
+                password: pass
+            }
             var xmlHttp = new XMLHttpRequest();
-            console.log("made var");
             xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
                     callback(xmlHttp.responseText);
             }
-            xmlHttp.open("GET", theUrl, true); // true for asynchronous
-            console.log("opened http");
-            xmlHttp.send(null);
-            console.log("sent");
+            xmlHttp.open("POST", theUrl, true); // true for asynchronous
+            xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xmlHttp.send(data);
         }
 
     h1= title
     p Welcome to #{title}
     div.input
-      input(type="text", name="username")
+      input(type="text", id="username")
     div.input
-      input(type="text", name="password")
+      input(type="text", id="password")
     button(onclick='httpGetAsync("/users", console.log)') Click
