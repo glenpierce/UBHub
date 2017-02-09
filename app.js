@@ -62,7 +62,7 @@ connection.connect();
 
 connection.query('SELECT * from Users', function(err, rows, fields) {
     if (!err)
-        console.log('The solution is: ', rows);
+        console.log('The user db contains: ', rows);
     else
         console.log('Error while performing Query.');
 });
