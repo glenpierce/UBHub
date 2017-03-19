@@ -3,11 +3,9 @@ var router = express.Router();
 var mysql = require('mysql');
 var bcrypt = require('bcryptjs');
 
-router.get('/', function(req, res, next) {
-  res.send('respond with req');
-});
-
 router.post('/', function(req, res){
+
+    console.log("creating user");
 
     var connection = mysql.createConnection({
         host     : 'localhost',
@@ -17,19 +15,21 @@ router.post('/', function(req, res){
     });
 
     console.log('POST request received');
-    // console.log(req.body);
-    // console.log(req.body.username);
+    console.log(req.body);
+    console.log(req.body.username);
+
+    var salt = bcrypt.genSaltSync(10);
+    var hash = bcrypt.hashSync(req.body.password, salt);
 
     if(isSafeSQL(req.body.username)) {
 
         connection.connect();
 
-        connection.query('CALL login("' + req.body.username + '")', function(err, rows, fields){
+//        connection.query('SELECT email, id from Users WHERE email = "' + req.body.username + '"', function (err, rows, fields) {
+        connection.query('CALL createUser("' + req.body.username + '", "' + hash + '")', function(err, rows, fields){
             if (!err) {
-                console.log(rows);
-                bcrypt.compare(req.body.password, rows[0][0].hashedPassword, function(err, res) {
-                    console.log(res);
-                });
+                console.log('The user db has created a user: ', rows);
+
             } else {
                 console.log('Error while performing Query.');
             }
@@ -43,14 +43,6 @@ router.post('/', function(req, res){
     } else {
 
     }
-});
-
-router.get('login', function(req, res, next) {
-    //check password
-    //if correct
-    //res.send();
-    // res.send('respond with a resource' + req);
-    // console.log("responding" + req);
 });
 
 var isSafeSQL = function(userInput){

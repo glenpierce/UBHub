@@ -28,4 +28,5 @@ body
       input(type="text", id="username")
     div.input
       input(type="text", id="password")
-    button(onclick='httpGetAsync("/users", console.log)') Click
+    button(onclick='httpGetAsync("/users", console.log)') Login
+    button(onclick='httpGetAsync("/createUser", console.log)') Create User
