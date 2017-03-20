@@ -9,6 +9,8 @@ router.get('/', function(req, res, next) {
 
 router.post('/', function(req, res){
 
+    console.log('login request received');
+
     var connection = mysql.createConnection({
         host     : 'localhost',
         user     : 'root',
@@ -16,46 +18,24 @@ router.post('/', function(req, res){
         database : 'epistemolog'
     });
 
-    console.log('POST request received');
-    // console.log(req.body);
-    // console.log(req.body.username);
+    connection.connect();
 
-    if(isSafeSQL(req.body.username)) {
+    connection.query('CALL login("' + req.body.username + '")', function(err, rows, fields){
+        if (!err) {
+            console.log(rows);
+            bcrypt.compare(req.body.password, rows[0][0].hashedPassword, function(err, res) {
+                console.log(res);
+            });
+        } else {
+            console.log('Error while performing Query.');
+        }
+    });
 
-        connection.connect();
-
-        connection.query('CALL login("' + req.body.username + '")', function(err, rows, fields){
-            if (!err) {
-                console.log(rows);
-                bcrypt.compare(req.body.password, rows[0][0].hashedPassword, function(err, res) {
-                    console.log(res);
-                });
-            } else {
-                console.log('Error while performing Query.');
-            }
-        });
-
-        connection.end();
+    connection.end();
 
 
-        res.writeHead(200, {'Content-Type': 'text/html'});
-        res.end('server says: post request received');
-    } else {
-
-    }
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end('server says: post request received');
 });
-
-router.get('login', function(req, res, next) {
-    //check password
-    //if correct
-    //res.send();
-    // res.send('respond with a resource' + req);
-    // console.log("responding" + req);
-});
-
-var isSafeSQL = function(userInput){
-    return true;
-    // return(!userInput.contains("'"));
-};
 
 module.exports = router;
