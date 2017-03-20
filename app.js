@@ -4,15 +4,25 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
-var bcrypt = require('bcryptjs');
-var passport = require('passport');
-var session = require('express-session');
+var session = require('client-sessions');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 var createUser = require('./routes/createUser');
+var dashboard = require('./routes/dashboard');
 
+// var https = require('https');
+// var fs = require('fs');
+//
+// var sslkey = fs.readFileSync('ssl-key.pem');
+// var sslcert = fs.readFileSync('ssl-cert.pem');
+//
+// var options = {
+//     key: sslkey,
+//     cert: sslcert
+// };
+//
+// var app = express.createServer(options);
 var app = express();
 
 // view engine setup
@@ -27,30 +37,20 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(session({
+    cookieName: 'session',
+    secret: process.argv[3],
+    duration: 30 * 60 * 1000,
+    activeDuration: 5 * 60 * 1000
+}));
+
 app.use('/', index);
 app.use('/users', users);
 app.use('/createUser', createUser);
+app.use('/dashboard', dashboard);
 
 //to setup docker mysql: docker run --name episql -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql
 //this port is in use according to Docker, how can I make sure that a port is valid for me to use?
-
-// required for passport
-app.use(session({ secret: process.argv[2] })); // session secret
-app.use(passport.initialize());
-app.use(passport.session()); // persistent login sessions
-
-// process.argv.forEach(function (val, index, array) {
-//     console.log(index + ': ' + val);
-// });
-
-const then = new Date().getTime();
-var salt = bcrypt.genSaltSync(10);
-var hash = bcrypt.hashSync("password", salt);
-console.log(bcrypt.compareSync("password", hash)); // true
-console.log(bcrypt.compareSync("not_bacon", hash)); // false
-console.log(new Date().getTime() - then);
-
-// console.log(process.env)
 
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
