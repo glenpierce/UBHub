@@ -21,6 +21,9 @@ body
             var dataAsJson = JSON.stringify(data);
             xmlHttp.send(dataAsJson);
         }
+        function redirect(res){
+          window.location = res;
+        }
 
     h1= title
     p Welcome to #{title}
@@ -28,5 +31,5 @@ body
       input(type="text", id="username")
     div.input
       input(type="text", id="password")
-    button(onclick='httpGetAsync("/users", console.log)') Login
+    button(onclick='httpGetAsync("/users", redirect)') Login
     button(onclick='httpGetAsync("/createUser", console.log)') Create User

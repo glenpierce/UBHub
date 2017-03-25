@@ -37,7 +37,7 @@ router.post('/', function(req, res){
                 console.log(response);
                 if(response){
                     req.session.user = req.body.username;
-                    res.redirect('/dashboard');
+                    return res.send('/dashboard');
                 }
             });
         } else {
