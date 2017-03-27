@@ -20,7 +20,7 @@ router.get('/', function(req, res, next) {
     } else {
         console.log("not logged in");
         req.session.reset();
-        res.redirect('/users');
+        res.redirect('/index');
     }
 });
 
