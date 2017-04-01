@@ -15,7 +15,7 @@ router.post('/', function(req, res){
     });
 
     var salt = bcrypt.genSaltSync(10);
-    var hash = bcrypt.hashSync(req.body.password, salt);
+    var hash = bcrypt.hashSync(req.body.password, salt); //todo: bcrypt.hashSync(req.body.password + "salty salt", salt);
 
     connection.connect();
 
