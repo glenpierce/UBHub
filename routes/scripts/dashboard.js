@@ -1,1 +1,5 @@
-window.alert("dashboard.js")
+window.alert("dashboard.js");
+
+var loadData = function(){
+
+};
