@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var mysql = require('mysql');
 var session = require('client-sessions');
+var path = require("path");
 
 var app = express();
 
@@ -16,7 +17,8 @@ router.get('/', function(req, res, next) {
     console.log("dashboard");
     if (req.session && req.session.user) {
         console.log("logged in as " + req.session.user);
-        res.render('index',{title:"You are logged in"});
+        res.sendFile(path.join(__dirname+'/dashboard.html'));
+        //res.render('index',{title:"You are logged in"});
     } else {
         console.log("not logged in");
         req.session.reset();

@@ -3,6 +3,7 @@ var router = express.Router();
 var mysql = require('mysql');
 var bcrypt = require('bcryptjs');
 var session = require('client-sessions');
+var path = require("path");
 
 var app = express();
 
@@ -37,6 +38,7 @@ router.post('/', function(req, res){
                 console.log(response);
                 if(response){
                     req.session.user = req.body.username;
+                    // return res.sendFile(path.join(__dirname+'/dashboard.html'));
                     return res.send('/dashboard');
                 }
             });
