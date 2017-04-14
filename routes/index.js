@@ -6,7 +6,7 @@ var path = require("path");
 /* GET home page. */
 router.get('/', function(req, res, next) {
 
-    res.render('index',{title:"The thing I'm working on"});
+    res.render('index',{title:"The thing we're working on"});
     // res.sendFile(path.join(__dirname+'/index.html'));
       // });
 
