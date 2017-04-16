@@ -8,7 +8,7 @@
     <link rel="stylesheet" type="text/css" href="/stylesheets/dashboard.css" media="screen" />
     <script>
         $(document).ready(function(){
-            fadeButtonsIn();
+            loadData();
         });
     </script>
 </head>
@@ -18,7 +18,7 @@
     <div class="headerText">About CBI</div>
     <div class="headerText">Resources</div>
     <div class="headerText">About us</div>
-    <div>User Name</div>
+    <div class="userName" id="userName">I should be blue</div>
     <div>Search icon</div>
 </div>
 <div style="position:absolute; top:80px;">
@@ -28,14 +28,5 @@
     <div style="border: solid">Popular Forum Topics</div>
     <div style="border: solid">Snapshot</div>
 </div>
-
-<div style="top: 60px; display: none;">
-    <button>Click to fade in boxes</button><br><br>
-
-    <div id="div1" style="width:80px;height:80px;display:none;background-color:red;"></div><br>
-    <div id="div2" style="width:80px;height:80px;display:none;background-color:green;"></div><br>
-    <div id="div3" style="width:80px;height:80px;display:none;background-color:blue;"></div>
-</div>
-
 </body>
 </html>

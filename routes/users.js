@@ -38,7 +38,6 @@ router.post('/', function(req, res){
                 console.log(response);
                 if(response){
                     req.session.user = req.body.username;
-                    // return res.sendFile(path.join(__dirname+'/dashboard.html'));
                     return res.send('/dashboard');
                 }
             });

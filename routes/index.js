@@ -7,10 +7,6 @@ var path = require("path");
 router.get('/', function(req, res, next) {
 
     res.render('index',{title:"The thing I'm working on"});
-    // res.sendFile(path.join(__dirname+'/index.html'));
-      // });
-
-    // connection.end();
 });
 
 module.exports = router;

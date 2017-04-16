@@ -18,7 +18,18 @@ router.get('/', function(req, res, next) {
     if (req.session && req.session.user) {
         console.log("logged in as " + req.session.user);
         res.sendFile(path.join(__dirname+'/dashboard.html'));
-        //res.render('index',{title:"You are logged in"});
+    } else {
+        console.log("not logged in");
+        req.session.reset();
+        res.redirect('/index');
+    }
+});
+
+router.get('/', function(req, res, next) {
+    console.log("dashboard");
+    if (req.session && req.session.user) {
+        console.log("logged in as " + req.session.user);
+        res.sendFile(path.join(__dirname+'/dashboard.html'));
     } else {
         console.log("not logged in");
         req.session.reset();

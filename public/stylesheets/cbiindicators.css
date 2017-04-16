@@ -1,0 +1,213 @@
+/*
+$blue1: #07456b;
+$blue2: #326f90;
+$blue4: #4490ba;
+$blue5: #71afd1;
+$blue6: #93c2d9;
+$blue7: #b6d5e3;
+$blue9: #daecf1;
+$blue10: #e9f6f9;
+
+$green1: #235449;
+$green2: #3b7e6a;
+$green4: #269973;
+$green5a: #2fb585;
+$green5b: #70ba8f;
+$green6: #82caa0;
+$green7: #acd9bb;
+$green8: #c1e3cd;
+$green9: #d8ecd4;
+$green10: #eff6e8;
+
+$yellow1: #683d1a;
+$yellow2: #8c5222;
+$yellow3: #c58c2b;
+$yellow5: #e7b627;
+$yellow6: #fcd350;
+$yellow7: #ffe57b;
+$yellow8: #ffef94;
+$yellow9: #fff1b6;
+$yellow10: #fffceb;
+
+$red1: #742109;
+$red2: #a63720;
+$red3: #d82d27;
+$red4: #f2613a;
+$red5: #f69056;
+$red6: #fab279;
+*/
+
+body{
+    background-color: white;
+    font-family: helvetica;
+    font-size:14px;
+}
+
+.border{
+    border-style:solid;
+    border-width:2px;
+    border-color: red;
+}
+
+.userName{
+    margin-bottom:12px;
+    margin-top:12px;
+}
+
+.city{
+    font-weight:bold;
+    font-size:28px;
+}
+
+.country{
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.tabs{
+    display:flex;
+    justify-content:space-between;
+    max-width: 800px;
+    margin:auto;
+}
+
+.tab{
+    margin-right:5px;
+    text-align:center;
+    font-size: 14px;
+    flex:1;
+    display: inline;
+    padding: 5px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.cityProfile{
+    margin-left:5px;
+    background-color:#c9ced0;
+}
+
+.nativeBiodiversity{
+    background-color:#b6d5e3;
+}
+
+.ecosystemServices{
+    background-color:#acd9bb;
+}
+
+.govManagement{
+    background-color:#fff1b6;
+}
+
+.tabsBaseLine{
+    margin:auto;
+    max-width:800px;
+    width:100%;
+    height:5px;
+    background-color:#3b7e6a;
+}
+
+.dataEntryBlock{
+    margin:auto;
+    margin-top:5px;
+    max-width: 780px;
+    display: flex;
+    justify-content:space-between;
+    background-color: #c1e3cd;
+    border-radius: 10px;
+    padding: 10px;
+    width: 100%;
+}
+
+.number{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #3b7e6a;
+    border-radius: 5px;
+    height: 25px;
+    width: 25px;
+    min-width:25px;
+    color: #ffffff;
+    font-weight:bold;
+}
+
+.center{
+    display:flex;
+    align-items: center;
+    height: 100%;
+}
+
+.centerNumber{
+    font-size: 8px;
+}
+
+.dataEntryTitle{
+    margin-left:5px;
+    font-weight: bold;
+    font-size:18px;
+}
+
+
+.dataEntryLabel{
+    padding-left:15px;
+    align-items:flex-end;
+    display: flex;
+    height:20px;
+    margin:5px;
+}
+
+.inputField{
+    background-color:white;
+    margin:5px;
+    width: 100px;
+    height:20px;
+}
+
+.inputFieldOptional{
+    background-color:#eff6e8;
+    margin:5px;
+    width: 140px;
+    height:60px;
+}
+
+.calculation{
+
+}
+
+.width100pct{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+}
+
+.points{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #3b7e6a;
+    border-radius: 10px;
+    height: 50px;
+    width: 60px;
+    min-width: 60px;
+    color: #ffffff;
+    font-weight:bold;
+}
+
+.centerPoints{
+
+}
+
+.baseline{
+    display:flex;
+    align-items:baseline;
+}
+
+.ptsNumber{
+    display:inline;
+    font-size: 24px;
+}
+
+.pts{
+    font-size:12px;
+}
