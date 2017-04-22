@@ -1,0 +1,45 @@
+doctype html
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/cbiindicators.css')
+
+mixin indicator(category, number, title, value)
+    div.dataEntryBlock
+        .div(style="display:flex; flex:1.2;")
+            div.number
+                div.center.centerNumber #{number}
+        .div(style="flex:1;")
+            div.dataEntryTitle #{title}
+                div.dataEntryLabel
+            div.calculation
+                div.inputField
+            .div(style="flex:1")
+                div.width100pct
+                    div Calculation
+                    div.points
+                        div.center.centerPoints
+                            div.baseline
+                                div.ptsNumber #{value}
+                                div.pts &nbsp;&nbsp;pts
+
+
+body
+    block content
+        .div(style="max-width:800px; margin:auto;")
+            div.userName #{userName}
+            div.city City
+            div.country Country
+        tabs.tabs
+            div.tab.cityProfile City Profile
+            div.tab.nativeBiodiversity Native Biodiversity
+            div.tab.ecosystemServices Ecosystem Services
+            div.tab.govManagement Governance & Management
+
+        div.tabsBaseLine
+
+        +indicator(category, number, title, value)
+        +indicator(category, number, title, value)
+        +indicator(category, number, title, value)
+        +indicator(category, number, title, value)
+        +indicator(category, number, title, value)
+        +indicator(category, number, title, value)

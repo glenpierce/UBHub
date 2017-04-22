@@ -23,7 +23,7 @@ router.post('/', function(req, res){
     console.log('login request received');
 
     var connection = mysql.createConnection({
-        host     : 'localhost',
+        host     : '192.168.99.100',
         user     : 'root',
         password : process.argv[2],
         database : 'epistemolog'
