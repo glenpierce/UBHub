@@ -99,6 +99,30 @@ body{
     background-color:#fff1b6;
 }
 
+.foregroundBlue{
+    background-color: #07456b;
+}
+
+.foregroundGreen{
+    background-color: #3b7e6a;
+}
+
+.foregroundYellow{
+    background-color: #fff1b6;
+}
+
+.lightBlue{
+    background-color: #e9f6f9;
+}
+
+.lightGreen{
+    background-color: #eff6e8;
+}
+
+.lightYellow{
+    background-color: #fffceb;
+}
+
 .tabsBaseLine{
     margin:auto;
     max-width:800px;
@@ -110,10 +134,9 @@ body{
 .dataEntryBlock{
     margin:auto;
     margin-top:5px;
-    max-width: 780px;
+    max-width: 760px;
     display: flex;
     justify-content:space-between;
-    background-color: #c1e3cd;
     border-radius: 10px;
     padding: 10px;
     width: 100%;
@@ -123,13 +146,11 @@ body{
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: #3b7e6a;
     border-radius: 5px;
     height: 25px;
     width: 25px;
     min-width:25px;
     color: #ffffff;
-    font-weight:bold;
 }
 
 .center{
@@ -139,7 +160,7 @@ body{
 }
 
 .centerNumber{
-    font-size: 8px;
+    font-size: 12px;
 }
 
 .dataEntryTitle{
@@ -165,14 +186,13 @@ body{
 }
 
 .inputFieldOptional{
-    background-color:#eff6e8;
     margin:5px;
     width: 140px;
     height:60px;
 }
 
-.calculation{
-
+.inputColumn{
+    flex:1.1;
 }
 
 .width100pct{
@@ -185,7 +205,6 @@ body{
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: #3b7e6a;
     border-radius: 10px;
     height: 50px;
     width: 60px;

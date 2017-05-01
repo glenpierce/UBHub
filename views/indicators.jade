@@ -2,25 +2,52 @@ doctype html
 html
     head
         link(rel='stylesheet', href='/stylesheets/cbiindicators.css')
+        script.
+            function scrollScript() {
+                console.log("scrolling...");
+            }
 
 mixin indicator(category, number, title, value)
-    div.dataEntryBlock
+
+    -var backgroundColor;
+    -var foregroundColor;
+    -var lightColor;
+    case category
+        when 1
+            -backgroundColor = 'nativeBiodiversity';
+            -foregroundColor = 'foregroundBlue';
+            -lightColor = 'lightBlue';
+        when 2
+            -backgroundColor = 'ecosystemServices';
+            -foregroundColor = 'foregroundGreen';
+            -lightColor = 'lightGreen';
+        default
+            -backgroundColor = 'govManagement';
+            -foregroundColor = 'foregroundYellow';
+            -lightColor = 'lightYellow';
+    div.dataEntryBlock(class = backgroundColor)
         .div(style="display:flex; flex:1.2;")
-            div.number
-                div.center.centerNumber #{number}
-        .div(style="flex:1;")
+            div(style="height:100%; display:flex; flex-direction:column; justify-content:space-between;")
+                div.number(class = foregroundColor)
+                    div.center.centerNumber #{number}
+                div(style="text-align:center; font-weight:bold;") i
             div.dataEntryTitle #{title}
-                div.dataEntryLabel
-            div.calculation
+        .div(style="flex:1;")
+                div.dataEntryLabel Value
+                div.dataEntryLabel Data year
+                div.dataEntryLabel Notes
+            div.inputColumn
                 div.inputField
+                div.inputField
+                div.inputFieldOptional(class = lightColor)
             .div(style="flex:1")
                 div.width100pct
                     div Calculation
-                    div.points
+                    div.points(class = foregroundColor)
                         div.center.centerPoints
                             div.baseline
                                 div.ptsNumber #{value}
-                                div.pts &nbsp;&nbsp;pts
+                                div.pts &nbsp;pts
 
 
 body
@@ -37,9 +64,6 @@ body
 
         div.tabsBaseLine
 
-        +indicator(category, number, title, value)
-        +indicator(category, number, title, value)
-        +indicator(category, number, title, value)
-        +indicator(category, number, title, value)
-        +indicator(category, number, title, value)
-        +indicator(category, number, title, value)
+        div(style="margin:auto; height:300px; overflow-y: scroll; max-width:800px;" onscroll="scrollScript()")
+            - for indicator in cityIndicators.indicators
+                +indicator(indicator.category, indicator.number, indicator.title, 0)
