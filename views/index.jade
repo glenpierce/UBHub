@@ -1,7 +1,10 @@
-extends layout
+doctype html
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/cbiindicators.css')
 
 body
-  block content
+    block content
 
     script.
         function httpGetAsync(theUrl, callback){
@@ -25,8 +28,14 @@ body
           window.location = res;
         }
 
-    h1= title
-    p Welcome to #{title}
+    h1= CBI
+            div(style="border-bottom:solid; display:flex; justify-content:space-between;")
+                img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
+                div(style="display:flex;")
+                    div(style="margin:20px; cursor:pointer;") About CBI
+                    div(style="margin:20px;cursor:pointer;") Resources
+                    div(style="margin:20px;cursor:pointer;") About Us
+                    div(style="margin:20px;cursor:pointer;") Search
     div.input
       input(type="text", id="username")
     div.input

@@ -80,6 +80,7 @@ body{
     padding: 5px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
+    cursor: pointer;
 }
 
 .cityProfile{
@@ -88,11 +89,11 @@ body{
 }
 
 .nativeBiodiversity{
-    background-color:#b6d5e3;
+    background-color:#acd9bb;
 }
 
 .ecosystemServices{
-    background-color:#acd9bb;
+    background-color:#b6d5e3;
 }
 
 .govManagement{
@@ -108,7 +109,7 @@ body{
 }
 
 .foregroundYellow{
-    background-color: #fff1b6;
+    background-color: #c58c2b;
 }
 
 .lightBlue{
@@ -131,15 +132,18 @@ body{
     background-color:#3b7e6a;
 }
 
-.dataEntryBlock{
+.container{
     margin:auto;
     margin-top:5px;
     max-width: 760px;
-    display: flex;
-    justify-content:space-between;
     border-radius: 10px;
     padding: 10px;
     width: 100%;
+}
+
+.dataEntryBlock{
+    display: flex;
+    justify-content:space-between;
 }
 
 .number{
