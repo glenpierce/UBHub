@@ -6,9 +6,11 @@ var path = require("path");
 
 var app = express();
 
+var config = require('config');
+
 app.use(session({
     cookieName: 'session',
-    secret: process.argv[3],
+    secret: config.secret,
     duration: 30 * 60 * 1000,
     activeDuration: 5 * 60 * 1000
 }));

@@ -12,6 +12,8 @@ var createUser = require('./routes/createUser');
 var dashboard = require('./routes/dashboard');
 var indicators = require('./routes/indicators');
 
+var config = require('config.js');
+
 // var https = require('https');
 // var fs = require('fs');
 //
@@ -40,7 +42,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
     cookieName: 'session',
-    secret: process.argv[3],
+    secret: config.secret,
     duration: 30 * 60 * 1000,
     activeDuration: 5 * 60 * 1000
 }));
@@ -54,24 +56,24 @@ app.use('/indicators', indicators);
 //to setup docker mysql: docker run --name episql -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql
 //this port is in use according to Docker, how can I make sure that a port is valid for me to use?
 
-var mysql      = require('mysql');
+var mysql = require('mysql');
 var connection = mysql.createConnection({
-    host     : '192.168.99.100',
-    user     : 'root',
-    password : process.argv[2],
-    database : 'epistemolog'
+    host: config.rdsHost,
+    user: config.rdsUser,
+    password: config.rdsPassword,
+    database: config.rdsDatabase
 });
 
-connection.connect();
-
-connection.query('SELECT * from Users', function(err, rows, fields) {
-    if (!err)
-        console.log('The user db contains: ', rows);
-    else
-        console.log('Error while performing Query.');
-});
-
-connection.end();
+// connection.connect();
+//
+// connection.query('SELECT * from Users', function(err, rows, fields) {
+//     if (!err)
+//         console.log('The user db contains: ', rows);
+//     else
+//         console.log('Error while performing Query.');
+// });
+//
+// connection.end();
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -3,15 +3,17 @@ var router = express.Router();
 var mysql = require('mysql');
 var bcrypt = require('bcryptjs');
 
+var config = require('config');
+
 router.post('/', function(req, res){
 
     console.log("creating user");
 
     var connection = mysql.createConnection({
-        host     : '192.168.99.100',
-        user     : 'root',
-        password : process.argv[2],
-        database : 'epistemolog'
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
     });
 
     var salt = bcrypt.genSaltSync(10);

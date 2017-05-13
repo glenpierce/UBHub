@@ -7,9 +7,11 @@ var path = require("path");
 
 var app = express();
 
+var config = require('config');
+
 app.use(session({
     cookieName: 'session',
-    secret: process.argv[3],
+    secret: config.secret,
     duration: 30 * 60 * 1000,
     activeDuration: 5 * 60 * 1000
 }));
@@ -23,10 +25,10 @@ router.post('/', function(req, res){
     console.log('login request received');
 
     var connection = mysql.createConnection({
-        host     : '192.168.99.100',
-        user     : 'root',
-        password : process.argv[2],
-        database : 'epistemolog'
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
     });
 
     connection.connect();
