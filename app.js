@@ -12,7 +12,7 @@ var createUser = require('./routes/createUser');
 var dashboard = require('./routes/dashboard');
 var indicators = require('./routes/indicators');
 
-var config = require('config.js');
+var config = require('./config.js');
 
 // var https = require('https');
 // var fs = require('fs');

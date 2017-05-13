@@ -3,7 +3,7 @@ var router = express.Router();
 var mysql = require('mysql');
 var bcrypt = require('bcryptjs');
 
-var config = require('config');
+var config = require('../config.js');
 
 router.post('/', function(req, res){
 

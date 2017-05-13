@@ -7,7 +7,7 @@ var path = require("path");
 
 var app = express();
 
-var config = require('config');
+var config = require('../config.js');
 
 app.use(session({
     cookieName: 'session',
