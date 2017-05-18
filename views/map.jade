@@ -1,0 +1,296 @@
+doctype html
+html
+    head
+        title Map
+        script(async, defer, src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&callback=initMap")
+        link(rel='stylesheet', href='/stylesheets/style.css')
+body
+
+    h3 My Google Maps Demo
+    div(id="map" style="height:400px; width:400px;")
+    form(name="add-estimation", method="post" style="display:flex; flex-direction:column; flex-grow:1; flex-shrink:1; width: 100%;")
+        div.input
+            span.label Title
+            input(type="text", name="title")
+        div.input
+            span.label Type
+            select(name="type")
+                option(value="none").option
+                option(value="data").option data
+                option(value="website").option website
+                option(value="tool").option tool
+                option(value="plan").option plan
+                option(value="publication").option publication
+                option(value="other").option other
+        div.input
+            span.label Year
+            input(type="text", name="year")
+        div.input
+            span.label Scale
+            select(name="scale")
+                option(value="none").option
+                option(value="neighborhood").option neighborhood
+                option(value="municipal").option municipal
+                option(value="metro region").option metro region
+                option(value="subnational").option subnational
+                option(value="national").option national
+                option(value="international").option international
+                option(value="global").option global
+                option(value="N/A").option N/A
+        div.input
+            span.label Description
+            textarea(name="description", cols="40", rows="5")
+        div.input
+            span.label URL
+            input(type="text", name="url")
+        div.input
+            span.label Author/Organization
+            input(type="text", name="author")
+        div.input
+            span.label Location
+            input(type="text", name="location")
+        div.input
+            div.label Tags
+        div.input
+            div.label Ecosystems
+            div
+                input(type="checkbox", name="streams").checkbox
+                span.label streams
+            div
+                input(type="checkbox", name="river").checkbox
+                span.label river delta
+            div
+                input(type="checkbox", name="oceans").checkbox
+                span.label oceans
+            div
+                input(type="checkbox", name="lakes").checkbox
+                span.label lakes
+            div
+                input(type="checkbox", name="wetlands").checkbox
+                span.label wetlands
+            div
+                input(type="checkbox", name="desert").checkbox
+                span.label desert
+            div
+                input(type="checkbox", name="forest").checkbox
+                span.label forest
+            div
+                input(type="checkbox", name="grassland").checkbox
+                span.label grassland/savannah
+            div
+                input(type="checkbox", name="steppe").checkbox
+                span.label steppe/montane
+            div
+                input(type="checkbox", name="tundra").checkbox
+                span.label tundra/polar
+            div
+                input(type="checkbox", name="shrubland").checkbox
+                span.label shrubland
+            div
+                input(type="checkbox", name="Intertidal").checkbox
+                span.label Intertidal/beach
+            div
+                input(type="checkbox", name="rooftop").checkbox
+                span.label rooftop/vertical
+            div
+                input(type="checkbox", name="rocky").checkbox
+                span.label rocky
+            div
+                input(type="checkbox", name="cave").checkbox
+                span.label cave/underground
+            div
+                input(type="checkbox", name="lawns").checkbox
+                span.label lawns and gardens
+            div
+                input(type="checkbox", name="crop").checkbox
+                span.label crop fields
+            div
+                input(type="checkbox", name="microbial").checkbox
+                span.label microbial
+            div
+                input(type="checkbox", name="Other").checkbox
+                span.label Other
+
+        div.input
+            div.label Ecosystem Services
+            div
+                input(type="checkbox", name="Food").checkbox
+                span.label Food
+            div
+                input(type="checkbox", name="Raw").checkbox
+                span.label Raw Materials
+            div
+                input(type="checkbox", name="Fresh").checkbox
+                span.label Fresh Water
+            div
+                input(type="checkbox", name="Medicinal").checkbox
+                span.label Medicinal Resources
+            div
+                input(type="checkbox", name="Local").checkbox
+                span.label Local climate and air quality
+            div
+                input(type="checkbox", name="Carbon").checkbox
+                span.label Carbon sequestration and storage
+            div
+                input(type="checkbox", name="Moderation").checkbox
+                span.label Moderation of extreme events
+            div
+                input(type="checkbox", name="Waste").checkbox
+                span.label Waste-water treatment
+            div
+                input(type="checkbox", name="Erosion ").checkbox
+                span.label Erosion prevention and maintenance of soil fertility
+            div
+                input(type="checkbox", name="Pollination").checkbox
+                span.label Pollination
+            div
+                input(type="checkbox", name="Biological ").checkbox
+                span.label Biological control
+            div
+                input(type="checkbox", name="Habitat").checkbox
+                span.label Habitat or supporting services
+            div
+                input(type="checkbox", name="Habitats").checkbox
+                span.label Habitats for species
+            div
+                input(type="checkbox", name="Maintenance").checkbox
+                span.label Maintenance of genetic diversity
+            div
+                input(type="checkbox", name="Recreation").checkbox
+                span.label Recreation and mental and physical health
+            div
+                input(type="checkbox", name="Tourism").checkbox
+                span.label Tourism
+            div
+                input(type="checkbox", name="Aesthetic ").checkbox
+                span.label Aesthetic appreciation and inspiration for culture, art and design
+            div
+                input(type="checkbox", name="Spiritual ").checkbox
+                span.label Spiritual experience and sense of place
+        div.input
+            div.label Sustainable Development Goals
+            div
+                input(type="checkbox", name="No Poverty").checkbox
+                span.label 1: No Poverty
+            div
+                input(type="checkbox", name="Zero Hunger").checkbox
+                span.label 2: Zero Hunger
+            div
+                input(type="checkbox", name="Good Health and Well-being").checkbox
+                span.label 3: Good Health and Well-being
+            div
+                input(type="checkbox", name="Quality Education").checkbox
+                span.label 4: Quality Education
+            div
+                input(type="checkbox", name="Gender Equality").checkbox
+                span.label 5: Gender Equality
+            div
+                input(type="checkbox", name="Clean Water and Sanitation").checkbox
+                span.label 6: Clean Water and Sanitation
+            div
+                input(type="checkbox", name="Affordable and Clean Energy").checkbox
+                span.label 7: Affordable and Clean Energy
+            div
+                input(type="checkbox", name="Decent Work and Economic Growth").checkbox
+                span.label 8: Decent Work and Economic Growth
+            div
+                input(type="checkbox", name="Industry, Innovation and Infrastructure").checkbox
+                span.label 9: Industry, Innovation and Infrastructure
+            div
+                input(type="checkbox", name="Reduced Inequalities").checkbox
+                span.label 10: Reduced Inequalities
+            div
+                input(type="checkbox", name="Sustainable Cities and Communities").checkbox
+                span.label 11: Sustainable Cities and Communities
+            div
+                input(type="checkbox", name="Responsible Consumption and Production").checkbox
+                span.label 12: Responsible Consumption and Production
+            div
+                input(type="checkbox", name="Climate Action").checkbox
+                span.label 13: Climate Action
+            div
+                input(type="checkbox", name="Life Below Water").checkbox
+                span.label 14: Life Below Water
+            div
+                input(type="checkbox", name="Life on Land").checkbox
+                span.label 15: Life on Land
+            div
+                input(type="checkbox", name="Peace, Justice and Strong Institutions").checkbox
+                span.label 16: Peace, Justice and Strong Institutions
+            div
+                input(type="checkbox", name="Partnerships for the Goals").checkbox
+                span.label 17: Partnerships for the Goals
+        div.input
+            div.label Parties Involved
+            div
+                input(type="checkbox", name="local community").checkbox
+                span.label Local Community
+            div
+                input(type="checkbox", name="NGO").checkbox
+                span.label NGO
+            div
+                input(type="checkbox", name="business").checkbox
+                span.label Business
+            div
+                input(type="checkbox", name="academia").checkbox
+                span.label Academia
+            div
+                input(type="checkbox", name="local government").checkbox
+                span.label Local Government
+            span.label Other
+            input(type="text", name="otherPartiesInvolved")
+        div.actions
+            input(type="submit", value="submit")
+script.
+    function initMap() {
+        var mapData =!{mapData};
+        console.log(mapData);
+        var uluru = {lat: -25.363, lng: 131.044};
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 4,
+            center: uluru
+        });
+        var uluruMarker = new google.maps.Marker({
+            position: uluru,
+            map: map
+        });
+        mapData.forEach(function (element) {
+
+            var contentString = '<div id="content">' +
+                '<div id="siteNotice">' +
+                '</div>' +
+                '<h1 id="firstHeading" class="firstHeading">Uluru</h1>' +
+                '<div id="bodyContent">' +
+                '<p><b>Uluru</b>, also referred to as <b>Ayers Rock</b>, is a large ' +
+                'sandstone rock formation in the southern part of the ' +
+                'Northern Territory, central Australia. It lies 335&#160;km (208&#160;mi) ' +
+                'south west of the nearest large town, Alice Springs; 450&#160;km ' +
+                '(280&#160;mi) by road. Kata Tjuta and Uluru are the two major ' +
+                'features of the Uluru - Kata Tjuta National Park. Uluru is ' +
+                'sacred to the Pitjantjatjara and Yankunytjatjara, the ' +
+                'Aboriginal people of the area. It has many springs, waterholes, ' +
+                'rock caves and ancient paintings. Uluru is listed as a World ' +
+                'Heritage Site.</p>' +
+                '<p>Attribution: Uluru, <a href="https://en.wikipedia.org/w/index.php?title=Uluru&oldid=297882194">' +
+                'https://en.wikipedia.org/w/index.php?title=Uluru</a> ' +
+                '(last visited June 22, 2009).</p>' +
+                '</div>' +
+                '</div>';
+
+            var infowindow = new google.maps.InfoWindow({
+                content: contentString
+            });
+
+            var position = {lat:element.lat, lng:element.lng};
+            var marker = new google.maps.Marker({
+                position: position,
+                map: map,
+                title: "Title",
+                icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=..|fb8d32|000000'
+            });
+
+            marker.addListener('click', function () {
+                infowindow.open(map, marker);
+            });
+        });
+    }

@@ -11,6 +11,7 @@ var users = require('./routes/users');
 var createUser = require('./routes/createUser');
 var dashboard = require('./routes/dashboard');
 var indicators = require('./routes/indicators');
+var map = require('./routes/map');
 
 var config = require('./config.js');
 
@@ -52,6 +53,7 @@ app.use('/users', users);
 app.use('/createUser', createUser);
 app.use('/dashboard', dashboard);
 app.use('/indicators', indicators);
+app.use('/map', map);
 
 //to setup docker mysql: docker run --name episql -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql
 //this port is in use according to Docker, how can I make sure that a port is valid for me to use?
