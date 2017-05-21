@@ -5,6 +5,7 @@ var session = require('client-sessions');
 var path = require("path");
 var http = require('http');
 var https = require('https');
+var mysql = require('mysql');
 
 var app = express();
 
@@ -17,7 +18,7 @@ app.use(session({
     activeDuration: 5 * 60 * 1000
 }));
 
-var getLatLong = function (address){
+function getLatLong(address, id){
     if(address){
         var addressQueryString = address.replace(/\s+/g, "+");
         //https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs
@@ -43,18 +44,17 @@ var getLatLong = function (address){
                 lng = result.results[0].geometry.location.lng;
                 console.log(lat);
                 console.log(lng);
-                createMarker("name", "address", lat, lng, "type");
+                updateLocation(id, lat, lng);
             });
         });
         req.end();
     } else {
         console.log("missing address");
     }
-};
+}
 
-var createMarker = function (name, address, lat, lng, type){
-    var mysql = require('mysql');
-    var connection = mysql.createConnection({
+function updateLocation(id, lat, lng){
+    connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
         password: config.rdsPassword,
@@ -62,23 +62,22 @@ var createMarker = function (name, address, lat, lng, type){
     });
 
     connection.connect();
-    var query = 'CALL createMarker("' + name + '", "' + address + '", "' + lat + '", "' + lng + '", "' + type + '")';
+    var query = 'CALL updateLocation("' + id + '", "' + lat + '", "' + lng + '")';
     console.log(query);
     connection.query(query, function(err, rows, fields) {
         if (!err) {
-            console.log("marker created");
+            console.log("location updated");
         } else {
             console.log(err);
         }
     });
     connection.end();
-};
+}
 
 router.get('/', function(req, res, next) {
     var mapData = "";
 
-    var mysql = require('mysql');
-    var connection = mysql.createConnection({
+    connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
         password: config.rdsPassword,
@@ -86,7 +85,7 @@ router.get('/', function(req, res, next) {
     });
 
     connection.connect();
-    connection.query('SELECT * from markers', function(err, rows, fields) {
+    connection.query('SELECT * from locations', function(err, rows, fields) {
         if (!err) {
             // console.log('The user db contains: ', rows);
             mapData = rows;
@@ -107,8 +106,7 @@ router.get('/', function(req, res, next) {
 router.get('/update', function(req, res, next) {
     var mapData = "";
 
-    var mysql = require('mysql');
-    var connection = mysql.createConnection({
+    connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
         password: config.rdsPassword,
@@ -116,11 +114,11 @@ router.get('/update', function(req, res, next) {
     });
 
     connection.connect();
-    connection.query('SELECT * from locations where address="Monaco"', function(err, rows, fields) {
+    connection.query('SELECT * from locations where lat is null', function(err, rows, fields) {
         if (!err) {
             mapData = rows;
                 rows.forEach(function (element){
-                    getLatLong(element.address);
+                    getLatLong(element.address, element.id);
                 });
         } else {
             console.log('Error while performing Query.');
@@ -131,8 +129,7 @@ router.get('/update', function(req, res, next) {
 
 router.post('/', function (req, res) {
     console.log(req.body);
-    var mysql = require('mysql');
-    var connection = mysql.createConnection({
+    connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
         password: config.rdsPassword,
@@ -140,10 +137,10 @@ router.post('/', function (req, res) {
     });
 
     connection.connect();
-    connection.query('CALL createLocation("' + req.body.location + '", "' + req.body.title + '")', function(err, rows, fields) {
+    connection.query('CALL createLocationSimple("' + req.body.location + '", "' + req.body.title + '")', function(err, rows, fields) {
         if (!err) {
             console.log("location created");
-            getLatLong(req.body.location);
+           getLatLong(req.body.location, rows[0][0].id);
         } else {
             console.log(err);
         }

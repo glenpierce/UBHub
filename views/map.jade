@@ -7,7 +7,7 @@ html
 body
 
     h3 My Google Maps Demo
-    div(id="map" style="height:400px; width:400px;")
+    div(id="map" style="height:400px; width:100%;")
     form(name="add-estimation", method="post" style="display:flex; flex-direction:column; flex-grow:1; flex-shrink:1; width: 100%;")
         div.input
             span.label Title
@@ -51,8 +51,12 @@ body
             input(type="text", name="location")
         div.input
             div.label Tags
-        div.input
-            div.label Ecosystems
+        div(style="background-color:#d8ecd4; display:grid; grid-template-columns:1fr 1fr 1fr 1fr; font-size:11px; margin:5px;grid-auto-flow:column;").input
+            div(style="grid-column-start:1; grid-column-end:5; display:inline; padding:5px;")
+                div(style="display:inline; font-size:18px; font-weight:700;").label Ecosystems
+                div(style="display:inline; margin-left:5px;")
+                    input(type="checkbox", name="all").checkbox
+                    span.label CHECK ALL
             div
                 input(type="checkbox", name="streams").checkbox
                 span.label streams
@@ -110,6 +114,7 @@ body
             div
                 input(type="checkbox", name="Other").checkbox
                 span.label Other
+                input(type="text", name="OtherText", style="margin:5px;")
 
         div.input
             div.label Ecosystem Services
@@ -248,33 +253,324 @@ script.
         var uluru = {lat: -25.363, lng: 131.044};
         var map = new google.maps.Map(document.getElementById('map'), {
             zoom: 4,
-            center: uluru
+            center: uluru,
+            styles: [
+                {
+                    "elementType": "geometry",
+                    "stylers": [
+                        {
+                            "color": "#1d2c4d"
+                        }
+                    ]
+                },
+                {
+                    "elementType": "labels.text.fill",
+                    "stylers": [
+                        {
+                            "color": "#8ec3b9"
+                        }
+                    ]
+                },
+                {
+                    "elementType": "labels.text.stroke",
+                    "stylers": [
+                        {
+                            "color": "#1a3646"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "administrative",
+                    "stylers": [
+                        {
+                            "visibility": "simplified"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "administrative",
+                    "elementType": "geometry",
+                    "stylers": [
+                        {
+                            "color": "#6ab285"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "administrative",
+                    "elementType": "geometry.stroke",
+                    "stylers": [
+                        {
+                            "color": "#d7e9cd"
+                        },
+                        {
+                            "visibility": "on"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "administrative",
+                    "elementType": "labels.text",
+                    "stylers": [
+                        {
+                            "color": "#d6e9cd"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "landscape",
+                    "stylers": [
+                        {
+                            "color": "#3d7761"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "landscape.man_made",
+                    "elementType": "geometry.stroke",
+                    "stylers": [
+                        {
+                            "color": "#334e87"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "landscape.natural",
+                    "stylers": [
+                        {
+                            "color": "#298f6a"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "poi",
+                    "stylers": [
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "poi",
+                    "elementType": "geometry",
+                    "stylers": [
+                        {
+                            "color": "#283d6a"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "poi",
+                    "elementType": "labels.text.fill",
+                    "stylers": [
+                        {
+                            "color": "#6f9ba5"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "poi",
+                    "elementType": "labels.text.stroke",
+                    "stylers": [
+                        {
+                            "color": "#1d2c4d"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "poi.park",
+                    "stylers": [
+                        {
+                            "color": "#6ab285"
+                        },
+                        {
+                            "visibility": "simplified"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "poi.park",
+                    "elementType": "labels",
+                    "stylers": [
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "poi.park",
+                    "elementType": "labels.icon",
+                    "stylers": [
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "road",
+                    "elementType": "geometry",
+                    "stylers": [
+                        {
+                            "color": "#2d1b5a"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "road",
+                    "elementType": "labels",
+                    "stylers": [
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "road",
+                    "elementType": "labels.text.fill",
+                    "stylers": [
+                        {
+                            "color": "#98a5be"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "road",
+                    "elementType": "labels.text.stroke",
+                    "stylers": [
+                        {
+                            "color": "#1d2c4d"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "road.arterial",
+                    "stylers": [
+                        {
+                            "visibility": "simplified"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "road.arterial",
+                    "elementType": "geometry",
+                    "stylers": [
+                        {
+                            "visibility": "simplified"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "road.arterial",
+                    "elementType": "labels",
+                    "stylers": [
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "road.highway",
+                    "stylers": [
+                        {
+                            "visibility": "simplified"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "road.highway",
+                    "elementType": "labels",
+                    "stylers": [
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "road.highway",
+                    "elementType": "labels.text.fill",
+                    "stylers": [
+                        {
+                            "color": "#b0d5ce"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "road.highway",
+                    "elementType": "labels.text.stroke",
+                    "stylers": [
+                        {
+                            "color": "#023e58"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "transit",
+                    "stylers": [
+                        {
+                            "color": "#00907d"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "transit",
+                    "elementType": "labels",
+                    "stylers": [
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "transit",
+                    "elementType": "labels.text.fill",
+                    "stylers": [
+                        {
+                            "color": "#98a5be"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "transit",
+                    "elementType": "labels.text.stroke",
+                    "stylers": [
+                        {
+                            "color": "#1d2c4d"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "water",
+                    "stylers": [
+                        {
+                            "color": "#193c59"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "water",
+                    "elementType": "labels.text.fill",
+                    "stylers": [
+                        {
+                            "color": "#4e6d70"
+                        }
+                    ]
+                }
+            ]
         });
         var uluruMarker = new google.maps.Marker({
             position: uluru,
             map: map
         });
-        mapData.forEach(function (element) {
+            mapData.forEach(function (element) {
 
-            var contentString = '<div id="content">' +
-                '<div id="siteNotice">' +
-                '</div>' +
-                '<h1 id="firstHeading" class="firstHeading">Uluru</h1>' +
-                '<div id="bodyContent">' +
-                '<p><b>Uluru</b>, also referred to as <b>Ayers Rock</b>, is a large ' +
-                'sandstone rock formation in the southern part of the ' +
-                'Northern Territory, central Australia. It lies 335&#160;km (208&#160;mi) ' +
-                'south west of the nearest large town, Alice Springs; 450&#160;km ' +
-                '(280&#160;mi) by road. Kata Tjuta and Uluru are the two major ' +
-                'features of the Uluru - Kata Tjuta National Park. Uluru is ' +
-                'sacred to the Pitjantjatjara and Yankunytjatjara, the ' +
-                'Aboriginal people of the area. It has many springs, waterholes, ' +
-                'rock caves and ancient paintings. Uluru is listed as a World ' +
-                'Heritage Site.</p>' +
-                '<p>Attribution: Uluru, <a href="https://en.wikipedia.org/w/index.php?title=Uluru&oldid=297882194">' +
-                'https://en.wikipedia.org/w/index.php?title=Uluru</a> ' +
-                '(last visited June 22, 2009).</p>' +
-                '</div>' +
+            var contentString =
+                '<div id="content">' +
+                    '<div id="siteNotice">' +
+                    '</div>' +
+                    '<h1 id="firstHeading" class="firstHeading">' + element.name + '</h1>' +
+                    '<div id="bodyContent">' +
+                        '<p>More text here.</p>' +
+                    '</div>' +
                 '</div>';
 
             var infowindow = new google.maps.InfoWindow({
@@ -285,8 +581,9 @@ script.
             var marker = new google.maps.Marker({
                 position: position,
                 map: map,
-                title: "Title",
-                icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=..|fb8d32|000000'
+                animation: google.maps.Animation.DROP,
+                title: element.name,
+                icon: '/images/marker-yellow-det.png'
             });
 
             marker.addListener('click', function () {
