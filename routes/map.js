@@ -40,11 +40,16 @@ function getLatLong(address, id){
             });
             response.on('end', function() {
                 var result = JSON.parse(data);
-                lat = result.results[0].geometry.location.lat;
-                lng = result.results[0].geometry.location.lng;
-                console.log(lat);
-                console.log(lng);
-                updateLocation(id, lat, lng);
+                console.log(result);
+                if(result.results[0]){
+                    lat = result.results[0].geometry.location.lat;
+                    lng = result.results[0].geometry.location.lng;
+                    console.log(lat);
+                    console.log(lng);
+                    updateLocation(id, lat, lng);
+                } else {
+                    console.log(id + "no good");
+                }
             });
         });
         req.end();
@@ -62,7 +67,7 @@ function updateLocation(id, lat, lng){
     });
 
     connection.connect();
-    var query = 'CALL updateLocation("' + id + '", "' + lat + '", "' + lng + '")';
+    query = 'CALL updateLocation(' + id + ', "' + lat + '", "' + lng + '")';
     console.log(query);
     connection.query(query, function(err, rows, fields) {
         if (!err) {
@@ -85,9 +90,10 @@ router.get('/', function(req, res, next) {
     });
 
     connection.connect();
-    connection.query('SELECT * from locations', function(err, rows, fields) {
+    query = 'SELECT * from locations';
+    console.log(query);
+    connection.query(query, function(err, rows, fields) {
         if (!err) {
-            // console.log('The user db contains: ', rows);
             mapData = rows;
             if (req.session && req.session.user) {
                 res.render('map', {mapData:JSON.stringify(mapData)});
@@ -104,7 +110,11 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/update', function(req, res, next) {
-    var mapData = "";
+    update();
+});
+
+function update(){
+    mapData = "";
 
     connection = mysql.createConnection({
         host: config.rdsHost,
@@ -114,18 +124,21 @@ router.get('/update', function(req, res, next) {
     });
 
     connection.connect();
-    connection.query('SELECT * from locations where lat is null', function(err, rows, fields) {
+    query = 'SELECT * from locations where lat is null';
+    console.log(query);
+    connection.query(query, function(err, rows, fields) {
         if (!err) {
             mapData = rows;
-                rows.forEach(function (element){
-                    getLatLong(element.address, element.id);
-                });
+            rows.forEach(function (element){
+                console.log("updating id=" + element.id);
+                getLatLong(element.address, element.id);
+            });
         } else {
             console.log('Error while performing Query.');
         }
     });
     connection.end();
-});
+}
 
 router.post('/', function (req, res) {
     console.log(req.body);
@@ -137,9 +150,10 @@ router.post('/', function (req, res) {
     });
 
     connection.connect();
-    connection.query('CALL createLocationSimple("' + req.body.location + '", "' + req.body.title + '")', function(err, rows, fields) {
+    query = 'CALL createLocationSimple("' + req.body.location + '", "' + req.body.title + '")';
+    console.log(query);
+    connection.query(query, function(err, rows, fields) {
         if (!err) {
-            console.log("location created");
            getLatLong(req.body.location, rows[0][0].id);
         } else {
             console.log(err);

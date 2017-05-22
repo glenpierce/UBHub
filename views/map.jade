@@ -250,10 +250,10 @@ script.
     function initMap() {
         var mapData =!{mapData};
         console.log(mapData);
-        var uluru = {lat: -25.363, lng: 131.044};
+        center = {lat: 20, lng: 15};
         var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 4,
-            center: uluru,
+            zoom: 2,
+            center: center,
             styles: [
                 {
                     "elementType": "geometry",
@@ -557,19 +557,15 @@ script.
                 }
             ]
         });
-        var uluruMarker = new google.maps.Marker({
-            position: uluru,
-            map: map
-        });
             mapData.forEach(function (element) {
 
             var contentString =
                 '<div id="content">' +
                     '<div id="siteNotice">' +
                     '</div>' +
-                    '<h1 id="firstHeading" class="firstHeading">' + element.name + '</h1>' +
+                    '<h1 id="firstHeading" class="firstHeading">' + element.title + '</h1>' +
                     '<div id="bodyContent">' +
-                        '<p>More text here.</p>' +
+                        '<p>' + element.scale + '</p>' +
                     '</div>' +
                 '</div>';
 
