@@ -7,6 +7,12 @@ a {
   color: #00B7FF;
 }
 
+.border{
+  border:solid;
+  border-radius:5px;
+  border-width:1px;
+}
+
 /*
 Blue
 1  07456b
