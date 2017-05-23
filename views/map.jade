@@ -11,6 +11,22 @@ mixin filterMixin(filterBy, attributeList)
         each attributeItem in attributeList
             option(value=attributeItem).option #{attributeItem}
 
+//mixin filterRangeMixin(filterBy, low, high)
+//    select(style="flex-grow:1; margin: 5px;" onchange="filterRange(this.value, #{filterBy})").border
+//        option(value="none").option
+//        each attributeItem in attributeList
+//            option(value=[low, high]).option #{low} < #{high}
+
+mixin checkboxMixin(value, label)
+    div
+        input(type="checkbox", name="#{value}").checkbox
+        span.label #{label}
+
+mixin textBoxMixin(value, label)
+    div(style="display:flex; width:100%;").fullLine
+        span.label #{label}
+        input(type="text", name="#{value}", style="flex-grow:1; margin-left:5px;")
+
 body
 
     h3 CBI Coalition Map
@@ -21,250 +37,152 @@ body
             option(value="England").option England
             option(value="India").option India
         +filterMixin("'scale'", ['global', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+        //+filterRangeMixin("'population'", 0, 1000000)
 
     div(id="map" style="height:400px; width:100%;")
     form(name="add-estimation", method="post" style="display:flex; flex-direction:column; flex-grow:1; flex-shrink:1; width: 100%;")
-        div.input
-            span.label Title
-            input(type="text", name="title")
-        div.input
-            span.label Type
-            select(name="type")
-                option(value="none").option
-                option(value="data").option data
-                option(value="website").option website
-                option(value="tool").option tool
-                option(value="plan").option plan
-                option(value="publication").option publication
-                option(value="other").option other
-        div.input
-            span.label Year
-            input(type="text", name="year")
-        div.input
-            span.label Scale
-            select(name="scale")
-                option(value="none").option
-                option(value="neighborhood").option neighborhood
-                option(value="municipal").option municipal
-                option(value="metro region").option metro region
-                option(value="subnational").option subnational
-                option(value="national").option national
-                option(value="international").option international
-                option(value="global").option global
-                option(value="N/A").option N/A
-        div.input
-            span.label Description
-            textarea(name="description", cols="40", rows="5")
-        div.input
-            span.label URL
-            input(type="text", name="url")
-        div.input
-            span.label Author/Organization
-            input(type="text", name="author")
-        div.input
-            span.label Location
-            input(type="text", name="location")
-        div.input
+        div(style="width:50%")
+            +textBoxMixin("title", "Title")
+            div.fullLine
+                span.label Type
+                select(name="type").select
+                    option(value="none").option
+                    option(value="data").option data
+                    option(value="repository").option repository
+                    option(value="environmentalNGO").option environmental NGO
+                    option(value="news").option news source/blog
+                    option(value="indexTool").option index/measurement tool
+                    option(value="plan").option plan/strategy
+                    option(value="toolkitGuide").option toolkit/guide
+                    option(value="researcherExpert").option researcher/expert
+                    option(value="researchInstitute").option research institute
+                    option(value="pubEngagementInstitute").option public engagement institute
+                    option(value="networkPartnershipProgram").option network/partnership program
+                    option(value="government").option government
+                    option(value="event").option event
+                    option(value="map").option map
+                    option(value="otherType").option other
+            div.fullLine
+                span.label Scale
+                select(name="scale").select
+                    option(value="none").option
+                    option(value="institution").option institution
+                    option(value="campus").option campus
+                    option(value="reserve").option urban reserve/wildlife park
+                    option(value="neighborhood").option community/neighborhood
+                    option(value="municipality").option municipality
+                    option(value="metro region").option metro region
+                    option(value="district").option district/county
+                    option(value="subnational").option subnational/provincial
+                    option(value="city").option city-state/autonomous city
+                    option(value="national").option national
+                    option(value="international").option international
+                    option(value="global").option global
+                    option(value="N/A").option N/A
+            +textBoxMixin("url", "Main weblink")
+            +textBoxMixin("author", "Author/Organization")
+            div.fullLine
+                span.label Description
+                textarea(name="description", cols="40", rows="5").select
+            +textBoxMixin("location", "Location")
+        div.input.border
             div.label Tags
-        div(style="background-color:#d8ecd4; display:grid; grid-template-columns:1fr 1fr 1fr 1fr; font-size:11px; margin:5px;").input
-            div(style="grid-column-start:1; grid-column-end:5; display:inline; padding:5px;")
-                div(style="display:inline; font-size:18px; font-weight:700;").label Ecosystems
-                div(style="display:inline; margin-left:5px;")
-                    input(type="checkbox", name="all").checkbox
-                    span.label CHECK ALL
-            div
-                input(type="checkbox", name="streams").checkbox
-                span.label streams
-            div
-                input(type="checkbox", name="river").checkbox
-                span.label river delta
-            div
-                input(type="checkbox", name="oceans").checkbox
-                span.label oceans
-            div
-                input(type="checkbox", name="lakes").checkbox
-                span.label lakes
-            div
-                input(type="checkbox", name="wetlands").checkbox
-                span.label wetlands
-            div
-                input(type="checkbox", name="desert").checkbox
-                span.label desert
-            div
-                input(type="checkbox", name="forest").checkbox
-                span.label forest
-            div
-                input(type="checkbox", name="grassland").checkbox
-                span.label grassland/savannah
-            div
-                input(type="checkbox", name="steppe").checkbox
-                span.label steppe/montane
-            div
-                input(type="checkbox", name="tundra").checkbox
-                span.label tundra/polar
-            div
-                input(type="checkbox", name="shrubland").checkbox
-                span.label shrubland
-            div
-                input(type="checkbox", name="Intertidal").checkbox
-                span.label Intertidal/beach
-            div
-                input(type="checkbox", name="rooftop").checkbox
-                span.label rooftop/vertical
-            div
-                input(type="checkbox", name="rocky").checkbox
-                span.label rocky
-            div
-                input(type="checkbox", name="cave").checkbox
-                span.label cave/underground
-            div
-                input(type="checkbox", name="lawns").checkbox
-                span.label lawns and gardens
-            div
-                input(type="checkbox", name="crop").checkbox
-                span.label crop fields
-            div
-                input(type="checkbox", name="microbial").checkbox
-                span.label microbial
-            div
-                input(type="checkbox", name="Other").checkbox
+            div(style="background-color:#d8ecd4; display:grid; grid-template-columns:1fr 1fr 1fr 1fr; font-size:11px; margin:5px;").input
+                div(style="grid-column-start:1; grid-column-end:5; display:inline; padding:5px;")
+                    div(style="display:inline; font-size:18px; font-weight:700;").label Ecosystems
+                    div(style="display:inline; margin-left:5px;")
+                        input(type="checkbox", name="all").checkbox
+                        span.label CHECK ALL
+                +checkboxMixin("streams", "streams")
+                +checkboxMixin("delta", "river delta")
+                +checkboxMixin("oceans", "oceans")
+                +checkboxMixin("lakes", "lakes")
+                +checkboxMixin("wetlands", "wetlands")
+                +checkboxMixin("desert", "desert")
+                +checkboxMixin("forest", "forest")
+                +checkboxMixin("grassland", "savannah")
+                +checkboxMixin("steppe", "steppe/montane")
+                +checkboxMixin("tundra", "tundra/polar")
+                +checkboxMixin("shrubland", "shrubland")
+                +checkboxMixin("intertidal", "intertidal/beach")
+                +checkboxMixin("rooftop", "rooftop/vertical")
+                +checkboxMixin("rocky", "rocky")
+                +checkboxMixin("cave", "cave/underground")
+                +checkboxMixin("lawns", "lawns and gardens")
+                +checkboxMixin("cropFields", "crop fields")
+                +checkboxMixin("microbial", "microbial")
+                +checkboxMixin("other", "other")
+                    input(type="text", name="OtherText", style="margin:5px;")
+            div.input
+                div.label Governance
+                    +checkboxMixin("policy", "policy")
+                    +checkboxMixin("index", "index")
+                    +checkboxMixin("regulation", "regulation")
+                    +checkboxMixin("spatialPlanning", "spatial planning")
+                    +checkboxMixin("developmentPartnerships", "development partnerships")
+                    +checkboxMixin("mainstreaming", "mainstreaming")
+                    +checkboxMixin("otherGovernance", "other")
+            div.input
+                div.label Consumption
+                    +checkboxMixin("footprintMeasurement", "footprint measurement")
+                    +checkboxMixin("sustainablePurchasing", "sustainable purchasing")
+                    +checkboxMixin("shareholderActivism", "shareholder activism")
+                    +checkboxMixin("urbanAgriculture", "urban agriculture")
+                    +checkboxMixin("foraging", "foraging")
+                    +checkboxMixin("otherConsumption", "other")
+            div.input
+                div.label Ecosystem Services
+                +checkboxMixin("Food", "Food")
+                +checkboxMixin("rawMaterials", "Raw Materials")
+                +checkboxMixin("freshWater", "Fresh Water")
+                +checkboxMixin("medicinalResources", "Medicinal Resources")
+                +checkboxMixin("localClimate", "Local climate and air quality")
+                +checkboxMixin("carbonSequestration", "Carbon sequestration and storage")
+                +checkboxMixin("moderation", "Moderation of extreme events")
+                +checkboxMixin("wasteWaterTreatment", "Waste-water treatment")
+                +checkboxMixin("erosionPrevention", "Erosion prevention and maintenance of soil fertility")
+                +checkboxMixin("pollination", "Pollination")
+                +checkboxMixin("biologicalControl", "Biological control")
+                +checkboxMixin("habitatServices", "Habitat or supporting services")
+                +checkboxMixin("habitatSpecies", "Habitats for species")
+                +checkboxMixin("maintenance", "Maintenance of genetic diversity")
+                +checkboxMixin("recreation", "Recreation and mental and physical health")
+                +checkboxMixin("tourism", "Tourism")
+                +checkboxMixin("aesthetic", "Aesthetic appreciation and inspiration for culture, art and design")
+                +checkboxMixin("spiritual", "Spiritual experience and sense of place")
+            div.input
+                div.label Sustainable Development Goals
+                +checkboxMixin("1", "1: No Poverty")
+                +checkboxMixin("2", "2: Zero Hunger")
+                +checkboxMixin("3", "3: Good Health and Well-being")
+                +checkboxMixin("4", "4: Quality Education")
+                +checkboxMixin("5", "5: Gender Equality")
+                +checkboxMixin("6", "6: Clean Water and Sanitation")
+                +checkboxMixin("7", "7: Affordable and Clean Energy")
+                +checkboxMixin("8", "8: Decent Work and Economic Growth")
+                +checkboxMixin("9", "9: Industry, Innovation and Infrastructure")
+                +checkboxMixin("10", "10: Reduced Inequalities")
+                +checkboxMixin("11", "11: Sustainable Cities and Communities")
+                +checkboxMixin("12", "12: Responsible Consumption and Production")
+                +checkboxMixin("13", "13: Climate Action")
+                +checkboxMixin("14", "14: Life Below Water")
+                +checkboxMixin("15", "15: Life on Land")
+                +checkboxMixin("16", "16: Peace, Justice and Strong Institutions")
+                +checkboxMixin("17", "17: Partnerships for the Goals")
+            div.input
+                div.label Parties Involved
+                +checkboxMixin("localCommunity", "Local Community")
+                +checkboxMixin("ngo", "NGO")
+                +checkboxMixin("business", "Business")
+                +checkboxMixin("academia", "Academia")
+                +checkboxMixin("localGov", "Local Government")
                 span.label Other
-                input(type="text", name="OtherText", style="margin:5px;")
-
-        div.input
-            div.label Ecosystem Services
-            div
-                input(type="checkbox", name="Food").checkbox
-                span.label Food
-            div
-                input(type="checkbox", name="Raw").checkbox
-                span.label Raw Materials
-            div
-                input(type="checkbox", name="Fresh").checkbox
-                span.label Fresh Water
-            div
-                input(type="checkbox", name="Medicinal").checkbox
-                span.label Medicinal Resources
-            div
-                input(type="checkbox", name="Local").checkbox
-                span.label Local climate and air quality
-            div
-                input(type="checkbox", name="Carbon").checkbox
-                span.label Carbon sequestration and storage
-            div
-                input(type="checkbox", name="Moderation").checkbox
-                span.label Moderation of extreme events
-            div
-                input(type="checkbox", name="Waste").checkbox
-                span.label Waste-water treatment
-            div
-                input(type="checkbox", name="Erosion ").checkbox
-                span.label Erosion prevention and maintenance of soil fertility
-            div
-                input(type="checkbox", name="Pollination").checkbox
-                span.label Pollination
-            div
-                input(type="checkbox", name="Biological ").checkbox
-                span.label Biological control
-            div
-                input(type="checkbox", name="Habitat").checkbox
-                span.label Habitat or supporting services
-            div
-                input(type="checkbox", name="Habitats").checkbox
-                span.label Habitats for species
-            div
-                input(type="checkbox", name="Maintenance").checkbox
-                span.label Maintenance of genetic diversity
-            div
-                input(type="checkbox", name="Recreation").checkbox
-                span.label Recreation and mental and physical health
-            div
-                input(type="checkbox", name="Tourism").checkbox
-                span.label Tourism
-            div
-                input(type="checkbox", name="Aesthetic ").checkbox
-                span.label Aesthetic appreciation and inspiration for culture, art and design
-            div
-                input(type="checkbox", name="Spiritual ").checkbox
-                span.label Spiritual experience and sense of place
-        div.input
-            div.label Sustainable Development Goals
-            div
-                input(type="checkbox", name="No Poverty").checkbox
-                span.label 1: No Poverty
-            div
-                input(type="checkbox", name="Zero Hunger").checkbox
-                span.label 2: Zero Hunger
-            div
-                input(type="checkbox", name="Good Health and Well-being").checkbox
-                span.label 3: Good Health and Well-being
-            div
-                input(type="checkbox", name="Quality Education").checkbox
-                span.label 4: Quality Education
-            div
-                input(type="checkbox", name="Gender Equality").checkbox
-                span.label 5: Gender Equality
-            div
-                input(type="checkbox", name="Clean Water and Sanitation").checkbox
-                span.label 6: Clean Water and Sanitation
-            div
-                input(type="checkbox", name="Affordable and Clean Energy").checkbox
-                span.label 7: Affordable and Clean Energy
-            div
-                input(type="checkbox", name="Decent Work and Economic Growth").checkbox
-                span.label 8: Decent Work and Economic Growth
-            div
-                input(type="checkbox", name="Industry, Innovation and Infrastructure").checkbox
-                span.label 9: Industry, Innovation and Infrastructure
-            div
-                input(type="checkbox", name="Reduced Inequalities").checkbox
-                span.label 10: Reduced Inequalities
-            div
-                input(type="checkbox", name="Sustainable Cities and Communities").checkbox
-                span.label 11: Sustainable Cities and Communities
-            div
-                input(type="checkbox", name="Responsible Consumption and Production").checkbox
-                span.label 12: Responsible Consumption and Production
-            div
-                input(type="checkbox", name="Climate Action").checkbox
-                span.label 13: Climate Action
-            div
-                input(type="checkbox", name="Life Below Water").checkbox
-                span.label 14: Life Below Water
-            div
-                input(type="checkbox", name="Life on Land").checkbox
-                span.label 15: Life on Land
-            div
-                input(type="checkbox", name="Peace, Justice and Strong Institutions").checkbox
-                span.label 16: Peace, Justice and Strong Institutions
-            div
-                input(type="checkbox", name="Partnerships for the Goals").checkbox
-                span.label 17: Partnerships for the Goals
-        div.input
-            div.label Parties Involved
-            div
-                input(type="checkbox", name="local community").checkbox
-                span.label Local Community
-            div
-                input(type="checkbox", name="NGO").checkbox
-                span.label NGO
-            div
-                input(type="checkbox", name="business").checkbox
-                span.label Business
-            div
-                input(type="checkbox", name="academia").checkbox
-                span.label Academia
-            div
-                input(type="checkbox", name="local government").checkbox
-                span.label Local Government
-            span.label Other
-            input(type="text", name="otherPartiesInvolved")
+                input(type="text", name="otherPartiesInvolved")
         div.actions
             input(type="submit", value="submit")
 script.
     var markers = [];
     function filter(value, filterBy){
-        console.log("filter by " + filterBy);
         markers.forEach(function (marker) {
             marker.setVisible(marker.element[filterBy] == value);
         });
@@ -273,7 +191,7 @@ script.
         markers.forEach(function (marker) {
             marker.setVisible(true);
         });
-    }
+    };
     function initMap() {
         var mapData =!{mapData};
         console.log(mapData);
@@ -314,3 +232,8 @@ script.
             markers.push(marker);
         });
     }
+    //    function filterRange(range, filterBy) {
+    //        markers.forEach(function (marker) {
+    //            marker.setVisible(marker.element[filterBy] > range.low && marker.element[filterBy] < range.high);
+    //        });
+    //    };

@@ -13,6 +13,16 @@ a {
   border-width:1px;
 }
 
+.select{
+  flex-grow: 1;
+  margin-left:5px;
+}
+
+.fullLine{
+  display: flex;
+  padding-bottom: 5px;
+}
+
 /*
 Blue
 1  07456b
