@@ -8,19 +8,23 @@ a {
 }
 
 .border{
-  border:solid;
-  border-radius:5px;
-  border-width:1px;
+  border:solid; border-radius:5px; border-width:1px;
 }
 
 .select{
-  flex-grow: 1;
-  margin-left:5px;
+  flex-grow: 1; margin-left:5px;
 }
 
 .fullLine{
-  display: flex;
-  padding-bottom: 5px;
+  display: flex; padding-bottom: 5px;
+}
+
+.inline{
+  display: inline;
+}
+
+.bigLabel{
+  font-size:18px; font-weight:700;
 }
 
 /*

@@ -142,89 +142,25 @@ function update(){
 
 router.post('/', function (req, res) {
     console.log(req.body);
-    // connection = mysql.createConnection({
-    //     host: config.rdsHost,
-    //     user: config.rdsUser,
-    //     password: config.rdsPassword,
-    //     database: config.rdsDatabase
-    // });
-    //
-    // connection.connect();
-    // // query = 'CALL createLocationSimple("' + req.body.location + '", "' + req.body.title + '")';
-    // query = getCreateLocationQuery();
-    // console.log(query);
-    // connection.query(query, function(err, rows, fields) {
-    //     if (!err) {
-    //        getLatLong(req.body.location, rows[0][0].id);
-    //     } else {
-    //         console.log(err);
-    //     }
-    // });
-    // connection.end();
+    connection = mysql.createConnection({
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
+    });
+
+    connection.connect();
+    query = 'CALL createLocationSimple("' + req.body.location + '", "' + req.body.title + '", \'' + JSON.stringify(req.body) + '\')';
+    console.log(query);
+    connection.query(query, function(err, rows, fields) {
+        if (!err) {
+           getLatLong(req.body.location, rows[0][0].id);
+        } else {
+            console.log(err);
+        }
+    });
+    connection.end();
     res.redirect('back');
 });
-
-// function getLocationQuery(){
-//     query = 'CALL createLocation("' +
-//         address + '", "' +
-//         title + '", "' +
-//         country + '", "' +
-//         scale + '", "' +
-//         intplan_year + '", "' +
-//         intplan_title + '", "' +
-//         intplan_url + '", "' +
-//         plan1_year + '", "' +
-//         plan1_title + '", "' +
-//         plan1_url + '", "' +
-//         plan2_year + '", "' +
-//         plan2_title + '", "' +
-//         plan2_url + '", "' +
-//         report_year + '", "' +
-//         report_title + '", "' +
-//         report_url + '", "' +
-//         EF_year + '", "' +
-//         EF_data_hapercap + '", "' +
-//         EF_link + '", "' +
-//         LAB_joined + '", "' +
-//         Durban_commitment + '", "' +
-//         LAB_CEPA + '", "' +
-//         LAB_URBIS + '", "' +
-//         LAB_wetlands + '", "' +
-//         Biophilic_cities + '", "' +
-//         European_Green_Capital_award + '", "' +
-//         European_capital_biodiversity + '", "' +
-//         biodiversity_url + '", "' +
-//         wetollllland_profile + '", "' +
-//         wetland_report + '", "' +
-//         SI_status + '", "' +
-//         MAB_urban + '", "' +
-//         IUCN_protected_area + '", "' +
-//         grab_partner + '", "' +
-//         extra1_title + '", "' +
-//         extra1_url + '", "' +
-//         extra2_title + '", "' +
-//         extra2_link + '", "' +
-//         map + '", "' +
-//         map_link + '", "' +
-//         data_portal + '", "' +
-//         data_link + '", "' +
-//         contact_name + '", "' +
-//         contact_title + '", "' +
-//         contact_email + '", "' +
-//         rainfall + '", "' +
-//         elevation_m + '", "' +
-//         temperature + '", "' +
-//         coastal + '", "' +
-//         CBI_coalition + '", "' +
-//         update_date + '", "' +
-//         update_by + '", "' +
-//         update_verified + '", "' +
-//         population + '", "' +
-//         density_km2 + '", "' +
-//         area_km2 + '", "' +
-//         area_h + '", "' +
-//         '")';
-//     return query;
-// }
 
 module.exports = router;

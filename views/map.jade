@@ -22,6 +22,12 @@ mixin checkboxMixin(value, label)
         input(type="checkbox", name="#{value}").checkbox
         span.label #{label}
 
+mixin checkBoxWithTextBoxMixin(value, label, textBoxValue)
+    div.inline
+        input(type="checkbox", name="#{value}").checkbox
+        span.label #{label}
+        input(type="text", name="#{value}", style="margin:5px; width:50%;").inline
+
 mixin textBoxMixin(value, label)
     div(style="display:flex; width:100%;").fullLine
         span.label #{label}
@@ -39,7 +45,8 @@ body
         +filterMixin("'scale'", ['global', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
         //+filterRangeMixin("'population'", 0, 1000000)
 
-    div(id="map" style="height:400px; width:100%;")
+    div(id="map" style="height:400px; width:100%; max-width:800px;")
+    div.bigLabel Overall Program or Institution
     form(name="add-estimation", method="post" style="display:flex; flex-direction:column; flex-grow:1; flex-shrink:1; width: 100%;")
         div(style="width:50%")
             +textBoxMixin("title", "Title")
@@ -85,11 +92,42 @@ body
                 span.label Description
                 textarea(name="description", cols="40", rows="5").select
             +textBoxMixin("location", "Location")
+        div(style="width:50%; margin-bottom:5px; padding:5px;").border
+            div.bigLabel Specific Program or Document 1
+            +textBoxMixin("documentTitle1", "Title")
+            +textBoxMixin("documentWeblink1", "Weblink")
+            Div(style="display:flex;") How many documents need to be uploaded?
+                +checkboxMixin("0doc1", "0")
+                +checkboxMixin("1doc1", "1")
+                +checkboxMixin("2doc1", "2")
+                +checkboxMixin("3+doc1", "3+")
+            +textBoxMixin("publicationYear", "publication year")
+
+            div.bigLabel Specific Program or Document 2
+            +textBoxMixin("documentTitle2", "Title")
+            +textBoxMixin("documentWeblink2", "Weblink")
+            Div(style="display:flex;") How many documents need to be uploaded?
+                +checkboxMixin("0doc2", "0")
+                +checkboxMixin("1doc2", "1")
+                +checkboxMixin("2doc2", "2")
+                +checkboxMixin("3+doc2", "3+")
+            +textBoxMixin("publicationYear", "publication year")
+
+            div.bigLabel Specific Program or Document 3
+            +textBoxMixin("documentTitle3", "Title")
+            +textBoxMixin("documentWeblink3", "Weblink")
+            Div(style="display:flex;") How many documents need to be uploaded?
+                +checkboxMixin("0doc3", "0")
+                +checkboxMixin("1doc3", "1")
+                +checkboxMixin("2doc3", "2")
+                +checkboxMixin("3+doc3", "3+")
+            +textBoxMixin("publicationYear", "publication year")
+
         div.input.border
-            div.label Tags
+            div(style="margin:5px;").label Please select a few relevant keywords or tags below.
             div(style="background-color:#d8ecd4; display:grid; grid-template-columns:1fr 1fr 1fr 1fr; font-size:11px; margin:5px;").input
                 div(style="grid-column-start:1; grid-column-end:5; display:inline; padding:5px;")
-                    div(style="display:inline; font-size:18px; font-weight:700;").label Ecosystems
+                    div(style="display:inline;").bigLabel Ecosystems
                     div(style="display:inline; margin-left:5px;")
                         input(type="checkbox", name="all").checkbox
                         span.label CHECK ALL
@@ -111,8 +149,7 @@ body
                 +checkboxMixin("lawns", "lawns and gardens")
                 +checkboxMixin("cropFields", "crop fields")
                 +checkboxMixin("microbial", "microbial")
-                +checkboxMixin("other", "other")
-                    input(type="text", name="OtherText", style="margin:5px;")
+                +checkBoxWithTextBoxMixin("other", "other", "otherEcosystems")
             div.input
                 div.label Governance
                     +checkboxMixin("policy", "policy")
@@ -121,7 +158,7 @@ body
                     +checkboxMixin("spatialPlanning", "spatial planning")
                     +checkboxMixin("developmentPartnerships", "development partnerships")
                     +checkboxMixin("mainstreaming", "mainstreaming")
-                    +checkboxMixin("otherGovernance", "other")
+                    +checkBoxWithTextBoxMixin("other", "other", "otherGovernance")
             div.input
                 div.label Consumption
                     +checkboxMixin("footprintMeasurement", "footprint measurement")
@@ -129,7 +166,44 @@ body
                     +checkboxMixin("shareholderActivism", "shareholder activism")
                     +checkboxMixin("urbanAgriculture", "urban agriculture")
                     +checkboxMixin("foraging", "foraging")
-                    +checkboxMixin("otherConsumption", "other")
+                    +checkBoxWithTextBoxMixin("other", "other", "otherConsumption")
+            div.input
+                div.label Education
+                    +checkboxMixin("schoolPrograms", "school programs")
+                    +checkboxMixin("events", "events")
+                    +checkboxMixin("facilities", "facilities")
+                    +checkboxMixin("behavioralPrograms", "behavioral programs")
+                    +checkboxMixin("liveCameras", "live cameras")
+                    +checkboxMixin("promotions", "promotions")
+                    +checkboxMixin("publicParticipation", "public participation")
+                    +checkBoxWithTextBoxMixin("other", "other", "otherEducation")
+            div.input
+                div.label Species Management
+                    +checkboxMixin("endangeredSpecies", "endangered species")
+                    +checkboxMixin("invasiveSpecies", "invasive species")
+                    +checkboxMixin("marine", "marine")
+                    +checkboxMixin("invertebrates", "invertebrates")
+                    +checkboxMixin("birds", "avian/birds")
+                    +checkboxMixin("landMammals", "land mammals")
+                    +checkBoxWithTextBoxMixin("other", "other", "otherSpeciesManagement")
+            div.input
+                div.label Habitat Management
+                    +checkboxMixin("connectivity", "connectivity")
+                    +checkboxMixin("vegetation", "vegetation")
+                    +checkboxMixin("restoration", "restoration")
+                    +checkboxMixin("designation", "designation")
+                    +checkboxMixin("management", "management")
+                    +checkboxMixin("prioritization", "prioritization")
+                    +checkBoxWithTextBoxMixin("other", "other", "otherHabitatManagement")
+            div.input
+                div.label Other Research
+                    +checkboxMixin("bioblitz", "bioblitz")
+                    +checkboxMixin("mapping", "mapping")
+                    +checkboxMixin("universityPrograms", "university programs")
+                    +checkboxMixin("conferences", "conferences")
+                    +checkboxMixin("citizenScience", "citizen science")
+                    +checkboxMixin("remoteSensing", "remote sensing")
+                    +checkBoxWithTextBoxMixin("other", "other", "otherResearch")
             div.input
                 div.label Ecosystem Services
                 +checkboxMixin("Food", "Food")
