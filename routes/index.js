@@ -5,8 +5,15 @@ var path = require("path");
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+    res.render('index');
+});
 
-    res.render('index',{title:"The thing I'm working on"});
+router.get('/index', function(req, res, next) {
+    res.render('index');
+});
+
+router.post('/', function(req, res, next) {
+    console.log(req);
 });
 
 module.exports = router;
