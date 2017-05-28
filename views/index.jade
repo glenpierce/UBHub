@@ -51,7 +51,11 @@ body(style="font-family:helvetica; background-color:#daecf1;")
     div(style="display:flex; align-items:center; width:100%; margin-bottom:20px;")
         div(style="margin:auto; text-align:center;") If you would like more information, <br> you may contact us at <br> cbicoalition@gmail.com <br> or register your contact information here:
 
-    form(name="email", method="post" onsubmit="submitForm()")
+    form(id="emailForm" name="emailForm", method="post" onsubmit="submitForm()")
+        div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
+            div(style="margin:auto; width:250px;")
+                div(style="display:inline-block; margin-top:4px;") Name
+                input(name="name" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
         div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
             div(style="margin:auto; width:250px;")
                 div(style="display:inline-block; margin-top:4px;") Email
@@ -74,6 +78,7 @@ body(style="font-family:helvetica; background-color:#daecf1;")
         button(onclick='httpGetAsync("/createUser", console.log)') Create User
 
     script.
-        function submitForm(){
+        function submitForm() {
             console.log("form submitted");
         }
+//            document.getElementById("emailForm").reset();
