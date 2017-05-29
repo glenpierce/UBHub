@@ -7,7 +7,10 @@ var config = require('../config.js');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    res.render('index');
+    // if(req.session && req.session.user)
+    //     return res.redirect('indicators');
+    // else
+        res.render('index');
 });
 
 router.get('/index', function(req, res, next) {
@@ -32,6 +35,7 @@ router.post('/', function(req, res, next) {
             );
         }
     }
+    res.render('index');
 });
 
 function addEmailToList(email){

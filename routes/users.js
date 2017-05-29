@@ -40,7 +40,7 @@ router.post('/', function(req, res){
                 console.log(response);
                 if(response){
                     req.session.user = req.body.username;
-                    return res.send('/dashboard');
+                    return res.send('/map');
                 }
             });
         } else {

@@ -5,6 +5,10 @@ var bcrypt = require('bcryptjs');
 
 var config = require('../config.js');
 
+router.get('/', function(req, res, next){
+    res.render('createUser');
+});
+
 router.post('/', function(req, res){
 
     console.log("creating user");
@@ -21,7 +25,7 @@ router.post('/', function(req, res){
 
     connection.connect();
 
-    connection.query('CALL createUser("' + req.body.username + '", "' + hash + '")', function(err, rows, fields){
+    connection.query('CALL createUser("' + req.body.username + '", "' + hash + '", "' + req.body.alias + '")', function(err, rows, fields){
         if (!err) {
             console.log('The user db has created a user: ', JSON.stringify(rows));
 
@@ -32,8 +36,7 @@ router.post('/', function(req, res){
 
     connection.end();
 
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.end('server says: post request received');
+    res.redirect('login');
 });
 
 module.exports = router;

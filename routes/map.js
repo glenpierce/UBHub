@@ -96,7 +96,7 @@ router.get('/', function(req, res, next) {
         if (!err) {
             mapData = rows;
             if (req.session && req.session.user) {
-                res.render('map', {mapData:JSON.stringify(mapData)});
+                res.render('map', {mapData:JSON.stringify(mapData), username: req.session.user});
             } else {
                 console.log("not logged in");
                 req.session.reset();

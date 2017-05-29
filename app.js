@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var session = require('client-sessions');
 
 var index = require('./routes/index');
+var login = require('./routes/login');
 var users = require('./routes/users');
 var createUser = require('./routes/createUser');
 var dashboard = require('./routes/dashboard');
@@ -49,6 +50,7 @@ app.use(session({
 }));
 
 app.use('/', index);
+app.use('/login', login);
 app.use('/users', users);
 app.use('/createUser', createUser);
 app.use('/dashboard', dashboard);
