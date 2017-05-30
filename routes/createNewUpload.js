@@ -9,7 +9,7 @@ var session = require('client-sessions');
 
 
 router.get('/', function(req, res, next) {
-    res.render('createNewUpload');
+    res.render('createNewUpload', {username: req.session.user});
 });
 
 router.post('/', function (req, res) {

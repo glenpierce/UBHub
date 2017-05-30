@@ -21,7 +21,7 @@ router.get('/', function(req, res, next) {
             // console.log({data:rows[0]});
             data = JSON.stringify(rows[0]);
             console.log(data);
-            res.render('yourUploads', {fromServer:data});
+            res.render('yourUploads', {fromServer:data, username: req.session.user});
         } else {
             console.log(err);
         }
