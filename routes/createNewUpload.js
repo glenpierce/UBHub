@@ -3,7 +3,10 @@ var mysql = require('mysql');
 var router = express.Router();
 var path = require("path");
 var request = require('request');
+var https = require('https');
 var config = require('../config.js');
+var session = require('client-sessions');
+
 
 router.get('/', function(req, res, next) {
     res.render('createNewUpload');

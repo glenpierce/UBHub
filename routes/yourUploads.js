@@ -18,7 +18,10 @@ router.get('/', function(req, res, next) {
     console.log(query);
     connection.query(query, function(err, rows, fields) {
         if (!err) {
-            res.render('yourUploads', {data:JSON.stringify(rows)});
+            // console.log({data:rows[0]});
+            data = JSON.stringify(rows[0]);
+            console.log(data);
+            res.render('yourUploads', {fromServer:data});
         } else {
             console.log(err);
         }
