@@ -25,7 +25,7 @@ router.post('/', function(req, res){
 
     connection.connect();
 
-    connection.query('CALL createUser("' + req.body.username + '", "' + hash + '", "' + req.body.alias + '")', function(err, rows, fields){
+    connection.query('CALL createUser("' + req.body.username + '", "' + hash + '", "' + req.body.alias + '", "' + req.body.userAddress + '")', function(err, rows, fields){
         if (!err) {
             console.log('The user db has created a user: ', JSON.stringify(rows));
 

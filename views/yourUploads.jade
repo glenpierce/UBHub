@@ -26,7 +26,7 @@ html
             div(onclick="window.location='/map'" style="display:block; text-decoration:underline; cursor:pointer; color:#4490ba;") back to Urban biodiversity activities map
 
         div(class="list" style="display:table; margin:auto")
-            div.record
+            div(style="cursor:default;").record
                 div(style="padding:5px; background-color:#d8ecd4;").item Id
                 div(style="padding:5px; background-color:#d8ecd4;").item Location
                 div(style="padding:5px; background-color:#d8ecd4;").item Latitude
@@ -45,6 +45,9 @@ html
             for(i = 0; i < data.length; i++) {
                 record = document.createElement('div');
                 record.classList.add('record');
+                record.addEventListener("click", function(){
+                    editUpload(this.firstElementChild.innerHTML);
+                });
                 var j = 0;
                 for (var key in data[i]) {
                     j++;
@@ -58,4 +61,12 @@ html
                     }
                 }
                 document.getElementsByClassName("list")[0].appendChild(record);
+            }
+
+            function editUpload(id) {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("POST", '/editUpload', true); // true for asynchronous
+                xmlHttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                var dataAsJson = JSON.stringify(id);
+                xmlHttp.send(dataAsJson);
             }

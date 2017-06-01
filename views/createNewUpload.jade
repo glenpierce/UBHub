@@ -29,7 +29,7 @@ html
                 input(type="text", name="#{value}", style="margin-left:5px; width:50%;").inline
 
         mixin textBoxMixin(value, label)
-            div(style="display:flex; width:100%;").fullLine
+            div(style="display:flex; width:100%;")
                 span.label #{label}
                 input(type="text", name="#{value}", style="flex-grow:1; margin-left:5px;")
 
@@ -56,7 +56,8 @@ html
             form(name="add-estimation-search", method="post" onsubmit="submitForm()" style="display:flex; flex-direction:column; flex-grow:1; flex-shrink:1; width: 100%;" autocomplete="off")
                 div(style="width:100%")
                     +textBoxMixin("title", "Title")
-                    div.fullLine
+                    div(style="font-size:10px;").fullLine Enter the main title as you would like it to appear on the map. Ex: City of Chicago, San Diego Zoo
+                    div(style="width=100%; display:flex;")
                         span.label Type
                         select(name="type").select
                             option(value="none").option
@@ -75,29 +76,36 @@ html
                             option(value="event").option event
                             option(value="map").option map
                             option(value="otherType").option other
-                    div.fullLine
+                    div(style="font-size:10px;").fullLine Select the most relevant option.
+                    div(style="width=100%; display:flex;")
                         span.label Scale
                         select(name="scale").select
                             option(value="none").option
-                            option(value="institution").option institution
-                            option(value="campus").option campus
-                            option(value="reserve").option urban reserve/wildlife park
-                            option(value="neighborhood").option community/neighborhood
-                            option(value="municipality").option municipality
-                            option(value="metro region").option metro region
-                            option(value="district").option district/county
-                            option(value="subnational").option subnational/provincial
-                            option(value="city").option city-state/autonomous city
+                            option(value="global").option global/universal
+                            option(value="international").option international/multicountry
                             option(value="national").option national
-                            option(value="international").option international
-                            option(value="global").option global
+                            option(value="city").option city-state/autonomous city
+                            option(value="subnational").option subnational/provincial
+                            option(value="district").option district/county
+                            option(value="metro region").option metro region
+                            option(value="municipality").option municipality
+                            option(value="neighborhood").option community/neighborhood
+                            option(value="reserve").option urban reserve/wildlife park
+                            option(value="campus").option campus
+                            option(value="institution").option institution
                             option(value="N/A").option N/A
+                    div(style="font-size:10px;").fullLine Choose the applicable scale for this item.  If it is a global or universal program, choose "global." If it is a group of countries, choose "international."  If it is a large city and its surrounding suburbs and satellite cities, choose "metro area." A university or business campus, choose "campus." If it is a place, such as a museum, choose "institution."
                     +textBoxMixin("url", "Main weblink")
+                    div(style="font-size:10px;").fullLine Indicate the primary urban biodiversity web address/url for this item. Ex: www.chicago.il/biodiversity
                     +textBoxMixin("author", "Author/Organization")
-                    div.fullLine
+                    div(style="font-size:10px;").fullLine Indicate the organization behind this item, if applicable and not already given in the title. Ex: GBIF Secretariat, UNESCO
+                    div(style="width=100%; display:flex;")
                         span.label Description
                         textarea(name="description", cols="40", rows="5").select
+                    div(style="font-size:10px;").fullLine Provide a short description.  You may include keywords here. Ex: Municipal biodiversity programs; Index on urban resilience including a chapter on biodiversity.
                     +textBoxMixin("location", "Location")
+                    div(style="font-size:10px; padding-bottom:20px;").fullLine Type in the location as you would into Google Maps, including the country.  Only use "regular" ASCII letters - no accents or other such extras (such as you would put in a url web address).  NO: ü ç ñ é î etc.  If you use these, the computer will not be able to process the location.
+                    div(style="font-size:10px;").fullLine In the blue box below, you may indicate up to 3 specific programs, files, tools, etc. that are a part of this overall entry.  For example, you can indicate the various biodiversity guidelines found on the ICLEI Canada website.  Or, you can put in the various biodiversity plan/reports of a city.  If there are pdfs or other documents, please indicate their titles and publication year and provide a link so we can upload them later.
                 div(style="width:100%; margin-bottom:5px; padding:5px; background-color:#daecf1;").border
                     div.bigLabel Specific Program or Document 1
                     +textBoxMixin("documentTitle1", "Title")

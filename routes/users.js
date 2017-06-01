@@ -49,10 +49,6 @@ router.post('/', function(req, res){
     });
 
     connection.end();
-
-
-    // res.writeHead(200, {'Content-Type': 'text/html'});
-    // res.end('server says: post request received');
 });
 
 module.exports = router;
