@@ -22,17 +22,7 @@ router.post('/', function(req, res, next) {
     if(req.body.email){
         if(req.body.email.toString() === req.body["verify-email"].toString()){
             userEmail = req.body.email.toString();
-            request.post(
-                'https://www.google.com/recaptcha/api/siteverify?secret=' + config.reCAPTCHASecret + "&response=" + req.body["g-recaptcha-response"] + "&remoteip=" + req.connection.remoteAddress,
-                { },
-                function (error, response, body) {
-                    if (!error && response.statusCode === 200) {
-                        if(response.success === true){
-                            addEmailToList(userEmail);
-                        }
-                    }
-                }
-            );
+            addEmailToList(userEmail);
         }
     }
     res.render('index');
@@ -48,7 +38,7 @@ function addEmailToList(email){
 
 connection.connect();
 
-connection.query('CALL addEmail(' + email + ')', function(err, rows, fields) {
+connection.query('CALL addEmail("' + email + '")', function(err, rows, fields) {
     if (!err)
         console.log('Email added');
     else

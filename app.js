@@ -14,6 +14,7 @@ var dashboard = require('./routes/dashboard');
 var indicators = require('./routes/indicators');
 var map = require('./routes/map');
 var yourUploads = require('./routes/yourUploads');
+var editUpload = require('./routes/editUpload');
 var createNewUpload = require('./routes/createNewUpload');
 
 var config = require('./config.js');
@@ -59,6 +60,7 @@ app.use('/dashboard', dashboard);
 app.use('/indicators', indicators);
 app.use('/map', map);
 app.use('/yourUploads', yourUploads);
+app.use('/editUpload', editUpload);
 app.use('/createNewUpload', createNewUpload);
 
 //to setup docker mysql: docker run --name episql -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql
