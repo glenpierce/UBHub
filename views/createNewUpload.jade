@@ -28,10 +28,10 @@ html
                 span.label #{label}
                 input(type="text", name="#{value}", style="margin-left:5px; width:50%;").inline
 
-        mixin textBoxMixin(value, label)
+        mixin textBoxMixin(name, label)
             div(style="display:flex; width:100%;")
                 span.label #{label}
-                input(type="text", name="#{value}", style="flex-grow:1; margin-left:5px;")
+                input(type="text", name="#{name}", style="flex-grow:1; margin-left:5px;")
 
     body
 

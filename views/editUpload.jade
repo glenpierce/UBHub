@@ -28,12 +28,23 @@ html
                 span.label #{label}
                 input(type="text", name="#{value}", style="margin-left:5px; width:50%;").inline
 
-        mixin textBoxMixin(value, label)
+        mixin textBoxMixin(name, label)
             div(style="display:flex; width:100%;")
                 span.label #{label}
-                input(type="text", name="#{value}", style="flex-grow:1; margin-left:5px;")
+                input(type="text", name="#{name}", style="flex-grow:1; margin-left:5px;")
+
+        mixin textBoxMixin(name, label, value)
+            div(style="display:flex; width:100%;")
+                span.label #{label}
+                input(type="text", name="#{name}", value="#{value}", style="flex-grow:1; margin-left:5px;")
 
     body
+        script.
+            var data = !{fromServer};
+            document.onload = thingToDo(data);
+            function thingToDo(data){
+                console.log(data.address);
+            }
 
         div(style="border-bottom:solid; display:flex; justify-content:space-between; margin-bottom:20px;")
             img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
@@ -43,10 +54,10 @@ html
                     div(style="margin:20px; cursor:pointer;") Resources
                     div(style="margin:20px; cursor:pointer;") About Us
                     div(style="margin:20px; cursor:pointer;") Search
-                div(style="float:right;") You are logged in as #{username}
+                div(style="float:right;") You are logged in as #{fromServer}
                 div(style="clear:right; float:right; text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
 
-        div(style="font-size:20px; font-weight:bold;") Create New Upload
+        div(style="font-size:20px; font-weight:bold;") Edit Upload
         div(style="padding-bottom:20px;")
             div(onclick="window.location='/yourUploads'" style="display:inline; text-decoration:underline; cursor:pointer; color:#4490ba;") back to your uploads manager
             div(style="font-size:12px; display:inline;") &nbsp;(exit without saving)
@@ -55,7 +66,7 @@ html
 
             form(name="add-estimation-search", method="post" onsubmit="submitForm()" style="display:flex; flex-direction:column; flex-grow:1; flex-shrink:1; width: 100%;" autocomplete="off")
                 div(style="width:100%")
-                    +textBoxMixin("title", "Title")
+                    +textBoxMixin("title", "Title", fromServer.title)
                     div(style="font-size:10px;").fullLine Enter the main title as you would like it to appear on the map. Ex: City of Chicago, San Diego Zoo
                     div(style="width=100%; display:flex;")
                         span.label Type
