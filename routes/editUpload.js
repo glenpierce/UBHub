@@ -20,9 +20,10 @@ router.get('/', function(req, res, next) {
     connection.query(query, function(err, rows, fields) {
         if (!err) {
             // console.log({data:rows[0]});
-            data = JSON.stringify(rows[0][0]);
+            data = rows[0][0];
+            stringFromServer = JSON.stringify(rows[0][0]);
             console.log(data);
-            res.render('editUpload', {fromServer:data, username: req.session.user});
+            res.render('editUpload', {fromServer:data, stringFromServer:stringFromServer, username: req.session.user});
         } else {
             console.log(err);
         }
@@ -43,7 +44,7 @@ router.post('/', function(req, res){
 
     connection.connect();
 
-    connection.query('CALL getLocation("' + req.body.locationId + '")', function(err, rows, fields){
+    connection.query('CALL updateLocation("' + req.body.locationId + '")', function(err, rows, fields){
         if (!err) {
             if(req.body.username == rows.user){
                 data = JSON.stringify(rows[0]);

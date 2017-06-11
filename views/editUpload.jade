@@ -11,12 +11,6 @@ html
                 each attributeItem in attributeList
                     option(value=attributeItem).option #{attributeItem}
 
-        //mixin filterRangeMixin(filterBy, low, high)
-        //    select(style="flex-grow:1; margin: 5px;" onchange="filterRange(this.value, #{filterBy})").border
-        //        option(value="none").option
-        //        each attributeItem in attributeList
-        //            option(value=[low, high]).option #{low} < #{high}
-
         mixin checkboxMixin(value, label)
             div
                 input(type="checkbox", name="#{value}").checkbox
@@ -33,17 +27,18 @@ html
                 span.label #{label}
                 input(type="text", name="#{name}", style="flex-grow:1; margin-left:5px;")
 
-        mixin textBoxMixin(name, label, value)
+        mixin textBoxMixinWithValue(name, label, value)
             div(style="display:flex; width:100%;")
                 span.label #{label}
                 input(type="text", name="#{name}", value="#{value}", style="flex-grow:1; margin-left:5px;")
 
     body
         script.
-            var data = !{fromServer};
-            document.onload = thingToDo(data);
-            function thingToDo(data){
-                console.log(data.address);
+            var data = !{stringFromServer};
+            document.onload = doOnLoad();
+            function doOnLoad(){
+                console.log(data.myJson);
+                console.log(JSON.parse(data.myJson).type);
             }
 
         div(style="border-bottom:solid; display:flex; justify-content:space-between; margin-bottom:20px;")
@@ -54,7 +49,7 @@ html
                     div(style="margin:20px; cursor:pointer;") Resources
                     div(style="margin:20px; cursor:pointer;") About Us
                     div(style="margin:20px; cursor:pointer;") Search
-                div(style="float:right;") You are logged in as #{fromServer}
+                div(style="float:right;") You are logged in as #{username}
                 div(style="clear:right; float:right; text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
 
         div(style="font-size:20px; font-weight:bold;") Edit Upload
@@ -66,7 +61,7 @@ html
 
             form(name="add-estimation-search", method="post" onsubmit="submitForm()" style="display:flex; flex-direction:column; flex-grow:1; flex-shrink:1; width: 100%;" autocomplete="off")
                 div(style="width:100%")
-                    +textBoxMixin("title", "Title", fromServer.title)
+                    +textBoxMixinWithValue("title", "Title", fromServer.title)
                     div(style="font-size:10px;").fullLine Enter the main title as you would like it to appear on the map. Ex: City of Chicago, San Diego Zoo
                     div(style="width=100%; display:flex;")
                         span.label Type
@@ -106,7 +101,7 @@ html
                             option(value="institution").option institution
                             option(value="N/A").option N/A
                     div(style="font-size:10px;").fullLine Choose the applicable scale for this item.  If it is a global or universal program, choose "global." If it is a group of countries, choose "international."  If it is a large city and its surrounding suburbs and satellite cities, choose "metro area." A university or business campus, choose "campus." If it is a place, such as a museum, choose "institution."
-                    +textBoxMixin("url", "Main weblink")
+                    +textBoxMixinWithValue("url", "Main weblink", JSON.parse(fromServer.myJson).url)
                     div(style="font-size:10px;").fullLine Indicate the primary urban biodiversity web address/url for this item. Ex: www.chicago.il/biodiversity
                     +textBoxMixin("author", "Author/Organization")
                     div(style="font-size:10px;").fullLine Indicate the organization behind this item, if applicable and not already given in the title. Ex: GBIF Secretariat, UNESCO
