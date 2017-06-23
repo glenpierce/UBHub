@@ -37,7 +37,7 @@ html
             var data = !{stringFromServer};
             document.onload = doOnLoad();
             function doOnLoad(){
-                console.log(data.myJson);
+                console.log(data);
                 console.log(JSON.parse(data.myJson).type);
             }
 
@@ -67,8 +67,8 @@ html
                         span.label Type
                         select(name="type").select
                             option(value="none").option
-                            option(value="data").option data
-                            option(value="repository").option repository
+                            option(selected=JSON.parse(fromServer.myJson).type=="data" value="data").option data
+                            option(selected=JSON.parse(fromServer.myJson).type=="repository" value="repository").option repository
                             option(value="environmentalNGO").option environmental NGO
                             option(value="news").option news source/blog
                             option(value="indexTool").option index/measurement tool
@@ -103,11 +103,11 @@ html
                     div(style="font-size:10px;").fullLine Choose the applicable scale for this item.  If it is a global or universal program, choose "global." If it is a group of countries, choose "international."  If it is a large city and its surrounding suburbs and satellite cities, choose "metro area." A university or business campus, choose "campus." If it is a place, such as a museum, choose "institution."
                     +textBoxMixinWithValue("url", "Main weblink", JSON.parse(fromServer.myJson).url)
                     div(style="font-size:10px;").fullLine Indicate the primary urban biodiversity web address/url for this item. Ex: www.chicago.il/biodiversity
-                    +textBoxMixin("author", "Author/Organization")
+                    +textBoxMixinWithValue("author", "Author/Organization", JSON.parse(fromServer.myJson).author)
                     div(style="font-size:10px;").fullLine Indicate the organization behind this item, if applicable and not already given in the title. Ex: GBIF Secretariat, UNESCO
                     div(style="width=100%; display:flex;")
                         span.label Description
-                        textarea(name="description", cols="40", rows="5").select
+                        textarea(name="description", cols="40", rows="5").select JSON.parse(fromServer.myJson).description)
                     div(style="font-size:10px;").fullLine Provide a short description.  You may include keywords here. Ex: Municipal biodiversity programs; Index on urban resilience including a chapter on biodiversity.
                     +textBoxMixin("location", "Location")
                     div(style="font-size:10px; padding-bottom:20px;").fullLine Type in the location as you would into Google Maps, including the country.  Only use "regular" ASCII letters - no accents or other such extras (such as you would put in a url web address).  NO: ü ç ñ é î etc.  If you use these, the computer will not be able to process the location.
@@ -289,5 +289,8 @@ html
                                 +checkboxMixin("academia", "Academia")
                                 +checkboxMixin("localGov", "Local Government")
                                 +checkBoxWithTextBoxMixin("other", "other", "otherPartiesInvolved")
+                    div.input
+                        div(style="display:none")
+                            +textBoxMixinWithValue("id", "Id", fromServer.id)
                 div.actions
                     input(type="submit", value="submit")
