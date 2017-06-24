@@ -6,3 +6,92 @@ body {
 a {
   color: #00B7FF;
 }
+
+.border{
+  border:solid; border-radius:5px; border-width:1px;
+}
+
+.item{
+  border:solid; border-width:1px; border-color:grey; display:table-cell; padding: 5px;
+}
+
+.record{
+  padding-bottom: 20px; cursor: pointer; display:table-row;
+}
+
+.record:hover{
+  border:solid; border-color: #00B7FF;
+}
+
+.select{
+  flex-grow: 1; margin-left:5px;
+}
+
+.fullLine{
+  display: flex; padding-bottom: 5px;
+}
+
+.inline{
+  display: inline;
+}
+
+.bigLabel{
+  font-size:18px; font-weight:700;
+}
+
+/*
+Blue
+1  07456b
+2  326f90 dark blue
+4  4490ba
+5  71afd1
+6  93c2d9
+7  b6d5e3 medium blue
+9  daecf1
+10 e9f6f9 light blue
+
+Green
+1  235449
+2  3b7e6a
+3  269973 dark green
+4  2fb585
+5  70ba8f
+6  91cfa8
+7  acd9bb medium green
+8  c1e3cd
+9  d8ecd4
+10 eff6e8 light green
+
+Yellow
+1  683d1a
+2  8c5222
+3  c58c2b dark yellow
+5  e7b627
+6  fcd350
+7  ffe57b medium yellow
+8  ffef94
+9  fff1b6
+10 fffceb
+
+Red
+1  742109
+2  a63720
+3  d82d27
+4  f2613a
+5  f69056
+6  fab279
+
+Black
+1  000000
+2  10% gradient
+3
+4
+5
+6
+7
+8
+9
+10
+11 5% black
+
+*/

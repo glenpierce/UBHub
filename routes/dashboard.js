@@ -6,9 +6,11 @@ var path = require("path");
 
 var app = express();
 
+var config = require('../config.js');
+
 app.use(session({
     cookieName: 'session',
-    secret: process.argv[3],
+    secret: config.secret,
     duration: 30 * 60 * 1000,
     activeDuration: 5 * 60 * 1000
 }));
@@ -17,8 +19,8 @@ router.get('/', function(req, res, next) {
     console.log("dashboard");
     if (req.session && req.session.user) {
         console.log("logged in as " + req.session.user);
-        res.sendFile(path.join(__dirname+'/dashboard.html'));
-        //res.render('index',{title:"You are logged in"});
+        res.render('dashboard');
+        //res.sendFile(path.join(__dirname+'/dashboard.html'));
     } else {
         console.log("not logged in");
         req.session.reset();

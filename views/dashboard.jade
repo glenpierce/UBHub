@@ -1,0 +1,26 @@
+doctype html
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/cbiindicators.css')
+        script.
+            function goToDashboard() {
+                console.log("clicked");
+            }
+
+
+body
+    block content
+        div(style="border-bottom:solid; display:flex; justify-content:space-between;")
+            img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
+            div(style="display:flex;")
+                div(style="margin:20px; cursor:pointer;") About CBI
+                div(style="margin:20px; cursor:pointer;") Resources
+                div(style="margin:20px; cursor:pointer;") About Us
+                div(style="margin:20px; cursor:pointer;") Search
+
+        div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px; cursor:pointer;") Account Summary
+        div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px;") Followed Questions
+        div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px;") FAQs
+        div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px;") Popular Forum Topics
+        div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px;") Snapshot
+        a(style="padding:10px;" href="http://default-environment.5bddwj795p.ca-central-1.elasticbeanstalk.com/map") Map

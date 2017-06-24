@@ -3,15 +3,21 @@ var router = express.Router();
 var mysql = require('mysql');
 var bcrypt = require('bcryptjs');
 
+var config = require('../config.js');
+
+router.get('/', function(req, res, next){
+    res.render('createUser');
+});
+
 router.post('/', function(req, res){
 
     console.log("creating user");
 
     var connection = mysql.createConnection({
-        host     : 'localhost',
-        user     : 'root',
-        password : process.argv[2],
-        database : 'epistemolog'
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
     });
 
     var salt = bcrypt.genSaltSync(10);
@@ -19,7 +25,7 @@ router.post('/', function(req, res){
 
     connection.connect();
 
-    connection.query('CALL createUser("' + req.body.username + '", "' + hash + '")', function(err, rows, fields){
+    connection.query('CALL createUser("' + req.body.username + '", "' + hash + '", "' + req.body.alias + '", "' + req.body.userAddress + '")', function(err, rows, fields){
         if (!err) {
             console.log('The user db has created a user: ', JSON.stringify(rows));
 
@@ -30,8 +36,7 @@ router.post('/', function(req, res){
 
     connection.end();
 
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.end('server says: post request received');
+    res.redirect('login');
 });
 
 module.exports = router;

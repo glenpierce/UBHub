@@ -1,0 +1,68 @@
+doctype html
+html
+    head
+        title Your Uploads
+        //script(async, defer, src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&callback=initMap")
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+    body
+
+        div(style="border-bottom:solid; display:flex; justify-content:space-between; margin-bottom:20px;")
+            img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
+            div
+                div(style="display:flex;")
+                    div(style="margin:20px; cursor:pointer;") About CBI
+                    div(style="margin:20px; cursor:pointer;") Resources
+                    div(style="margin:20px; cursor:pointer;") About Us
+                    div(style="margin:20px; cursor:pointer;") Search
+                div(style="float:right;") You are logged in as #{username}
+                div(style="clear:right; float:right; text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
+
+        div(style="font-size:20px; padding-bottom:20px; font-weight:bold; text-align:center;") Your Uploads Manager
+
+        div(style="padding-bottom:20px; text-align:center;")
+            div(style="display:inline;") Below is a table of the items you have entered so far.<br>To edit an item, click on it.<br>
+            div(onclick="window.location='/createNewUpload'" style="display:inline; text-decoration:underline; cursor:pointer; color:#4490ba;") Add a new item.
+            div(onclick="window.location='/map'" style="display:block; text-decoration:underline; cursor:pointer; color:#4490ba;") back to Urban biodiversity activities map
+
+        div(class="list" style="display:table; margin:auto")
+            div(style="cursor:default;").record
+                div(style="padding:5px; background-color:#d8ecd4;").item Id
+                div(style="padding:5px; background-color:#d8ecd4;").item Location
+                div(style="padding:5px; background-color:#d8ecd4;").item Latitude
+                div(style="padding:5px; background-color:#d8ecd4;").item Longitude
+                div(style="padding:5px; background-color:#d8ecd4;").item Title
+                div(style="padding:5px; background-color:#d8ecd4;").item Country
+                div(style="padding:5px; background-color:#d8ecd4;").item Scale
+
+
+        script.
+            var data = !{fromServer};
+            console.log(data);
+            console.log(data[0].address);
+            console.log(data.length);
+
+            for(i = 0; i < data.length; i++) {
+                record = document.createElement('div');
+                record.classList.add('record');
+                record.addEventListener("click", function(){
+                    editUpload(this.firstElementChild.innerHTML);
+                });
+                var j = 0;
+                for (var key in data[i]) {
+                    j++;
+                    if(j < 8) {
+                        item = document.createElement('div');
+                        item.innerHTML = data[i][key];
+                        item.classList.add('item');
+                        record.appendChild(item);
+                    } else {
+                        break;
+                    }
+                }
+                document.getElementsByClassName("list")[0].appendChild(record);
+            }
+
+            function editUpload(id) {
+                window.location = 'editUpload?id=' + id;
+            }

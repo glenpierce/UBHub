@@ -7,9 +7,11 @@ var path = require("path");
 
 var app = express();
 
+var config = require('../config.js');
+
 app.use(session({
     cookieName: 'session',
-    secret: process.argv[3],
+    secret: config.secret,
     duration: 30 * 60 * 1000,
     activeDuration: 5 * 60 * 1000
 }));
@@ -23,10 +25,10 @@ router.post('/', function(req, res){
     console.log('login request received');
 
     var connection = mysql.createConnection({
-        host     : 'localhost',
-        user     : 'root',
-        password : process.argv[2],
-        database : 'epistemolog'
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
     });
 
     connection.connect();
@@ -38,8 +40,7 @@ router.post('/', function(req, res){
                 console.log(response);
                 if(response){
                     req.session.user = req.body.username;
-                    // return res.sendFile(path.join(__dirname+'/dashboard.html'));
-                    return res.send('/dashboard');
+                    return res.send('/map');
                 }
             });
         } else {
@@ -48,10 +49,6 @@ router.post('/', function(req, res){
     });
 
     connection.end();
-
-
-    // res.writeHead(200, {'Content-Type': 'text/html'});
-    // res.end('server says: post request received');
 });
 
 module.exports = router;

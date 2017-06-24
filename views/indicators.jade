@@ -1,0 +1,132 @@
+doctype html
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/cbiindicators.css')
+        script.
+            function scrollScript() {
+                var scrollPosition = document.getElementsByClassName("scrollPanel")[0].scrollTop;
+                var scrollPositionNativeBio = document.getElementsByClassName("nativeBiodiversity")[1].offsetTop - document.getElementsByClassName("nativeBiodiversity")[1].offsetHeight - 31;
+                var scrollPositionEcoSystem = document.getElementsByClassName("ecosystemServices")[1].offsetTop - document.getElementsByClassName("ecosystemServices")[1].offsetHeight - 31;
+                var scrollPositionGovManage = document.getElementsByClassName("govManagement")[1].offsetTop - document.getElementsByClassName("govManagement")[1].offsetHeight - 31;
+                console.log("scrollPosition= " + scrollPosition);
+                console.log("scrollPositionNativeBio= " + scrollPositionNativeBio);
+                console.log("scrollPositionEcoSystem= " + scrollPositionEcoSystem);
+                console.log("scrollPositionGovManage= " + scrollPositionGovManage);
+
+
+                if(scrollPosition <= scrollPositionEcoSystem){
+                    highlightNativeBio();
+                } else if(scrollPosition > scrollPositionEcoSystem && scrollPosition < scrollPositionGovManage){
+                    highlightEcoSystem();
+                } else {
+                    highlightGovManage();
+                }
+            }
+            function highlightNativeBio() {
+                document.getElementsByClassName("tabsBaseLine")[0].style.backgroundColor = "#3b7e6a";
+                document.getElementsByClassName("nativeBiodiversity")[0].style.backgroundColor = "#3b7e6a";
+                document.getElementsByClassName("nativeBiodiversity")[0].style.color = "#ffffff";
+                document.getElementsByClassName("ecosystemServices")[0].style.backgroundColor = "#b6d5e3";
+                document.getElementsByClassName("ecosystemServices")[0].style.color = "#000000";
+                document.getElementsByClassName("govManagement")[0].style.backgroundColor = "#fff1b6";
+                document.getElementsByClassName("govManagement")[0].style.color = "#000000";
+            }
+            function highlightEcoSystem() {
+                document.getElementsByClassName("tabsBaseLine")[0].style.backgroundColor = "#07456b";
+                document.getElementsByClassName("nativeBiodiversity")[0].style.backgroundColor = "#acd9bb";
+                document.getElementsByClassName("nativeBiodiversity")[0].style.color = "#000000";
+                document.getElementsByClassName("ecosystemServices")[0].style.backgroundColor = "#07456b";
+                document.getElementsByClassName("ecosystemServices")[0].style.color = "#ffffff";
+                document.getElementsByClassName("govManagement")[0].style.backgroundColor = "#fff1b6";
+                document.getElementsByClassName("govManagement")[0].style.color = "#000000";
+            }
+            function highlightGovManage() {
+                document.getElementsByClassName("tabsBaseLine")[0].style.backgroundColor = "#c58c2b";
+                document.getElementsByClassName("nativeBiodiversity")[0].style.backgroundColor = "#acd9bb";
+                document.getElementsByClassName("nativeBiodiversity")[0].style.color = "#000000";
+                document.getElementsByClassName("ecosystemServices")[0].style.backgroundColor = "#b6d5e3";
+                document.getElementsByClassName("ecosystemServices")[0].style.color = "#000000";
+                document.getElementsByClassName("govManagement")[0].style.backgroundColor = "#c58c2b";
+                document.getElementsByClassName("govManagement")[0].style.color = "#ffffff";
+            }
+            function scrollToPosition(position) {
+                console.log("scrolling");
+                document.getElementsByClassName("scrollPanel")[0].scrollTop = position.scrollTop;
+            }
+
+mixin indicator(category, number, title, calculation, value)
+
+    -var backgroundColor;
+    -var foregroundColor;
+    -var lightColor;
+    case category
+        when 1
+            -backgroundColor = 'nativeBiodiversity';
+            -foregroundColor = 'foregroundGreen';
+            -lightColor = 'lightGreen';
+        when 2
+            -backgroundColor = 'ecosystemServices';
+            -foregroundColor = 'foregroundBlue';
+            -lightColor = 'lightBlue';
+        default
+            -backgroundColor = 'govManagement';
+            -foregroundColor = 'foregroundYellow';
+            -lightColor = 'lightYellow';
+    div.container(class = backgroundColor)
+        div.dataEntryBlock
+            .div(style="display:flex; flex:1.2;")
+                div(style="height:100%; display:flex; flex-direction:column; justify-content:space-between;")
+                    div.number(class = foregroundColor)
+                        div.center.centerNumber #{number}
+                    div(style="text-align:center; font-weight:bold;") i
+                div.dataEntryTitle #{title}
+            .div(style="flex:1;")
+                    div.dataEntryLabel Value
+                    div.dataEntryLabel Data year
+                    div.dataEntryLabel Notes
+                div.inputColumn
+                    div.inputField
+                    div.inputField
+                    div.inputFieldOptional(class = lightColor)
+                .div(style="flex:1")
+                    div.width100pct
+                        div Calculation
+                        div.points(class = foregroundColor)
+                            div.center.centerPoints
+                                div.baseline
+                                    div.ptsNumber #{value}
+                                    div.pts &nbsp;pts
+        div.moreInfo(style="display:none; padding: 10px; border-radius:10px;" class = lightColor) #{calculation}
+
+
+body
+    block content
+        div(style="border-bottom:solid; display:flex; justify-content:space-between;")
+            img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
+            div(style="display:flex;")
+                div(style="margin:20px; cursor:pointer;") About CBI
+                div(style="margin:20px;cursor:pointer;") Resources
+                div(style="margin:20px;cursor:pointer;") About Us
+                div(style="margin:20px;cursor:pointer;") Search
+
+        .div(style="max-width:800px; margin:auto;")
+            div(style="margin-top:10px;") home > myCBI Indicators
+            div(style="display:flex; justify-content:space-between;")
+                div
+                    div.userName #{userName}
+                    div.city City
+                    div.country Country
+                img(style="height:90px; padding-bottom:10px;" src="/images/dial.png")
+        tabs.tabs
+            div.tab.cityProfile City Profile
+            div.tab.nativeBiodiversity(onclick="scrollToPosition(document.getElementsByClassName('nativeBiodiversity')[1])") Native Biodiversity
+            div.tab.ecosystemServices(onclick="scrollToPosition(document.getElementsByClassName('ecosystemServices')[1])") Ecosystem Services
+            div.tab.govManagement(onclick="scrollToPosition(document.getElementsByClassName('govManagement')[1])") Governance & Management
+
+        div.tabsBaseLine
+
+        div.scrollPanel(style="margin:auto; height:300px; overflow-y: scroll; max-width:800px;" onscroll="scrollScript()")
+            - for indicator in cityIndicators.indicators
+                +indicator(indicator.category, indicator.number, indicator.title, indicator.calculation, 0)
+
+        script window.onLoad=highlightNativeBio()

@@ -7,9 +7,17 @@ var bodyParser = require('body-parser');
 var session = require('client-sessions');
 
 var index = require('./routes/index');
+var login = require('./routes/login');
 var users = require('./routes/users');
 var createUser = require('./routes/createUser');
 var dashboard = require('./routes/dashboard');
+var indicators = require('./routes/indicators');
+var map = require('./routes/map');
+var yourUploads = require('./routes/yourUploads');
+var editUpload = require('./routes/editUpload');
+var createNewUpload = require('./routes/createNewUpload');
+
+var config = require('./config.js');
 
 // var https = require('https');
 // var fs = require('fs');
@@ -30,7 +38,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -39,37 +47,43 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
     cookieName: 'session',
-    secret: process.argv[3],
+    secret: config.secret,
     duration: 30 * 60 * 1000,
     activeDuration: 5 * 60 * 1000
 }));
 
 app.use('/', index);
+app.use('/login', login);
 app.use('/users', users);
 app.use('/createUser', createUser);
 app.use('/dashboard', dashboard);
+app.use('/indicators', indicators);
+app.use('/map', map);
+app.use('/yourUploads', yourUploads);
+app.use('/editUpload', editUpload);
+app.use('/createNewUpload', createNewUpload);
 
 //to setup docker mysql: docker run --name episql -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql
 //this port is in use according to Docker, how can I make sure that a port is valid for me to use?
 
-var mysql      = require('mysql');
+var mysql = require('mysql');
 var connection = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : process.argv[2],
-    database : 'epistemolog'
+    host: config.rdsHost,
+    user: config.rdsUser,
+    password: config.rdsPassword,
+    database: config.rdsDatabase
 });
 
-connection.connect();
-
-connection.query('SELECT * from Users', function(err, rows, fields) {
-    if (!err)
-        console.log('The user db contains: ', rows);
-    else
-        console.log('Error while performing Query.');
-});
-
-connection.end();
+// connection.connect();
+//
+// connection.query('SELECT * from Users', function(err, rows, fields) {
+//     if (!err)
+//         console.log('The user db contains: ', rows);
+//     else
+//         console.log('Error while performing Query.');
+// });
+//
+// connection.end();
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
