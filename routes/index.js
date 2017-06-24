@@ -13,10 +13,6 @@ router.get('/', function(req, res, next) {
         res.render('index');
 });
 
-router.get('/index', function(req, res, next) {
-    res.render('index');
-});
-
 router.post('/', function(req, res, next) {
     userEmail = "";
     if(req.body.email){
