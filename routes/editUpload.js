@@ -17,15 +17,21 @@ router.get('/', function(req, res, next) {
     id = req.query.id;
 
     connection.connect();
-    query = 'CALL getUploadByUserById("' + req.session.user + '", "' + id + '")';
-    console.log(query);
+    query = 'CALL getUploadById(' + id + ')';
     connection.query(query, function(err, rows, fields) {
         if (!err) {
-            // console.log({data:rows[0]});
-            data = rows[0][0];
-            stringFromServer = JSON.stringify(rows[0][0]);
-            console.log(data);
-            res.render('editUpload', {fromServer:data, stringFromServer:stringFromServer, username: req.session.user});
+            if(req.body.username === rows.user) {
+                data = rows[0][0];
+                stringFromServer = JSON.stringify(rows[0][0]);
+                console.log(data);
+                res.render('editUpload', {
+                    fromServer: data,
+                    stringFromServer: stringFromServer,
+                    username: req.session.user
+                });
+            } else {
+                res.redirect('login');
+            }
         } else {
             console.log(err);
         }
@@ -47,8 +53,6 @@ router.post('/', function(req, res){
     connection.connect();
 
     query = 'CALL getUploadById("' + id + '")';
-    query = 'SELECT * FROM locations WHERE id = ' + id + ';';
-    console.log(query);
     connection.query(query, function(err, rows, fields){
         if (!err) {
             if(req.body.username === rows.user){
