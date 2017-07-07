@@ -1,7 +1,7 @@
 doctype html
 html
     head
-        title Create New Upload
+        title Edit Upload
         //script(async, defer, src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&callback=initMap")
         link(rel='stylesheet', href='/stylesheets/style.css')
 
@@ -14,6 +14,14 @@ html
         mixin checkboxMixin(value, label)
             div
                 input(type="checkbox", name="#{value}").checkbox
+                span.label #{label}
+
+        mixin checkboxWithExistingValueMixin(checked, value, label)
+            div
+                if checked
+                    input(checked, type="checkbox", name="#{value}").checkbox
+                else
+                    input(type="checkbox", name="#{value}").checkbox
                 span.label #{label}
 
         mixin checkBoxWithTextBoxMixin(value, label, textBoxValue)
@@ -69,37 +77,37 @@ html
                             option(value="none").option
                             option(selected=JSON.parse(fromServer.myJson).type=="data" value="data").option data
                             option(selected=JSON.parse(fromServer.myJson).type=="repository" value="repository").option repository
-                            option(value="environmentalNGO").option environmental NGO
-                            option(value="news").option news source/blog
-                            option(value="indexTool").option index/measurement tool
-                            option(value="plan").option plan/strategy
-                            option(value="toolkitGuide").option toolkit/guide
-                            option(value="researcherExpert").option researcher/expert
-                            option(value="researchInstitute").option research institute
-                            option(value="pubEngagementInstitute").option public engagement institute
-                            option(value="networkPartnershipProgram").option network/partnership program
-                            option(value="government").option government
-                            option(value="event").option event
-                            option(value="map").option map
-                            option(value="otherType").option other
+                            option(selected=JSON.parse(fromServer.myJson).type=="environmentalNGO" value="environmentalNGO").option environmental NGO
+                            option(selected=JSON.parse(fromServer.myJson).type=="news" value="news").option news source/blog
+                            option(selected=JSON.parse(fromServer.myJson).type=="indexTool" value="indexTool").option index/measurement tool
+                            option(selected=JSON.parse(fromServer.myJson).type=="plan" value="plan").option plan/strategy
+                            option(selected=JSON.parse(fromServer.myJson).type=="toolkitGuide" value="toolkitGuide").option toolkit/guide
+                            option(selected=JSON.parse(fromServer.myJson).type=="researcherExpert" value="researcherExpert").option researcher/expert
+                            option(selected=JSON.parse(fromServer.myJson).type=="researchInstitute" value="researchInstitute").option research institute
+                            option(selected=JSON.parse(fromServer.myJson).type=="pubEngagementInstitute" value="pubEngagementInstitute").option public engagement institute
+                            option(selected=JSON.parse(fromServer.myJson).type=="networkPartnershipProgram" value="networkPartnershipProgram").option network/partnership program
+                            option(selected=JSON.parse(fromServer.myJson).type=="government" value="government").option government
+                            option(selected=JSON.parse(fromServer.myJson).type=="event" value="event").option event
+                            option(selected=JSON.parse(fromServer.myJson).type=="map" value="map").option map
+                            option(selected=JSON.parse(fromServer.myJson).type=="otherType" value="otherType").option other
                     div(style="font-size:10px;").fullLine Select the most relevant option.
                     div(style="width=100%; display:flex;")
                         span.label Scale
                         select(name="scale").select
                             option(value="none").option
-                            option(value="global").option global/universal
-                            option(value="international").option international/multicountry
-                            option(value="national").option national
-                            option(value="city").option city-state/autonomous city
-                            option(value="subnational").option subnational/provincial
-                            option(value="district").option district/county
-                            option(value="metro region").option metro region
-                            option(value="municipality").option municipality
-                            option(value="neighborhood").option community/neighborhood
-                            option(value="reserve").option urban reserve/wildlife park
-                            option(value="campus").option campus
-                            option(value="institution").option institution
-                            option(value="N/A").option N/A
+                            option(selected=JSON.parse(fromServer.myJson).scale=="global" value="global").option global/universal
+                            option(selected=JSON.parse(fromServer.myJson).scale=="international" value="international").option international/multicountry
+                            option(selected=JSON.parse(fromServer.myJson).scale=="national" value="national").option national
+                            option(selected=JSON.parse(fromServer.myJson).scale=="city" value="city").option city-state/autonomous city
+                            option(selected=JSON.parse(fromServer.myJson).scale=="subnational" value="subnational").option subnational/provincial
+                            option(selected=JSON.parse(fromServer.myJson).scale=="district" value="district").option district/county
+                            option(selected=JSON.parse(fromServer.myJson).scale=="metro " value="metro region").option metro region
+                            option(selected=JSON.parse(fromServer.myJson).scale=="municipality" value="municipality").option municipality
+                            option(selected=JSON.parse(fromServer.myJson).scale=="neighborhood" value="neighborhood").option community/neighborhood
+                            option(selected=JSON.parse(fromServer.myJson).scale=="reserve" value="reserve").option urban reserve/wildlife park
+                            option(selected=JSON.parse(fromServer.myJson).scale=="campus" value="campus").option campus
+                            option(selected=JSON.parse(fromServer.myJson).scale=="institution" value="institution").option institution
+                            option(selected=JSON.parse(fromServer.myJson).scale=="N/A" value="N/A").option N/A
                     div(style="font-size:10px;").fullLine Choose the applicable scale for this item.  If it is a global or universal program, choose "global." If it is a group of countries, choose "international."  If it is a large city and its surrounding suburbs and satellite cities, choose "metro area." A university or business campus, choose "campus." If it is a place, such as a museum, choose "institution."
                     +textBoxMixinWithValue("url", "Main weblink", JSON.parse(fromServer.myJson).url)
                     div(style="font-size:10px;").fullLine Indicate the primary urban biodiversity web address/url for this item. Ex: www.chicago.il/biodiversity
@@ -117,30 +125,30 @@ html
                     +textBoxMixin("documentTitle1", "Title")
                     +textBoxMixin("documentWeblink1", "Weblink")
                     Div(style="display:flex;") How many documents need to be uploaded?
-                        +checkboxMixin("0doc1", "0")
-                        +checkboxMixin("1doc1", "1")
-                        +checkboxMixin("2doc1", "2")
-                        +checkboxMixin("3+doc1", "3+")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["0doc1"]=="on", "0doc1", "0")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["1doc1"]=="on", "1doc1", "1")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["2doc1"]=="on", "2doc1", "2")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["3+doc1"]=="on", "3+doc1", "3+")
                     +textBoxMixin("publicationYear", "publication year")
 
                     div.bigLabel Specific Program or Document 2
                     +textBoxMixin("documentTitle2", "Title")
                     +textBoxMixin("documentWeblink2", "Weblink")
                     Div(style="display:flex;") How many documents need to be uploaded?
-                        +checkboxMixin("0doc2", "0")
-                        +checkboxMixin("1doc2", "1")
-                        +checkboxMixin("2doc2", "2")
-                        +checkboxMixin("3+doc2", "3+")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["0doc2"]=="on", "0doc2", "0")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["1doc2"]=="on", "1doc2", "1")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["2doc2"]=="on", "2doc2", "2")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["3+doc2"]=="on", "3+doc2", "3+")
                     +textBoxMixin("publicationYear", "publication year")
 
                     div.bigLabel Specific Program or Document 3
                     +textBoxMixin("documentTitle3", "Title")
                     +textBoxMixin("documentWeblink3", "Weblink")
                     Div(style="display:flex;") How many documents need to be uploaded?
-                        +checkboxMixin("0doc3", "0")
-                        +checkboxMixin("1doc3", "1")
-                        +checkboxMixin("2doc3", "2")
-                        +checkboxMixin("3+doc3", "3+")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["0doc3"]=="on", "0doc3", "0")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["1doc3"]=="on", "1doc3", "1")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["2doc3"]=="on", "2doc3", "2")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["3+doc3"]=="on", "3+doc3", "3+")
                     +textBoxMixin("publicationYear", "publication year")
 
                 div.input.border
@@ -151,143 +159,143 @@ html
                             //div(style="display:inline; margin-left:5px;")
                             //    input(type="checkbox", name="all").checkbox
                             //    span.label CHECK ALL
-                        +checkboxMixin("streams", "streams")
-                        +checkboxMixin("delta", "river delta")
-                        +checkboxMixin("oceans", "oceans")
-                        +checkboxMixin("lakes", "lakes")
-                        +checkboxMixin("wetlands", "wetlands")
-                        +checkboxMixin("desert", "desert")
-                        +checkboxMixin("forest", "forest")
-                        +checkboxMixin("grassland", "savannah")
-                        +checkboxMixin("steppe", "steppe/montane")
-                        +checkboxMixin("tundra", "tundra/polar")
-                        +checkboxMixin("shrubland", "shrubland")
-                        +checkboxMixin("intertidal", "intertidal/beach")
-                        +checkboxMixin("rooftop", "rooftop/vertical")
-                        +checkboxMixin("rocky", "rocky")
-                        +checkboxMixin("cave", "cave/underground")
-                        +checkboxMixin("lawns", "lawns and gardens")
-                        +checkboxMixin("cropFields", "crop fields")
-                        +checkboxMixin("microbial", "microbial")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).streams=="on", "streams", "streams")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).delta=="on", "delta", "river delta")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).oceans=="on", "oceans", "oceans")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).lakes=="on", "lakes", "lakes")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).wetlands=="on", "wetlands", "wetlands")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).desert=="on", "desert", "desert")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).forest=="on", "forest", "forest")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).grassland=="on", "grassland", "savannah")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).steppe=="on", "steppe", "steppe/montane")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).tundra=="on", "tundra", "tundra/polar")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).shrubland=="on", "shrubland", "shrubland")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).intertidal=="on", "intertidal", "intertidal/beach")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).rooftop=="on", "rooftop", "rooftop/vertical")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).rocky=="on", "rocky", "rocky")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).cave=="on", "cave", "cave/underground")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).lawns=="on", "lawns", "lawns and gardens")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).cropFields=="on", "cropFields", "crop fields")
+                        +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).microbial=="on", "microbial", "microbial")
                         +checkBoxWithTextBoxMixin("other", "other", "otherEcosystems")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Governance
                             div(style="display:flex; flex-wrap:wrap; justify-content:space-between; padding:10px;")
-                                +checkboxMixin("policy", "policy")
-                                +checkboxMixin("index", "index")
-                                +checkboxMixin("regulation", "regulation")
-                                +checkboxMixin("spatialPlanning", "spatial planning")
-                                +checkboxMixin("developmentPartnerships", "development partnerships")
-                                +checkboxMixin("mainstreaming", "mainstreaming")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).policy=="on", "policy", "policy")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).index=="on", "index", "index")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).regulation=="on", "regulation", "regulation")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).spatialPlanning=="on", "spatialPlanning", "spatial planning")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).developmentPartnerships=="on", "developmentPartnerships", "development partnerships")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).mainstreaming=="on", "mainstreaming", "mainstreaming")
                                 +checkBoxWithTextBoxMixin("other", "other", "otherGovernance")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Consumption
                             div(style="display:flex; flex-wrap:wrap; justify-content:space-between; padding:10px;")
-                                +checkboxMixin("footprintMeasurement", "footprint measurement")
-                                +checkboxMixin("sustainablePurchasing", "sustainable purchasing")
-                                +checkboxMixin("shareholderActivism", "shareholder activism")
-                                +checkboxMixin("urbanAgriculture", "urban agriculture")
-                                +checkboxMixin("foraging", "foraging")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).footprintMeasurement=="on", "footprintMeasurement", "footprint measurement")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).sustainablePurchasing=="on", "sustainablePurchasing", "sustainable purchasing")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).shareholderActivism=="on", "shareholderActivism", "shareholder activism")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).urbanAgriculture=="on", "urbanAgriculture", "urban agriculture")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).foraging=="on", "foraging", "foraging")
                                 +checkBoxWithTextBoxMixin("other", "other", "otherConsumption")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Education
                             div(style="display:flex; flex-wrap:wrap; justify-content:space-between; padding:10px;")
-                                +checkboxMixin("schoolPrograms", "school programs")
-                                +checkboxMixin("events", "events")
-                                +checkboxMixin("facilities", "facilities")
-                                +checkboxMixin("behavioralPrograms", "behavioral programs")
-                                +checkboxMixin("liveCameras", "live cameras")
-                                +checkboxMixin("promotions", "promotions")
-                                +checkboxMixin("publicParticipation", "public participation")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).schoolPrograms=="on", "schoolPrograms", "school programs")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).events=="on", "events", "events")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).facilities=="on", "facilities", "facilities")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).behavioralPrograms=="on", "behavioralPrograms", "behavioral programs")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).liveCameras=="on", "liveCameras", "live cameras")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).promotions=="on", "promotions", "promotions")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).publicParticipation=="on", "publicParticipation", "public participation")
                                 +checkBoxWithTextBoxMixin("other", "other", "otherEducation")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Species Management
                             div(style="display:flex; flex-wrap:wrap; justify-content:space-between; padding:10px;")
-                                +checkboxMixin("endangeredSpecies", "endangered species")
-                                +checkboxMixin("invasiveSpecies", "invasive species")
-                                +checkboxMixin("marine", "marine")
-                                +checkboxMixin("invertebrates", "invertebrates")
-                                +checkboxMixin("birds", "avian/birds")
-                                +checkboxMixin("landMammals", "land mammals")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).endangeredSpecies=="on", "endangeredSpecies", "endangered species")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).invasiveSpecies=="on", "invasiveSpecies", "invasive species")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).marine=="on", "marine", "marine")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).invertebrates=="on", "invertebrates", "invertebrates")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).birds=="on", "birds", "avian/birds")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).landMammals=="on", "landMammals", "land mammals")
                                 +checkBoxWithTextBoxMixin("other", "other", "otherSpeciesManagement")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Habitat Management
                             div(style="display:flex; flex-wrap:wrap; justify-content:space-between; padding:10px;")
-                                +checkboxMixin("connectivity", "connectivity")
-                                +checkboxMixin("vegetation", "vegetation")
-                                +checkboxMixin("restoration", "restoration")
-                                +checkboxMixin("designation", "designation")
-                                +checkboxMixin("management", "management")
-                                +checkboxMixin("prioritization", "prioritization")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).connectivity=="on", "connectivity", "connectivity")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).vegetation=="on", "vegetation", "vegetation")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).restoration=="on", "restoration", "restoration")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).designation=="on", "designation", "designation")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).management=="on", "management", "management")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).prioritization=="on", "prioritization", "prioritization")
                                 +checkBoxWithTextBoxMixin("other", "other", "otherHabitatManagement")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Other Research
                             div(style="display:flex; flex-wrap:wrap; justify-content:space-between; padding:10px;")
-                                +checkboxMixin("bioblitz", "bioblitz")
-                                +checkboxMixin("mapping", "mapping")
-                                +checkboxMixin("universityPrograms", "university programs")
-                                +checkboxMixin("conferences", "conferences")
-                                +checkboxMixin("citizenScience", "citizen science")
-                                +checkboxMixin("remoteSensing", "remote sensing")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).bioblitz=="on", "bioblitz", "bioblitz")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).mapping=="on", "mapping", "mapping")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).universityPrograms=="on", "universityPrograms", "university programs")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).conferences=="on", "conferences", "conferences")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).citizenScience=="on", "citizenScience", "citizen science")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).remoteSensing=="on", "remoteSensing", "remote sensing")
                                 +checkBoxWithTextBoxMixin("other", "other", "otherResearch")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Ecosystem Services
                             div(style="display:flex; flex-wrap:wrap; justify-content:space-between; padding:10px;")
-                                +checkboxMixin("Food", "Food")
-                                +checkboxMixin("rawMaterials", "Raw Materials")
-                                +checkboxMixin("freshWater", "Fresh Water")
-                                +checkboxMixin("medicinalResources", "Medicinal Resources")
-                                +checkboxMixin("localClimate", "Local climate and air quality")
-                                +checkboxMixin("carbonSequestration", "Carbon sequestration and storage")
-                                +checkboxMixin("moderation", "Moderation of extreme events")
-                                +checkboxMixin("wasteWaterTreatment", "Waste-water treatment")
-                                +checkboxMixin("erosionPrevention", "Erosion prevention and maintenance of soil fertility")
-                                +checkboxMixin("pollination", "Pollination")
-                                +checkboxMixin("biologicalControl", "Biological control")
-                                +checkboxMixin("habitatServices", "Habitat or supporting services")
-                                +checkboxMixin("habitatSpecies", "Habitats for species")
-                                +checkboxMixin("maintenance", "Maintenance of genetic diversity")
-                                +checkboxMixin("recreation", "Recreation and mental and physical health")
-                                +checkboxMixin("tourism", "Tourism")
-                                +checkboxMixin("aesthetic", "Aesthetic appreciation and inspiration for culture, art and design")
-                                +checkboxMixin("spiritual", "Spiritual experience and sense of place")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).Food=="on", "Food", "Food")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).rawMaterials=="on", "rawMaterials", "Raw Materials")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).freshWater=="on", "freshWater", "Fresh Water")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).medicinalResources=="on", "medicinalResources", "Medicinal Resources")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).localClimate=="on", "localClimate", "Local climate and air quality")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).carbonSequestration=="on", "carbonSequestration", "Carbon sequestration and storage")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).moderation=="on", "moderation", "Moderation of extreme events")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).wasteWaterTreatment=="on", "wasteWaterTreatment", "Waste-water treatment")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).erosionPrevention=="on", "erosionPrevention", "Erosion prevention and maintenance of soil fertility")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).pollination=="on", "pollination", "Pollination")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).biologicalControl=="on", "biologicalControl", "Biological control")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).habitatServices=="on", "habitatServices", "Habitat or supporting services")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).habitatSpecies=="on", "habitatSpecies", "Habitats for species")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).maintenance=="on", "maintenance", "Maintenance of genetic diversity")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).recreation=="on", "recreation", "Recreation and mental and physical health")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).tourism=="on", "tourism", "Tourism")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).aesthetic=="on", "aesthetic", "Aesthetic appreciation and inspiration for culture, art and design")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).spiritual=="on", "spiritual", "Spiritual experience and sense of place")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Sustainable Development Goals
                             div(style="display:flex; flex-wrap:wrap; justify-content:space-between; padding:10px;")
-                                +checkboxMixin("1", "1: No Poverty")
-                                +checkboxMixin("2", "2: Zero Hunger")
-                                +checkboxMixin("3", "3: Good Health and Well-being")
-                                +checkboxMixin("4", "4: Quality Education")
-                                +checkboxMixin("5", "5: Gender Equality")
-                                +checkboxMixin("6", "6: Clean Water and Sanitation")
-                                +checkboxMixin("7", "7: Affordable and Clean Energy")
-                                +checkboxMixin("8", "8: Decent Work and Economic Growth")
-                                +checkboxMixin("9", "9: Industry, Innovation and Infrastructure")
-                                +checkboxMixin("10", "10: Reduced Inequalities")
-                                +checkboxMixin("11", "11: Sustainable Cities and Communities")
-                                +checkboxMixin("12", "12: Responsible Consumption and Production")
-                                +checkboxMixin("13", "13: Climate Action")
-                                +checkboxMixin("14", "14: Life Below Water")
-                                +checkboxMixin("15", "15: Life on Land")
-                                +checkboxMixin("16", "16: Peace, Justice and Strong Institutions")
-                                +checkboxMixin("17", "17: Partnerships for the Goals")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["1"]=="on", "1", "1: No Poverty")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["2"]=="on", "2", "2: Zero Hunger")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["3"]=="on", "3", "3: Good Health and Well-being")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["4"]=="on", "4", "4: Quality Education")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["5"]=="on", "5", "5: Gender Equality")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["6"]=="on", "6", "6: Clean Water and Sanitation")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["7"]=="on", "7", "7: Affordable and Clean Energy")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["8"]=="on", "8", "8: Decent Work and Economic Growth")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["9"]=="on", "9", "9: Industry, Innovation and Infrastructure")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["10"]=="on", "10", "10: Reduced Inequalities")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["11"]=="on", "11", "11: Sustainable Cities and Communities")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["12"]=="on", "12", "12: Responsible Consumption and Production")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["13"]=="on", "13", "13: Climate Action")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["14"]=="on", "14", "14: Life Below Water")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["15"]=="on", "15", "15: Life on Land")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["16"]=="on", "16", "16: Peace, Justice and Strong Institutions")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["17"]=="on", "17", "17: Partnerships for the Goals")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Parties Involved
                             div(style="display:flex; flex-wrap:wrap; justify-content:space-between; padding:10px;")
-                                +checkboxMixin("localCommunity", "Local Community")
-                                +checkboxMixin("ngo", "NGO")
-                                +checkboxMixin("business", "Business")
-                                +checkboxMixin("academia", "Academia")
-                                +checkboxMixin("localGov", "Local Government")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).localCommunity=="on", "localCommunity", "Local Community")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).ngo=="on", "ngo", "NGO")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).business=="on", "business", "Business")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).academia=="on", "academia", "Academia")
+                                +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).localGov=="on", "localGov", "Local Government")
                                 +checkBoxWithTextBoxMixin("other", "other", "otherPartiesInvolved")
                     div.input
                         div(style="display:none")
