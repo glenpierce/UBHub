@@ -16,7 +16,7 @@ router.get('/', function(req, res, next) {
 router.post('/', function(req, res, next) {
     userEmail = "";
     if(req.body.email){
-        if(req.body.email.toString() === req.body["verify-email"].toString()){
+        if(req.body.email.toString() === req.body['verify-email'].toString()){
             userEmail = req.body.email.toString();
             addEmailToList(userEmail);
         }
