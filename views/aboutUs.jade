@@ -1,10 +1,29 @@
 doctype html
 html
     head
-        link(rel='stylesheet', href='/stylesheets/cbiindicators.css')
+        link(rel='stylesheet', href='/stylesheets/aboutus.css')
         //script(src='https://www.google.com/recaptcha/api.js')
+        
+        //- link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css')
 
-body(style="font-family:helvetica; background-color:#daecf1;")
+        link(rel='stylesheet' href='/assets/stylesheets/index.css')
+
+        <!-- Latest compiled and minified CSS -->
+        //- link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' integrity='sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u' crossorigin='anonymous')
+
+        <!-- Optional theme -->
+        //- <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css' integrity='sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp' crossorigin='anonymous'>
+
+        <!-- Latest compiled and minified JavaScript -->
+        //- <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js' integrity='sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa' crossorigin='anonymous'></script>
+
+        <!-- jQuery -->
+        //- script. src='https://code.jquery.com/jquery-3.2.1.min.js' integrity='sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=' crossorigin='anonymous'
+
+        <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> -->
+
+
+body(style="font-family:helvetica; background-color:#FFFFFF;")
     block content
 
     script.
@@ -29,10 +48,42 @@ body(style="font-family:helvetica; background-color:#daecf1;")
           window.location = res;
         }
 
-    h1(style="text-align:center;") Welcome to the City Biodiversity Indicators Coalition
+    //- h1(style="text-align:center;") Welcome to the City Biodiversity Indicators Coalition
         
     div(style="display:flex; align-items:center; width:100%; padding-bottom:20px;")
         script.
             function submitForm() {
                 document.getElementById("emailForm").reset();
             }
+
+    div(style="border-bottom:solid; display:flex; justify-content:space-between; margin-bottom:20px;")
+                img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
+                div
+                    div(style="display:flex;")
+                        div(style="margin:20px; cursor:pointer;") About CBI
+                        div(style="margin:20px; cursor:pointer;") Resources
+                        div(style="margin:20px; cursor:pointer;" onclick="window.location='/aboutUs'") About Us
+                        div(style="margin:20px; cursor:pointer;") Search
+                    div(style="float:right;") You are logged in as #{username}
+                    div(style="clear:right; float:right; text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
+
+
+    div(class="container-fluid")
+        div(class="row")
+            div(class="col-md-12")
+                img(src="images/Brochure_op4.png" alt="Jane Doe" style="width:100%" class="w3-hover-opacity")
+          
+                div(class="row")
+                    //- p(class="col-xs-0 fa fa-heart pull-left")
+                    //- p(class="col-xs-8 text-left">456)
+                    //- p(class="col-xs-0 fa fa-bookmark pull-right")
+                    //- <p>Measuring Urban Biodiversity</p>
+
+
+                
+    script.
+        function logOut(){
+            document.cookie = 'session' + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+            console.log("logout");
+            location.reload(true);
+        }
