@@ -30,6 +30,15 @@ html
                 span.label #{label}
                 input(type="text", name="#{value}", style="margin-left:5px; width:50%;").inline
 
+        mixin checkBoxWithTextBoxWithValueMixin(value, label, textBoxValue, checked, textBoxContents)
+            div.inline
+                if checked
+                    input(checked, type="checkbox", name="#{value}").checkbox
+                else
+                    input(type="checkbox", name="#{value}").checkbox
+                span.label #{label}
+                input(type="text", name="#{value}", style="margin-left:5px; width:50%;").inline= textBoxContents
+
         mixin textBoxMixin(name, label)
             div(style="display:flex; width:100%;")
                 span.label #{label}
@@ -115,41 +124,42 @@ html
                     div(style="font-size:10px;").fullLine Indicate the organization behind this item, if applicable and not already given in the title. Ex: GBIF Secretariat, UNESCO
                     div(style="width=100%; display:flex;")
                         span.label Description
-                        textarea(name="description", cols="40", rows="5").select JSON.parse(fromServer.myJson).description)
+                        - var descriptionText = JSON.parse(fromServer.myJson).description;
+                        textarea(name="description", cols="40", rows="5").select= descriptionText
                     div(style="font-size:10px;").fullLine Provide a short description.  You may include keywords here. Ex: Municipal biodiversity programs; Index on urban resilience including a chapter on biodiversity.
                     +textBoxMixin("location", "Location")
                     div(style="font-size:10px; padding-bottom:20px;").fullLine Type in the location as you would into Google Maps, including the country.  Only use "regular" ASCII letters - no accents or other such extras (such as you would put in a url web address).  NO: ü ç ñ é î etc.  If you use these, the computer will not be able to process the location.
                     div(style="font-size:10px;").fullLine In the blue box below, you may indicate up to 3 specific programs, files, tools, etc. that are a part of this overall entry.  For example, you can indicate the various biodiversity guidelines found on the ICLEI Canada website.  Or, you can put in the various biodiversity plan/reports of a city.  If there are pdfs or other documents, please indicate their titles and publication year and provide a link so we can upload them later.
                 div(style="width:100%; margin-bottom:5px; padding:5px; background-color:#daecf1;").border
                     div.bigLabel Specific Program or Document 1
-                    +textBoxMixin("documentTitle1", "Title")
-                    +textBoxMixin("documentWeblink1", "Weblink")
+                    +textBoxMixinWithValue("documentTitle1", "Title", JSON.parse(fromServer.myJson).documentTitle1)
+                    +textBoxMixinWithValue("documentWeblink1", "Weblink", JSON.parse(fromServer.myJson).documentWeblink1)
                     Div(style="display:flex;") How many documents need to be uploaded?
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["0doc1"]=="on", "0doc1", "0")
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["1doc1"]=="on", "1doc1", "1")
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["2doc1"]=="on", "2doc1", "2")
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["3+doc1"]=="on", "3+doc1", "3+")
-                    +textBoxMixin("publicationYear", "publication year")
+                    +textBoxMixinWithValue("publicationYear1", "publication year", JSON.parse(fromServer.myJson).publicationYear1)
 
                     div.bigLabel Specific Program or Document 2
-                    +textBoxMixin("documentTitle2", "Title")
-                    +textBoxMixin("documentWeblink2", "Weblink")
+                    +textBoxMixinWithValue("documentTitle2", "Title", JSON.parse(fromServer.myJson).documentTitle2)
+                    +textBoxMixinWithValue("documentWeblink2", "Weblink", JSON.parse(fromServer.myJson).documentWeblink2)
                     Div(style="display:flex;") How many documents need to be uploaded?
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["0doc2"]=="on", "0doc2", "0")
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["1doc2"]=="on", "1doc2", "1")
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["2doc2"]=="on", "2doc2", "2")
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["3+doc2"]=="on", "3+doc2", "3+")
-                    +textBoxMixin("publicationYear", "publication year")
+                    +textBoxMixinWithValue("publicationYear2", "publication year", JSON.parse(fromServer.myJson).publicationYear2)
 
                     div.bigLabel Specific Program or Document 3
-                    +textBoxMixin("documentTitle3", "Title")
-                    +textBoxMixin("documentWeblink3", "Weblink")
+                    +textBoxMixinWithValue("documentTitle3", "Title", JSON.parse(fromServer.myJson).documentTitle3)
+                    +textBoxMixinWithValue("documentWeblink3", "Weblink", JSON.parse(fromServer.myJson).documentWeblink3)
                     Div(style="display:flex;") How many documents need to be uploaded?
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["0doc3"]=="on", "0doc3", "0")
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["1doc3"]=="on", "1doc3", "1")
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["2doc3"]=="on", "2doc3", "2")
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson)["3+doc3"]=="on", "3+doc3", "3+")
-                    +textBoxMixin("publicationYear", "publication year")
+                    +textBoxMixinWithValue("publicationYear3", "publication year", JSON.parse(fromServer.myJson).publicationYear3)
 
                 div.input.border
                     div(style="margin:5px;").label Please select a few relevant keywords or tags below.
@@ -177,7 +187,7 @@ html
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).lawns=="on", "lawns", "lawns and gardens")
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).cropFields=="on", "cropFields", "crop fields")
                         +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).microbial=="on", "microbial", "microbial")
-                        +checkBoxWithTextBoxMixin("other", "other", "otherEcosystems")
+                        +checkBoxWithTextBoxWithValueMixin("other", "other", "otherEcosystems")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Governance
@@ -188,7 +198,7 @@ html
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).spatialPlanning=="on", "spatialPlanning", "spatial planning")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).developmentPartnerships=="on", "developmentPartnerships", "development partnerships")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).mainstreaming=="on", "mainstreaming", "mainstreaming")
-                                +checkBoxWithTextBoxMixin("other", "other", "otherGovernance")
+                                +checkBoxWithTextBoxWithValueMixin("other", "other", "otherGovernance")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Consumption
@@ -198,7 +208,7 @@ html
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).shareholderActivism=="on", "shareholderActivism", "shareholder activism")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).urbanAgriculture=="on", "urbanAgriculture", "urban agriculture")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).foraging=="on", "foraging", "foraging")
-                                +checkBoxWithTextBoxMixin("other", "other", "otherConsumption")
+                                +checkBoxWithTextBoxWithValueMixin("other", "other", "otherConsumption")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Education
@@ -210,7 +220,7 @@ html
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).liveCameras=="on", "liveCameras", "live cameras")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).promotions=="on", "promotions", "promotions")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).publicParticipation=="on", "publicParticipation", "public participation")
-                                +checkBoxWithTextBoxMixin("other", "other", "otherEducation")
+                                +checkBoxWithTextBoxWithValueMixin("other", "other", "otherEducation")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Species Management
@@ -221,7 +231,7 @@ html
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).invertebrates=="on", "invertebrates", "invertebrates")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).birds=="on", "birds", "avian/birds")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).landMammals=="on", "landMammals", "land mammals")
-                                +checkBoxWithTextBoxMixin("other", "other", "otherSpeciesManagement")
+                                +checkBoxWithTextBoxWithValueMixin("other", "other", "otherSpeciesManagement")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Habitat Management
@@ -232,7 +242,7 @@ html
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).designation=="on", "designation", "designation")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).management=="on", "management", "management")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).prioritization=="on", "prioritization", "prioritization")
-                                +checkBoxWithTextBoxMixin("other", "other", "otherHabitatManagement")
+                                +checkBoxWithTextBoxWithValueMixin("other", "other", "otherHabitatManagement")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Other Research
@@ -243,7 +253,7 @@ html
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).conferences=="on", "conferences", "conferences")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).citizenScience=="on", "citizenScience", "citizen science")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).remoteSensing=="on", "remoteSensing", "remote sensing")
-                                +checkBoxWithTextBoxMixin("other", "other", "otherResearch")
+                                +checkBoxWithTextBoxWithValueMixin("other", "other", "otherResearch")
                     div.input
                         div(style="background-color:#d8ecd4; margin:5px;")
                             div.bigLabel Ecosystem Services
@@ -296,7 +306,7 @@ html
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).business=="on", "business", "Business")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).academia=="on", "academia", "Academia")
                                 +checkboxWithExistingValueMixin(JSON.parse(fromServer.myJson).localGov=="on", "localGov", "Local Government")
-                                +checkBoxWithTextBoxMixin("other", "other", "otherPartiesInvolved")
+                                +checkBoxWithTextBoxWithValueMixin("other", "other", "otherPartiesInvolved")
                     div.input
                         div(style="display:none")
                             +textBoxMixinWithValue("id", "Id", fromServer.id)
