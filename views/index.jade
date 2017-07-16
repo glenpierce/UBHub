@@ -80,5 +80,13 @@ body(style="font-family:helvetica; background-color:#daecf1;")
 
     script.
         function submitForm() {
-
+            var formElements = document.getElementById("emailForm").elements;
+            var postData = {};
+            for (var i = 0; i < formElements.length; i++)
+                if (formElements[i].type != "submit")//we dont want to include the submit-buttom
+                    postData[formElements[i].name] = formElements[i].value;
+            if(postData.email === postData["verify-email"] && postData.email.toString().length > 0)
+                window.alert("Thank you " + postData.nameFirst);
+            else
+                window.alert("It seems that something is missing, Email and Verify Email should contain your email address and should match.")
         }

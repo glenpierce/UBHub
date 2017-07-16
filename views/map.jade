@@ -60,24 +60,43 @@ body
 
         div(id="map" style="height:400px; width:100%; max-width:800px; padding-bottom:20px;")
 
-        div(onclick="resetFilter()").border Reset!
-        div(style="display:flex; flex-wrap:wrap;").filters
-            select(style="flex-grow:1; margin: 5px;" onchange="filter(this.value, 'country')").border
-                option(value="none").option
-                option(value="England").option England
-                option(value="India").option India
-            +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
-            div(style="padding:5px; margin: 5px;" onclick="filterNotNull('Biophilic_cities')").border Biophilic Cities
-            div(style="padding:5px; margin: 5px;" onclick="filterNotNull('IUCN_protected_area')").border IUCN Protected Area
-            div(style="padding:5px; margin: 5px;" onclick="filterNotNull('MAB_urban')").border Man and the Biosphere
-            div(style="padding:5px; margin: 5px;" onclick="filterNotNull('SI_status')").border Singapore Index
-            div(style="padding:5px; margin: 5px;" onclick="filterNotNull('EF_year')").border Ecofootprint
-            div(style="padding:5px; margin: 5px;" onclick="filterArrayNotNull('LAB_CEPA', 'LAB_URBIS', 'LAB_joined', 'LAB_wetlands')").border LAB Participation
-            div(style="padding:5px; margin: 5px;" onclick="filterNotNull('Durban_commitment')").border Durban Commitment
-            div(style="padding:5px; margin: 5px;" onclick="filterNotNull('European_Green_Capital_award')").border European Green Capital Award
-            div(style="padding:5px; margin: 5px;" onclick="filterNotNull('European_capital_biodiversity')").border European Capital Biodiversity
-            div(style="padding:5px; margin: 5px;" onclick="filterNotNull('report_title')").border Biodiversity Report
-            div(style="padding:5px; margin: 5px;" onclick="filterNotNull('intplan_title')").border Biodiversity in a More General Plan
+        div(style="margin-top:10px; width:100%; max-width:790px; background-color:#326f90; padding:5px; display:flex; justify-content:space-between;")
+            div(onclick="tipDown(this)" style="color:white; font-style:italic; font-weight:700; cursor:pointer;") Show/hide filter settings
+            div(style="display:flex;")
+                div(onclick="resetFilter()" style="background-color:white; border-radius:5px; color:#326f90; padding-left:5px; padding-right:5px;") RESET FILTERS
+                img(src="/images/arrow-right3.svg" style="transform:rotate(180deg); transform-origin:center; height:13px;")
+        +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+
+        div(style="margin-top:10px; width:100%; max-width:790px; background-color:#c58c2b; padding:5px; display:flex; justify-content:space-between;")
+            div(onclick="tipDown(this)" style="color:white; font-style:italic; font-weight:700; cursor:pointer;") Show/hide highlight settings
+            div(style="display:flex;")
+                img(src="/images/arrow-right3.svg" style="transform:rotate(180deg); transform-origin:center; height:13px;")
+
+        div(style="margin-top:10px; width:100%; max-width:790px; background-color:#bbbbbb; padding:5px; display:flex; justify-content:space-between;")
+            div(onclick="tipDown(this)" style="color:white; font-style:italic; font-weight:700; cursor:pointer;") Show/hide results settings
+            div(style="display:flex;")
+                img(src="/images/arrow-right3.svg" style="transform:rotate(180deg); transform-origin:center; height:13px;")
+
+        div(style="margin-top:10px; width:100%; max-width:790px; background-color:#269973; padding:5px; display:flex; justify-content:space-between;")
+            div(onclick="tipDown(this)" style="color:white; font-style:italic; font-weight:700; cursor:pointer;") Show/hide table of results
+            div(style="display:flex;")
+                img(src="/images/arrow-right3.svg" style="transform:rotate(180deg); transform-origin:center; height:13px;")
+        //div(style="display:flex; flex-wrap:wrap;").filters
+        //    select(style="flex-grow:1; margin: 5px;" onchange="filter(this.value, 'country')").border
+        //        option(value="none").option
+        //        option(value="England").option England
+        //        option(value="India").option India
+        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('Biophilic_cities')").border Biophilic Cities
+        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('IUCN_protected_area')").border IUCN Protected Area
+        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('MAB_urban')").border Man and the Biosphere
+        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('SI_status')").border Singapore Index
+        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('EF_year')").border Ecofootprint
+        //    div(style="padding:5px; margin: 5px;" onclick="filterArrayNotNull('LAB_CEPA', 'LAB_URBIS', 'LAB_joined', 'LAB_wetlands')").border LAB Participation
+        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('Durban_commitment')").border Durban Commitment
+        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('European_Green_Capital_award')").border European Green Capital Award
+        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('European_capital_biodiversity')").border European Capital Biodiversity
+        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('report_title')").border Biodiversity Report
+        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('intplan_title')").border Biodiversity in a More General Plan
 
 
         //div.bigLabel Overall Program or Institution
@@ -425,6 +444,10 @@ script.
     }
     function submitForm(){
         console.log("form submitted!");
+    }
+
+    function tipDown(parent){
+
     }
     //    function filterRange(range, filterBy) {
     //        markers.forEach(function (marker) {
