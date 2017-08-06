@@ -19,3 +19,42 @@ mixin header(displayLoginInfo)
             -if(displayLoginInfo)
                 div(style="float:right;") You are logged in as #{username}
                 div(style="clear:right; float:right; text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
+
+mixin footer()
+    div(style="display:flex; justify-content:space-between;")
+        div
+            img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
+            div(style="width:200px;") The City Biodiversity Indicators (CBI) Coalition helps cities around the world to measure and promote their biodiversity and assess their biodiversity strategy.
+        div
+            div About CBI
+            div CBI Toolkit
+            div Resources
+            div About Us
+            div Pricing / Fees
+            div FAQs
+            div Sitemap
+        div
+            div Contact us
+            div info@cbicoalition.org
+            a(class="twitter-follow-button" href="https://twitter.com/cbicoalition") Follow @cbicoalition
+        div
+            div copyright info
+
+script.
+    window.twttr = (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+        if (d.getElementById(id))
+        return t;
+    js = d.createElement(s);
+        js.id = id;
+        js.src = "https://platform.twitter.com/widgets.js";
+        fjs.parentNode.insertBefore(js, fjs);
+
+        t._e = [];
+        t.ready = function(f) {
+            t._e.push(f);
+    };
+
+    return t;
+    }(document, "script", "twitter-wjs"));

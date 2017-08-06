@@ -201,4 +201,8 @@ router.get('/', function(req, res, next) {
     res.render('indicators',{userName: req.session.user, cityIndicators:cityIndicators});
 });
 
+router.post('/', function(req, res){
+    console.log(req);
+});
+
 module.exports = router;

@@ -9,10 +9,10 @@ html
                 var scrollPositionNativeBio = document.getElementsByClassName("nativeBiodiversity")[1].offsetTop - document.getElementsByClassName("nativeBiodiversity")[1].offsetHeight - 31;
                 var scrollPositionEcoSystem = document.getElementsByClassName("ecosystemServices")[1].offsetTop - document.getElementsByClassName("ecosystemServices")[1].offsetHeight - 31;
                 var scrollPositionGovManage = document.getElementsByClassName("govManagement")[1].offsetTop - document.getElementsByClassName("govManagement")[1].offsetHeight - 31;
-                console.log("scrollPosition= " + scrollPosition);
-                console.log("scrollPositionNativeBio= " + scrollPositionNativeBio);
-                console.log("scrollPositionEcoSystem= " + scrollPositionEcoSystem);
-                console.log("scrollPositionGovManage= " + scrollPositionGovManage);
+                //console.log("scrollPosition= " + scrollPosition);
+                //console.log("scrollPositionNativeBio= " + scrollPositionNativeBio);
+                //console.log("scrollPositionEcoSystem= " + scrollPositionEcoSystem);
+                //console.log("scrollPositionGovManage= " + scrollPositionGovManage);
 
 
                 if(scrollPosition <= scrollPositionEcoSystem){
@@ -55,7 +55,7 @@ html
                 document.getElementsByClassName("scrollPanel")[0].scrollTop = position.scrollTop;
             }
 
-mixin indicator(category, number, title, calculation, value)
+mixin indicator(category, number, title, calculation, value, userInput1)
 
     -var backgroundColor;
     -var foregroundColor;
@@ -82,13 +82,13 @@ mixin indicator(category, number, title, calculation, value)
                     div(style="text-align:center; font-weight:bold;") i
                 div.dataEntryTitle #{title}
             .div(style="flex:1;")
-                    div.dataEntryLabel Value
+                    div.dataEntryLabel #{userInput1}
                     div.dataEntryLabel Data year
                     div.dataEntryLabel Notes
                 div.inputColumn
-                    div.inputField
-                    div.inputField
-                    div.inputFieldOptional(class = lightColor)
+                    input.inputField
+                    input.inputField
+                    textarea.inputFieldOptional(class = lightColor style="resize: none;")
                 .div(style="flex:1")
                     div.width100pct
                         div Calculation
@@ -121,7 +121,14 @@ body
         div.tabsBaseLine
 
         div.scrollPanel(style="margin:auto; height:300px; overflow-y: scroll; max-width:800px;" onscroll="scrollScript()")
-            - for indicator in cityIndicators.indicators
-                +indicator(indicator.category, indicator.number, indicator.title, indicator.calculation, 0)
+            form(name="indicatorsForm", method="post" onsubmit="submitForm()" autocomplete="off")
+                - for indicator in cityIndicators.indicators
+                    +indicator(indicator.category, indicator.number, indicator.title, indicator.calculation, 0, indicator.userInput1)
+                div.actions
+                    input(type="submit", value="submit")
 
         script window.onLoad=highlightNativeBio()
+        script.
+            function submitForm() {
+                console.log("form submitted!" + JSON.stringify(indicatorsForm.valueOf()));
+            }
