@@ -1,4 +1,5 @@
 doctype html
+include mixins
 html
     head
         link(rel='stylesheet', href='/stylesheets/aboutus.css')
@@ -56,16 +57,7 @@ body(style="font-family:helvetica; background-color:#FFFFFF;")
                 document.getElementById("emailForm").reset();
             }
 
-    div(style="border-bottom:solid; display:flex; justify-content:space-between; margin-bottom:20px;")
-                img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
-                div
-                    div(style="display:flex;")
-                        div(style="margin:20px; cursor:pointer;") About CBI
-                        div(style="margin:20px; cursor:pointer;") Resources
-                        div(style="margin:20px; cursor:pointer;" onclick="window.location='/aboutUs'") About Us
-                        div(style="margin:20px; cursor:pointer;") Search
-                    div(style="float:right;") You are logged in as #{username}
-                    div(style="clear:right; float:right; text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
+    +header(false)
 
 
     div(class="container-fluid")

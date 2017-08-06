@@ -1,0 +1,131 @@
+doctype html
+include mixins
+html
+    head
+        title Map
+        script(async, defer, src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&callback=initMap")
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+body
+
+    +header(true)
+
+    div(style="width=100%; text-align:center; margin-bottom:20px;")
+        div(style="") City Biodiversity Index
+        div CBI
+        div(style="background:grey; height:1px; width:50%; margin:auto; margin-top:10px; margin-bottom:10px;")
+        div(style="") The only quantitative measurement tool for Cities to self monitor their biodiversity
+
+    div(style="background:grey; height:1px; width:100%; margin:auto; margin-top:10px; margin-bottom:10px;")
+
+    div(style="margin:auto; text-align:center;") myCBI Portal
+
+    div(style="background:grey; height:1px; width:100%; margin:auto; margin-top:10px; margin-bottom:10px;")
+
+    div(style="max-width:800px; margin:auto;")
+        div(style="color:#4490ba; font-weight:bold; font-size:20px; text-align:center;") Join cities doing amazing things worldwide
+        div(id="map" style="height:400px; width:100%; max-width:800px; padding-bottom:20px;")
+
+    div(style="background:grey; height:1px; width:100%; margin:auto; margin-top:10px; margin-bottom:10px;")
+
+    div(style="margin:auto; text-align:center;") Are you...
+    div(style="display:flex; justify-content:space-around;")
+        div(style="border:solid; border-radius:5px; height:40px; width:100px; text-align:center; padding-top:10px;") Government Official
+        div(style="border:solid; border-radius:5px; height:40px; width:100px; text-align:center; padding-top:10px;") Citizen
+        div(style="border:solid; border-radius:5px; height:40px; width:100px; text-align:center; padding-top:10px;") Press
+    div(style="border:solid; border-radius:5px; height:70px; width:140px; text-align:center; padding-top:10px; margin:auto; margin-top:10px;") How you can help more cities measure their biodiversity efforts
+
+    div(style="background:grey; height:1px; width:100%; margin:auto; margin-top:10px; margin-bottom:10px;")
+
+    div The City Biodiversity Indicators (CBI) Coalition helps cities around the world to measure and promote their biodiversity and assess their biodiversity strategy.
+
+script.
+    var markers = [];
+    var yellowImage;
+    var greenImage;
+    var orangeImage;
+    function initMap() {
+        yellowImage = {
+            url: '/images/marker-yellow-det.png',
+            size: new google.maps.Size(14, 46),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(12, 46)
+        };
+        greenImage = {
+            url: '/images/marker-green-det.png',
+            size: new google.maps.Size(14, 46),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(12, 46)
+        };
+        orangeImage = {
+            url: '/images/marker-orange-det.png',
+            size: new google.maps.Size(14, 46),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(12, 46)
+        };
+        var mapData =!{mapData};
+        console.log(mapData);
+        center = {lat: 20, lng: 15};
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 2,
+            center: center,
+            styles: [{"elementType": "geometry","stylers": [{"color": "#1d2c4d"}]}, {"elementType": "labels.text.fill","stylers": [{"color": "#8ec3b9"}]},{"elementType": "labels.text.stroke","stylers": [ { "color": "#1a3646" } ]},{"featureType": "administrative","stylers": [{"visibility": "simplified"}]},{"featureType": "administrative","elementType": "geometry","stylers": [{"color": "#6ab285"}]},{"featureType": "administrative", "elementType": "geometry.stroke", "stylers": [ { "color": "#d7e9cd" }, { "visibility": "on" } ] }, { "featureType": "administrative", "elementType": "labels.text", "stylers": [ { "color": "#d6e9cd" } ] }, { "featureType": "landscape", "stylers": [ { "color": "#3d7761" } ] }, { "featureType": "landscape.man_made", "elementType": "geometry.stroke", "stylers": [ { "color": "#334e87" } ] }, { "featureType": "landscape.natural", "stylers": [ { "color": "#298f6a" } ] }, { "featureType": "poi", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi", "elementType": "geometry", "stylers": [ { "color": "#283d6a" } ] }, { "featureType": "poi", "elementType": "labels.text.fill", "stylers": [ { "color": "#6f9ba5" } ] }, { "featureType": "poi", "elementType": "labels.text.stroke", "stylers": [ { "color": "#1d2c4d" } ] }, { "featureType": "poi.park", "stylers": [ { "color": "#6ab285" }, { "visibility": "simplified" } ] }, { "featureType": "poi.park", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi.park", "elementType": "labels.icon", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road", "elementType": "geometry", "stylers": [ { "color": "#2d1b5a" } ] }, { "featureType": "road", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road", "elementType": "labels.text.fill", "stylers": [ { "color": "#98a5be" } ] }, { "featureType": "road", "elementType": "labels.text.stroke", "stylers": [ { "color": "#1d2c4d" } ] }, { "featureType": "road.arterial", "stylers": [ { "visibility": "simplified" } ] }, { "featureType": "road.arterial", "elementType": "geometry", "stylers": [ { "visibility": "simplified" } ] }, { "featureType": "road.arterial", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road.highway", "stylers": [ { "visibility": "simplified" } ] }, { "featureType": "road.highway", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road.highway", "elementType": "labels.text.fill", "stylers": [ { "color": "#b0d5ce" } ] }, { "featureType": "road.highway", "elementType": "labels.text.stroke", "stylers": [ { "color": "#023e58" } ] }, { "featureType": "transit", "stylers": [ { "color": "#00907d" } ] }, { "featureType": "transit", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "transit", "elementType": "labels.text.fill", "stylers": [ { "color": "#98a5be" } ] }, { "featureType": "transit", "elementType": "labels.text.stroke", "stylers": [ { "color": "#1d2c4d" } ] }, { "featureType": "water", "stylers": [ { "color": "#193c59" } ] }, { "featureType": "water", "elementType": "labels.text.fill", "stylers": [ { "color": "#4e6d70" } ] } ]});
+        mapData.forEach(function (element) {
+            if(element.lat){
+                var contentString =
+                    '<div id="content">' +
+                    '<div id="siteNotice">' +
+                    '</div>' +
+                    '<div style="font-weight:bold; font-size:20px;">' + element.title + '</div>' +
+                    '<div id="bodyContent">' +
+                    (element.scale  !== null ?  '<div">' + element.scale + '</div>' : "") +
+
+                    (element.biodiversity_url  !== null ?  '<div><a href="' + element.biodiversity_url + 'rel="noopener noreferrer" target="_blank"">Main link</a></div>' : "") +
+
+                    (element.intplan_title  !== null ?  '<p>' + (element.intplan_year !== null ? element.intplan_year : "") + ' ' + element.intplan_title + " " : "") +
+                    (element.intplan_url  !== null ?  '<a href="' + element.intplan_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
+
+                    (element.plan1_title !== null ? '<p>' + (element.plan1_year !== null ? element.plan1_year : "") + ' ' + element.plan1_title + " " : "") +
+                    (element.plan1_url !== null ? '<a href="' + element.plan1_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
+
+                    (element.plan2_title !== null ? '<p>' + (element.plan2_year !== null ? element.plan2_year : "") + ' ' + element.plan2_title + " " : "") +
+                    (element.plan2_url !== null ? '<a href="' + element.plan2_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
+
+                    (element.report_title !== null ? '<p>' + (element.report_year !== null ? element.report_year : "") + ' ' + element.report_title + " " : "") +
+                    (element.report_url !== null ? '<a href="' + element.report_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
+
+                    (element.extra1_title !== null ? '<p>' + element.extra1_title + ' ' : "") +
+                    (element.extra1_url !== null ? '<a href="' + element.extra1_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
+
+                    (element.extra2_title !== null ? '<p>' + element.extra2_title + ' ': "") +
+                    (element.extra2_url !== null && typeof extra2_url !== "undefined" ? '<a href="' + element.extra2_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
+
+                    (element.EF_data_ghapercap !== null ? '<p>' + (element.EF_year !== null ? element.EF_year : "") + ' Ecological Footprint ' + element.EF_data_ghapercap + "gha/cap " : "") +
+                    (element.EF_link !== null ? '<a href="' + element.EF_link + 'rel="noopener noreferrer" target="_blank"">source</a></p>' : "</p>") +
+
+
+                    '</div>' +
+                    '</div>';
+
+                var infowindow = new google.maps.InfoWindow({
+                    content: contentString
+                });
+
+                var position = {lat:element.lat, lng:element.lng};
+                var marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    animation: google.maps.Animation.DROP,
+                    title: element.name,
+                    icon: yellowImage, //'/images/marker-yellow-det.png',
+                    zIndex: 1
+                });
+                marker.element = element;
+
+                marker.addListener('click', function () {
+                    infowindow.open(map, marker);
+                });
+                markers.push(marker);
+            }
+        });
+    }

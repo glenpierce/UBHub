@@ -1,4 +1,5 @@
 doctype html
+include mixins
 html
     head
         title Edit Upload
@@ -58,16 +59,7 @@ html
                 console.log(JSON.parse(data.myJson).type);
             }
 
-        div(style="border-bottom:solid; display:flex; justify-content:space-between; margin-bottom:20px;")
-            img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
-            div
-                div(style="display:flex;")
-                    div(style="margin:20px; cursor:pointer;") About CBI
-                    div(style="margin:20px; cursor:pointer;") Resources
-                    div(style="margin:20px; cursor:pointer;" onclick="window.location='/aboutUs'") About Us
-                    div(style="margin:20px; cursor:pointer;") Search
-                div(style="float:right;") You are logged in as #{username}
-                div(style="clear:right; float:right; text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
+        +header(true)
 
         div(style="font-size:20px; font-weight:bold;") Edit Upload
         div(style="padding-bottom:20px;")

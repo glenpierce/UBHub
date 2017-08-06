@@ -30,13 +30,7 @@ body(style="font-family:helvetica; background-color:#daecf1;")
         }
 
     h1(style="text-align:center;") Welcome to the City Biodiversity Indicators Coalition
-        //div(style="border-bottom:solid; display:flex; justify-content:space-between;")
-        //    img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
-        //    div(style="display:flex;")
-        //        div(style="margin:20px; cursor:pointer;") About CBI
-        //        div(style="margin:20px; cursor:pointer;") Resources
-        //        div(style="margin:20px; cursor:pointer;" onclick="window.location='/aboutUs'") About Us
-        //        div(style="margin:20px; cursor:pointer;") Search
+
     div(style="display:flex; align-items:center; width:100%; padding-bottom:20px;")
         img(src="/images/CBI_Coalition_logo_web_main.png" style="margin:auto; height:400px;")
     div(style="text-align:center; padding-bottom:20px;") Thank you for your interest. This site is under construction.
@@ -88,5 +82,5 @@ body(style="font-family:helvetica; background-color:#daecf1;")
             if(postData.email === postData["verify-email"] && postData.email.toString().length > 0)
                 window.alert("Thank you " + postData.nameFirst);
             else
-                window.alert("It seems that something is missing, Email and Verify Email should contain your email address and should match.")
+                window.alert("Sorry, but it seems that something is missing. Please verify that the \"Email\" and \"Verify Email\" fields have a valid email address and match each other.")
         }

@@ -17,11 +17,13 @@ router.post('/', function(req, res, next) {
     userEmail = "";
     if(req.body.email){
         if(req.body.email.toString() === req.body['verify-email'].toString()){
-            userEmail = req.body.email.toString();
+            userEmail = JSON.stringify(req.body);
+            userEmail.replace("\"", " ");
+            console.log(userEmail);
             addEmailToList(userEmail);
+            res.render('index');
         }
     }
-    res.render('index');
 });
 
 function addEmailToList(email){

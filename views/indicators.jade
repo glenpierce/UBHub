@@ -1,4 +1,5 @@
 doctype html
+include mixins
 html
     head
         link(rel='stylesheet', href='/stylesheets/cbiindicators.css')
@@ -101,13 +102,7 @@ mixin indicator(category, number, title, calculation, value)
 
 body
     block content
-        div(style="border-bottom:solid; display:flex; justify-content:space-between;")
-            img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
-            div(style="display:flex;")
-                div(style="margin:20px; cursor:pointer;") About CBI
-                div(style="margin:20px;cursor:pointer;") Resources
-                div(style="margin:20px;cursor:pointer;" onclick="window.location='/aboutUs'") About Us
-                div(style="margin:20px;cursor:pointer;") Search
+        +header(true)
 
         .div(style="max-width:800px; margin:auto;")
             div(style="margin-top:10px;") home > myCBI Indicators

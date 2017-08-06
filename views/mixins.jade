@@ -1,0 +1,21 @@
+mixin textInShape(textValue, colorValue, percentFill, radius)
+    -percentNotFilled = 100 - percentFill;
+    -percentNotFilledPlus = percentNotFilled + 5;
+    div(style="height:100px; width:100px;")
+        div(style="height:100px; width:100px; position:absolute; border:solid; background:#{colorValue}; border-radius:#{radius};")
+        div(style="position:absolute; height:110px; width: #{percentNotFilledPlus}px; left: #{percentNotFilled}px; background:white;")
+        div(style="height:100px; width:100px; position:absolute; border:solid; border-radius:#{radius};")
+        div(style="height:100px; width:100px; position:absolute; align-items:center; display:flex; justify-content:center;") #{textValue}
+
+mixin header(displayLoginInfo)
+    div(style="border-bottom:solid; display:flex; justify-content:space-between; margin-bottom:20px;")
+        img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
+        div
+            div(style="display:flex;")
+                div(style="margin:20px; cursor:pointer;") About CBI
+                div(style="margin:20px; cursor:pointer;") Resources
+                div(style="margin:20px; cursor:pointer;" onclick="window.location='/aboutUs'") About Us
+                div(style="margin:20px; cursor:pointer;") Search
+            -if(displayLoginInfo)
+                div(style="float:right;") You are logged in as #{username}
+                div(style="clear:right; float:right; text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out

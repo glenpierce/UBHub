@@ -17,6 +17,7 @@ var yourUploads = require('./routes/yourUploads');
 var editUpload = require('./routes/editUpload');
 var createNewUpload = require('./routes/createNewUpload');
 var aboutUs = require('./routes/aboutUs');
+var home = require('./routes/home');
 
 var config = require('./config.js');
 
@@ -34,7 +35,6 @@ var config = require('./config.js');
 // var app = express.createServer(options);
 var app = express();
 
-console.log('testing');
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -65,6 +65,7 @@ app.use('/yourUploads', yourUploads);
 app.use('/editUpload', editUpload);
 app.use('/createNewUpload', createNewUpload);
 app.use('/aboutUs', aboutUs);
+app.use('/home', home);
 
 //to setup docker mysql: docker run --name episql -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql
 //this port is in use according to Docker, how can I make sure that a port is valid for me to use?
@@ -105,7 +106,5 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
-console.log('testing end')
 
 module.exports = app;
