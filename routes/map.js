@@ -5,7 +5,6 @@ var session = require('client-sessions');
 var path = require("path");
 var http = require('http');
 var https = require('https');
-var mysql = require('mysql');
 
 var app = express();
 

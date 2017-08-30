@@ -1,3 +1,5 @@
+
+
 mixin textInShape(textValue, colorValue, percentFill, radius)
     -percentNotFilled = 100 - percentFill;
     -percentNotFilledPlus = percentNotFilled + 5;
@@ -8,17 +10,44 @@ mixin textInShape(textValue, colorValue, percentFill, radius)
         div(style="height:100px; width:100px; position:absolute; align-items:center; display:flex; justify-content:center;") #{textValue}
 
 mixin header(displayLoginInfo)
-    div(style="border-bottom:solid; display:flex; justify-content:space-between; margin-bottom:20px;")
-        img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
-        div
-            div(style="display:flex;")
-                div(style="margin:20px; cursor:pointer;") About CBI
-                div(style="margin:20px; cursor:pointer;") Resources
-                div(style="margin:20px; cursor:pointer;" onclick="window.location='/aboutUs'") About Us
-                div(style="margin:20px; cursor:pointer;") Search
-            -if(displayLoginInfo)
-                div(style="float:right;") You are logged in as #{username}
-                div(style="clear:right; float:right; text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
+    //the header should behave like this one: rubygarage.org
+    div(class="showWhenNarrow")
+        div Hi, I'm the special thing that only shows up when the screen is narrow :)
+    div(class="hideWhenNarrow")
+        div(style="width:100%; position:fixed; display:flex; flex-grow:1;")
+            div(style="height:80px; background:white; flex-grow:1;")
+            div(style="max-width:1200px; display:flex; justify-content:space-between; height: 40px; width:100%; flex-grow:5;")
+                div
+                    div(style="position:fixed; width:100%; max-width:1200px; height:35px; background-color:#acd9bb; z-index:-1; top:0px;")
+                    div(style="position:fixed; width:100%; max-width:1200px; height:35px; background-color:#eff6e8; z-index:-1; top:35px;")
+                    div(style="position:fixed; width:100%; max-width:1200px; height:5px; background:white; z-index:-1; top: 70px;")
+                    img(src="/images/CBI Coalition logo.png" style="height:120px; margin-bottom:10px;")
+                div(style="width:100%;")
+                    div
+                        div(style="display:flex; justify-content:space-between;")
+                            -if(displayLoginInfo){
+                                div(style="display:flex; justify-content:space-around; flex-grow:1;")
+                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") myCBI
+                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Indicators
+                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Forum
+                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Account
+                                div(style="padding:5px;")
+                                    div(style="background-color:#269973; color:white; padding:5px 10px 5px 10px; border-radius:20px; font-weight:700;") #{username} Glen Pierce
+                                //div(style="text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
+                            -}else{
+                                div(style="color:#fab279; font-weight:700;") Signup / Log in
+                            -}
+                    div(style="display:flex; justify-content:space-between;")
+                        div(style="display:flex; justify-content:space-around; flex-grow:1;")
+                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Home
+                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Database
+                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Resources
+                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") FAQs
+                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/aboutUs'") About Us
+                        div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Search
+            div(style="height:80px; background:white; flex-grow:1;")
+
+        div(style="width:100%; height:80px;")
 
 mixin footer()
     div(style="display:flex; justify-content:space-between;")

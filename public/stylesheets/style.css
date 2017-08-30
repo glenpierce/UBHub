@@ -1,3 +1,24 @@
+@media only screen and (min-width:700px){
+  .hideWhenNarrow{
+    /*display: block;*/
+  }
+
+  .showWhenNarrow{
+    display: none;
+  }
+
+}
+
+@media only screen and (max-width:701px){
+  .hideWhenNarrow{
+    display: none;
+  }
+
+  .showWhenNarrow{
+    /*display: block;*/
+  }
+}
+
 body {
   margin: 0px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;

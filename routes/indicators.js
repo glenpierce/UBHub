@@ -202,7 +202,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/', function(req, res){
-    console.log(req);
+    console.log(req.body);
 });
 
 module.exports = router;

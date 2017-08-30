@@ -86,9 +86,9 @@ mixin indicator(category, number, title, calculation, value, userInput1)
                     div.dataEntryLabel Data year
                     div.dataEntryLabel Notes
                 div.inputColumn
-                    input.inputField
-                    input.inputField
-                    textarea.inputFieldOptional(class = lightColor style="resize: none;")
+                    input.inputField(name="#{userInput1}Field1" type="text")
+                    input.inputField(name="#{userInput1}Field2" type="text")
+                    textarea.inputFieldOptional(class = lightColor style="resize: none;" name="#{userInput1}Field3" type="text")
                 .div(style="flex:1")
                     div.width100pct
                         div Calculation

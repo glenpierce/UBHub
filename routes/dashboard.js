@@ -20,11 +20,10 @@ router.get('/', function(req, res, next) {
     if (req.session && req.session.user) {
         console.log("logged in as " + req.session.user);
         res.render('dashboard');
-        //res.sendFile(path.join(__dirname+'/dashboard.html'));
     } else {
         console.log("not logged in");
         req.session.reset();
-        res.redirect('/index');
+        res.redirect('/');
     }
 });
 
