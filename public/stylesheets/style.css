@@ -60,6 +60,10 @@ a {
   font-size:18px; font-weight:700;
 }
 
+.homePageWhiteBox{
+  background-color:white; border-radius:10px; height: 40px; width: 100px; padding:20px; margin:10px; color:#326f90; font-weight:700; display:flex; justify-content:center; align-items:center; text-align:center;
+}
+
 /*
 Blue
 1  07456b
@@ -70,6 +74,9 @@ Blue
 7  b6d5e3 medium blue
 9  daecf1
 10 e9f6f9 light blue
+
+Orange
+E3965C
 
 Green
 1  235449
