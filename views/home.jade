@@ -32,8 +32,6 @@ body
                             div(class="homePageWhiteBox") Indicator Tracker
             img(style="margin-top:100px;" src="/images/owl.svg")
 
-    //div(style="background:grey; height:1px; width:100%; margin:auto; margin-top:10px; margin-bottom:10px;")
-
     div(style="background:white; display:flex;")
         img(style="width:100px;" src="http://d1roc322tckjdp.cloudfront.net/wp-content/uploads/2012/05/Types-of-Lizards.jpg")
         div
@@ -51,8 +49,6 @@ body
                     div
                     div
 
-    //div(style="background:grey; height:1px; width:100%; margin:auto; margin-top:10px; margin-bottom:10px;")
-
     div(style="background:url('/images/blue_monkeys_horiz.png') darkblue; background-size: cover; width:100%; display:flex; align-items:center; height:400px;")
         div
             div(style="color:white; font-weight:700; font-size:40px; text-align:center; margin:auto; padding-bottom:10px;") <i>"A really awesome quote from a well-respected person that is of a decent length kinda like this sentence that keeps running on and on."</i>
@@ -65,6 +61,34 @@ body
         div(style="max-width:120px; text-align:center; margin:20px; border-radius:10px; padding:10px; background:#91cfa8; color:white;") Explore our Resources
         img(src="/images/Capture.PNG")
 
+    div(style="display:flex; max-width:1000px; margin:auto; min-width:600px; justify-content:space-around; padding:20px;")
+        div(class="indexBox") Singapore Index
+        div(class="indexBox")
+            img(src="/images/biophilicCitiesLogo.png" height=60 width=120)
+        div(class="indexBox")
+            img(src="/images/LabProgrammeLogo.jpg" height=60 width=120)
+        div(class="indexBox") The Economics of Ecosystems and Biodiversity
+        div(class="indexBox") Biodivercities Methodology
+        div(class="indexBox") Biodiversity Sensitive Urban Design
+
+    div(style="width=100%; background:#4490ba; color:white; text-align:center; padding:10px; font-size:30px;") Explore Urban Biodiversity Actions
+
+    div(id="map" style="height:800px; width:100%;")
+
+    div(style="width=100%; background:#4490ba; color:white; text-align:center; padding:10px; font-size:30px;") myCBI Members Page
+
+    div(style="margin:auto; max-width:600px; color:#4490ba; text-align:center; font-size:30px;") myCBI <b>Indicator Tracker</b>
+    div(style="margin:auto; max-width:600px; color:#4490ba; text-align:center; font-size:30px;") With our indicator tracker, you can track your progress in one of our <span style="color:#fcd350; font-size:40px; font-weight:700;">3</span> supported systems, or create your own customized set of indicators.
+
+    div(style="width:600px; margin:auto; margin-top:10px; margin-bottom:10px;")
+        div(style="color:#4490ba;") <b>Dashboard Example</b> (note: data is for sample purposes only and does not reflect actual activity)
+        div(class="blueBorder" style="padding:5px; margin:auto;")
+            img(src="/images/sampleIndicatorsPage.PNG")
+
+    div(style="display:flex; margin:auto; justify-content:space-around; align-items:center; margin:10px;")
+        div(class="largeBlueText" style="max-width:400px; text-align:center;") myCBI <b>Experts Forum</b><br> Get answers to your urban biodiversity questions from experts on our forum.
+        div(style="border-radius:10px; background-color:#fcd350; color:white; text-align:center; width:80px; padding:10px; display:flex; align-items:center;") Learn more about membership
+
     div(style="background:url('/images/blue_overlook_nightcity_horiz.png') darkblue; display:flex; background-size: cover;")
         div(style="flex-grow:1;")
             div(style="color:white; font-size:40px; text-align:center; padding:20px;") Get Involved
@@ -76,8 +100,6 @@ body
                     div(class="homePageWhiteBox") Expert
                     div(class="homePageWhiteBox") Press
         img(src="/images/Capture.PNG" style="margin:20px;")
-
-    //div(style="background:grey; height:1px; width:100%; margin:auto; margin-top:10px; margin-bottom:10px;")
 
     +footer()
 
@@ -105,7 +127,7 @@ script.
             origin: new google.maps.Point(0, 0),
             anchor: new google.maps.Point(12, 46)
         };
-        var mapData =!{mapData};
+        var mapData = null; //!{mapData};
         console.log(mapData);
         center = {lat: 20, lng: 15};
         var map = new google.maps.Map(document.getElementById('map'), {
