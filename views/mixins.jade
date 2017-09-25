@@ -39,7 +39,7 @@ mixin header(displayLoginInfo)
                             -}
                     div(style="display:flex; justify-content:space-between;")
                         div(style="display:flex; justify-content:space-around; flex-grow:1;")
-                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Home
+                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/home'") Home
                             div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Database
                             div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Resources
                             div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") FAQs
@@ -68,22 +68,22 @@ mixin footer()
             a(class="twitter-follow-button" href="https://twitter.com/cbicoalition") Follow @cbicoalition
         div
             div copyright info
-
-script.
-    window.twttr = (function(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0],
-    t = window.twttr || {};
-        if (d.getElementById(id))
-        return t;
-    js = d.createElement(s);
-        js.id = id;
-        js.src = "https://platform.twitter.com/widgets.js";
-        fjs.parentNode.insertBefore(js, fjs);
-
-        t._e = [];
-        t.ready = function(f) {
-            t._e.push(f);
-    };
-
-    return t;
-    }(document, "script", "twitter-wjs"));
+//
+//script.
+//    window.twttr = (function(d, s, id) {
+//        var js, fjs = d.getElementsByTagName(s)[0],
+//    t = window.twttr || {};
+//        if (d.getElementById(id))
+//        return t;
+//    js = d.createElement(s);
+//        js.id = id;
+//        js.src = "https://platform.twitter.com/widgets.js";
+//        fjs.parentNode.insertBefore(js, fjs);
+//
+//        t._e = [];
+//        t.ready = function(f) {
+//            t._e.push(f);
+//    };
+//
+//    return t;
+//    }(document, "script", "twitter-wjs"));

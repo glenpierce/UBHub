@@ -99,8 +99,9 @@ body
     div(style="width=100%; background:#4490ba; color:white; text-align:center; padding:10px; font-size:30px;") Explore Urban Biodiversity Actions
 
     div(style="position:relative;")
-        div(id="map" style="height:800px; width:100%; max-width:1600px; margin:auto; pointer-events: none !important; z-index:-1;")
+        div(id="map" style="height:800px; width:100%; max-width:1600px; margin:auto; z-index:-1;")
         div(style="background:white; border-radius:10px; color:#4490ba; text-align:center; width: 140px; position: absolute; top: 50%; left: 50%; font-size:20px; padding:20px; z-index:-1;") Go to<br>Interactive<br>Map
+        div(style="width:140px; height:60px; position: absolute; top: 50%; left: 50%; padding:20px; z-index:1; cursor:pointer;" onclick="window.location='/map'")
 
     div(style="width=100%; background:#4490ba; color:white; text-align:center; padding:10px; font-size:30px;") myCBI Members Page
 
@@ -136,6 +137,8 @@ script.
     var yellowImage;
     var greenImage;
     var orangeImage;
+    var mapData = !{mapData};
+    console.log(mapData);
     function initMap() {
         yellowImage = {
             url: '/images/marker-yellow-det.png',
@@ -155,8 +158,6 @@ script.
             origin: new google.maps.Point(0, 0),
             anchor: new google.maps.Point(12, 46)
         };
-        var mapData = !{mapData};
-        //console.log(mapData);
         center = {lat: 20, lng: 15};
         var map = new google.maps.Map(document.getElementById('map'), {
             zoom: 3,

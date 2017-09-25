@@ -28,7 +28,7 @@ router.get('/', function(req, res, next) {
     });
 
     connection.connect();
-    query = 'SELECT * from locations';
+    query = 'SELECT * from locations limit 10';
     console.log(query);
     connection.query(query, function(err, rows, fields) {
         if (!err) {
@@ -36,9 +36,7 @@ router.get('/', function(req, res, next) {
             if (req.session && req.session.user) {
                 res.render('map', {mapData:JSON.stringify(mapData), username: req.session.user});
             } else {
-                console.log("not logged in");
-                req.session.reset();
-                res.redirect('/index');
+                res.render('map', {mapData:JSON.stringify(mapData), username: null});
             }
         } else {
             console.log('Error while performing Query.');
