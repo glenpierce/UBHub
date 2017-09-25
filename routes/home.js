@@ -7,29 +7,29 @@ var config = require('../config.js');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    res.render('home', {mapData:null});
-    // var mapData = "";
-    //
-    // connection = mysql.createConnection({
-    //     host: config.rdsHost,
-    //     user: config.rdsUser,
-    //     password: config.rdsPassword,
-    //     database: config.rdsDatabase
-    // });
-    //
-    // connection.connect();
-    // query = 'SELECT * from locations';
-    // console.log(query);
-    // connection.query(query, function(err, rows, fields) {
-    //     if (!err) {
-    //         mapData = rows;
-    //         res.render('home', {mapData:JSON.stringify(mapData)});
-    //     } else {
-    //         console.log('Error while performing Query.');
-    //         res.render('home', {mapData:null});
-    //     }
-    // });
-    // connection.end();
+    // res.render('home', {mapData:null});
+    var mapData = "";
+
+    connection = mysql.createConnection({
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
+    });
+
+    connection.connect();
+    query = 'SELECT * from locations';
+    console.log(query);
+    connection.query(query, function(err, rows, fields) {
+        if (!err) {
+            mapData = rows;
+            res.render('home', {mapData:JSON.stringify(mapData)});
+        } else {
+            console.log('Error while performing Query.');
+            res.render('home', {mapData:null});
+        }
+    });
+    connection.end();
 });
 
 module.exports = router;
