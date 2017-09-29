@@ -33,7 +33,7 @@ body
             img(style="align-self:flex-end; height:70%;" src="/images/owl.svg")
 
     div(style="background:white; display:flex;")
-        img(style="width:100px;" src="http://d1roc322tckjdp.cloudfront.net/wp-content/uploads/2012/05/Types-of-Lizards.jpg")
+        img(style="height:400px;" src="/images/lizardgreen.svg")
         div
             div(style="display:flex; align-items:center;")
                 div(style="margin:auto; text-align:center;")
@@ -41,7 +41,40 @@ body
                     div(style="color:#326f90; font-size:20px;") Our database includes over <span style="color:#E3965C; font-weight:700; font-size:30px;">800</span> actions in over <span style="color:#E3965C; font-weight:700; font-size:30px;">400</span> locations around the globe, including more than <span style="color:#E3965C; font-weight:700; font-size:30px;">200</span> municipal governments, over <span style="color:#E3965C; font-weight:700; font-size:30px;">250</span> biodiversity plans and reports, and including participation in 13 different international urban biodiversity networks and indicator programs.
                 div(style="color:white; background:#E3965C; border-radius:5px; padding:10px; text-align:center;") Explore the database
             div(style="margin:auto; display:flex; align-items:center; flex-direction:column; margin-top:20px;")
-                div(style="color:#326f90; font-weight:700;") Example locations:
+                div(style="display:flex;")
+                    div(style="color:#326f90; font-weight:700;") Example locations:
+                    div(onclick="document.getElementById('key').style.display='flex';" style="cursor:pointer;") Show key
+                div(id="key" style="display:none; border:solid; border-radius:5px; width:200px; flex-direction:column; padding:10px;")
+                    div Key:
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            img(src="/images/arc_BC_ltblue.svg")
+                        div Program participant
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            img(src="/images/arc_SI_drkblue.svg")
+                        div Program completed
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            div SI
+                        div Singapore Index
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            div BC
+                        div Biophilic Cities Network
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            div LAB
+                        div Local Action for Biodiversity Pioneer Programme
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            div EF
+                        div Ecological Footprint
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            div C
+                        div Customized Program
+                    div Planning documents are listed by publication year
                 div(style="display:flex;")
                     div(style="margin:10px;")
                         div(style="margin-bottom:-3px; background:url('/images/blue_singapore_50x180.png'); color:white; height:50px; width:180px;") Singapore
@@ -84,7 +117,7 @@ body
             div(style="color:#4490ba; font-size:20px; text-align:center;") CBI Coalition <b>Resources</b>
             div(style="color:#4490ba; font-size:20px; text-align:center;") Our resources section includes <span style="color:#91cfa8; font-weight:700; font-size:30px;">800</span> resources, including a comparision of these <span style="color:#91cfa8; font-weight:700; font-size:30px;">6</span> guidelines for urban biodiversity planning to help you choose which is right for you.
         div(style="max-width:120px; text-align:center; margin:20px; border-radius:10px; padding:10px; background:#91cfa8; color:white;") Explore our Resources
-        img(src="/images/Capture.PNG")
+        img(style="width:100px;" src="/images/Possum.svg")
 
     div(style="display:flex; max-width:1000px; margin:auto; min-width:600px; justify-content:space-around; padding:20px;")
         div(class="indexBox") Singapore Index
@@ -105,8 +138,11 @@ body
 
     div(style="width=100%; background:#4490ba; color:white; text-align:center; padding:10px; font-size:30px;") myCBI Members Page
 
-    div(style="margin:auto; max-width:600px; color:#4490ba; text-align:center; font-size:30px;") myCBI <b>Tracker</b>
-    div(style="margin:auto; max-width:600px; color:#4490ba; text-align:center; font-size:30px;") With our indicator tracker, you can track your progress in one of our <span style="color:#fcd350; font-size:40px; font-weight:700;">3</span> supported systems, or create your own customized set of indicators.
+    div(style="display:flex; align-items:flex-start; justify-content:space-between;")
+        img(style="width:300px;" src="/images/Bee.svg")
+        div(style="padding:30px;")
+            div(style="margin:auto; max-width:600px; color:#4490ba; text-align:center; font-size:30px;") myCBI <b>Tracker</b>
+            div(style="margin:auto; max-width:600px; color:#4490ba; text-align:center; font-size:30px;") With our indicator tracker, you can track your progress in one of our <span style="color:#fcd350; font-size:40px; font-weight:700;">3</span> supported systems, or create your own customized set of indicators.
 
     div(style="width:600px; margin:auto; margin-top:10px; margin-bottom:10px;")
         div(style="color:#4490ba;") <b>Dashboard Example</b> (note: data is for sample purposes only and does not reflect actual activity)

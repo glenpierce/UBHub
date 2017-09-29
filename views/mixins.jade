@@ -28,11 +28,11 @@ mixin header(displayLoginInfo)
                             -if(displayLoginInfo){
                                 div(style="display:flex; justify-content:space-around; flex-grow:1;")
                                     div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") myCBI
-                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Indicators
+                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/indicators'") Indicators
                                     div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Forum
                                     div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Account
                                 div(style="padding:5px;")
-                                    div(style="background-color:#269973; color:white; padding:5px 10px 5px 10px; border-radius:20px; font-weight:700;") #{username} Glen Pierce
+                                    div(style="background-color:#269973; color:white; padding:5px 10px 5px 10px; border-radius:20px; font-weight:700;") #{username} User Name
                                 //div(style="text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
                             -}else{
                                 div(style="color:#fab279; font-weight:700;") Signup / Log in
@@ -50,40 +50,40 @@ mixin header(displayLoginInfo)
         div(style="width:100%; height:80px;")
 
 mixin footer()
-    div(style="display:flex; justify-content:space-between;")
+    div(style="margin:auto; max-width:1200px; display:flex; justify-content:space-between; padding-top:10px;")
         div
             img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
-            div(style="width:200px;") The City Biodiversity Indicators (CBI) Coalition helps cities around the world to choose a biodiversity strategy, then measure and improve their Biodiversity Strategy and Action Plans (BSAPs).
+        div(style="width:200px;" class="smallText") The City Biodiversity Indicators (CBI) Coalition helps cities around the world to choose a biodiversity strategy, then measure and improve their Biodiversity Strategy and Action Plans (BSAPs).
         div
-            div About CBI
-            div CBI Toolkit
-            div Resources
-            div About Us
-            div Pricing / Fees
-            div FAQs
-            div Sitemap
+            div(class="smallText") About CBI
+            div(class="smallText") CBI Toolkit
+            div(class="smallText") Resources
+            div(class="smallText") About Us
+            div(class="smallText") Pricing / Fees
+            div(class="smallText") FAQs
+            div(class="smallText") Sitemap
         div
-            div Contact us
-            div info@cbicoalition.org
+            div(class="smallText") Contact us
+            div(class="smallText") info@cbicoalition.org
             a(class="twitter-follow-button" href="https://twitter.com/cbicoalition") Follow @cbicoalition
         div
-            div copyright info
-//
-//script.
-//    window.twttr = (function(d, s, id) {
-//        var js, fjs = d.getElementsByTagName(s)[0],
-//    t = window.twttr || {};
-//        if (d.getElementById(id))
-//        return t;
-//    js = d.createElement(s);
-//        js.id = id;
-//        js.src = "https://platform.twitter.com/widgets.js";
-//        fjs.parentNode.insertBefore(js, fjs);
-//
-//        t._e = [];
-//        t.ready = function(f) {
-//            t._e.push(f);
-//    };
-//
-//    return t;
-//    }(document, "script", "twitter-wjs"));
+            div(class="smallText") copyright info
+
+script.
+    window.twttr = (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+        if (d.getElementById(id))
+        return t;
+    js = d.createElement(s);
+        js.id = id;
+        js.src = "https://platform.twitter.com/widgets.js";
+        fjs.parentNode.insertBefore(js, fjs);
+
+        t._e = [];
+        t.ready = function(f) {
+            t._e.push(f);
+    };
+
+    return t;
+    }(document, "script", "twitter-wjs"));
