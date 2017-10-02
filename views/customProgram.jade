@@ -1,0 +1,26 @@
+doctype html
+include mixins
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+body
+    +header(true)
+
+    div(style="padding:40px;")
+        - var indicatorsJSON = JSON.parse(indicators);
+        //div #{indicators}
+        //div #{indicatorsJSON}
+        - for (var i = 0; i < indicatorsJSON.length; i++)
+            +indicator(indicatorsJSON[i].indicatorName, indicatorsJSON[i].description, indicatorsJSON[i].descriptionOfCalculation)
+        //script.
+        //    var indicators = !{indicators};
+        //    console.log(indicators);
+        //    console.log(indicators.length);
+        //    for (var i = 0; i < indicators.length; i++) {
+        //        console.log(indicators[i]);
+        //        console.log(indicators[i].indicatorName);
+        //        document.write("<div> indicator " + indicators[i].id +" </div>");
+        //    }
+
+    +footer()

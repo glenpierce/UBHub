@@ -9,6 +9,12 @@ mixin textInShape(textValue, colorValue, percentFill, radius)
         div(style="height:100px; width:100px; position:absolute; border:solid; border-radius:#{radius};")
         div(style="height:100px; width:100px; position:absolute; align-items:center; display:flex; justify-content:center;") #{textValue}
 
+mixin indicator(indicatorName, indicatorDescription, descriptionOfCalculation)
+    div(style="border:solid;")
+        div #{indicatorName}
+        div #{indicatorDescription}
+        div #{descriptionOfCalculation}
+
 mixin header(displayLoginInfo)
     //the header should behave like this one: rubygarage.org
     div(class="showWhenNarrow")
@@ -27,7 +33,7 @@ mixin header(displayLoginInfo)
                         div(style="display:flex; justify-content:space-between;")
                             -if(displayLoginInfo){
                                 div(style="display:flex; justify-content:space-around; flex-grow:1;")
-                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") myCBI
+                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/dashboard'") myCBI
                                     div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/indicators'") Indicators
                                     div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Forum
                                     div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Account

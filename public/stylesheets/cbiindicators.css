@@ -37,6 +37,27 @@ $red5: #f69056;
 $red6: #fab279;
 */
 
+@media only screen and (min-width:700px){
+    .hideWhenNarrow{
+        /*display: block;*/
+    }
+
+    .showWhenNarrow{
+        display: none;
+    }
+
+}
+
+@media only screen and (max-width:701px){
+    .hideWhenNarrow{
+        display: none;
+    }
+
+    .showWhenNarrow{
+        /*display: block;*/
+    }
+}
+
 body{
     background-color: white;
     font-family: helvetica;

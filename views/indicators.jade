@@ -101,34 +101,33 @@ mixin indicator(category, number, title, calculation, value, userInput1)
 
 
 body
-    block content
-        +header(true)
+    +header(true)
 
-        .div(style="max-width:800px; margin:auto;")
-            div(style="margin-top:10px;") home > myCBI Indicators
-            div(style="display:flex; justify-content:space-between;")
-                div
-                    div.userName #{userName}
-                    div.city City
-                    div.country Country
-                img(style="height:90px; padding-bottom:10px;" src="/images/dial.png")
-        tabs.tabs
-            div.tab.cityProfile City Profile
-            div.tab.nativeBiodiversity(onclick="scrollToPosition(document.getElementsByClassName('nativeBiodiversity')[1])") Native Biodiversity
-            div.tab.ecosystemServices(onclick="scrollToPosition(document.getElementsByClassName('ecosystemServices')[1])") Ecosystem Services
-            div.tab.govManagement(onclick="scrollToPosition(document.getElementsByClassName('govManagement')[1])") Governance & Management
+    .div(style="max-width:800px; margin:auto;")
+        div(style="margin-top:10px;") home > myCBI Indicators
+        div(style="display:flex; justify-content:space-between;")
+            div
+                div.userName #{userName}
+                div.city City
+                div.country Country
+            img(style="height:90px; padding-bottom:10px;" src="/images/dial.png")
+    tabs.tabs
+        div.tab.cityProfile City Profile
+        div.tab.nativeBiodiversity(onclick="scrollToPosition(document.getElementsByClassName('nativeBiodiversity')[1])") Native Biodiversity
+        div.tab.ecosystemServices(onclick="scrollToPosition(document.getElementsByClassName('ecosystemServices')[1])") Ecosystem Services
+        div.tab.govManagement(onclick="scrollToPosition(document.getElementsByClassName('govManagement')[1])") Governance & Management
 
-        div.tabsBaseLine
+    div.tabsBaseLine
 
-        div.scrollPanel(style="margin:auto; height:300px; overflow-y: scroll; max-width:800px;" onscroll="scrollScript()")
-            form(name="indicatorsForm", method="post" onsubmit="submitForm()" autocomplete="off")
-                - for indicator in cityIndicators.indicators
-                    +indicator(indicator.category, indicator.number, indicator.title, indicator.calculation, 0, indicator.userInput1)
-                div.actions
-                    input(type="submit", value="submit")
+    div.scrollPanel(style="margin:auto; height:300px; overflow-y: scroll; max-width:800px;" onscroll="scrollScript()")
+        form(name="indicatorsForm", method="post" onsubmit="submitForm()" autocomplete="off")
+            - for indicator in cityIndicators.indicators
+                +indicator(indicator.category, indicator.number, indicator.title, indicator.calculation, 0, indicator.userInput1)
+            div.actions
+                input(type="submit", value="submit")
 
-        script window.onLoad=highlightNativeBio()
-        script.
-            function submitForm() {
-                console.log("form submitted!" + JSON.stringify(indicatorsForm.valueOf()));
-            }
+    script window.onLoad=highlightNativeBio()
+    script.
+        function submitForm() {
+            console.log("form submitted!" + JSON.stringify(indicatorsForm.valueOf()));
+        }
