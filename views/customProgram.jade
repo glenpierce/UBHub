@@ -8,6 +8,7 @@ body
     +header(true)
 
     div(style="padding:40px;")
+        div(onclick="window.location='/createCustomIndicator'") create new indicator
         - var indicatorsJSON = JSON.parse(indicators);
         //div #{indicators}
         //div #{indicatorsJSON}

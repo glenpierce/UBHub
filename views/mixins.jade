@@ -15,6 +15,11 @@ mixin indicator(indicatorName, indicatorDescription, descriptionOfCalculation)
         div #{indicatorDescription}
         div #{descriptionOfCalculation}
 
+mixin site(siteName, siteDescription)
+    div(style="border:solid;")
+        div #{siteName}
+        div #{siteDescription}
+
 mixin header(displayLoginInfo)
     //the header should behave like this one: rubygarage.org
     div(class="showWhenNarrow")

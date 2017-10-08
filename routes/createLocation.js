@@ -16,8 +16,11 @@ app.use(session({
 }));
 
 router.get('/', function(req, res, next) {
-    var indicators = "";
+    res.render('createLocation', {username:req.session.user});
+});
 
+router.post('/', function(req, res){
+    console.log(req.body);
     // connection = mysql.createConnection({
     //     host: config.rdsHost,
     //     user: config.rdsUser,
@@ -26,17 +29,15 @@ router.get('/', function(req, res, next) {
     // });
     //
     // connection.connect();
+    // query = 'insert into sites2 (siteName) values (' + req.body + ')';
+    // console.log(query);
     // connection.query(query, function(err, rows, fields) {
     //     if (!err) {
-            res.render('createIndicator', {username:req.session.user});
-            // console.log({indicators:JSON.stringify(indicators)});
+    res.send('dashboard');
+    // return res.send('/changeLocation');
     //     }
     // });
     // connection.end();
-});
-
-router.post('/', function(req, res){
-    console.log(req.body);
 });
 
 module.exports = router;

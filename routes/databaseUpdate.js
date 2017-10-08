@@ -117,10 +117,12 @@ function update(){
         "`notApplicableColor` VARCHAR(8) CHARACTER SET utf8" +
         ");";
 
-    privateDataQuery = "CREATE TABLE permissions(" +
+    permissionsQuery = "CREATE TABLE permissions(" +
         "`user` VARCHAR(254) NOT NULL, " +
+        "`permissionLevel` INT" +
         "`program` INT, " +
         "`indicator` INT" +
+        "`site` INT" +
         ");";
 
     userDataQuery = "CREATE TABLE userData(" +
@@ -208,7 +210,7 @@ function update(){
     //verified/unverified - ie:City of Chicago vs. some guy interested in Chicago
 
     //superadmins - Glen, Jen, Mika, CBI
-    //managers - can make data public and add a user or manager to a site and switch user privileges
+    //managers - can create and edit custom indicators/programs can make data public and add a user or manager to a site and switch user privileges
     //view only - can only see information, cannot change it
     //worker - can input data
     //public - can view public data

@@ -1,0 +1,27 @@
+doctype html
+include mixins
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+body
+    +header(true)
+
+    div(style="padding:40px;")
+        - var sitesJSON = JSON.parse(sites);
+        div(onclick="window.location='/createLocation'") create new location
+        //div #{sites}
+        //div #{sitesJSON}
+        - for (var i = 0; i < sitesJSON.length; i++)
+            +site(sitesJSON[i].id, sitesJSON[i].siteName)
+        //script.
+        //    var sites = !{sites};
+        //    console.log(sites);
+        //    console.log(sites.length);
+        //    for (var i = 0; i < sites.length; i++) {
+        //        console.log(sites[i]);
+        //        console.log(sites[i].indicatorName);
+        //        document.write("<div> indicator " + sites[i].id +" </div>");
+        //    }
+
+    +footer()
