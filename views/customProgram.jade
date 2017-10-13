@@ -5,15 +5,67 @@ html
         link(rel='stylesheet', href='/stylesheets/style.css')
 
 body
+    div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="createNewCategoryModal" onclick="hideModal()")
+        div(style="height:200px; width:400px; background-color:white; margin:auto; border-radius:10px;" onclick="event.stopPropagation();")
+            input(id="createNewCategoryInput")
+            button(onclick="createCategory(); hideModal();") add category
+
     +header(true)
 
+    script.
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            var data = ev.dataTransfer.getData("text");
+            var i = 0;
+            var element = ev.target
+            while (!element.getAttribute("ondrop") && i < 100) {
+                //console.log(ev.target);
+                //console.log(ev.target.parentElement);
+                console.log("recalibrating");
+                element = element.parentElement;
+                i++;
+            }
+            element.appendChild(document.getElementById(data));
+        }
+
+        function createNewCategory() {
+            console.log("create new category");
+            document.getElementById('createNewCategoryModal').style.display = "flex";
+        }
+
+        function hideModal() {
+            document.getElementById('createNewCategoryModal').style.display = "none";
+        }
+
+        function stopPropagation(e) {
+            e.stopPropagation();
+        }
+
+        function createCategory() {
+            console.log(document.getElementById('createNewCategoryInput').value);
+        }
+
     div(style="padding:40px;")
-        div(onclick="window.location='/createCustomIndicator'") create new indicator
         - var indicatorsJSON = JSON.parse(indicators);
         //div #{indicators}
         //div #{indicatorsJSON}
-        - for (var i = 0; i < indicatorsJSON.length; i++)
-            +indicator(indicatorsJSON[i].indicatorName, indicatorsJSON[i].description, indicatorsJSON[i].descriptionOfCalculation)
+        div(style="display:flex;")
+            div(style="flex-grow:1; border:solid;" ondrop="drop(event)" ondragover="allowDrop(event)") Indicators
+                div(onclick="window.location='/createCustomIndicator'") create new indicator
+                - for (var i = 0; i < indicatorsJSON.length; i++){
+                    +indicator(indicatorsJSON[i].indicatorName, indicatorsJSON[i].description, indicatorsJSON[i].descriptionOfCalculation, i)
+                - }
+            div(style="flex-grow:1; border:solid;") Categories
+                div(style="border:solid; height:100%; width:100%;" ondrop="drop(event)" ondragover="allowDrop(event)")
+                    div(onclick="createNewCategory()") Create new category
         //script.
         //    var indicators = !{indicators};
         //    console.log(indicators);
