@@ -73,6 +73,8 @@ body
             newIndicator.textContent = document.getElementById('createNewIndicatorInput').value;
             newIndicator.setAttribute("draggable", "true");
             newIndicator.setAttribute("ondragstart", "drag(event)");
+            newIndicator.setAttribute("style", "border:solid;")
+            newIndicator.id = (document.getElementById('createNewIndicatorInput').value);
             document.getElementById("indicatorsContainer").appendChild(newIndicator);
             document.getElementById('createNewIndicatorInput').value = "";
         }
