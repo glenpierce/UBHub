@@ -88,6 +88,10 @@ a {
   display: flex; height:40px; width:40px; align-items: center; justify-content: center;
 }
 
+.button{
+  cursor: pointer; border: solid; border-width: 1px; border-radius: 10px; background-color: #4490ba; width: fit-content; padding: 10px;
+}
+
 /*
 Blue
 1  07456b

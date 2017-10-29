@@ -53,19 +53,24 @@ body
             console.log(document.getElementById('createNewCategoryInput').value);
         }
 
+        function createProgram() {
+            console.log("create program");
+        }
+
     div(style="padding:40px;")
         - var indicatorsJSON = JSON.parse(indicators);
         //div #{indicators}
         //div #{indicatorsJSON}
         div(style="display:flex;")
             div(style="flex-grow:1; border:solid;" ondrop="drop(event)" ondragover="allowDrop(event)") Indicators
-                div(onclick="window.location='/createCustomIndicator'") create new indicator
+                div(onclick="window.location='/createCustomIndicator'" class="button") create new indicator
                 - for (var i = 0; i < indicatorsJSON.length; i++){
                     +indicator(indicatorsJSON[i].indicatorName, indicatorsJSON[i].description, indicatorsJSON[i].descriptionOfCalculation, i)
                 - }
             div(style="flex-grow:1; border:solid;") Categories
                 div(style="border:solid; height:100%; width:100%;" ondrop="drop(event)" ondragover="allowDrop(event)")
-                    div(onclick="createNewCategory()") Create new category
+                    div(onclick="createNewCategory()" class="button") Create new category
+        div(onclick="createProgram()" class="button") Create Program
         //script.
         //    var indicators = !{indicators};
         //    console.log(indicators);
