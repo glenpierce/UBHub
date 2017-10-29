@@ -38,6 +38,80 @@ function update(){
 
     connection.connect();
 
+    initialSetup = "create table users(\n" +
+        "\temail VARCHAR(254) NOT NULL,\n" +
+        "    hashedPassword CHAR(254) not null,\n" +
+        "    alias VARCHAR(254) NOT NULL,\n" +
+        "    PRIMARY KEY (email),\n" +
+        "    UNIQUE INDEX (email)\n" +
+        "    );\n" +
+        "alter table users add userAddress VARCHAR(2000);\n" +
+        "\n" +
+        "DELIMITER //\n" +
+        "CREATE PROCEDURE createUser(IN emailInput VARCHAR(255), IN passwordHash VARCHAR(255), IN alias VARCHAR(255), IN userAddress VARCHAR(2000))\n" +
+        "  BEGIN\n" +
+        "\tinsert into users values(emailInput, passwordHash, alias, userAddress);\n" +
+        "  END //\n" +
+        "DELIMITER ;\n" +
+        "\n" +
+        "DELIMITER //\n" +
+        "CREATE PROCEDURE createLocationSimple(IN address VARCHAR(204), IN title VARCHAR(200), IN updateBy VARCHAR(254), IN country VARCHAR(51), IN scale VARCHAR(51), IN myJson JSON)\n" +
+        "  BEGIN\n" +
+        "\tINSERT INTO locations (address, title, update_by, country, scale, myJson) VALUES (address, title, updateBy, country, scale, myJson);\n" +
+        "    SELECT * FROM locations WHERE id=LAST_INSERT_ID();\n" +
+        "  END //\n" +
+        "DELIMITER ;\n" +
+        "\n" +
+        "DELIMITER //\n" +
+        "CREATE PROCEDURE login(IN emailInput VARCHAR(255))\n" +
+        "  BEGIN\n" +
+        "\tSELECT email, hashedPassword from users WHERE email = emailInput;\n" +
+        "  END //\n" +
+        "DELIMITER ;\n" +
+        "\n" +
+        "DELIMITER //\n" +
+        "CREATE PROCEDURE updateLocation(IN idEntry INT, IN lat FLOAT( 10, 6 ), IN lng FLOAT( 10, 6 ))\n" +
+        "  BEGIN\n" +
+        "\tUPDATE locations SET lat = lat, lng = lng where id = idEntry;\n" +
+        "  END //\n" +
+        "DELIMITER ;\n" +
+        "\n" +
+        "alter table locations add column myJson json;\n" +
+        "select * from locations;\n" +
+        "\n" +
+        "CREATE TABLE emails (\n" +
+        "    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,\n" +
+        "    `email` VARCHAR(2048) CHARACTER SET utf8\n" +
+        ");\n" +
+        "\n" +
+        "DELIMITER //\n" +
+        "CREATE PROCEDURE addEmail(IN email VARCHAR(2048))\n" +
+        "  BEGIN\n" +
+        "\tINSERT INTO emails (email) VALUES (email);\n" +
+        "  END //\n" +
+        "DELIMITER ;\n" +
+        "\n" +
+        "DELIMITER //\n" +
+        "CREATE PROCEDURE getAllUploadsByUser(IN userId VARCHAR(2048))\n" +
+        "  BEGIN\n" +
+        "\tSELECT * from locations where update_by = userId;\n" +
+        "  END //\n" +
+        "DELIMITER ;\n" +
+        "\n" +
+        "DELIMITER //\n" +
+        "CREATE PROCEDURE getUploadById(IN inputId int(11))\n" +
+        "  BEGIN\n" +
+        "\tSELECT * from locations where id = inputId;\n" +
+        "  END //\n" +
+        "DELIMITER ;\n" +
+        "\n" +
+        "DELIMITER //\n" +
+        "CREATE PROCEDURE GetAllUsers(emailInput char(254))\n" +
+        "BEGIN\n" +
+        "SELECT * FROM Users where email = emailInput;\n" +
+        "END //\n" +
+        "DELIMITER ;";
+
     programsQuery = "CREATE TABLE programs(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`programName` VARCHAR(2048) CHARACTER SET utf8, " +
