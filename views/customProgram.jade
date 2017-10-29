@@ -5,10 +5,15 @@ html
         link(rel='stylesheet', href='/stylesheets/style.css')
 
 body
-    div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="createNewCategoryModal" onclick="hideModal()")
-        div(style="height:200px; width:400px; background-color:white; margin:auto; border-radius:10px;" onclick="event.stopPropagation();")
+    div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="createNewCategoryModal" onclick="hideModal('createNewCategoryModal')")
+        div(style="height:200px; width:400px; background-color:white; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
             input(id="createNewCategoryInput")
-            button(onclick="createCategory(); hideModal();") add category
+            button(onclick="createCategory(); hideModal('createNewCategoryModal');") add category
+
+    div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="createNewIndicatorModal" onclick="hideModal('createNewIndicatorModal')")
+        div(style="height:200px; width:400px; background-color:white; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
+            input(id="createNewIndicatorInput")
+            button(onclick="createCategory(); hideModal('createNewIndicatorModal');") add category
 
     +header(true)
 
@@ -36,21 +41,26 @@ body
             element.appendChild(document.getElementById(data));
         }
 
+        function hideModal(id) {
+            document.getElementById(id).style.display = "none";
+        }
+
+        //function stopPropagation(e) {
+        //    e.stopPropagation();
+        //}
+
         function createNewCategory() {
             console.log("create new category");
             document.getElementById('createNewCategoryModal').style.display = "flex";
         }
 
-        function hideModal() {
-            document.getElementById('createNewCategoryModal').style.display = "none";
-        }
-
-        function stopPropagation(e) {
-            e.stopPropagation();
-        }
-
         function createCategory() {
             console.log(document.getElementById('createNewCategoryInput').value);
+        }
+
+        function createCustomIndicator(){
+            console.log("create new category");
+            document.getElementById('createNewIndicatorModal').style.display = "flex";
         }
 
         function createProgram() {
@@ -63,7 +73,8 @@ body
         //div #{indicatorsJSON}
         div(style="display:flex;")
             div(style="flex-grow:1; border:solid;" ondrop="drop(event)" ondragover="allowDrop(event)") Indicators
-                div(onclick="window.location='/createCustomIndicator'" class="button") create new indicator
+                div(onclick="createCustomIndicator()" class="button") create new indicator
+                    //window.location='/createCustomIndicator'
                 - for (var i = 0; i < indicatorsJSON.length; i++){
                     +indicator(indicatorsJSON[i].indicatorName, indicatorsJSON[i].description, indicatorsJSON[i].descriptionOfCalculation, i)
                 - }
