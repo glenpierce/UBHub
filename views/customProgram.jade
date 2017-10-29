@@ -13,7 +13,7 @@ body
     div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="createNewIndicatorModal" onclick="hideModal('createNewIndicatorModal')")
         div(style="height:200px; width:400px; background-color:white; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
             input(id="createNewIndicatorInput")
-            button(onclick="createIndicator(); hideModal('createNewIndicatorModal');") add category
+            button(onclick="createIndicator(); hideModal('createNewIndicatorModal');") add indicator
 
     +header(true)
 
@@ -50,25 +50,31 @@ body
         }
 
         function createNewCategory() {
-            console.log("create new category");
             document.getElementById('createNewCategoryModal').style.display = "flex";
+            document.getElementById('createNewCategoryInput').focus();
         }
 
         function createCategory() {
-            console.log(document.getElementById('createNewCategoryInput').value);
             var newCategory = document.createElement("div");
             newCategory.textContent = document.getElementById('createNewCategoryInput').value;
+            newCategory.setAttribute("ondrop", "drop(event)");
+            newCategory.setAttribute("ondragover", "allowDrop(event)");
             document.getElementById("categoriesContainer").appendChild(newCategory);
             document.getElementById('createNewCategoryInput').value = "";
         }
 
         function createNewIndicator(){
-            console.log("create new indicator");
             document.getElementById('createNewIndicatorModal').style.display = "flex";
+            document.getElementById('createNewIndicatorInput').focus();
         }
 
         function createIndicator(){
-            console.log(document.getElementById('createNewIndicatorInput').value);
+            var newIndicator = document.createElement("div");
+            newIndicator.textContent = document.getElementById('createNewIndicatorInput').value;
+            newIndicator.setAttribute("draggable", "true");
+            newIndicator.setAttribute("ondragstart", "drag(event)");
+            document.getElementById("indicatorsContainer").appendChild(newIndicator);
+            document.getElementById('createNewIndicatorInput').value = "";
         }
 
         function createProgram() {
@@ -82,7 +88,7 @@ body
         div(style="display:flex;")
             div(style="flex-grow:1;") Indicators
                 div(onclick="createNewIndicator()" class="button") create new indicator
-                div(style="height:100%; width:100%; border:solid;" ondrop="drop(event)" ondragover="allowDrop(event)")
+                div(style="height:100%; width:100%; border:solid;" ondrop="drop(event)" ondragover="allowDrop(event)" id="indicatorsContainer")
                     - for (var i = 0; i < indicatorsJSON.length; i++){
                         +indicator(indicatorsJSON[i].indicatorName, indicatorsJSON[i].description, indicatorsJSON[i].descriptionOfCalculation, i)
                     - }
