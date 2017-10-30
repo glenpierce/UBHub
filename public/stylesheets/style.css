@@ -92,6 +92,14 @@ a {
   cursor: pointer; border: solid; border-width: 1px; border-radius: 10px; background-color: #4490ba; width: fit-content; padding: 10px;
 }
 
+.color{
+  border-radius: 100%;
+  cursor: pointer;
+  height: 33px;
+  width: 33px;
+  margin: 0 auto;
+}
+
 /*
 Blue
 1  07456b

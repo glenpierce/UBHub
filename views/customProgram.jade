@@ -15,9 +15,26 @@ body
             input(id="createNewIndicatorInput")
             button(onclick="createIndicator(); hideModal('createNewIndicatorModal');") add indicator
 
+    div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="colorPickerModal" onclick="hideModal('colorPickerModal')")
+        div(style="height:200px; width:400px; background-color:#B7B7B7; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
+            div(style="display:flex;")
+                div(class="color" style="background:#E94A35;")
+                div(class="color" style="background:#F59D00;")
+                div(class="color" style="background:#F5E100;")
+                div(class="color" style="background:#009755;")
+                div(class="color" style="background:#0073BF;")
+                div(class="color" style="background:#083D7A;")
+                div(class="color" style="background:#6EC4FD;")
+                div(class="color" style="background:#7935E9;")
+                div(class="color" style="background:#000000;")
+                div(class="color" style="background:#B58989;")
+
     +header(true)
 
     script.
+
+        var newProgram = {};
+
         function allowDrop(ev) {
             ev.preventDefault();
         }
@@ -32,8 +49,6 @@ body
             var i = 0;
             var element = ev.target
             while (!element.getAttribute("ondrop") && i < 100) {
-                //console.log(ev.target);
-                //console.log(ev.target.parentElement);
                 console.log("recalibrating");
                 element = element.parentElement;
                 i++;
@@ -55,12 +70,32 @@ body
         }
 
         function createCategory() {
+            var newCategoryWrapper = document.createElement("div");
+            newCategoryWrapper.setAttribute("ondrop", "drop(event)");
+            newCategoryWrapper.setAttribute("ondragover", "allowDrop(event)");
+
             var newCategory = document.createElement("div");
-            newCategory.textContent = document.getElementById('createNewCategoryInput').value;
-            newCategory.setAttribute("ondrop", "drop(event)");
-            newCategory.setAttribute("ondragover", "allowDrop(event)");
-            document.getElementById("categoriesContainer").appendChild(newCategory);
+            newCategory.setAttribute("style", "display:flex;");
+
+            var newCategoryInput = document.createElement("input");
+            newCategoryInput.value = document.getElementById('createNewCategoryInput').value;
+
+            var newCategoryColor = document.createElement("div");
+            newCategoryColor.setAttribute("style", "background-color:red; border-radius:100%; width:30px; height:30px;");
+            newCategoryColor.setAttribute("onclick", "openColorPicker(this);");
+
+            newCategory.appendChild(newCategoryInput);
+            newCategory.appendChild(newCategoryColor);
+
+            newCategoryWrapper.appendChild(newCategory);
+
+            document.getElementById("categoriesContainer").appendChild(newCategoryWrapper);
             document.getElementById('createNewCategoryInput').value = "";
+        }
+
+        function openColorPicker(target){
+            document.getElementById('colorPickerModal').style.display = "flex";
+            //target.style.backgroundColor = "blue";
         }
 
         function createNewIndicator(){
@@ -81,6 +116,8 @@ body
 
         function createProgram() {
             console.log("create program");
+            newProgram.data = document.getElementById("categoriesContainer").innerHTML;
+            console.log(newProgram);
         }
 
     div(style="padding:40px;")
@@ -95,7 +132,7 @@ body
                         +indicator(indicatorsJSON[i].indicatorName, indicatorsJSON[i].description, indicatorsJSON[i].descriptionOfCalculation, i)
                     - }
             div(style="flex-grow:1;") Categories
-                div(onclick="createNewCategory()" class="button") Create new category
+                div(onclick="createNewCategory();" class="button") Create new category
                 div(style="height:100%; width:100%; border:solid;" ondrop="drop(event)" ondragover="allowDrop(event)" id="categoriesContainer")
         div(onclick="createProgram()" class="button") Create Program
         //script.
