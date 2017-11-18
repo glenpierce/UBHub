@@ -26,4 +26,4 @@ docker run --name ubhub -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql
 
 This container should be running when you are running the project.
 
-To setup the initial database schema, go to http://localhost:3000/databaseUpdate/update and the MySQL commands to setup the database will run (some of them at least, I'm working on getting the stored procedures in place now).
+To setup the initial database schema, go to http://localhost:3000/databaseUpdate/update and the MySQL commands to setup the database will run.
