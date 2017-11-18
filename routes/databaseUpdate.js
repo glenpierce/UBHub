@@ -138,7 +138,7 @@ function update(){
     var createUser =
         "CREATE PROCEDURE createUser(IN emailInput VARCHAR(255), IN passwordHash VARCHAR(255), IN alias VARCHAR(255), IN userAddress VARCHAR(2000))\n" +
         "BEGIN\n" +
-        "insert into users values(emailInput, passwordHash, alias, userAddress);\n" +
+        "insert into users (email, hashedPassword, alias, userAddress) values(emailInput, passwordHash, alias, userAddress);\n" +
         "END";
     query.push(createUser);
 
