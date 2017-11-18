@@ -32,85 +32,181 @@ function update(){
     connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
+        password: config.rdsPassword
+        //database: config.rdsDatabase //we have not yet created the database schema, so trying to connect to a schema will not work
     });
 
     connection.connect();
 
-    initialSetup = "create table users(\n" +
-        "\temail VARCHAR(254) NOT NULL,\n" +
-        "    hashedPassword CHAR(254) not null,\n" +
-        "    alias VARCHAR(254) NOT NULL,\n" +
-        "    PRIMARY KEY (email),\n" +
-        "    UNIQUE INDEX (email)\n" +
-        "    );\n" +
-        "alter table users add userAddress VARCHAR(2000);\n" +
-        "\n" +
+    var query = [];
+
+    var createDb = "create database ubhub;";
+    query.push(createDb);
+
+    var useDb = "use ubhub;";
+    query.push(useDb);
+
+    createUsersTable =
+        "create table users(" +
+            "email VARCHAR(254) NOT NULL," +
+            "userAddress VARCHAR(2000)," +
+            "hashedPassword CHAR(254) not null," +
+            "alias VARCHAR(254) NOT NULL," +
+            "PRIMARY KEY (email)," +
+            "UNIQUE INDEX (email)" +
+            ");";
+    query.push(createUsersTable);
+
+    var emails =
+        "CREATE TABLE emails (" +
+            "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+            "`email` VARCHAR(2048) CHARACTER SET utf8" +
+        ");";
+    query.push(emails);
+
+    var createLocationsTable =
+        "CREATE TABLE locations (" +
+            "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+            "`address` VARCHAR(204) CHARACTER SET utf8," +
+            "`lat` FLOAT( 10, 6 )," +
+            "`lng` FLOAT( 10, 6 )," +
+            "`title` VARCHAR(57) CHARACTER SET utf8," +
+            "`country` VARCHAR(51) CHARACTER SET utf8," +
+            "`scale` VARCHAR(51) CHARACTER SET utf8," +
+            "`intplan_year` INT," +
+            "`intplan_title` VARCHAR(102) CHARACTER SET utf8," +
+            "`intplan_url` VARCHAR(459) CHARACTER SET utf8," +
+            "`plan1_year` VARCHAR(19) CHARACTER SET utf8," +
+            "`plan1_title` VARCHAR(108) CHARACTER SET utf8," +
+            "`plan1_url` VARCHAR(459) CHARACTER SET utf8," +
+            "`plan2_year` VARCHAR(11) CHARACTER SET utf8," +
+            "`plan2_title` VARCHAR(102) CHARACTER SET utf8," +
+            "`plan2_url` VARCHAR(459) CHARACTER SET utf8," +
+            "`report_year` INT," +
+            "`report_title` VARCHAR(102) CHARACTER SET utf8," +
+            "`report_url` VARCHAR(459) CHARACTER SET utf8," +
+            "`EF_year` VARCHAR(10) CHARACTER SET utf8," +
+            "`EF_data_ghapercap` NUMERIC(5, 3)," +
+            "`EF_link` VARCHAR(459) CHARACTER SET utf8," +
+            "`LAB_joined` VARCHAR(102) CHARACTER SET utf8," +
+            "`Durban_commitment` VARCHAR(102) CHARACTER SET utf8," +
+            "`LAB_CEPA` VARCHAR(102) CHARACTER SET utf8," +
+            "`LAB_URBIS` VARCHAR(102) CHARACTER SET utf8," +
+            "`LAB_wetlands` VARCHAR(102) CHARACTER SET utf8," +
+            "`Biophilic_cities` VARCHAR(102) CHARACTER SET utf8," +
+            "`European_Green_Capital_award` INT," +
+            "`European_capital_biodiversity` INT," +
+            "`biodiversity_url` VARCHAR(459) CHARACTER SET utf8," +
+            "`wetland_profile` VARCHAR(102) CHARACTER SET utf8," +
+            "`wetland_report` VARCHAR(102) CHARACTER SET utf8," +
+            "`SI_status` VARCHAR(102) CHARACTER SET utf8," +
+            "`MAB_urban` INT," +
+            "`IUCN_protected_area` VARCHAR(102) CHARACTER SET utf8," +
+            "`grab_partner` VARCHAR(102) CHARACTER SET utf8," +
+            "`extra1_title` VARCHAR(102) CHARACTER SET utf8," +
+            "`extra1_url` VARCHAR(459) CHARACTER SET utf8," +
+            "`extra2_title` VARCHAR(102) CHARACTER SET utf8," +
+            "`extra2_link` VARCHAR(459) CHARACTER SET utf8," +
+            "`map` VARCHAR(102) CHARACTER SET utf8," +
+            "`map_link` VARCHAR(459) CHARACTER SET utf8," +
+            "`data_portal` VARCHAR(102) CHARACTER SET utf8," +
+            "`data_link` VARCHAR(459) CHARACTER SET utf8," +
+            "`contact_name` VARCHAR(102) CHARACTER SET utf8," +
+            "`contact_title` INT," +
+            "`contact_email` VARCHAR(102) CHARACTER SET utf8," +
+            "`rainfall` INT," +
+            "`elevation_m` INT," +
+            "`temperature` INT," +
+            "`coastal` INT," +
+            "`CBI_coalition` INT," +
+            "`update_date` INT," +
+            "`update_by` VARCHAR(102) CHARACTER SET utf8," +
+            "`update_verified` INT," +
+            "`population` INT," +
+            "`density_km2` NUMERIC(14, 9)," +
+            "`area_km2` NUMERIC(17, 11)," +
+            "`area_ha` NUMERIC(6, 1)," +
+            "`OnePlanet` VARCHAR(3) CHARACTER SET utf8," +
+            "`carrycap_year` VARCHAR(10) CHARACTER SET utf8," +
+            "`carrycap_ghapercap` NUMERIC(5, 4)," +
+            "`carrycap_source` VARCHAR(204) CHARACTER SET utf8," +
+            "`myJson` VARCHAR(2000)" +
+        ");";
+    query.push(createLocationsTable);
+
+
+    var createUser =
         "DELIMITER //\n" +
         "CREATE PROCEDURE createUser(IN emailInput VARCHAR(255), IN passwordHash VARCHAR(255), IN alias VARCHAR(255), IN userAddress VARCHAR(2000))\n" +
-        "  BEGIN\n" +
-        "\tinsert into users values(emailInput, passwordHash, alias, userAddress);\n" +
-        "  END //\n" +
-        "DELIMITER ;\n" +
-        "\n" +
+        "BEGIN\n" +
+        "insert into users values(emailInput, passwordHash, alias, userAddress);\n" +
+        "END //\n" +
+        "DELIMITER ;";
+    query.push(createUser);
+
+    var createLocationSimple =
         "DELIMITER //\n" +
-        "CREATE PROCEDURE createLocationSimple(IN address VARCHAR(204), IN title VARCHAR(200), IN updateBy VARCHAR(254), IN country VARCHAR(51), IN scale VARCHAR(51), IN myJson JSON)\n" +
-        "  BEGIN\n" +
-        "\tINSERT INTO locations (address, title, update_by, country, scale, myJson) VALUES (address, title, updateBy, country, scale, myJson);\n" +
-        "    SELECT * FROM locations WHERE id=LAST_INSERT_ID();\n" +
-        "  END //\n" +
-        "DELIMITER ;\n" +
-        "\n" +
+        "CREATE PROCEDURE createLocationSimple(IN address VARCHAR(204), IN title VARCHAR(200), IN updateBy VARCHAR(254), IN country VARCHAR(51), IN scale VARCHAR(51), IN myJson VARCHAR(2000))\n" +
+        "BEGIN\n" +
+        "INSERT INTO locations (address, title, update_by, country, scale, myJson) VALUES (address, title, updateBy, country, scale, myJson);\n" +
+        "SELECT * FROM locations WHERE id=LAST_INSERT_ID();\n" +
+        "END //\n" +
+        "DELIMITER ;";
+    query.push(createLocationSimple);
+
+    var login =
         "DELIMITER //\n" +
         "CREATE PROCEDURE login(IN emailInput VARCHAR(255))\n" +
-        "  BEGIN\n" +
-        "\tSELECT email, hashedPassword from users WHERE email = emailInput;\n" +
-        "  END //\n" +
-        "DELIMITER ;\n" +
-        "\n" +
+        "BEGIN\n" +
+        "SELECT email, hashedPassword from users WHERE email = emailInput;\n" +
+        "END //\n" +
+        "DELIMITER ;";
+    query.push(login);
+
+    var updateLocation =
         "DELIMITER //\n" +
         "CREATE PROCEDURE updateLocation(IN idEntry INT, IN lat FLOAT( 10, 6 ), IN lng FLOAT( 10, 6 ))\n" +
-        "  BEGIN\n" +
-        "\tUPDATE locations SET lat = lat, lng = lng where id = idEntry;\n" +
-        "  END //\n" +
-        "DELIMITER ;\n" +
-        "\n" +
-        "alter table locations add column myJson json;\n" +
-        "select * from locations;\n" +
-        "\n" +
-        "CREATE TABLE emails (\n" +
-        "    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,\n" +
-        "    `email` VARCHAR(2048) CHARACTER SET utf8\n" +
-        ");\n" +
-        "\n" +
+        "BEGIN\n" +
+        "UPDATE locations SET lat = lat, lng = lng where id = idEntry;\n" +
+        "END //\n" +
+        "DELIMITER ;";
+    query.push(updateLocation);
+
+    var addEmail =
         "DELIMITER //\n" +
         "CREATE PROCEDURE addEmail(IN email VARCHAR(2048))\n" +
-        "  BEGIN\n" +
-        "\tINSERT INTO emails (email) VALUES (email);\n" +
-        "  END //\n" +
-        "DELIMITER ;\n" +
-        "\n" +
+        "BEGIN\n" +
+        "INSERT INTO emails (email) VALUES (email);\n" +
+        "END //\n" +
+        "DELIMITER ;";
+    query.push(addEmail);
+
+    var getAllUploadsByUser =
         "DELIMITER //\n" +
         "CREATE PROCEDURE getAllUploadsByUser(IN userId VARCHAR(2048))\n" +
-        "  BEGIN\n" +
-        "\tSELECT * from locations where update_by = userId;\n" +
-        "  END //\n" +
-        "DELIMITER ;\n" +
-        "\n" +
+        "BEGIN\n" +
+        "SELECT * from locations where update_by = userId;\n" +
+        "END //\n" +
+        "DELIMITER ;";
+    query.push(getAllUploadsByUser);
+
+    var getUploadById =
         "DELIMITER //\n" +
         "CREATE PROCEDURE getUploadById(IN inputId int(11))\n" +
-        "  BEGIN\n" +
-        "\tSELECT * from locations where id = inputId;\n" +
-        "  END //\n" +
-        "DELIMITER ;\n" +
-        "\n" +
+        "BEGIN\n" +
+        "SELECT * from locations where id = inputId;\n" +
+        "END //\n" +
+        "DELIMITER ;";
+    query.push(getUploadById);
+
+    var getAllUsers =
         "DELIMITER //\n" +
         "CREATE PROCEDURE GetAllUsers(emailInput char(254))\n" +
         "BEGIN\n" +
         "SELECT * FROM Users where email = emailInput;\n" +
         "END //\n" +
         "DELIMITER ;";
+    query.push(getAllUsers);
 
     programsQuery = "CREATE TABLE programs(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
@@ -293,21 +389,26 @@ function update(){
     //     "" +
     //     "";
 
-    query = ["select * from locations limit 3;", "select * from users;", "select * from emails;"];
-
     // Achievements - (ie: Silver, gold, platinum)
     // Unique ID
     // Name
     // Icon
     // Program
     // Threshold
+
+    // console.log(query.length);
+    // console.log(query);
+    // for(var i = 0; i < query.length; i++){
+    //     console.log(query[i]);
+    // }
     
-    for(var i = 0; i < 3; i++) {
+    for(var i = 0; i < query.length; i++) {
 
         console.log(query[i]);
         connection.query(query[i], function (err, rows, fields) {
             if (!err) {
-                console.log(rows);
+                // console.log(rows);
+                console.log("success");
             } else {
                 console.log('Error while performing Query.');
             }
