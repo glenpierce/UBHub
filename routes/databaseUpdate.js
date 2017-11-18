@@ -136,76 +136,60 @@ function update(){
 
 
     var createUser =
-        "DELIMITER //\n" +
         "CREATE PROCEDURE createUser(IN emailInput VARCHAR(255), IN passwordHash VARCHAR(255), IN alias VARCHAR(255), IN userAddress VARCHAR(2000))\n" +
         "BEGIN\n" +
         "insert into users values(emailInput, passwordHash, alias, userAddress);\n" +
-        "END //\n" +
-        "DELIMITER ;";
+        "END";
     query.push(createUser);
 
     var createLocationSimple =
-        "DELIMITER //\n" +
         "CREATE PROCEDURE createLocationSimple(IN address VARCHAR(204), IN title VARCHAR(200), IN updateBy VARCHAR(254), IN country VARCHAR(51), IN scale VARCHAR(51), IN myJson VARCHAR(2000))\n" +
         "BEGIN\n" +
         "INSERT INTO locations (address, title, update_by, country, scale, myJson) VALUES (address, title, updateBy, country, scale, myJson);\n" +
         "SELECT * FROM locations WHERE id=LAST_INSERT_ID();\n" +
-        "END //\n" +
-        "DELIMITER ;";
+        "END";
     query.push(createLocationSimple);
 
     var login =
-        "DELIMITER //\n" +
         "CREATE PROCEDURE login(IN emailInput VARCHAR(255))\n" +
         "BEGIN\n" +
         "SELECT email, hashedPassword from users WHERE email = emailInput;\n" +
-        "END //\n" +
-        "DELIMITER ;";
+        "END";
     query.push(login);
 
     var updateLocation =
-        "DELIMITER //\n" +
         "CREATE PROCEDURE updateLocation(IN idEntry INT, IN lat FLOAT( 10, 6 ), IN lng FLOAT( 10, 6 ))\n" +
         "BEGIN\n" +
-        "UPDATE locations SET lat = lat, lng = lng where id = idEntry;\n" +
-        "END //\n" +
-        "DELIMITER ;";
+        "UPDATE locations SET lat = lat, lng = lng where id = idEntry;" +
+        "END";
     query.push(updateLocation);
 
     var addEmail =
-        "DELIMITER //\n" +
         "CREATE PROCEDURE addEmail(IN email VARCHAR(2048))\n" +
         "BEGIN\n" +
         "INSERT INTO emails (email) VALUES (email);\n" +
-        "END //\n" +
-        "DELIMITER ;";
+        "END";
     query.push(addEmail);
 
     var getAllUploadsByUser =
-        "DELIMITER //\n" +
         "CREATE PROCEDURE getAllUploadsByUser(IN userId VARCHAR(2048))\n" +
         "BEGIN\n" +
         "SELECT * from locations where update_by = userId;\n" +
-        "END //\n" +
-        "DELIMITER ;";
+        "END";
     query.push(getAllUploadsByUser);
 
     var getUploadById =
-        "DELIMITER //\n" +
         "CREATE PROCEDURE getUploadById(IN inputId int(11))\n" +
         "BEGIN\n" +
-        "SELECT * from locations where id = inputId;\n" +
-        "END //\n" +
-        "DELIMITER ;";
+        "SELECT * from locations where id = inputId;" +
+        "END";
     query.push(getUploadById);
 
     var getAllUsers =
-        "DELIMITER //\n" +
         "CREATE PROCEDURE GetAllUsers(emailInput char(254))\n" +
         "BEGIN\n" +
         "SELECT * FROM Users where email = emailInput;\n" +
-        "END //\n" +
-        "DELIMITER ;";
+        "END";
     query.push(getAllUsers);
 
     programsQuery = "CREATE TABLE programs(" +
@@ -407,10 +391,11 @@ function update(){
         console.log(query[i]);
         connection.query(query[i], function (err, rows, fields) {
             if (!err) {
-                // console.log(rows);
                 console.log("success");
             } else {
                 console.log('Error while performing Query.');
+                console.log(err.code);
+                console.log(err.message);
             }
         });
 
