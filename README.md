@@ -7,10 +7,15 @@ To run this project, you will need to add a config.js file in the root directory
 var config = {};
 
 config.rdsHost = process.env.RDS_HOST || '[the ip address of your docker container]';
+
 config.rdsUser = process.env.RDS_USER || 'root';
+
 config.rdsPassword =  process.env.RDS_PASSWORD || 'my-secret-pw';
+
 config.rdsDatabase = process.env.RDS_DATABASE || 'ubhub';
+
 config.secret = 'In our dev environments, this doesn't really need to be a secret';
+
 config.reCAPTCHASecret = ''; //you don't need this right now reCAPTCHA doesn't seem to be working.
 
 module.exports = config;
