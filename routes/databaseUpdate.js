@@ -52,6 +52,7 @@ function update(){
             "userAddress VARCHAR(2000)," +
             "hashedPassword CHAR(254) not null," +
             "alias VARCHAR(254) NOT NULL," +
+            "privileges INT, " +
             "PRIMARY KEY (email)," +
             "UNIQUE INDEX (email)" +
             ");";
@@ -201,6 +202,7 @@ function update(){
         "`author` VARCHAR(254), " +
         "`creationDate` DATE" +
         ");";
+    query.push(programsQuery);
 
     sitesQuery = "CREATE TABLE sites(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
@@ -212,11 +214,13 @@ function update(){
             calculation: density = population / -1
             */
         ");";
+    query.push(sitesQuery);
 
     sitesByUserQuery = "CREATE TABLE sitesByUser(" +
         "`site` INT NOT NULL, " +
         "`user` VARCHAR(254) NOT NULL" +
         ");";
+    query.push(sitesByUserQuery);
 
     indicatorsQuery = "CREATE TABLE indicators(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
@@ -233,6 +237,7 @@ function update(){
         "`author` VARCHAR(254), " +
         "`creationDate` DATE" +
         ");";
+    query.push(indicatorsQuery);
 
     indicatorValues = "CREATE TABLE indicatorValues(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
@@ -247,17 +252,20 @@ function update(){
         "`defaultTextValue` VARCHAR(2048), " +
         "`completionThreshold` FLOAT(10, 2)" +
         ");";
+    query.push(indicatorValues);
 
-    indicatorRatingsQuery = "CREAT TABLE indicatorRatings(" +
+    indicatorRatingsQuery = "CREATE TABLE indicatorRatings(" +
         "`indicator` INT, " +
         "`user` VARCHAR(254), " +
         "`rating` INT" +
         ");";
+    query.push(indicatorRatingsQuery);
 
     documentsQuery = "CREATE TABLE documents(" +
         "`documentName` VARCHAR(255), " +
         "`documentUrl` VARCHAR(2048)" +
         ");";
+    query.push(documentsQuery);
 
     categoriesQuery = "CREATE TABLE categories(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
@@ -270,6 +278,7 @@ function update(){
         "`partiallyCompleteColor` VARCHAR(8) CHARACTER SET utf8, " +
         "`notApplicableColor` VARCHAR(8) CHARACTER SET utf8" +
         ");";
+    query.push(categoriesQuery);
 
     permissionsQuery = "CREATE TABLE permissions(" +
         "`user` VARCHAR(254) NOT NULL, " +
@@ -278,6 +287,7 @@ function update(){
         "`indicator` INT" +
         "`site` INT" +
         ");";
+    query.push(permissionsQuery);
 
     userDataQuery = "CREATE TABLE userData(" +
         "`site` INT," +
@@ -290,10 +300,9 @@ function update(){
         "`name` VARCHAR(2048), " +
         "`notes` VARCHAR(2048)" +
         ");";
+    query.push(userDataQuery);
 
-    userUpdateQuery = "ALTER TABLE users ADD privileges INT;";
-
-    insertIntoIndicatorsQuery = "" +
+    insertIntoIndicatorsQuery =
         "insert into programs(programName, description, programType, private) values('Singapore Index', 'An index made in Singapore', 0, 0);" +
 
         "insert into indicators(indicatorName, numberInProgram, categoryInProgram, archetype, weight, required, description, descriptionOfCalculation, calculation, private) values(Proportion of Natural Areas in the City, 1, 1, " +
@@ -385,7 +394,7 @@ function update(){
     // for(var i = 0; i < query.length; i++){
     //     console.log(query[i]);
     // }
-    
+
     for(var i = 0; i < query.length; i++) {
 
         console.log(query[i]);

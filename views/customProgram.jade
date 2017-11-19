@@ -33,7 +33,9 @@ body
 
     script.
 
-        var newProgram = {};
+        var newProgram = {
+            categories: []
+        };
 
         function allowDrop(ev) {
             ev.preventDefault();
@@ -44,16 +46,28 @@ body
         }
 
         function drop(ev) {
+            console.log("drop");
             ev.preventDefault();
             var data = ev.dataTransfer.getData("text");
             var i = 0;
             var element = ev.target
             while (!element.getAttribute("ondrop") && i < 100) {
-                console.log("recalibrating");
                 element = element.parentElement;
                 i++;
             }
             element.appendChild(document.getElementById(data));
+            for (var i = 0; i < newProgram.categories.length; i++) {
+                if(element.getAttribute("categoryId") == newProgram.categories[i].id){ //yes we are relying on type coercion here element.getAttribute("categoryId") is a string, newProgram.categories[i].id is a number
+                    indicator = {
+                        id: Date.now(),
+                        name: data
+                    };
+                    newProgram.categories[i].indicators.push(indicator)
+                    console.log("adding indicator to category");
+                    break;
+                }
+            }
+            console.log(newProgram);
         }
 
         function hideModal(id) {
@@ -86,6 +100,24 @@ body
 
             newCategory.appendChild(newCategoryInput);
             newCategory.appendChild(newCategoryColor);
+
+            newCategoryObject = {
+                name: newCategoryInput.value,
+                id: Date.now(),
+                indicators: []
+            };
+            newCategoryWrapper.setAttribute("categoryName", newCategoryObject.name);
+            newCategoryWrapper.setAttribute("categoryId", newCategoryObject.id);
+            newProgram.categories.push(newCategoryObject);
+            newCategoryInput.onblur = function (event) {
+                newCategoryWrapper.setAttribute("categoryName", newCategoryInput.value);
+                for(var i = 0; i < newProgram.categories.length; i++){
+                    if(newProgram.categories[i].id === newCategoryWrapper.getAttribute("categoryId")){
+                        newProgram.categories[i].name = newCategoryInput.value;
+                        break;
+                    }
+                }
+            }
 
             newCategoryWrapper.appendChild(newCategory);
 

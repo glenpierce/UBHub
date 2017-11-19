@@ -26,7 +26,7 @@ router.get('/', function(req, res, next) {
     });
 
     connection.connect();
-    query = 'SELECT * from indicators2';
+    query = 'SELECT * from indicators';
     console.log(query);
     connection.query(query, function(err, rows, fields) {
         if (!err) {
