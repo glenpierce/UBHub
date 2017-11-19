@@ -40,6 +40,13 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/', function(req, res){
+
+    if (req.session && req.session.user) {
+
+    } else {
+
+    }
+
     console.log(req.body);
     res.writeHead(200, {'Content-Type': 'text/html'});
     res.write("message received");

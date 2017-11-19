@@ -144,13 +144,23 @@ body
             document.getElementById('createNewIndicatorInput').focus();
         }
 
-        function createIndicator(){
+        function createIndicator() {
+            newIndicatorSendToServer = {
+                name: document.getElementById('createNewIndicatorInput').value
+            };
+
+            httpPost("/createCustomIndicator", createIndicatorCallback, newIndicatorSendToServer);
+        }
+
+        function createIndicatorCallback(responseFromServer) {
+            responseFromServer = JSON.parse(responseFromServer)
+            console.log(responseFromServer);
             var newIndicator = document.createElement("div");
-            newIndicator.textContent = document.getElementById('createNewIndicatorInput').value;
+            newIndicator.textContent = responseFromServer.indicatorName;
             newIndicator.setAttribute("draggable", "true");
             newIndicator.setAttribute("ondragstart", "drag(event)");
             newIndicator.setAttribute("style", "border:solid;")
-            newIndicator.id = Date.now();
+            newIndicator.id = responseFromServer.id;
             document.getElementById("indicatorsContainer").appendChild(newIndicator);
             document.getElementById('createNewIndicatorInput').value = "";
         }
@@ -170,7 +180,7 @@ body
                 div(onclick="createNewIndicator()" class="button") create new indicator
                 div(style="height:100%; width:100%; border:solid;" ondrop="drop(event)" ondragover="allowDrop(event)" id="indicatorsContainer")
                     - for (var i = 0; i < indicatorsJSON.length; i++){
-                        +indicator(indicatorsJSON[i].indicatorName, indicatorsJSON[i].description, indicatorsJSON[i].descriptionOfCalculation, i)
+                        +indicator(indicatorsJSON[i].indicatorName, indicatorsJSON[i].description, indicatorsJSON[i].descriptionOfCalculation, indicatorsJSON[i].id)
                     - }
             div(style="flex-grow:1;") Categories
                 div(onclick="createNewCategory();" class="button") Create new category

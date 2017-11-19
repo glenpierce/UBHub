@@ -239,6 +239,14 @@ function update(){
         ");";
     query.push(indicatorsQuery);
 
+    createIndicator =
+        "CREATE PROCEDURE createIndicator(IN indicatorName VARCHAR(2048), IN author VARCHAR(254))\n" +
+        "BEGIN\n" +
+        "INSERT INTO indicators(indicatorName, author) VALUES (indicatorName, author);\n" +
+        "SELECT * FROM indicators WHERE id=LAST_INSERT_ID();\n" +
+        "END";
+    query.push(createIndicator);
+
     indicatorValues = "CREATE TABLE indicatorValues(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`name` VARCHAR(2048), " +
