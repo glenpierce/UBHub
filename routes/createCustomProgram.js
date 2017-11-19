@@ -41,6 +41,9 @@ router.get('/', function(req, res, next) {
 
 router.post('/', function(req, res){
     console.log(req.body);
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.write("message received");
+    res.end();
 });
 
 module.exports = router;

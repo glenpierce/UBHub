@@ -157,8 +157,8 @@ body
 
         function createProgram() {
             console.log("create program");
-            newProgram.data = document.getElementById("categoriesContainer").innerHTML;
             console.log(newProgram);
+            httpPost("/createCustomProgram", console.log, newProgram);
         }
 
     div(style="padding:40px;")
