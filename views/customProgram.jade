@@ -42,28 +42,37 @@ body
         }
 
         function drag(ev) {
-            ev.dataTransfer.setData("text", ev.target.id);
+            ev.dataTransfer.setData("text", ev.target.textContent);
+            ev.dataTransfer.setData("id", ev.target.id);
         }
 
         function drop(ev) {
-            console.log("drop");
             ev.preventDefault();
             var data = ev.dataTransfer.getData("text");
+            var id = ev.dataTransfer.getData("id");
             var i = 0;
             var element = ev.target
             while (!element.getAttribute("ondrop") && i < 100) {
                 element = element.parentElement;
                 i++;
             }
-            element.appendChild(document.getElementById(data));
+            element.appendChild(document.getElementById(id));
+            for (var i = 0; i < newProgram.categories.length; i++) {
+                for(var j = 0; j < newProgram.categories[i].indicators.length; j++) {
+                    if(newProgram.categories[i].indicators[j].id == id){ //yes we are relying on type coercion here
+                        newProgram.categories[i].indicators.splice(j, 1);
+                        break;
+                    }
+                }
+            }
+
             for (var i = 0; i < newProgram.categories.length; i++) {
                 if(element.getAttribute("categoryId") == newProgram.categories[i].id){ //yes we are relying on type coercion here element.getAttribute("categoryId") is a string, newProgram.categories[i].id is a number
                     indicator = {
-                        id: Date.now(),
+                        id: id,
                         name: data
                     };
                     newProgram.categories[i].indicators.push(indicator)
-                    console.log("adding indicator to category");
                     break;
                 }
             }
@@ -141,7 +150,7 @@ body
             newIndicator.setAttribute("draggable", "true");
             newIndicator.setAttribute("ondragstart", "drag(event)");
             newIndicator.setAttribute("style", "border:solid;")
-            newIndicator.id = (document.getElementById('createNewIndicatorInput').value);
+            newIndicator.id = Date.now();
             document.getElementById("indicatorsContainer").appendChild(newIndicator);
             document.getElementById('createNewIndicatorInput').value = "";
         }
@@ -165,7 +174,7 @@ body
                     - }
             div(style="flex-grow:1;") Categories
                 div(onclick="createNewCategory();" class="button") Create new category
-                div(style="height:100%; width:100%; border:solid;" ondrop="drop(event)" ondragover="allowDrop(event)" id="categoriesContainer")
+                div(style="height:100%; width:100%; border:solid;" id="categoriesContainer")
         div(onclick="createProgram()" class="button") Create Program
         //script.
         //    var indicators = !{indicators};
