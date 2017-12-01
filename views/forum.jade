@@ -1,0 +1,13 @@
+doctype html
+include mixins
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        script.
+            function goToDashboard() {
+                console.log("clicked");
+            }
+
+
+body
+    +header(true)

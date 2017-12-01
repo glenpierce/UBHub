@@ -292,7 +292,7 @@ function update(){
         "`user` VARCHAR(254) NOT NULL, " +
         "`permissionLevel` INT" +
         "`program` INT, " +
-        "`indicator` INT" +
+        "`indicator` INT, " +
         "`site` INT" +
         ");";
     query.push(permissionsQuery);
@@ -402,7 +402,6 @@ function update(){
     // for(var i = 0; i < query.length; i++){
     //     console.log(query[i]);
     // }
-
     for(var i = 0; i < query.length; i++) {
 
         console.log(query[i]);
