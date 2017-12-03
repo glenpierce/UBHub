@@ -58,6 +58,24 @@ function update(){
             ");";
     query.push(createUsersTable);
 
+    createPostsTable =
+      "create table posts(" +
+        "id INT(255) NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+        "parent INT(255)," +
+        "author VARCHAR(254) NOT NULL," +
+        "subject VARCHAR(255) NOT NULL," +
+        "body TEXT(65534)," +
+        "creationDate DATETIME," +
+        "upvotes INT(255)," +
+        "downvotes INT(255)," +
+        "views INT(255)," +
+        "tags VARCHAR(2048)," +
+        "keywords VARCHAR(2048)," +
+        "status VARCHAR(255)," +
+        "acceptedAnswerId INT(255)" +
+      ");";
+    query.push(createPostsTable);
+
     var emails =
         "CREATE TABLE emails (" +
             "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
@@ -193,6 +211,14 @@ function update(){
         "END";
     query.push(getAllUsers);
 
+    var createAddPostQuery =
+      "CREATE PROCEDURE AddForumPost(IN author varchar(255), IN parent varchar(255), IN subject varchar(255), IN body TEXT, IN creationDate DATETIME)\n" +
+      "BEGIN\n" +
+      "INSERT INTO posts (author, parent, subject, body, creationDate) VALUES (author, parent, subject, body, creationDate);\n" +
+      "SELECT * FROM posts WHERE id=LAST_INSERT_ID();\n" +
+      "END";
+    query.push(createAddPostQuery);
+
     programsQuery = "CREATE TABLE programs(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`programName` VARCHAR(2048) CHARACTER SET utf8, " +
@@ -310,6 +336,9 @@ function update(){
         ");";
     query.push(userDataQuery);
 
+
+
+
     insertIntoIndicatorsQuery =
         "insert into programs(programName, description, programType, private) values('Singapore Index', 'An index made in Singapore', 0, 0);" +
 
@@ -370,6 +399,10 @@ function update(){
         "insert into categories (program, categoryName, number, description, completeColor, incompleteColor, partiallyCompleteColor, notApplicableColor) values (1, categoryName, 3, description, completeColor, incompleteColor, partiallyCompleteColor, notApplicableColor);" +
         "";
 
+
+
+
+
     /*
      Indicator ratings across multiple categories
      Indicator Certifications
@@ -402,6 +435,9 @@ function update(){
     // for(var i = 0; i < query.length; i++){
     //     console.log(query[i]);
     // }
+
+    query = [useDb, createAddPostQuery];
+
     for(var i = 0; i < query.length; i++) {
 
         console.log(query[i]);

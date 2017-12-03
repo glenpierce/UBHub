@@ -100,6 +100,36 @@ a {
   margin: 0 auto;
 }
 
+.contentContainer {
+  max-width: 800px; margin: auto;
+}
+
+/**Forum**/
+
+#askForm label {
+  font-weight: bold;
+  margin-bottom: 8px;
+  display: block;
+}
+
+#askForm input {
+  width: 100%;
+  max-width:480px;
+  display: block;
+  padding: 4px;
+  margin-bottom: 12px;
+}
+
+#askForm textarea {
+  width: 100%;
+  display: block;
+  margin-bottom: 12px;
+  resize: none;
+  padding: 4px;
+  height: 320px;
+
+}
+
 /*
 Blue
 1  07456b

@@ -1,0 +1,23 @@
+doctype html
+include mixins
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        script(src='/javascripts/forumscripts.js')
+        script.
+            function goToDashboard() {
+                console.log("clicked");
+            }
+
+
+body
+    +header(true)
+    div(class="contentContainer")
+      h2(style="text-align: center") Ask a Question!
+      div
+        form(action="" id="askForm")
+          label Your Question:
+          input(type="text" name="questionTitle")
+          label Details:
+          textarea(name="questionBody")
+          input(type="button" onclick="submitQuestion()" value="Submit Question")

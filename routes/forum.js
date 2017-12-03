@@ -15,6 +15,14 @@ app.use(session({
     activeDuration: 5 * 60 * 1000
 }));
 
+/*
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+
+app.use(bodyParser.json());
+
+*/
 router.get('/', function(req, res, next) {
     console.log("forum");
     if (req.session && req.session.user) {
@@ -26,5 +34,26 @@ router.get('/', function(req, res, next) {
         res.redirect('/');
     }
 });
+
+
+router.get('/ask', function(req, res, next) {
+  console.log("forum");
+  if (req.session && req.session.user) {
+      console.log("logged in as " + req.session.user);
+      res.render('ask');
+  } else {
+      console.log("not logged in");
+      req.session.reset();
+      res.redirect('/');
+  }
+});
+
+router.post("/submit", function (req, res) {
+    //TODO: make sure the post is legal etc.
+    if (req.session && req.session.user) {
+      
+    }
+});
+
 
 module.exports = router;
