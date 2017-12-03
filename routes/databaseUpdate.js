@@ -60,19 +60,19 @@ function update(){
 
     createPostsTable =
       "create table posts(" +
-        "id INT(255) NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-        "parent INT(255)," +
-        "author VARCHAR(254) NOT NULL," +
+        "id INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+        "parent INT," +
+        "author VARCHAR(255) NOT NULL," +
         "subject VARCHAR(255) NOT NULL," +
-        "body TEXT(65534)," +
+        "body TEXT," +
         "creationDate DATETIME," +
-        "upvotes INT(255)," +
-        "downvotes INT(255)," +
-        "views INT(255)," +
+        "upvotes INT," +
+        "downvotes INT," +
+        "views INT," +
         "tags VARCHAR(2048)," +
         "keywords VARCHAR(2048)," +
         "status VARCHAR(255)," +
-        "acceptedAnswerId INT(255)" +
+        "acceptedAnswerId INT" +
       ");";
     query.push(createPostsTable);
 
