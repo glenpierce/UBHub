@@ -40,23 +40,23 @@ function update(){
 
     var query = [];
 
-    var createDb = "create database ubhub;";
-    query.push(createDb);
+    createDbQuery = "create database ubhub;";
+    query.push(createDbQuery);
 
-    var useDb = "use ubhub;";
-    query.push(useDb);
+    useDbQuery = "use ubhub;";
+    query.push(useDbQuery);
 
-    createUsersTable =
+    createUsersTableQuery =
         "create table users(" +
-            "email VARCHAR(254) NOT NULL," +
+            "email VARCHAR(255) NOT NULL," +
             "userAddress VARCHAR(2000)," +
-            "hashedPassword CHAR(254) not null," +
-            "alias VARCHAR(254) NOT NULL," +
+            "hashedPassword CHAR(255) not null," + //pretty sure bcrypt only allows for 60 chars in a hash
+            "alias VARCHAR(255) NOT NULL," +
             "privileges INT, " +
             "PRIMARY KEY (email)," +
             "UNIQUE INDEX (email)" +
             ");";
-    query.push(createUsersTable);
+    query.push(createUsersTableQuery);
 
     createPostsTable =
       "create table posts(" +
@@ -76,14 +76,14 @@ function update(){
       ");";
     query.push(createPostsTable);
 
-    var emails =
+    createEmailsTableQuery =
         "CREATE TABLE emails (" +
             "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
             "`email` VARCHAR(2048) CHARACTER SET utf8" +
         ");";
-    query.push(emails);
+    query.push(createEmailsTableQuery);
 
-    var createLocationsTable =
+    createLocationsTableQuery =
         "CREATE TABLE locations (" +
             "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
             "`address` VARCHAR(204) CHARACTER SET utf8," +
@@ -151,65 +151,65 @@ function update(){
             "`carrycap_source` VARCHAR(204) CHARACTER SET utf8," +
             "`myJson` VARCHAR(2000)" +
         ");";
-    query.push(createLocationsTable);
+    query.push(createLocationsTableQuery);
 
 
-    var createUser =
+    createUserQuery =
         "CREATE PROCEDURE createUser(IN emailInput VARCHAR(255), IN passwordHash VARCHAR(255), IN alias VARCHAR(255), IN userAddress VARCHAR(2000))\n" +
         "BEGIN\n" +
         "insert into users (email, hashedPassword, alias, userAddress) values(emailInput, passwordHash, alias, userAddress);\n" +
         "END";
-    query.push(createUser);
+    query.push(createUserQuery);
 
-    var createLocationSimple =
-        "CREATE PROCEDURE createLocationSimple(IN address VARCHAR(204), IN title VARCHAR(200), IN updateBy VARCHAR(254), IN country VARCHAR(51), IN scale VARCHAR(51), IN myJson VARCHAR(2000))\n" +
+    createLocationSimpleQuery =
+        "CREATE PROCEDURE createLocationSimple(IN address VARCHAR(204), IN title VARCHAR(200), IN updateBy VARCHAR(255), IN country VARCHAR(51), IN scale VARCHAR(51), IN myJson VARCHAR(2000))\n" +
         "BEGIN\n" +
         "INSERT INTO locations (address, title, update_by, country, scale, myJson) VALUES (address, title, updateBy, country, scale, myJson);\n" +
         "SELECT * FROM locations WHERE id=LAST_INSERT_ID();\n" +
         "END";
-    query.push(createLocationSimple);
+    query.push(createLocationSimpleQuery);
 
-    var login =
+    loginQuery =
         "CREATE PROCEDURE login(IN emailInput VARCHAR(255))\n" +
         "BEGIN\n" +
         "SELECT email, hashedPassword from users WHERE email = emailInput;\n" +
         "END";
-    query.push(login);
+    query.push(loginQuery);
 
-    var updateLocation =
+    updateLocationQuery =
         "CREATE PROCEDURE updateLocation(IN idEntry INT, IN lat FLOAT( 10, 6 ), IN lng FLOAT( 10, 6 ))\n" +
         "BEGIN\n" +
         "UPDATE locations SET lat = lat, lng = lng where id = idEntry;" +
         "END";
-    query.push(updateLocation);
+    query.push(updateLocationQuery);
 
-    var addEmail =
+    addEmailQuery =
         "CREATE PROCEDURE addEmail(IN email VARCHAR(2048))\n" +
         "BEGIN\n" +
         "INSERT INTO emails (email) VALUES (email);\n" +
         "END";
-    query.push(addEmail);
+    query.push(addEmailQuery);
 
-    var getAllUploadsByUser =
+    getAllUploadsByUserQuery =
         "CREATE PROCEDURE getAllUploadsByUser(IN userId VARCHAR(2048))\n" +
         "BEGIN\n" +
         "SELECT * from locations where update_by = userId;\n" +
         "END";
-    query.push(getAllUploadsByUser);
+    query.push(getAllUploadsByUserQuery);
 
-    var getUploadById =
+    getUploadByIdQuery =
         "CREATE PROCEDURE getUploadById(IN inputId int(11))\n" +
         "BEGIN\n" +
         "SELECT * from locations where id = inputId;" +
         "END";
-    query.push(getUploadById);
+    query.push(getUploadByIdQuery);
 
-    var getAllUsers =
-        "CREATE PROCEDURE GetAllUsers(emailInput char(254))\n" +
+    getAllUsersQuery =
+        "CREATE PROCEDURE GetAllUsers(emailInput char(255))\n" +
         "BEGIN\n" +
         "SELECT * FROM Users where email = emailInput;\n" +
         "END";
-    query.push(getAllUsers);
+    query.push(getAllUsersQuery);
 
     var createAddPostQuery =
       "CREATE PROCEDURE AddForumPost(IN author varchar(255), IN parent varchar(255), IN subject varchar(255), IN body TEXT, IN creationDate DATETIME)\n" +
@@ -219,18 +219,28 @@ function update(){
       "END";
     query.push(createAddPostQuery);
 
-    programsQuery = "CREATE TABLE programs(" +
+    createProgramsTableQuery =
+        "CREATE TABLE programs(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`programName` VARCHAR(2048) CHARACTER SET utf8, " +
         "`description` VARCHAR(2048) CHARACTER SET utf8, " +
         "`programType` INT, " + //0 = index
         "`private` BIT, " +
-        "`author` VARCHAR(254), " +
+        "`author` VARCHAR(255), " +
         "`creationDate` DATE" +
         ");";
-    query.push(programsQuery);
+    query.push(createProgramsTableQuery);
 
-    sitesQuery = "CREATE TABLE sites(" +
+    createProgramQuery =
+        "CREATE PROCEDURE createProgram(IN programName VARCHAR(2048), IN author VARCHAR(255))\n" +
+        "BEGIN\n" +
+        "INSERT INTO programs(programName, author) VALUES (programName, author);\n" +
+        "SELECT * FROM programs WHERE id=LAST_INSERT_ID();\n" +
+        "END";
+    query.push(createProgramQuery);
+
+    createSitesTableQuery =
+        "CREATE TABLE sites(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`siteName` VARCHAR(2048) CHARACTER SET utf8" +
         "" +
@@ -240,15 +250,17 @@ function update(){
             calculation: density = population / -1
             */
         ");";
-    query.push(sitesQuery);
+    query.push(createSitesTableQuery);
 
-    sitesByUserQuery = "CREATE TABLE sitesByUser(" +
+    createSitesByUserTableQuery =
+        "CREATE TABLE sitesByUser(" +
         "`site` INT NOT NULL, " +
-        "`user` VARCHAR(254) NOT NULL" +
+        "`user` VARCHAR(255) NOT NULL" +
         ");";
-    query.push(sitesByUserQuery);
+    query.push(createSitesByUserTableQuery);
 
-    indicatorsQuery = "CREATE TABLE indicators(" +
+    createIndicatorsTableQuery =
+        "CREATE TABLE indicators(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`indicatorName` VARCHAR(2048) CHARACTER SET utf8, " +
         "`numberInProgram` INT, " +
@@ -260,20 +272,29 @@ function update(){
         "`descriptionOfCalculation` VARCHAR(2048) CHARACTER SET utf8, " +
         "`calculation` VARCHAR(2048), " + //example: (1 * 2) / 3 or if(1 > 1.0) 1; else 0;
         "`private` BIT, " +
-        "`author` VARCHAR(254), " +
+        "`author` VARCHAR(255), " +
         "`creationDate` DATE" +
         ");";
-    query.push(indicatorsQuery);
+    query.push(createIndicatorsTableQuery);
 
-    createIndicator =
-        "CREATE PROCEDURE createIndicator(IN indicatorName VARCHAR(2048), IN author VARCHAR(254))\n" +
+    createIndicatorQuery =
+        "CREATE PROCEDURE createIndicator(IN indicatorName VARCHAR(2048), IN author VARCHAR(255))\n" +
         "BEGIN\n" +
         "INSERT INTO indicators(indicatorName, author) VALUES (indicatorName, author);\n" +
         "SELECT * FROM indicators WHERE id=LAST_INSERT_ID();\n" +
         "END";
-    query.push(createIndicator);
+    query.push(createIndicatorQuery);
 
-    indicatorValues = "CREATE TABLE indicatorValues(" +
+    createIndicatorInProgramQuery =
+        "CREATE PROCEDURE createIndicatorInProgram(IN indicatorName VARCHAR(2048), numberInProgram INT, categoryInProgram INT)\n" +
+        "BEGIN\n" +
+        "INSERT INTO indicators(indicatorName, numberInProgram, categoryInProgram) VALUES (indicatorName, numberInProgram, categoryInProgram);\n" +
+        "SELECT * FROM indicators WHERE id=LAST_INSERT_ID();\n" +
+        "END";
+    query.push(createIndicatorInProgramQuery);
+
+    createIndicatorValuesTableQuery =
+        "CREATE TABLE indicatorValues(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`name` VARCHAR(2048), " +
         "`indicator` INT, " +
@@ -286,22 +307,25 @@ function update(){
         "`defaultTextValue` VARCHAR(2048), " +
         "`completionThreshold` FLOAT(10, 2)" +
         ");";
-    query.push(indicatorValues);
+    query.push(createIndicatorValuesTableQuery);
 
-    indicatorRatingsQuery = "CREATE TABLE indicatorRatings(" +
+    createIndicatorRatingsTableQuery =
+        "CREATE TABLE indicatorRatings(" +
         "`indicator` INT, " +
-        "`user` VARCHAR(254), " +
+        "`user` VARCHAR(255), " +
         "`rating` INT" +
         ");";
-    query.push(indicatorRatingsQuery);
+    query.push(createIndicatorRatingsTableQuery);
 
-    documentsQuery = "CREATE TABLE documents(" +
+    createDocumentsTableQuery =
+        "CREATE TABLE documents(" +
         "`documentName` VARCHAR(255), " +
         "`documentUrl` VARCHAR(2048)" +
         ");";
-    query.push(documentsQuery);
+    query.push(createDocumentsTableQuery);
 
-    categoriesQuery = "CREATE TABLE categories(" +
+    createCategoriesTableQuery =
+        "CREATE TABLE categories(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`program` INT, " +
         "`categoryName` VARCHAR(2048) CHARACTER SET utf8, " +
@@ -312,18 +336,27 @@ function update(){
         "`partiallyCompleteColor` VARCHAR(8) CHARACTER SET utf8, " +
         "`notApplicableColor` VARCHAR(8) CHARACTER SET utf8" +
         ");";
-    query.push(categoriesQuery);
+    query.push(createCategoriesTableQuery);
 
-    permissionsQuery = "CREATE TABLE permissions(" +
-        "`user` VARCHAR(254) NOT NULL, " +
+    createCategoryQuery =
+        "CREATE PROCEDURE createCategory(IN categoryName VARCHAR(2048), IN number INT, IN program INT)\n" +
+        "BEGIN\n" +
+        "INSERT INTO categories(categoryName, number, program) VALUES (categoryName, number, program);\n" +
+        "END";
+    query.push(createCategoryQuery);
+
+    createPermissionsTableQuery =
+        "CREATE TABLE permissions(" +
+        "`user` VARCHAR(255) NOT NULL, " +
         "`permissionLevel` INT" +
         "`program` INT, " +
         "`indicator` INT, " +
         "`site` INT" +
         ");";
-    query.push(permissionsQuery);
+    query.push(createPermissionsTableQuery);
 
-    userDataQuery = "CREATE TABLE userData(" +
+    createUserDataTableQuery =
+        "CREATE TABLE userData(" +
         "`site` INT," +
         "`program` INT, " +
         "`year` INT, " +
@@ -334,7 +367,7 @@ function update(){
         "`name` VARCHAR(2048), " +
         "`notes` VARCHAR(2048)" +
         ");";
-    query.push(userDataQuery);
+    query.push(createUserDataTableQuery);
 
 
 
@@ -436,7 +469,8 @@ function update(){
     //     console.log(query[i]);
     // }
 
-    query = [useDb, createAddPostQuery];
+
+    // query = [useDbQuery, ];
 
     for(var i = 0; i < query.length; i++) {
 
