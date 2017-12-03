@@ -40,17 +40,74 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/', function(req, res){
+    var newProgram = req.body;
+    response = "";
 
     if (req.session && req.session.user) {
-
+        //create new program
+        createCategories = createCategoriesFunction(newProgram); //this is creating a callback function that includes a closure containing the newProgram object that we want to keep track of in our callbacks.
+        makeDbCall("CALL createProgram('" + newProgram.categories[0].name + "', '" + req.session.user + "')", createCategories);
+        response = "here we go!"
     } else {
-
+        //send the user a popup that tells them they aren't logged in
+        response = "you aren't logged in";
     }
-
-    console.log(req.body);
     res.writeHead(200, {'Content-Type': 'text/html'});
-    res.write("message received");
+    res.write(response);
     res.end();
 });
+
+createCategoriesFunction = function(program) {
+    return function (rows) {
+        console.log(rows);
+        console.log(program);
+        programId = rows[0][0].id;
+        number = 1;
+        for (category in program.categories) {
+            //create new category
+            console.log("category in categories=");
+            console.log(category);
+            createIndicators = createIndicatorsFunction(program.categories[category]);
+            makeDbCall("CALL createCategory('" + category + "', '" + number + "', '" + programId + "')", createIndicators);
+            number++;
+        }
+    };
+};
+
+createIndicatorsFunction = function(category) {
+    return function() {
+        console.log("category in indicators=");
+        console.log(category);
+        numberInProgram = 0;
+        categoryInProgram = 0;
+        for (indicator in category.indicators) {
+            //create new indicator
+            makeDbCall("CALL createIndicatorInProgram('" + indicator + "', '" + numberInProgram + "', '" + categoryInProgram + "')", console.log);
+        }
+    };
+};
+
+makeDbCall = function(queryString, callback){
+    connection = mysql.createConnection({
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
+    });
+
+    connection.connect();
+    query = queryString;
+    console.log(query);
+    connection.query(query, function(err, rows, fields) {
+        if (!err) {
+            callback(rows);
+        } else {
+            console.log('Error while performing Query.');
+            console.log(err.code);
+            console.log(err.message);
+        }
+    });
+    connection.end();
+};
 
 module.exports = router;
