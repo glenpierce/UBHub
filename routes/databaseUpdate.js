@@ -324,7 +324,7 @@ function update(){
         "`user` VARCHAR(255) NOT NULL, " +
         "`permissionLevel` INT" +
         "`program` INT, " +
-        "`indicator` INT" +
+        "`indicator` INT, " +
         "`site` INT" +
         ");";
     query.push(createPermissionsTableQuery);
