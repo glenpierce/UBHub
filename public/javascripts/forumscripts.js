@@ -1,5 +1,8 @@
+var askQuestion = () => {
+  window.location='/forum/ask';
+}
+
 var submitQuestion = () => {
-  console.log("clicked");
   var formElements = document.getElementById("askForm").elements;
   var postData = {};
   for (var i = 0; i < formElements.length; i++)

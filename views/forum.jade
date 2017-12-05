@@ -3,6 +3,7 @@ include mixins
 html
     head
         link(rel='stylesheet', href='/stylesheets/style.css')
+        script(src='/javascripts/forumscripts.js')
         script.
             function goToDashboard() {
                 console.log("clicked");
@@ -14,3 +15,4 @@ body
     div(class="contentContainer")
       h2(style="text-align: center") Welcome to the UBHub Forums
       div
+        button(value="Ask a Question" onclick="askQuestion()") Ask a Question

@@ -50,10 +50,35 @@ router.get('/ask', function(req, res, next) {
 
 router.post("/submit", function (req, res) {
     //TODO: make sure the post is legal etc.
+
+
+
     if (req.session && req.session.user) {
-      
+      var connection = mysql.createConnection({
+          host: config.rdsHost,
+          user: config.rdsUser,
+          password: config.rdsPassword,
+          database: config.rdsDatabase
+      });
+      var path="";
+      connection.connect();
+      query = `CALL AddForumPost('${req.session.user}', '-1', '${req.body.questionTitle}', '${req.body.questionBody}', '${new Date().toISOString().slice(0, 19).replace('T', ' ')}')`;
+      connection.query(query, function(err, rows, fields) {
+          if (!err) {
+              //If successful, redirect to the post page
+              path = `/forum/?q=${rows[0][0].id}`;
+          } else {
+              path = `/forum/ask`;
+              console.log(err);
+          }
+          console.log(path);
+          //TODO Actually return the path value so that the browser can redirect
+          res.redirect(path);
+      });
+      connection.end();
+
+
     }
 });
-
 
 module.exports = router;

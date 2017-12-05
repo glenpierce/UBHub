@@ -219,6 +219,28 @@ function update(){
       "END";
     query.push(createAddPostQuery);
 
+    var createGetPostQuery =
+      "CREATE PROCEDURE GetPostByID(IN id int)\n"+
+      "BEGIN\n" +
+      "SELECT * FROM posts WHERE `id`=id;\n" +
+      "END";
+
+    query.push(createGetPostQuery);
+
+    var createGetAllPostsQuery =
+      "CREATE PROCEDURE GetAllPosts()\n" +
+      "BEGIN\n" +
+      "SELECT * FROM posts;\n" +
+      "END";
+    query.push(createGetAllPostsQuery);
+
+    var createDeletePostQuery =
+      "CREATE PROCEDURE DeletePostByID(IN id int)\n"+
+      "BEGIN\n" +
+      "DELETE FROM posts WHERE `id`=id;\n" +
+      "END";
+    query.push(createDeletePostQuery);
+
     createProgramsTableQuery =
         "CREATE TABLE programs(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
