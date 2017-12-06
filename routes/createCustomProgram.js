@@ -26,7 +26,7 @@ router.get('/', function(req, res, next) {
     });
 
     connection.connect();
-    query = 'SELECT * from indicators';
+    query = 'SELECT * from indicators where positionInCategory is null';
     console.log(query);
     connection.query(query, function(err, rows, fields) {
         if (!err) {
@@ -62,30 +62,34 @@ createCategoriesFunction = function(program) {
         console.log(rows);
         console.log(program);
         programId = rows[0][0].id;
-        number = 1;
+        positionInProgram = 0;
         for (category in program.categories) {
             //create new category
-            console.log("category in categories=");
-            console.log(category);
             createIndicators = createIndicatorsFunction(program.categories[category]);
-            makeDbCall("CALL createCategory('" + category + "', '" + number + "', '" + programId + "')", createIndicators);
-            number++;
+            makeDbCall("CALL createCategory('" + program.categories[category].name + "', '" + positionInProgram + "', '" + programId + "')", createIndicators);
+            positionInProgram++;
         }
     };
 };
 
 createIndicatorsFunction = function(category) {
-    return function() {
-        console.log("category in indicators=");
+    return function(rows) {
+        console.log(rows);
+        console.log("category containing indicators=");
         console.log(category);
-        numberInProgram = 0;
-        categoryInProgram = 0;
+        categoryId = rows[0][0].id;
+        positionInCategory = 0;
         for (indicator in category.indicators) {
             //create new indicator
-            makeDbCall("CALL createIndicatorInProgram('" + indicator + "', '" + numberInProgram + "', '" + categoryInProgram + "')", console.log);
+            console.log(category.indicators);
+            console.log(indicator);
+            makeDbCall("CALL createIndicatorInProgram('" + category.indicators[indicator].name + "', '" + positionInCategory + "', '" + categoryId + "')", noop);
+            positionInCategory++;
         }
     };
 };
+
+noop = function(){};
 
 makeDbCall = function(queryString, callback){
     connection = mysql.createConnection({
