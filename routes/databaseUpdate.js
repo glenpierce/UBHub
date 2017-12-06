@@ -212,7 +212,7 @@ function update(){
     query.push(getAllUsersQuery);
 
     var createAddPostQuery =
-      "CREATE PROCEDURE AddForumPost(IN author varchar(255), IN parent varchar(255), IN subject varchar(255), IN body TEXT, IN creationDate DATETIME)\n" +
+      "CREATE PROCEDURE addForumPost(IN author varchar(255), IN parent varchar(255), IN subject varchar(255), IN body TEXT, IN creationDate DATETIME)\n" +
       "BEGIN\n" +
       "INSERT INTO posts (author, parent, subject, body, creationDate) VALUES (author, parent, subject, body, creationDate);\n" +
       "SELECT * FROM posts WHERE id=LAST_INSERT_ID();\n" +
@@ -220,7 +220,7 @@ function update(){
     query.push(createAddPostQuery);
 
     var createGetPostQuery =
-      "CREATE PROCEDURE GetPostByID(IN id int)\n"+
+      "CREATE PROCEDURE getPostById(IN id int)\n"+
       "BEGIN\n" +
       "SELECT * FROM posts WHERE `id`=id;\n" +
       "END";
@@ -228,14 +228,14 @@ function update(){
     query.push(createGetPostQuery);
 
     var createGetAllPostsQuery =
-      "CREATE PROCEDURE GetAllPosts()\n" +
+      "CREATE PROCEDURE getAllPosts()\n" +
       "BEGIN\n" +
       "SELECT * FROM posts;\n" +
       "END";
     query.push(createGetAllPostsQuery);
 
     var createDeletePostQuery =
-      "CREATE PROCEDURE DeletePostByID(IN id int)\n"+
+      "CREATE PROCEDURE deletePostById(IN id int)\n"+
       "BEGIN\n" +
       "DELETE FROM posts WHERE `id`=id;\n" +
       "END";

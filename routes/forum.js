@@ -25,11 +25,32 @@ app.use(bodyParser.json());
 */
 router.get('/', function(req, res, next) {
     console.log("forum");
-    if (req.session && req.session.user) {
-        console.log("logged in as " + req.session.user);
-        res.render('forum');
+      if (req.session && req.session.user) {
+        var connection = mysql.createConnection({
+            host: config.rdsHost,
+            user: config.rdsUser,
+            password: config.rdsPassword,
+            database: config.rdsDatabase
+        });
+        connection.connect();
+        query = `CALL getAllPosts()`;
+        connection.query(query, function(err, rows, fields) {
+            if (!err) {
+
+              res.render('forum', rows);
+
+            } else {
+              res.render('forum', []);
+              console.log(err);
+            }
+            console.log(path);
+            //TODO Actually return the path value so that the browser can redirect
+        });
+        connection.end();
+
+
     } else {
-        console.log("not logged in");
+
         req.session.reset();
         res.redirect('/');
     }
