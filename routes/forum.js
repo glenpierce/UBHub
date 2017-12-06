@@ -26,28 +26,8 @@ app.use(bodyParser.json());
 router.get('/', function(req, res, next) {
     console.log("forum");
       if (req.session && req.session.user) {
-        var connection = mysql.createConnection({
-            host: config.rdsHost,
-            user: config.rdsUser,
-            password: config.rdsPassword,
-            database: config.rdsDatabase
-        });
-        connection.connect();
-        query = `CALL getAllPosts()`;
-        connection.query(query, function(err, rows, fields) {
-            if (!err) {
 
-              res.render('forum', rows);
-
-            } else {
-              res.render('forum', []);
-              console.log(err);
-            }
-            console.log(path);
-            //TODO Actually return the path value so that the browser can redirect
-        });
-        connection.end();
-
+        getPosts(renderPosts, res);
 
     } else {
 
@@ -56,9 +36,42 @@ router.get('/', function(req, res, next) {
     }
 });
 
+var getPosts = (callback, res) => {
+  //TODO: implement pagination
+
+  var connection = mysql.createConnection({
+      host: config.rdsHost,
+      user: config.rdsUser,
+      password: config.rdsPassword,
+      database: config.rdsDatabase
+  });
+  connection.connect();
+  query = `CALL getAllPosts()`;
+  connection.query(query, function(err, rows, fields) {
+      if (!err) {
+
+        callback(err, rows, res);
+
+      } else {
+        res.render('forum', []);
+        console.log(err);
+      }
+      console.log(path);
+  });
+  connection.end();
+}
+
+var renderPosts = (err, rows, res) => {
+    console.log(rows[0]);
+    console.log("Rendering " + rows[0].length + " rows")
+    res.render('forum', {posts: rows[0]});
+}
+
+var renderPost = (err, rows, res) => {
+  res.render('post', {post: rows[0][0]});
+}
 
 router.get('/ask', function(req, res, next) {
-  console.log("forum");
   if (req.session && req.session.user) {
       console.log("logged in as " + req.session.user);
       res.render('ask');
@@ -69,10 +82,37 @@ router.get('/ask', function(req, res, next) {
   }
 });
 
+router.get('/post', function(req, res, next) {
+
+    var post_id = req.query.id;
+
+      if (req.session && req.session.user) {
+
+        var connection = mysql.createConnection({
+            host: config.rdsHost,
+            user: config.rdsUser,
+            password: config.rdsPassword,
+            database: config.rdsDatabase
+        });
+        connection.connect();
+
+        query = `CALL getPostById(${post_id})`;
+        connection.query(query, function(err, rows, fields) {
+            if (!err) {
+
+              renderPost(err, rows, res);
+
+            } else {
+              res.render('forum', []);
+              console.log(err);
+            }
+          });
+        }
+      });
+
+
 router.post("/submit", function (req, res) {
     //TODO: make sure the post is legal etc.
-
-
 
     if (req.session && req.session.user) {
       var connection = mysql.createConnection({
@@ -81,6 +121,7 @@ router.post("/submit", function (req, res) {
           password: config.rdsPassword,
           database: config.rdsDatabase
       });
+
       var path="";
       connection.connect();
       query = `CALL AddForumPost('${req.session.user}', '-1', '${req.body.questionTitle}', '${req.body.questionBody}', '${new Date().toISOString().slice(0, 19).replace('T', ' ')}')`;

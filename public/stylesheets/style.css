@@ -127,8 +127,17 @@ a {
   resize: none;
   padding: 4px;
   height: 320px;
-
 }
+
+.indexPostLinks .singlePostLink {
+  padding: 24px;
+  background-color: #fff;
+  border: 1px #36806a solid;
+  border-radius: 5px;
+  margin-top: 12px;
+}
+
+
 
 /*
 Blue

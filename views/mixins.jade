@@ -63,13 +63,13 @@ mixin header(displayLoginInfo)
         div(style="width:100%; height:80px;")
 
 mixin indexPostLinks(posts)
-  div(class="indexPostLinks") QUESTIONS:
-  each value, post in posts
-    mixin singlePostLink(post)
+  div.indexPostLinks QUESTIONS:
+    each post in posts
+      +singlePostLink(post)
 
 mixin singlePostLink(post)
-  div(class="singlePostLink") Q: #{post}
-    h3(onclick="goToPost(#{post.id})") #{post.title}
+  div.singlePostLink
+    h3(onclick="goToPost(#{post.id})") #{post.subject}
     p #{post.body}
 
 mixin footer()

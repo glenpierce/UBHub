@@ -220,9 +220,9 @@ function update(){
     query.push(createAddPostQuery);
 
     var createGetPostQuery =
-      "CREATE PROCEDURE getPostById(IN id int)\n"+
+      "CREATE PROCEDURE getPostById(IN inputId int)\n"+
       "BEGIN\n" +
-      "SELECT * FROM posts WHERE `id`=id;\n" +
+      "SELECT * FROM posts WHERE `id`=inputId;\n" +
       "END";
 
     query.push(createGetPostQuery);
