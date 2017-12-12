@@ -46,7 +46,7 @@ var getPosts = (callback, res) => {
       database: config.rdsDatabase
   });
   connection.connect();
-  query = `CALL getAllPosts()`;
+  query = `CALL getPostsByParent(-1)`;
   connection.query(query, function(err, rows, fields) {
       if (!err) {
 
@@ -67,8 +67,10 @@ var renderPosts = (err, rows, res) => {
     res.render('forum', {posts: rows[0]});
 }
 
-var renderPost = (err, rows, res) => {
-  res.render('post', {post: rows[0][0]});
+var renderPost = (post, children, res) => {
+  console.log(children);
+  res.render('post', {post: post,
+                      children: children});
 }
 
 router.get('/ask', function(req, res, next) {
@@ -100,7 +102,7 @@ router.get('/post', function(req, res, next) {
         connection.query(query, function(err, rows, fields) {
             if (!err) {
 
-              renderPost(err, rows, res);
+              getChildPosts(rows[0][0], res);
 
             } else {
               res.render('forum', []);
@@ -110,6 +112,28 @@ router.get('/post', function(req, res, next) {
         }
       });
 
+
+var getChildPosts = (parent_post, res) => {
+  var connection = mysql.createConnection({
+      host: config.rdsHost,
+      user: config.rdsUser,
+      password: config.rdsPassword,
+      database: config.rdsDatabase
+  });
+  connection.connect();
+
+  query = `CALL getPostsByParent(${parent_post.id})`;
+  connection.query(query, function(err, rows, fields) {
+      if (!err) {
+
+        renderPost(parent_post, rows[0], res);
+
+      } else {
+        res.render('forum', []);
+        console.log(err);
+      }
+    });
+  }
 
 router.post("/submit", function (req, res) {
     //TODO: make sure the post is legal etc.
@@ -124,7 +148,7 @@ router.post("/submit", function (req, res) {
 
       var path="";
       connection.connect();
-      query = `CALL AddForumPost('${req.session.user}', '-1', '${req.body.questionTitle}', '${req.body.questionBody}', '${new Date().toISOString().slice(0, 19).replace('T', ' ')}')`;
+      query = `CALL AddForumPost('${req.session.user}', '${req.body.parentPost}', '${req.body.questionTitle}', '${req.body.questionBody}', '${new Date().toISOString().slice(0, 19).replace('T', ' ')}')`;
       connection.query(query, function(err, rows, fields) {
           if (!err) {
               //If successful, redirect to the post page

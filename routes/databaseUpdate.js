@@ -239,6 +239,15 @@ function update(){
       "END";
     query.push(createGetAllPostsQuery);
 
+    var createGetPostsByParentQuery =
+      "CREATE PROCEDURE getPostsByParent(IN parentId int)\n" +
+      "BEGIN\n" +
+      "SELECT * FROM posts WHERE `parent`=parentId;\n" +
+      "END";
+    query.push(createGetPostsByParentQuery);
+
+
+
     var createDeletePostQuery =
       "CREATE PROCEDURE deletePostById(IN id int)\n"+
       "BEGIN\n" +

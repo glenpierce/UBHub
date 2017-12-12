@@ -31,6 +31,9 @@ var postQuestion = (theUrl, questionObject, callback) => {
     xmlHttp.send(dataAsJson);
 }
 
+var goToPost = (id) => {
+  window.location = '/forum/post?id=' +id;
+}
 
 
 var messageCallback = (res) => {
