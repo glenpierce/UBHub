@@ -219,10 +219,11 @@ function update(){
     var createAddPostQuery =
       "CREATE PROCEDURE addForumPost(IN author varchar(255), IN parent varchar(255), IN subject varchar(255), IN body TEXT, IN creationDate DATETIME)\n" +
       "BEGIN\n" +
-      "INSERT INTO posts (author, parent, subject, body, creationDate) VALUES (author, parent, subject, body, creationDate);\n" +
+      "INSERT INTO posts (author, parent, subject, body, creationDate, upvotes, downvotes, views, status) VALUES (author, parent, subject, body, creationDate, 0, 0, 0, 'published');\n" +
       "SELECT * FROM posts WHERE id=LAST_INSERT_ID();\n" +
       "END";
     query.push(createAddPostQuery);
+
 
     var createGetPostQuery =
       "CREATE PROCEDURE getPostById(IN inputId int)\n"+
@@ -254,6 +255,20 @@ function update(){
       "DELETE FROM posts WHERE `id`=id;\n" +
       "END";
     query.push(createDeletePostQuery);
+
+    var createUpvotePostQuery =
+      "CREATE PROCEDURE upvotePostById(IN postId int)\n"+
+      "BEGIN\n" +
+      "UPDATE posts SET `upvotes` = `upvotes` + 1 WHERE `id`=postId;\n" +
+      "END";
+    query.push(createUpvotePostQuery);
+
+    var createDownvotePostQuery =
+      "CREATE PROCEDURE downvotePostById(IN postId int)\n"+
+      "BEGIN\n" +
+      "UPDATE posts SET `upvotes` = `upvotes` - 1 WHERE `id`=postId;\n" +
+      "END";
+    query.push(createDownvotePostQuery);
 
     createProgramsTableQuery =
         "CREATE TABLE programs(" +

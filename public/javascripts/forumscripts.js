@@ -2,8 +2,8 @@ var askQuestion = () => {
   window.location='/forum/ask';
 }
 
-var submitQuestion = () => {
-  var formElements = document.getElementById("askForm").elements;
+var submitQuestion = (formId) => {
+  var formElements = document.getElementById(formId).elements;
   var postData = {};
   for (var i = 0; i < formElements.length; i++)
       if (formElements[i].type != "button")
@@ -31,12 +31,34 @@ var postQuestion = (theUrl, questionObject, callback) => {
     xmlHttp.send(dataAsJson);
 }
 
+
 var goToPost = (id) => {
   window.location = '/forum/post?id=' +id;
 }
 
 
 var messageCallback = (res) => {
-  console.log (res);
-  //probably redirect
+
+}
+
+var replyTo = (postId, parentId) => {
+  if(parentId == -1) {
+    //If it's a top-level post, scroll the user to the reply box.
+    var askForm = document.getElementById('askForm');
+    askForm.scrollIntoView(false);
+    askForm.classList.add("highlighted");
+  } else {
+    //If it's a second-level post, unhide the post's comment box.
+    var responseFormId = "responseBox" + postId;
+    hideAllResponseForms();
+    var responseForm = document.getElementById(responseFormId);
+    responseForm.classList.remove("hide");
+  }
+}
+
+var hideAllResponseForms = () => {
+  var responseForms = document.getElementsByClassName('responseBox');
+  for(i = 0; i < responseForms.length; i++){
+    responseForms[i].classList.add("hide");
+  }
 }

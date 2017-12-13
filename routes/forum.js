@@ -36,42 +36,7 @@ router.get('/', function(req, res, next) {
     }
 });
 
-var getPosts = (callback, res) => {
-  //TODO: implement pagination
 
-  var connection = mysql.createConnection({
-      host: config.rdsHost,
-      user: config.rdsUser,
-      password: config.rdsPassword,
-      database: config.rdsDatabase
-  });
-  connection.connect();
-  query = `CALL getPostsByParent(-1)`;
-  connection.query(query, function(err, rows, fields) {
-      if (!err) {
-
-        callback(err, rows, res);
-
-      } else {
-        res.render('forum', []);
-        console.log(err);
-      }
-      console.log(path);
-  });
-  connection.end();
-}
-
-var renderPosts = (err, rows, res) => {
-    console.log(rows[0]);
-    console.log("Rendering " + rows[0].length + " rows")
-    res.render('forum', {posts: rows[0]});
-}
-
-var renderPost = (post, children, res) => {
-  console.log(children);
-  res.render('post', {post: post,
-                      children: children});
-}
 
 router.get('/ask', function(req, res, next) {
   if (req.session && req.session.user) {
@@ -102,38 +67,16 @@ router.get('/post', function(req, res, next) {
         connection.query(query, function(err, rows, fields) {
             if (!err) {
 
-              getChildPosts(rows[0][0], res);
+              getChildPosts(rows[0][0], res, true);
 
             } else {
               res.render('forum', []);
               console.log(err);
             }
           });
+          connection.end();
         }
       });
-
-
-var getChildPosts = (parent_post, res) => {
-  var connection = mysql.createConnection({
-      host: config.rdsHost,
-      user: config.rdsUser,
-      password: config.rdsPassword,
-      database: config.rdsDatabase
-  });
-  connection.connect();
-
-  query = `CALL getPostsByParent(${parent_post.id})`;
-  connection.query(query, function(err, rows, fields) {
-      if (!err) {
-
-        renderPost(parent_post, rows[0], res);
-
-      } else {
-        res.render('forum', []);
-        console.log(err);
-      }
-    });
-  }
 
 router.post("/submit", function (req, res) {
     //TODO: make sure the post is legal etc.
@@ -148,6 +91,7 @@ router.post("/submit", function (req, res) {
 
       var path="";
       connection.connect();
+      console.log(req.body.parentPost);
       query = `CALL AddForumPost('${req.session.user}', '${req.body.parentPost}', '${req.body.questionTitle}', '${req.body.questionBody}', '${new Date().toISOString().slice(0, 19).replace('T', ' ')}')`;
       connection.query(query, function(err, rows, fields) {
           if (!err) {
@@ -166,5 +110,70 @@ router.post("/submit", function (req, res) {
 
     }
 });
+
+var getChildPosts = (parent_post, res, get_subs) => {
+  var connection = mysql.createConnection({
+      host: config.rdsHost,
+      user: config.rdsUser,
+      password: config.rdsPassword,
+      database: config.rdsDatabase
+  });
+  connection.connect();
+
+  query = `CALL getPostsByParent(${parent_post.id})`;
+  connection.query(query, function(err, rows, fields) {
+      if (!err) {
+
+        getChildComments();
+        renderPost(parent_post, rows[0], res);
+
+      } else {
+        res.render('forum', []);
+        console.log(err);
+      }
+    });
+    connection.end();
+  }
+
+var getChildComments = (posts) => {
+  //TODO: this
+}
+
+var getPosts = (callback, res) => {
+    //TODO: implement pagination
+
+    var connection = mysql.createConnection({
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
+    });
+    connection.connect();
+    query = `CALL getPostsByParent(-1)`;
+    connection.query(query, function(err, rows, fields) {
+        if (!err) {
+
+          callback(err, rows, res);
+
+        } else {
+          res.render('forum', []);
+          console.log(err);
+        }
+        console.log(path);
+    });
+    connection.end();
+  }
+
+  var renderPosts = (err, rows, res) => {
+      console.log(rows[0]);
+      console.log("Rendering " + rows[0].length + " rows")
+      res.render('forum', {posts: rows[0]});
+  }
+
+  var renderPost = (post, children, res) => {
+    console.log(children);
+    res.render('post', {post: post,
+                        children: children});
+  }
 
 module.exports = router;

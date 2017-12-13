@@ -69,8 +69,64 @@ mixin indexPostLinks(posts)
 
 mixin singlePostLink(post)
   div.singlePostLink
-    h3(onclick="goToPost(#{post.id})" style="cursor:pointer;") #{post.subject}
-    p #{post.body}
+    p.forumAsker #{post.author} asks:
+    h3(class="forumTitle" onclick="goToPost(#{post.id})" style="cursor:pointer;") #{post.subject}
+    +postMeta(post)
+
+mixin responsePosts(posts)
+  div.indexPostLinks
+    each post in posts
+      +singleResponsePost(post)
+
+mixin singleResponsePost(post)
+  div.singlePostLink
+    p.forumAsker #{post.author} says:
+    h3.forumTitle #{post.subject}
+    p.postBody #{post.body}
+    +postMeta(post)
+    +discussionResponseBox(post)
+
+mixin responseComments(posts)
+  div.comments
+    each post in posts
+      +singleComment(post)
+
+mixin singleComment(post)
+  div.singleComment
+    p.forumAsker #{post.author} says:
+    p.postBody #{post.body}
+
+mixin discussionResponseBox(post)
+  div(class="responseBox hide" id="responseBox#{post.id}")
+    form(action="" id="responseForm#{post.id}")
+      label Your response:
+      input(type="hidden" name="questionTitle" value="Re: #{post.subject}")
+      textarea(name="questionBody")
+      input(type="hidden" name="parentPost" value="#{post.id}")
+      input(type="button" onClick="submitQuestion('responseForm#{post.id}')" value="Submit Comment")
+
+
+mixin postMeta(post)
+  div.forumPostMeta
+    span.upvotes +
+      span.number 23
+    span.downvotes -
+      span.number 11
+    span.views v
+      span.number 203
+    span.tag Tag1
+    span.tag Tag2
+    button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Reply
+
+mixin forumHeader()
+  div.forumHeader
+    div.searchOption
+      form
+        input(type="text" placeholder="Search the forums for discussions and answers")
+        button(value="Submit") Search
+    div.askOption
+      button(value="Ask a Question" onclick="askQuestion()") Ask a Question
+
 
 mixin footer()
     div(style="margin:auto; max-width:1200px; display:flex; justify-content:space-between; padding-top:10px;")

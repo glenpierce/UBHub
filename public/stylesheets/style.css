@@ -102,14 +102,131 @@ a {
 
 .contentContainer {
   max-width: 800px; margin: auto;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  padding: 12px;
 }
 
 /**Forum**/
+
+.spacer {
+  height: 48px;
+}
+
+.forumHeader {
+  display: flex;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #aaa;
+}
+
+.forumHeader>div {
+  display: flex;
+  flex-grow: 1;
+}
+
+.forumHeader .searchOption input {
+  padding: 6px;
+  width: 300px;
+  border-radius: 5px 0 0 5px;
+  border: 1px solid #aaa;
+}
+
+.forumHeader .searchOption button {
+  height: 100%;
+  border-radius: 0 5px 5px 0;
+  border: 1px solid #aaa;
+  border-width: 1px 1px 1px 0;
+  cursor: pointer;
+
+}
+
+.forumHeader .askOption{
+  justify-content: flex-end;
+}
+
+.forumHeader .askOption button {
+  height: 100%;
+  border-radius: 5px;
+  border: 1px solid #aaa;
+  cursor: pointer;
+
+}
+
+.forumAsker {
+    font-size: 12px;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+h2.forumTitle {
+  margin-top: 4px;
+}
+
+h3.forumTitle {
+  margin-top: 4px;
+}
+
+p.postBody {
+  line-height: 1.4;
+}
+
+.forumPostMeta {
+  padding: 12px 0;
+}
+
+.forumPostMeta>span{
+  background: #ccc;
+  padding: 8px 18px;
+  margin-right: 4px;
+  border-radius: 16px;
+  font-weight: 700;
+}
+
+.forumPostMeta span span.number {
+  background-color: #fff;
+  padding: 2px;
+  margin-left: 4px;
+  font-weight: 400;
+}
+
+.forumPostMeta .replyButton {
+  float: right;
+  padding: 4px 8px;
+}
+
+.responseBox.hide {
+  display: none;
+}
+
+.responseBox label{
+  display: block;
+  font-weight: 700;
+}
+
+.responseBox textarea {
+  height: 200px;
+  width: 480px;
+  resize: none;
+
+}
+
+.responseBox input {
+  display: block;
+}
+
+#askForm {
+  margin-top: 24px;
+}
+
+#askForm.highlighted label {
+  background-color: #ffef94;
+}
 
 #askForm label {
   font-weight: bold;
   margin-bottom: 8px;
   display: block;
+  transition: all 0.5s;
 }
 
 #askForm input {

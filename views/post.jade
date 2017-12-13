@@ -4,6 +4,7 @@ html
     head
         link(rel='stylesheet', href='/stylesheets/style.css')
         script(src='/javascripts/forumscripts.js')
+
         script.
             function goToDashboard() {
                 console.log("clicked");
@@ -12,15 +13,21 @@ html
 
 body
     +header(true)
-    div(class="contentContainer")
-      h2(style="text-align: center") #{post.subject}
-      p #{post.body}
+    div.spacer
+    div.contentContainer
+      +forumHeader()
+      p.forumAsker #{post.author} asks:
+      h2.forumTitle #{post.subject}
+      p.postBody #{post.body}
+      +postMeta(post)
       div
-        +indexPostLinks(children)
+        +responsePosts(children)
         form(action="" id="askForm")
           label Your Response:
           input(type="text" name="questionTitle")
           label Details:
           textarea(name="questionBody")
           input(type="hidden" name="parentPost" value="#{post.id}")
-          input(type="button" onclick="submitQuestion()" value="Submit Response")
+          input(type="button" onclick="submitQuestion('askForm')" value="Submit Response")
+    div.spacer
+  +footer
