@@ -84,6 +84,7 @@ mixin singleResponsePost(post)
     h3.forumTitle #{post.subject}
     p.postBody #{post.body}
     +postMeta(post)
+    +responseComments(post.children)
     +discussionResponseBox(post)
 
 mixin responseComments(posts)
@@ -92,7 +93,7 @@ mixin responseComments(posts)
       +singleComment(post)
 
 mixin singleComment(post)
-  div.singleComment
+  div.singleComment 
     p.forumAsker #{post.author} says:
     p.postBody #{post.body}
 

@@ -194,6 +194,11 @@ p.postBody {
   padding: 4px 8px;
 }
 
+.singleComment {
+  border-top: 1px solid #aaa;
+  margin-top: 12px;
+}
+
 .responseBox.hide {
   display: none;
 }

@@ -233,6 +233,17 @@ function update(){
 
     query.push(createGetPostQuery);
 
+    var createGetPostAndAllSubsQuery =
+      "CREATE PROCEDURE getPostAndAllSubs(IN postId int)\n"+
+      "SELECT * FROM posts WHERE `id` = postId \n"+
+      "UNION\n" +
+      "SELECT * FROM posts WHERE `parent` = postId \n" +
+      "UNION\n" +
+      "SELECT * FROM posts WHERE `parent` in \n" +
+      "(SELECT id FROM posts WHERE `parent` = postId)";
+
+    query.push(createGetPostAndAllSubsQuery);
+
     var createGetAllPostsQuery =
       "CREATE PROCEDURE getAllPosts()\n" +
       "BEGIN\n" +

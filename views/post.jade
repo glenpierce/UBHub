@@ -10,24 +10,28 @@ html
                 console.log("clicked");
             }
 
+      script(type='text/javascript').
+        var post = !{JSON.stringify(postTree)};
+        console.log(post);
+        console.log(post.author);
 
 body
     +header(true)
     div.spacer
     div.contentContainer
       +forumHeader()
-      p.forumAsker #{post.author} asks:
-      h2.forumTitle #{post.subject}
-      p.postBody #{post.body}
-      +postMeta(post)
+      p.forumAsker #{postTree.author} asks:
+      h2.forumTitle #{postTree.subject}
+      p.postBody #{postTree.body}
+      +postMeta(postTree)
       div
-        +responsePosts(children)
+        +responsePosts(postTree.children)
         form(action="" id="askForm")
           label Your Response:
           input(type="text" name="questionTitle")
           label Details:
           textarea(name="questionBody")
-          input(type="hidden" name="parentPost" value="#{post.id}")
+          input(type="hidden" name="parentPost" value="#{postTree.id}")
           input(type="button" onclick="submitQuestion('askForm')" value="Submit Response")
     div.spacer
   +footer

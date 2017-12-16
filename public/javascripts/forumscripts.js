@@ -29,6 +29,7 @@ var postQuestion = (theUrl, questionObject, callback) => {
     xmlHttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
     var dataAsJson = JSON.stringify(data);
     xmlHttp.send(dataAsJson);
+
 }
 
 
@@ -38,7 +39,7 @@ var goToPost = (id) => {
 
 
 var messageCallback = (res) => {
-
+  window.location = JSON.parse(res).path;
 }
 
 var replyTo = (postId, parentId) => {
