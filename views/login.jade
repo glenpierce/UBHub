@@ -7,7 +7,7 @@ body(style="font-family:helvetica; background-color:#daecf1;")
     block content
 
     script.
-        function httpGetAsync(theUrl, callback){
+        function httpPostAsync(theUrl, callback){
                 let user = document.getElementById('username').value;
                 let pass = document.getElementById('password').value;
                 let data = {
@@ -45,4 +45,4 @@ body(style="font-family:helvetica; background-color:#daecf1;")
             div(style="margin:auto; width:300px;")
                 div(style="display:inline-block; margin-top:4px;") Password
                 input(id="password" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="password")
-        button(onclick='httpGetAsync("/users", redirect)' style="background-color:#4490ba; border-radius:5px; border:none; padding:5px; color: white; cursor:pointer; margin:auto;") Login
+        button(onclick='httpPostAsync("/users", redirect)' style="background-color:#4490ba; border-radius:5px; border:none; padding:5px; color: white; cursor:pointer; margin:auto;") Login

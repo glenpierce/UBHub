@@ -1,0 +1,261 @@
+doctype html
+include mixins
+html
+    head
+        title Map
+        script(async, defer, src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&callback=initMap")
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+body
+
+    +header(true)
+
+    div
+        div(style="width=100%; text-align:center; background:url('/images/blue-background.png') darkblue; background-size: cover; height:400px; display:flex; justify-content:center;")
+            div(style="padding-left:20px; padding-right:20px;")
+                div(style="color:white; font-weight:700; font-size:20px; margin-top:100px;") CITY BIODIVERSITY INDICATORS COALITION
+                div(style="background:white; height:1px; width:50%; margin:auto; margin-top:10px; margin-bottom:10px;")
+                div(style="color:white;") The CBI Coalition helps cities around the world choose biodiversity strategies, then measure and improve their strategies and action plans
+                div(style="color:white; font-size:20px; padding-top:20px;") CBI Coalition offers:
+                div(style="border-radius:10px; background-color:rgba(255,255,255,0.5); display:flex; justify-content:center;")
+                    div
+                        div
+                            div(style="color:white; margin:auto; margin-top:10px;") Public Site
+                            div(style="display:flex;")
+                                div(class="homePageWhiteBox") Database of Plans and Activities
+                                div(class="homePageWhiteBox") Resources of Practices and Standards
+                    div(style="background:white; height:100px; width:1px; margin:auto; margin:10px;")
+                    div
+                        div(style="color:white; margin:auto; margin-top:10px;") myCBI Portal
+                        div(style="display:flex;")
+                            div(class="homePageWhiteBox") Experts Forum
+                            div(class="homePageWhiteBox") Indicator Tracker
+            img(style="align-self:flex-end; height:70%;" src="/images/owl.svg")
+
+    div(style="background:white; display:flex;")
+        img(style="height:400px;" src="/images/lizardgreen.svg")
+        div
+            div(style="display:flex; align-items:center;")
+                div(style="margin:auto; text-align:center;")
+                    div(style="color:#326f90; font-size:20px; margin-bottom:10px;") CBI Coalition <b>Database</b>
+                    div(style="color:#326f90; font-size:20px;") Our database includes over <span style="color:#E3965C; font-weight:700; font-size:30px;">800</span> actions in over <span style="color:#E3965C; font-weight:700; font-size:30px;">400</span> locations around the globe, including more than <span style="color:#E3965C; font-weight:700; font-size:30px;">200</span> municipal governments, over <span style="color:#E3965C; font-weight:700; font-size:30px;">250</span> biodiversity plans and reports, and including participation in 13 different international urban biodiversity networks and indicator programs.
+                div(style="color:white; background:#E3965C; border-radius:5px; padding:10px; text-align:center;") Explore the database
+            div(style="margin:auto; display:flex; align-items:center; flex-direction:column; margin-top:20px;")
+                div(style="display:flex;")
+                    div(style="color:#326f90; font-weight:700;") Example locations:
+                    div(onclick="document.getElementById('key').style.display='flex';" style="cursor:pointer;") Show key
+                div(id="key" style="display:none; border:solid; border-radius:5px; width:200px; flex-direction:column; padding:10px;")
+                    div Key:
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            img(src="/images/arc_BC_ltblue.svg")
+                        div Program participant
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            img(src="/images/arc_SI_drkblue.svg")
+                        div Program completed
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            div SI
+                        div Singapore Index
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            div BC
+                        div Biophilic Cities Network
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            div LAB
+                        div Local Action for Biodiversity Pioneer Programme
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            div EF
+                        div Ecological Footprint
+                    div(class="keyFlexbox")
+                        div(class="keyFlexboxLine")
+                            div C
+                        div Customized Program
+                    div Planning documents are listed by publication year
+                div(style="display:flex;")
+                    div(style="margin:10px;")
+                        div(style="margin-bottom:-3px; background:url('/images/blue_singapore_50x180.png'); color:white; height:50px; width:180px;") Singapore
+                        div(style="border:solid; border-width:1px; border-radius:0px 0px 10px 10px; border-color:#326f90; height:100px; width:178px;")
+                            div(style="display:flex; margin-bottom:10px;")
+                                img(src="/images/arc_SI_drkblue.svg" style="margin-left:5px; margin-top:5px;")
+                                img(src="/images/arc_BC_ltblue.svg" style="margin-left:5px; margin-top:5px;")
+                                div(style="position:relative; font-size:8px; height:0px; width:0px; left:-28px; top:35px;") 2013
+                                img(src="/images/arc_EF_drkblue.svg" style="margin-left:5px; margin-top:5px;")
+                                div(style="position:relative; font-size:8px; height:0px; width:0px; left:-28px; top:35px;") 2013
+                            div(style="font-size:10px;") 2012 <b>Singapore Green Plan</b>
+                            div(style="font-size:10px;") 2009 <b>Conserving Our Biodiversity</b>
+                    div(style="margin:10px;")
+                        div(style="margin-bottom:-3px; background:url('/images/blue_jerusalem_50x180.png'); color:white; height:50px; width:180px;") Jerusalem<br><span style="font-size:10px;">ISRAEL</span>
+                        div(style="border:solid; border-width:1px; border-radius:0px 0px 10px 10px; border-color:#326f90; height:100px; width:178px;")
+                            div(style="display:flex; margin-bottom:10px;")
+                                img(src="/images/arc_LAB_drkblue.svg" style="margin-left:5px; margin-top:5px;")
+                                div(style="position:relative; font-size:8px; height:0px; width:0px; left:-28px; top:35px;") 2009
+                            div(style="font-size:10px;") 2012 <b>Green Jerusalem</b>
+                            div(style="font-size:10px;") 2014 <b>Urban Nature in Jerusalem</b>
+                            div(style="font-size:10px;") 2014 <b>Nature in the City Policy</b>
+                    div(style="margin:10px;")
+                        div(style="margin-bottom:-3px; background:url('/images/blue_vancouver_50x180.png'); color:white; height:50px; width:180px;") Vancouver<br><span style="font-size:10px;">CANADA</span>
+                        div(style="border:solid; border-width:1px; border-radius:0px 0px 10px 10px; border-color:#326f90; height:100px; width:178px;")
+                            div(style="display:flex; margin-bottom:10px;")
+                                img(src="/images/arc_EF_drkblue.svg" style="margin-left:5px; margin-top:5px;")
+                                div(style="position:relative; font-size:8px; height:0px; width:0px; left:-28px; top:35px;") 2006
+                                img(src="/images/arc_EF_drkblue.svg" style="margin-left:5px; margin-top:5px;")
+                                div(style="position:relative; font-size:8px; height:0px; width:0px; left:-28px; top:35px;") 2015
+                            div(style="font-size:10px;") 2015 <b>Bird Strategy</b>
+                            div(style="font-size:10px;") 2016 <b>Biodiversity Strategy</b>
+
+    div(style="background:url('/images/blue_monkeys_horiz.png') darkblue; background-size: cover; width:100%; display:flex; align-items:center; height:400px;")
+        div
+            div(style="color:white; font-weight:700; font-size:40px; text-align:center; margin:auto; padding-bottom:10px;") <i>"A really awesome quote from a well-respected person that is of a decent length kinda like this sentence that keeps running on and on."</i>
+            div(style="color:white; font-size:20px; text-align:center; margin:auto;") -Dr. Pierce, UBC
+
+    div(style="display:flex; align-items:center; justify-content:center;")
+        div(style="max-width:800px; margin:auto;")
+            div(style="color:#4490ba; font-size:20px; text-align:center;") CBI Coalition <b>Resources</b>
+            div(style="color:#4490ba; font-size:20px; text-align:center;") Our resources section includes <span style="color:#91cfa8; font-weight:700; font-size:30px;">800</span> resources, including a comparision of these <span style="color:#91cfa8; font-weight:700; font-size:30px;">6</span> guidelines for urban biodiversity planning to help you choose which is right for you.
+        div(style="max-width:120px; text-align:center; margin:20px; border-radius:10px; padding:10px; background:#91cfa8; color:white;") Explore our Resources
+        img(style="width:100px;" src="/images/Possum.svg")
+
+    div(style="display:flex; max-width:1000px; margin:auto; min-width:600px; justify-content:space-around; padding:20px;")
+        div(class="indexBox") Singapore Index
+        div(class="indexBox")
+            img(src="/images/biophilicCitiesLogo.png" height=60 width=120)
+        div(class="indexBox")
+            img(src="/images/LabProgrammeLogo.jpg" height=60 width=120)
+        div(class="indexBox") The Economics of Ecosystems and Biodiversity
+        div(class="indexBox") Biodivercities Methodology
+        div(class="indexBox") Biodiversity Sensitive Urban Design
+
+    div(style="width=100%; background:#4490ba; color:white; text-align:center; padding:10px; font-size:30px;") Explore Urban Biodiversity Actions
+
+    div(style="position:relative;")
+        div(id="map" style="height:800px; width:100%; max-width:1600px; margin:auto; z-index:-1;")
+        div(style="background:white; border-radius:10px; color:#4490ba; text-align:center; width: 140px; position: absolute; top: 50%; left: 50%; font-size:20px; padding:20px; z-index:-1;") Go to<br>Interactive<br>Map
+        div(style="width:140px; height:60px; position: absolute; top: 50%; left: 50%; padding:20px; z-index:1; cursor:pointer;" onclick="window.location='/map'")
+
+    div(style="width=100%; background:#4490ba; color:white; text-align:center; padding:10px; font-size:30px;") myCBI Members Page
+
+    div(style="display:flex; align-items:flex-start; justify-content:space-between;")
+        img(style="width:300px;" src="/images/Bee.svg")
+        div(style="padding:30px;")
+            div(style="margin:auto; max-width:600px; color:#4490ba; text-align:center; font-size:30px;") myCBI <b>Tracker</b>
+            div(style="margin:auto; max-width:600px; color:#4490ba; text-align:center; font-size:30px;") With our indicator tracker, you can track your progress in one of our <span style="color:#fcd350; font-size:40px; font-weight:700;">3</span> supported systems, or create your own customized set of indicators.
+
+    div(style="width:600px; margin:auto; margin-top:10px; margin-bottom:10px;")
+        div(style="color:#4490ba;") <b>Dashboard Example</b> (note: data is for sample purposes only and does not reflect actual activity)
+        div(class="blueBorder" style="padding:5px; margin:auto;")
+            img(src="/images/sampleIndicatorsPage.PNG")
+
+    div(style="display:flex; margin:auto; justify-content:space-around; align-items:center; margin:10px;")
+        div(class="largeBlueText" style="max-width:400px; text-align:center;") myCBI <b>Experts Forum</b><br> Get answers to your urban biodiversity questions from experts on our forum.
+        div(style="border-radius:10px; background-color:#fcd350; color:white; text-align:center; width:80px; padding:10px; display:flex; align-items:center;") Learn more about membership
+
+    div(style="background:url('/images/blue_overlook_nightcity_horiz.png') darkblue; display:flex; background-size: cover;")
+        div(style="flex-grow:1;")
+            div(style="color:white; font-size:40px; text-align:center; padding:20px;") Get Involved
+            div(style="background-color:rgba(255,255,255,0.5); border-radius:10px; margin:auto; max-width:800px;")
+                div(style="margin:auto; text-align:center; color:white; padding:20px; font-size:30px;") Are You A...
+                div(style="display:flex; justify-content:space-around; padding-bottom:15px; ")
+                    div(class="homePageWhiteBox") Government Official
+                    div(class="homePageWhiteBox") Citizen
+                    div(class="homePageWhiteBox") Expert
+                    div(class="homePageWhiteBox") Press
+            div(style="height:20px;")
+        //img(src="/images/Capture.PNG" style="margin:20px;")
+
+    +footer()
+
+script.
+    var markers = [];
+    var yellowImage;
+    var greenImage;
+    var orangeImage;
+    var mapData = !{mapData};
+    console.log(mapData);
+    function initMap() {
+        yellowImage = {
+            url: '/images/marker-yellow-det.png',
+            size: new google.maps.Size(14, 46),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(12, 46)
+        };
+        greenImage = {
+            url: '/images/marker-green-det.png',
+            size: new google.maps.Size(14, 46),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(12, 46)
+        };
+        orangeImage = {
+            url: '/images/marker-orange-det.png',
+            size: new google.maps.Size(14, 46),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(12, 46)
+        };
+        center = {lat: 20, lng: 15};
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 3,
+            center: center,
+            disableDefaultUI: true,
+            styles: [{"elementType": "geometry","stylers": [{"color": "#1d2c4d"}]}, {"elementType": "labels.text.fill","stylers": [{"color": "#8ec3b9"}]},{"elementType": "labels.text.stroke","stylers": [ { "color": "#1a3646" } ]},{"featureType": "administrative","stylers": [{"visibility": "simplified"}]},{"featureType": "administrative","elementType": "geometry","stylers": [{"color": "#6ab285"}]},{"featureType": "administrative", "elementType": "geometry.stroke", "stylers": [ { "color": "#d7e9cd" }, { "visibility": "on" } ] }, { "featureType": "administrative", "elementType": "labels.text", "stylers": [ { "color": "#d6e9cd" } ] }, { "featureType": "landscape", "stylers": [ { "color": "#3d7761" } ] }, { "featureType": "landscape.man_made", "elementType": "geometry.stroke", "stylers": [ { "color": "#334e87" } ] }, { "featureType": "landscape.natural", "stylers": [ { "color": "#298f6a" } ] }, { "featureType": "poi", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi", "elementType": "geometry", "stylers": [ { "color": "#283d6a" } ] }, { "featureType": "poi", "elementType": "labels.text.fill", "stylers": [ { "color": "#6f9ba5" } ] }, { "featureType": "poi", "elementType": "labels.text.stroke", "stylers": [ { "color": "#1d2c4d" } ] }, { "featureType": "poi.park", "stylers": [ { "color": "#6ab285" }, { "visibility": "simplified" } ] }, { "featureType": "poi.park", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi.park", "elementType": "labels.icon", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road", "elementType": "geometry", "stylers": [ { "color": "#2d1b5a" } ] }, { "featureType": "road", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road", "elementType": "labels.text.fill", "stylers": [ { "color": "#98a5be" } ] }, { "featureType": "road", "elementType": "labels.text.stroke", "stylers": [ { "color": "#1d2c4d" } ] }, { "featureType": "road.arterial", "stylers": [ { "visibility": "simplified" } ] }, { "featureType": "road.arterial", "elementType": "geometry", "stylers": [ { "visibility": "simplified" } ] }, { "featureType": "road.arterial", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road.highway", "stylers": [ { "visibility": "simplified" } ] }, { "featureType": "road.highway", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road.highway", "elementType": "labels.text.fill", "stylers": [ { "color": "#b0d5ce" } ] }, { "featureType": "road.highway", "elementType": "labels.text.stroke", "stylers": [ { "color": "#023e58" } ] }, { "featureType": "transit", "stylers": [ { "color": "#00907d" } ] }, { "featureType": "transit", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "transit", "elementType": "labels.text.fill", "stylers": [ { "color": "#98a5be" } ] }, { "featureType": "transit", "elementType": "labels.text.stroke", "stylers": [ { "color": "#1d2c4d" } ] }, { "featureType": "water", "stylers": [ { "color": "#193c59" } ] }, { "featureType": "water", "elementType": "labels.text.fill", "stylers": [ { "color": "#4e6d70" } ] } ]});
+        mapData.forEach(function (element) {
+            if(element.lat){
+                var contentString =
+                    '<div id="content">' +
+                    '<div id="siteNotice">' +
+                    '</div>' +
+                    '<div style="font-weight:bold; font-size:20px;">' + element.title + '</div>' +
+                    '<div id="bodyContent">' +
+                    (element.scale  !== null ?  '<div">' + element.scale + '</div>' : "") +
+
+                    (element.biodiversity_url  !== null ?  '<div><a href="' + element.biodiversity_url + 'rel="noopener noreferrer" target="_blank"">Main link</a></div>' : "") +
+
+                    (element.intplan_title  !== null ?  '<p>' + (element.intplan_year !== null ? element.intplan_year : "") + ' ' + element.intplan_title + " " : "") +
+                    (element.intplan_url  !== null ?  '<a href="' + element.intplan_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
+
+                    (element.plan1_title !== null ? '<p>' + (element.plan1_year !== null ? element.plan1_year : "") + ' ' + element.plan1_title + " " : "") +
+                    (element.plan1_url !== null ? '<a href="' + element.plan1_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
+
+                    (element.plan2_title !== null ? '<p>' + (element.plan2_year !== null ? element.plan2_year : "") + ' ' + element.plan2_title + " " : "") +
+                    (element.plan2_url !== null ? '<a href="' + element.plan2_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
+
+                    (element.report_title !== null ? '<p>' + (element.report_year !== null ? element.report_year : "") + ' ' + element.report_title + " " : "") +
+                    (element.report_url !== null ? '<a href="' + element.report_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
+
+                    (element.extra1_title !== null ? '<p>' + element.extra1_title + ' ' : "") +
+                    (element.extra1_url !== null ? '<a href="' + element.extra1_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
+
+                    (element.extra2_title !== null ? '<p>' + element.extra2_title + ' ': "") +
+                    (element.extra2_url !== null && typeof extra2_url !== "undefined" ? '<a href="' + element.extra2_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
+
+                    (element.EF_data_ghapercap !== null ? '<p>' + (element.EF_year !== null ? element.EF_year : "") + ' Ecological Footprint ' + element.EF_data_ghapercap + "gha/cap " : "") +
+                    (element.EF_link !== null ? '<a href="' + element.EF_link + 'rel="noopener noreferrer" target="_blank"">source</a></p>' : "</p>") +
+
+
+                    '</div>' +
+                    '</div>';
+
+                var infowindow = new google.maps.InfoWindow({
+                    content: contentString
+                });
+
+                var position = {lat:element.lat, lng:element.lng};
+                var marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    animation: google.maps.Animation.DROP,
+                    title: element.name,
+                    icon: yellowImage, //'/images/marker-yellow-det.png',
+                    zIndex: 1
+                });
+                marker.element = element;
+
+                marker.addListener('click', function () {
+                    infowindow.open(map, marker);
+                });
+                markers.push(marker);
+            }
+        });
+    }

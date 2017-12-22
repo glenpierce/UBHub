@@ -1,0 +1,199 @@
+doctype html
+include mixins
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+body
+    div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="createNewCategoryModal" onclick="hideModal('createNewCategoryModal')")
+        div(style="height:200px; width:400px; background-color:white; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
+            input(id="createNewCategoryInput")
+            button(onclick="createCategory(); hideModal('createNewCategoryModal');") add category
+
+    div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="createNewIndicatorModal" onclick="hideModal('createNewIndicatorModal')")
+        div(style="height:200px; width:400px; background-color:white; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
+            input(id="createNewIndicatorInput")
+            button(onclick="createIndicator(); hideModal('createNewIndicatorModal');") add indicator
+
+    div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="colorPickerModal" onclick="hideModal('colorPickerModal')")
+        div(style="height:200px; width:400px; background-color:#B7B7B7; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
+            div(style="display:flex;")
+                div(class="color" style="background:#E94A35;")
+                div(class="color" style="background:#F59D00;")
+                div(class="color" style="background:#F5E100;")
+                div(class="color" style="background:#009755;")
+                div(class="color" style="background:#0073BF;")
+                div(class="color" style="background:#083D7A;")
+                div(class="color" style="background:#6EC4FD;")
+                div(class="color" style="background:#7935E9;")
+                div(class="color" style="background:#000000;")
+                div(class="color" style="background:#B58989;")
+
+    +header(true)
+
+    script.
+
+        var newProgram = {
+            categories: []
+        };
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.textContent);
+            ev.dataTransfer.setData("id", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            var data = ev.dataTransfer.getData("text");
+            var id = ev.dataTransfer.getData("id");
+            var i = 0;
+            var element = ev.target
+            while (!element.getAttribute("ondrop") && i < 100) {
+                element = element.parentElement;
+                i++;
+            }
+            element.appendChild(document.getElementById(id));
+            for (var i = 0; i < newProgram.categories.length; i++) {
+                for(var j = 0; j < newProgram.categories[i].indicators.length; j++) {
+                    if(newProgram.categories[i].indicators[j].id == id){ //yes we are relying on type coercion here
+                        newProgram.categories[i].indicators.splice(j, 1);
+                        break;
+                    }
+                }
+            }
+
+            for (var i = 0; i < newProgram.categories.length; i++) {
+                if(element.getAttribute("categoryId") == newProgram.categories[i].id){ //yes we are relying on type coercion here element.getAttribute("categoryId") is a string, newProgram.categories[i].id is a number
+                    indicator = {
+                        id: id,
+                        name: data
+                    };
+                    newProgram.categories[i].indicators.push(indicator)
+                    break;
+                }
+            }
+            console.log(newProgram);
+        }
+
+        function hideModal(id) {
+            document.getElementById(id).style.display = "none";
+        }
+
+        function stopPropagation(e) {
+            e.stopPropagation();
+        }
+
+        function createNewCategory() {
+            document.getElementById('createNewCategoryModal').style.display = "flex";
+            document.getElementById('createNewCategoryInput').focus();
+        }
+
+        function createCategory() {
+            var newCategoryWrapper = document.createElement("div");
+            newCategoryWrapper.setAttribute("ondrop", "drop(event)");
+            newCategoryWrapper.setAttribute("ondragover", "allowDrop(event)");
+
+            var newCategory = document.createElement("div");
+            newCategory.setAttribute("style", "display:flex;");
+
+            var newCategoryInput = document.createElement("input");
+            newCategoryInput.value = document.getElementById('createNewCategoryInput').value;
+
+            var newCategoryColor = document.createElement("div");
+            newCategoryColor.setAttribute("style", "background-color:red; border-radius:100%; width:30px; height:30px;");
+            newCategoryColor.setAttribute("onclick", "openColorPicker(this);");
+
+            newCategory.appendChild(newCategoryInput);
+            newCategory.appendChild(newCategoryColor);
+
+            newCategoryObject = {
+                name: newCategoryInput.value,
+                id: Date.now(),
+                indicators: []
+            };
+            newCategoryWrapper.setAttribute("categoryName", newCategoryObject.name);
+            newCategoryWrapper.setAttribute("categoryId", newCategoryObject.id);
+            newProgram.categories.push(newCategoryObject);
+            newCategoryInput.onblur = function (event) {
+                newCategoryWrapper.setAttribute("categoryName", newCategoryInput.value);
+                for(var i = 0; i < newProgram.categories.length; i++){
+                    if(newProgram.categories[i].id === newCategoryWrapper.getAttribute("categoryId")){
+                        newProgram.categories[i].name = newCategoryInput.value;
+                        break;
+                    }
+                }
+            }
+
+            newCategoryWrapper.appendChild(newCategory);
+
+            document.getElementById("categoriesContainer").appendChild(newCategoryWrapper);
+            document.getElementById('createNewCategoryInput').value = "";
+        }
+
+        function openColorPicker(target){
+            document.getElementById('colorPickerModal').style.display = "flex";
+            //target.style.backgroundColor = "blue";
+        }
+
+        function createNewIndicator(){
+            document.getElementById('createNewIndicatorModal').style.display = "flex";
+            document.getElementById('createNewIndicatorInput').focus();
+        }
+
+        function createIndicator() {
+            newIndicatorSendToServer = {
+                name: document.getElementById('createNewIndicatorInput').value
+            };
+
+            httpPost("/createCustomIndicator", createIndicatorCallback, newIndicatorSendToServer);
+        }
+
+        function createIndicatorCallback(responseFromServer) {
+            responseFromServer = JSON.parse(responseFromServer)
+            console.log(responseFromServer);
+            var newIndicator = document.createElement("div");
+            newIndicator.textContent = responseFromServer.indicatorName;
+            newIndicator.setAttribute("draggable", "true");
+            newIndicator.setAttribute("ondragstart", "drag(event)");
+            newIndicator.setAttribute("style", "border:solid;")
+            newIndicator.id = responseFromServer.id;
+            document.getElementById("indicatorsContainer").appendChild(newIndicator);
+            document.getElementById('createNewIndicatorInput').value = "";
+        }
+
+        function createProgram() {
+            console.log("create program");
+            console.log(newProgram);
+            httpPost("/createCustomProgram", console.log, newProgram);
+        }
+
+    div(style="padding:40px;")
+        - var indicatorsJSON = JSON.parse(indicators);
+        //div #{indicators}
+        //div #{indicatorsJSON}
+        div(style="display:flex;")
+            div(style="flex-grow:1;") Indicators
+                div(onclick="createNewIndicator()" class="button") create new indicator
+                div(style="height:100%; width:100%; border:solid;" ondrop="drop(event)" ondragover="allowDrop(event)" id="indicatorsContainer")
+                    - for (var i = 0; i < indicatorsJSON.length; i++){
+                        +indicator(indicatorsJSON[i].indicatorName, indicatorsJSON[i].description, indicatorsJSON[i].descriptionOfCalculation, indicatorsJSON[i].id)
+                    - }
+            div(style="flex-grow:1;") Categories
+                div(onclick="createNewCategory();" class="button") Create new category
+                div(style="height:100%; width:100%; border:solid;" id="categoriesContainer")
+        div(onclick="createProgram()" class="button") Create Program
+        //script.
+        //    var indicators = !{indicators};
+        //    console.log(indicators);
+        //    console.log(indicators.length);
+        //    for (var i = 0; i < indicators.length; i++) {
+        //        console.log(indicators[i]);
+        //        console.log(indicators[i].indicatorName);
+        //        document.write("<div> indicator " + indicators[i].id +" </div>");
+        //    }
+
+    +footer()

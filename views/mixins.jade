@@ -1,0 +1,182 @@
+
+
+mixin textInShape(textValue, colorValue, percentFill, radius)
+    -percentNotFilled = 100 - percentFill;
+    -percentNotFilledPlus = percentNotFilled + 5;
+    div(style="height:100px; width:100px;")
+        div(style="height:100px; width:100px; position:absolute; border:solid; background:#{colorValue}; border-radius:#{radius};")
+        div(style="position:absolute; height:110px; width: #{percentNotFilledPlus}px; left: #{percentNotFilled}px; background:white;")
+        div(style="height:100px; width:100px; position:absolute; border:solid; border-radius:#{radius};")
+        div(style="height:100px; width:100px; position:absolute; align-items:center; display:flex; justify-content:center;") #{textValue}
+
+mixin indicator(indicatorName, indicatorDescription, descriptionOfCalculation, id)
+    div(style="display:flex;" id=id draggable="true" ondragstart="drag(event)")
+        div(style="border:solid;")
+            div #{indicatorName}
+            div #{indicatorDescription}
+            div #{descriptionOfCalculation}
+        div(style="border:solid; align-self:center;") Add
+
+mixin site(siteName, siteDescription)
+    div(style="border:solid;")
+        div #{siteName}
+        div #{siteDescription}
+
+mixin header(displayLoginInfo)
+    //the header should behave like this one: rubygarage.org
+    div(class="showWhenNarrow")
+        div Hi, I'm the special thing that only shows up when the screen is narrow :)
+    div(class="hideWhenNarrow")
+        div(style="width:100%; position:fixed; display:flex; flex-grow:1;")
+            div(style="height:112px; background:white; flex-grow:1;")
+            div(style="max-width:1200px; display:flex; justify-content:space-between; height: 40px; width:100%; flex-grow:5;")
+                div
+                    div(style="position:fixed; width:100%; max-width:1200px; height:35px; background-color:#acd9bb; z-index:-1; top:0px;")
+                    div(style="position:fixed; width:100%; max-width:1200px; height:35px; background-color:#eff6e8; z-index:-1; top:35px;")
+                    div(style="position:fixed; width:100%; max-width:1200px; height:5px; background:white; z-index:-1; top: 70px;")
+                    img(src="/images/CBI_logo_outlined.svg" style="height:120px; margin-bottom:10px;")
+                div(style="width:100%;")
+                    div
+                        div(style="display:flex; justify-content:space-between;")
+                            -if(displayLoginInfo){
+                                div(style="display:flex; justify-content:space-around; flex-grow:1;")
+                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/dashboard'") myCBI
+                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/indicators'") Indicators
+                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/forum'") Forum
+                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Account
+                                div(style="padding:5px;")
+                                    div(style="background-color:#269973; color:white; padding:5px 10px 5px 10px; border-radius:20px; font-weight:700;") #{username} User Name
+                                //div(style="text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
+                            -}else{
+                                div(style="color:#fab279; font-weight:700;") Signup / Log in
+                            -}
+                    div(style="display:flex; justify-content:space-between;")
+                        div(style="display:flex; justify-content:space-around; flex-grow:1;")
+                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/home'") Home
+                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Database
+                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Resources
+                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") FAQs
+                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/aboutUs'") About Us
+                        div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Search
+            div(style="height:75px; background:white; flex-grow:1;")
+
+        div(style="width:100%; height:80px;")
+
+mixin indexPostLinks(posts)
+  div.indexPostLinks
+    each post in posts
+      +singlePostLink(post)
+
+mixin singlePostLink(post)
+  div.singlePostLink
+    p.forumAsker #{post.author} asks:
+    h3(class="forumTitle" onclick="goToPost(#{post.id})" style="cursor:pointer;") #{post.subject}
+    +postMeta(post)
+
+mixin responsePosts(posts)
+  div.indexPostLinks
+    each post in posts
+      +singleResponsePost(post)
+
+mixin singleResponsePost(post)
+  div.singlePostLink
+    p.forumAsker #{post.author} says:
+    h3.forumTitle #{post.subject}
+    p.postBody #{post.body}
+    +postMeta(post)
+    +responseComments(post.children)
+    +discussionResponseBox(post)
+
+mixin responseComments(posts)
+  div.comments
+    each post in posts
+      +singleComment(post)
+
+mixin singleComment(post)
+  div.singleComment 
+    p.forumAsker #{post.author} says:
+    p.postBody #{post.body}
+
+mixin discussionResponseBox(post)
+  div(class="responseBox hide" id="responseBox#{post.id}")
+    form(action="" id="responseForm#{post.id}")
+      label Your response:
+      input(type="hidden" name="questionTitle" value="Re: #{post.subject}")
+      textarea(name="questionBody")
+      input(type="hidden" name="parentPost" value="#{post.id}")
+      input(type="button" onClick="submitQuestion('responseForm#{post.id}')" value="Submit Comment")
+
+
+mixin postMeta(post)
+  div.forumPostMeta
+    span.upvotes +
+      span.number 23
+    span.downvotes -
+      span.number 11
+    span.views v
+      span.number 203
+    span.tag Tag1
+    span.tag Tag2
+    button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Reply
+
+mixin forumHeader()
+  div.forumHeader
+    div.searchOption
+      form
+        input(type="text" placeholder="Search the forums for discussions and answers")
+        button(value="Submit") Search
+    div.askOption
+      button(value="Ask a Question" onclick="askQuestion()") Ask a Question
+
+
+mixin footer()
+    div(style="margin:auto; max-width:1200px; display:flex; justify-content:space-between; padding-top:10px;")
+        div
+            img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
+        div(style="width:200px;" class="smallText") The City Biodiversity Indicators (CBI) Coalition helps cities around the world to choose a biodiversity strategy, then measure and improve their Biodiversity Strategy and Action Plans (BSAPs).
+        div
+            div(class="smallText") About CBI
+            div(class="smallText") CBI Toolkit
+            div(class="smallText") Resources
+            div(class="smallText") About Us
+            div(class="smallText") Pricing / Fees
+            div(class="smallText") FAQs
+            div(class="smallText") Sitemap
+        div
+            div(class="smallText") Contact us
+            div(class="smallText") info@cbicoalition.org
+            a(class="twitter-follow-button" href="https://twitter.com/cbicoalition") Follow @cbicoalition
+        div
+            div(class="smallText") copyright info
+
+script.
+    window.twttr = (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0],
+    t = window.twttr || {};
+        if (d.getElementById(id))
+        return t;
+    js = d.createElement(s);
+        js.id = id;
+        js.src = "https://platform.twitter.com/widgets.js";
+        fjs.parentNode.insertBefore(js, fjs);
+
+        t._e = [];
+        t.ready = function(f) {
+            t._e.push(f);
+    };
+
+    return t;
+    }(document, "script", "twitter-wjs"));
+
+script.
+    function httpPost(theUrl, callback, data) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                callback(xmlHttp.responseText);
+        }
+        xmlHttp.open("POST", theUrl, true); // true for asynchronous
+        xmlHttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        var dataAsJson = JSON.stringify(data);
+        xmlHttp.send(dataAsJson);
+    }

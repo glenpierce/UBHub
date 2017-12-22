@@ -1,7 +1,8 @@
 doctype html
+include mixins
 html
     head
-        link(rel='stylesheet', href='/stylesheets/cbiindicators.css')
+        link(rel='stylesheet', href='/stylesheets/style.css')
         script.
             function goToDashboard() {
                 console.log("clicked");
@@ -9,18 +10,21 @@ html
 
 
 body
-    block content
-        div(style="border-bottom:solid; display:flex; justify-content:space-between;")
-            img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
-            div(style="display:flex;")
-                div(style="margin:20px; cursor:pointer;") About CBI
-                div(style="margin:20px; cursor:pointer;") Resources
-                div(style="margin:20px; cursor:pointer;") About Us
-                div(style="margin:20px; cursor:pointer;") Search
+    +header(true)
 
-        div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px; cursor:pointer;") Account Summary
-        div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px;") Followed Questions
-        div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px;") FAQs
-        div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px;") Popular Forum Topics
-        div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px;") Snapshot
-        a(style="padding:10px;" href="http://default-environment.5bddwj795p.ca-central-1.elasticbeanstalk.com/map") Map
+    div(style="padding:40px;")
+        div(style="width:100%; height: 200px; border:solid;") Program Snapshot
+            div(onclick="window.location='/changeLocation'" class="button") change location
+            div(onclick="window.location='/createCustomProgram'" class="button") create custom Program
+        div(style="display:flex; width:100%;")
+            div(style="border:solid; flex-grow:1;") myCBI Account
+            div(style="border:solid; flex-grow:3;") Forum
+            div(style="border:solid; flex-grow:1;") Environmental Services
+            //div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px; cursor:pointer;") Account Summary
+            //div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px;") Followed Questions
+            //div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px;") FAQs
+            //div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px;") Popular Forum Topics
+            //div(style="border:solid; border-width:1px; border-color:#ccc; padding:10px;") Snapshot
+            //a(style="padding:10px;" href="http://default-environment.5bddwj795p.ca-central-1.elasticbeanstalk.com/map") Map
+
+    +footer()

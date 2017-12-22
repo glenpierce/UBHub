@@ -1,0 +1,33 @@
+doctype html
+include mixins
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        script.
+            function httpGetAsync(theUrl, callback) {
+                    let siteName = document.getElementById('siteName').value;
+                    let data = {
+                        "siteName": siteName
+                    }
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function () {
+                    if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                        callback(xmlHttp.responseText);
+                }
+                xmlHttp.open("POST", theUrl, true); // true for asynchronous
+                xmlHttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                var dataAsJson = JSON.stringify(data);
+                xmlHttp.send(dataAsJson);
+            }
+            function redirect(res) {
+                window.location = res;
+            }
+
+body
+    +header(true)
+
+    div(style="padding:40px;")
+        input(id="siteName" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+        button(onclick='httpGetAsync("/createLocation", redirect)') Create Location here :)
+
+    +footer()

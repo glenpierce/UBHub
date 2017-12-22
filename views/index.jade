@@ -2,7 +2,7 @@ doctype html
 html
     head
         link(rel='stylesheet', href='/stylesheets/cbiindicators.css')
-        //script(src='https://www.google.com/recaptcha/api.js')
+        script(src='https://www.google.com/recaptcha/api.js')
 
 body(style="font-family:helvetica; background-color:#daecf1;")
     block content
@@ -30,13 +30,7 @@ body(style="font-family:helvetica; background-color:#daecf1;")
         }
 
     h1(style="text-align:center;") Welcome to the City Biodiversity Indicators Coalition
-        //div(style="border-bottom:solid; display:flex; justify-content:space-between;")
-        //    img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
-        //    div(style="display:flex;")
-        //        div(style="margin:20px; cursor:pointer;") About CBI
-        //        div(style="margin:20px; cursor:pointer;") Resources
-        //        div(style="margin:20px; cursor:pointer;") About Us
-        //        div(style="margin:20px; cursor:pointer;") Search
+
     div(style="display:flex; align-items:center; width:100%; padding-bottom:20px;")
         img(src="/images/CBI_Coalition_logo_web_main.png" style="margin:auto; height:400px;")
     div(style="text-align:center; padding-bottom:20px;") Thank you for your interest. This site is under construction.
@@ -52,33 +46,41 @@ body(style="font-family:helvetica; background-color:#daecf1;")
         div(style="margin:auto; text-align:center;") If you would like more information, <br> you may contact us at <br> cbicoalition@gmail.com
             //<br> or register your contact information here:
 
-    //form(id="emailForm" name="emailForm", method="post" onsubmit="submitForm()")
-    //    div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
-    //        div(style="margin:auto; width:250px;")
-    //            div(style="display:inline-block; margin-top:4px;") First Name
-    //            input(name="nameFirst" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
-    //    div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
-    //        div(style="margin:auto; width:250px;")
-    //            div(style="display:inline-block; margin-top:4px;") Last Name
-    //            input(name="nameLast" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
-    //    div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
-    //        div(style="margin:auto; width:250px;")
-    //            div(style="display:inline-block; margin-top:4px;") Organization
-    //            input(name="organization" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
-    //    div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
-    //        div(style="margin:auto; width:250px;")
-    //            div(style="display:inline-block; margin-top:4px;") Email
-    //            input(name="email" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
-    //    div(style="display:flex; align-items:center; width:100%; margin-bottom:20px;")
-    //        div(style="margin:auto; width:250px;")
-    //            div(style="display:inline-block; margin-top:4px;") Verify Email
-    //            input(name="verify-email" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
-        //div(style="display:flex; align-items:center; width:100%; margin-bottom:20px;")
-        //    div(class="g-recaptcha" data-sitekey="6LfgLSMUAAAAABRJzT1aYJTLTKHEc7zorV0nRPxm" style="margin:auto;")
+    form(id="emailForm" name="emailForm", method="post" onsubmit="submitForm()")
+        div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
+            div(style="margin:auto; width:300px;")
+                div(style="display:inline-block; margin-top:4px;") First Name
+                input(name="nameFirst" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+        div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
+            div(style="margin:auto; width:300px;")
+                div(style="display:inline-block; margin-top:4px;") Last Name
+                input(name="nameLast" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+        div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
+            div(style="margin:auto; width:300px;")
+                div(style="display:inline-block; margin-top:4px;") Organization
+                input(name="organization" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+        div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
+            div(style="margin:auto; width:300px;")
+                div(style="display:inline-block; margin-top:4px;") Email
+                input(name="email" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+        div(style="display:flex; align-items:center; width:100%; margin-bottom:20px;")
+            div(style="margin:auto; width:300px;")
+                div(style="display:inline-block; margin-top:4px;") Verify Email
+                input(name="verify-email" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+        div(style="display:flex; align-items:center; width:100%; margin-bottom:20px;")
+            div(class="g-recaptcha" data-sitekey="6LfgLSMUAAAAABRJzT1aYJTLTKHEc7zorV0nRPxm" style="margin:auto;")
         div(style="display:flex; align-items:center; width:100%;")
             input(type="submit" value="Add to mailing list" style="background-color:#4490ba; border-radius:5px; border:none; padding:5px; color: white; cursor:pointer; margin:auto;")
 
     script.
         function submitForm() {
-            document.getElementById("emailForm").reset();
+            var formElements = document.getElementById("emailForm").elements;
+            var postData = {};
+            for (var i = 0; i < formElements.length; i++)
+                if (formElements[i].type != "submit")//we dont want to include the submit-buttom
+                    postData[formElements[i].name] = formElements[i].value;
+            if(postData.email === postData["verify-email"] && postData.email.toString().length > 0)
+                window.alert("Thank you " + postData.nameFirst);
+            else
+                window.alert("Sorry, but it seems that something is missing. Please verify that the \"Email\" and \"Verify Email\" fields have a valid email address and match each other.")
         }
