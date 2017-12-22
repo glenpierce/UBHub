@@ -19,12 +19,40 @@ router.get('/', function(req, res, next) {
     console.log("dashboard");
     if (req.session && req.session.user) {
         console.log("logged in as " + req.session.user);
-        res.render('dashboard');
+        query = `Call getSitesByUser('${req.session.user}')`;
+        render = function(rows){
+            res.render('dashboard', {rows: rows});
+        };
+        makeDbCall(query, render);
     } else {
         console.log("not logged in");
         req.session.reset();
         res.redirect('/');
     }
 });
+
+makeDbCall = function(queryString, callback){
+    connection = mysql.createConnection({
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
+    });
+
+    connection.connect();
+    query = queryString;
+    console.log(query);
+    connection.query(query, function(err, rows, fields) {
+        if (!err) {
+            console.log(rows);
+            callback(rows);
+        } else {
+            console.log('Error while performing Query.');
+            console.log(err.code);
+            console.log(err.message);
+        }
+    });
+    connection.end();
+};
 
 module.exports = router;

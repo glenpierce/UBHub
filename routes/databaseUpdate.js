@@ -58,9 +58,9 @@ function update(){
             ");";
     query.push(createUsersTableQuery);
 
-    // createDevelopmentUser =
-    //     "INSERT INTO users(email, hashedPassword) VALUES ('user', '$2a$10$ZuthLMZuo.F9LOfYNs3NpO6eWrBJoq8NYyd7AmOgwC3sPQLBxUbT6');";
-    // query.push(createDevelopmentUser);
+    createDevelopmentUserQuery =
+        "INSERT INTO users(email, hashedPassword) VALUES ('user', '$2a$10$ZuthLMZuo.F9LOfYNs3NpO6eWrBJoq8NYyd7AmOgwC3sPQLBxUbT6');";
+    query.push(createDevelopmentUserQuery);
 
 
     createPostsTable =
@@ -216,7 +216,7 @@ function update(){
         "END";
     query.push(getAllUsersQuery);
 
-    var createAddPostQuery =
+    createAddPostQuery =
       "CREATE PROCEDURE addForumPost(IN author varchar(255), IN parent varchar(255), IN subject varchar(255), IN body TEXT, IN creationDate DATETIME)\n" +
       "BEGIN\n" +
       "INSERT INTO posts (author, parent, subject, body, creationDate) VALUES (author, parent, subject, body, creationDate);\n" +
@@ -224,15 +224,14 @@ function update(){
       "END";
     query.push(createAddPostQuery);
 
-    var createGetPostQuery =
+    createGetPostQuery =
       "CREATE PROCEDURE getPostById(IN inputId int)\n"+
       "BEGIN\n" +
       "SELECT * FROM posts WHERE `id`=inputId;\n" +
       "END";
-
     query.push(createGetPostQuery);
 
-    var createGetAllPostsQuery =
+    createGetAllPostsQuery =
       "CREATE PROCEDURE getAllPosts()\n" +
       "BEGIN\n" +
       "SELECT * FROM posts;\n" +
@@ -248,7 +247,7 @@ function update(){
 
 
 
-    var createDeletePostQuery =
+    createDeletePostQuery =
       "CREATE PROCEDURE deletePostById(IN id int)\n"+
       "BEGIN\n" +
       "DELETE FROM posts WHERE `id`=id;\n" +
@@ -294,6 +293,24 @@ function update(){
         "`user` VARCHAR(255) NOT NULL" +
         ");";
     query.push(createSitesByUserTableQuery);
+
+    createGetSitesByUserQuery =
+        "CREATE PROCEDURE getSitesByUser(IN emailInput varchar(255))\n"+
+        "BEGIN\n" +
+        "SELECT * FROM sites where id IN (SELECT site FROM sitesByUser WHERE 'email' = \"emailInput\");\n" +
+        "END";
+    query.push(createGetSitesByUserQuery);
+
+    createSiteQuery =
+        "CREATE PROCEDURE createSite(IN siteName VARCHAR(2048), IN userInput VARCHAR(255))\n" +
+        "BEGIN\n" +
+        "INSERT INTO sites(siteName) VALUES (siteName);\n" +
+        "SET @last_id_in_sites = LAST_INSERT_ID();\n" +
+        "INSERT INTO sitesByUser(user, site) VALUES (userInput, @last_id_in_sites);\n" +
+        "SELECT * FROM sitesByUser WHERE site=LAST_INSERT_ID();\n" +
+        "END";
+    query.push(createSiteQuery);
+
 
     createIndicatorsTableQuery =
         "CREATE TABLE indicators(" +
@@ -507,7 +524,7 @@ function update(){
     // }
 
 
-    // query = [useDbQuery, ];
+    query = [useDbQuery, createSiteQuery];
 
     for(var i = 0; i < query.length; i++) {
 
