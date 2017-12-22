@@ -4,23 +4,34 @@ html
     head
         link(rel='stylesheet', href='/stylesheets/style.css')
         script(src='/javascripts/forumscripts.js')
+
         script.
             function goToDashboard() {
                 console.log("clicked");
             }
 
+      script(type='text/javascript').
+        var post = !{JSON.stringify(postTree)};
+        console.log(post);
+        console.log(post.author);
 
 body
     +header(true)
-    div(class="contentContainer")
-      h2(style="text-align: center") #{post.subject}
-      p #{post.body}
+    div.spacer
+    div.contentContainer
+      +forumHeader()
+      p.forumAsker #{postTree.author} asks:
+      h2.forumTitle #{postTree.subject}
+      p.postBody #{postTree.body}
+      +postMeta(postTree)
       div
-        +indexPostLinks(children)
+        +responsePosts(postTree.children)
         form(action="" id="askForm")
           label Your Response:
           input(type="text" name="questionTitle")
           label Details:
           textarea(name="questionBody")
-          input(type="hidden" name="parentPost" value="#{post.id}")
-          input(type="button" onclick="submitQuestion()" value="Submit Response")
+          input(type="hidden" name="parentPost" value="#{postTree.id}")
+          input(type="button" onclick="submitQuestion('askForm')" value="Submit Response")
+    div.spacer
+  +footer
