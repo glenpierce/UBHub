@@ -231,7 +231,7 @@ function update(){
       "END";
     query.push(createGetPostQuery);
 
-    var createGetPostAndAllSubsQuery =
+    createGetPostAndAllSubsQuery =
       "CREATE PROCEDURE getPostAndAllSubs(IN postId int)\n"+
       "SELECT * FROM posts WHERE `id` = postId \n"+
       "UNION\n" +
@@ -242,14 +242,14 @@ function update(){
 
     query.push(createGetPostAndAllSubsQuery);
 
-    var createGetAllPostsQuery =
+    createGetAllPostsQuery =
       "CREATE PROCEDURE getAllPosts()\n" +
       "BEGIN\n" +
       "SELECT * FROM posts;\n" +
       "END";
     query.push(createGetAllPostsQuery);
 
-    var createGetPostsByParentQuery =
+    createGetPostsByParentQuery =
       "CREATE PROCEDURE getPostsByParent(IN parentId int)\n" +
       "BEGIN\n" +
       "SELECT * FROM posts WHERE `parent`=parentId;\n" +
@@ -265,14 +265,14 @@ function update(){
       "END";
     query.push(createDeletePostQuery);
 
-    var createUpvotePostQuery =
+    createUpvotePostQuery =
       "CREATE PROCEDURE upvotePostById(IN postId int)\n"+
       "BEGIN\n" +
       "UPDATE posts SET `upvotes` = `upvotes` + 1 WHERE `id`=postId;\n" +
       "END";
     query.push(createUpvotePostQuery);
 
-    var createDownvotePostQuery =
+    createDownvotePostQuery =
       "CREATE PROCEDURE downvotePostById(IN postId int)\n"+
       "BEGIN\n" +
       "UPDATE posts SET `upvotes` = `upvotes` - 1 WHERE `id`=postId;\n" +
