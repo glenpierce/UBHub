@@ -189,6 +189,10 @@ p.postBody {
   font-weight: 400;
 }
 
+.forumPostMeta>span.upvotes, .forumPostMeta>span.downvotes {
+  cursor: pointer;
+}
+
 .forumPostMeta .replyButton {
   float: right;
   padding: 4px 8px;

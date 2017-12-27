@@ -71,8 +71,6 @@ function update(){
         "subject VARCHAR(255) NOT NULL," +
         "body TEXT," +
         "creationDate DATETIME," +
-        "upvotes INT," +
-        "downvotes INT," +
         "views INT," +
         "tags VARCHAR(2048)," +
         "keywords VARCHAR(2048)," +
@@ -80,6 +78,14 @@ function update(){
         "acceptedAnswerId INT" +
       ");";
     query.push(createPostsTable);
+
+    createVotesTable =
+      "CREATE TABLE votes(" +
+      "author VARCHAR(255) NOT NULL," +
+      "postId INT NOT NULL," +
+      "deltaUpvotes INT" +
+      ");";
+    query.push(createVotesTable);
 
     createEmailsTableQuery =
         "CREATE TABLE emails (" +
@@ -258,8 +264,6 @@ function update(){
       "END";
     query.push(createGetPostsByParentQuery);
 
-
-
     var createDeletePostQuery =
       "CREATE PROCEDURE deletePostById(IN id int)\n"+
       "BEGIN\n" +
@@ -268,18 +272,60 @@ function update(){
     query.push(createDeletePostQuery);
 
     var createUpvotePostQuery =
-      "CREATE PROCEDURE upvotePostById(IN postId int)\n"+
+      "CREATE PROCEDURE upvotePostById(IN authorId VARCHAR(255), IN post INT)\n"+
       "BEGIN\n" +
-      "UPDATE posts SET `upvotes` = `upvotes` + 1 WHERE `id`=postId;\n" +
+      "INSERT INTO votes (author, postId, deltaUpvotes) VALUES(authorId, post, 1);\n" +
       "END";
     query.push(createUpvotePostQuery);
 
     var createDownvotePostQuery =
-      "CREATE PROCEDURE downvotePostById(IN postId int)\n"+
+      "CREATE PROCEDURE downvotePostById(IN authorId VARCHAR(255), IN post INT)\n"+
       "BEGIN\n" +
-      "UPDATE posts SET `upvotes` = `upvotes` - 1 WHERE `id`=postId;\n" +
+      "INSERT INTO votes (author, postId, deltaUpvotes) VALUES(authorId, post, -1);\n" +
       "END";
     query.push(createDownvotePostQuery);
+
+    var createGetDeltaVotesTotalQuery =
+      "CREATE PROCEDURE getDeltaVotesTotal(IN post INT)\n"+
+      "BEGIN\n" +
+      "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post;\n"+
+      "END";
+    query.push(createGetDeltaVotesTotalQuery);
+
+    var createGetUpvotesTotalQuery =
+      "CREATE PROCEDURE getUpvotesTotal(IN post INT)\n"+
+      "BEGIN\n" +
+      "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post AND `deltaUpvotes` = 1;\n"+
+      "END";
+    query.push(createGetUpvotesTotalQuery);
+
+    var createGetDownvotesTotalQuery =
+      "CREATE PROCEDURE getDownvotesTotal(IN post INT)\n"+
+      "BEGIN\n" +
+      "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post AND `deltaUpvotes` = -1;\n"+
+      "END";
+    query.push(createGetDownvotesTotalQuery);
+
+    var createGetAuthorVoteForPostQuery =
+      "CREATE PROCEDURE getAuthorVoteForPost(IN post INT, IN authorId VARCHAR(255))\n"+
+      "BEGIN\n"+
+      "SELECT deltaUpvotes FROM votes WHERE `author` = authorId AND `postId` = post;\n"+
+      "END";
+    query.push(createGetAuthorVoteForPostQuery);
+
+    var createUnvoteForPostQuery =
+      "CREATE PROCEDURE unvoteForPost(IN post INT, IN authorId VARCHAR(255))\n"+
+      "BEGIN\n"+
+      "DELETE FROM votes WHERE `author` = authorId AND `postId` = post;\n"+
+      "END";
+    query.push(createUnvoteForPostQuery);
+
+    var createAddViewQuery =
+      "CREATE PROCEDURE addView(IN post INT)\n"+
+      "BEGIN\n"+
+      "UPDATE posts SET `views` = views + 1 WHERE id = post;\n"+
+      "END";
+    query.push(createAddViewQuery);
 
     createProgramsTableQuery =
         "CREATE TABLE programs(" +
