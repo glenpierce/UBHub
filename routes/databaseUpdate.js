@@ -222,7 +222,7 @@ function update(){
         "END";
     query.push(getAllUsersQuery);
 
-    var createAddPostQuery =
+    createAddPostQuery =
       "CREATE PROCEDURE addForumPost(IN author varchar(255), IN parent varchar(255), IN subject varchar(255), IN body TEXT, IN creationDate DATETIME)\n" +
       "BEGIN\n" +
       "INSERT INTO posts (author, parent, subject, body, creationDate, upvotes, downvotes, views, status) VALUES (author, parent, subject, body, creationDate, 0, 0, 0, 'published');\n" +
@@ -230,16 +230,14 @@ function update(){
       "END";
     query.push(createAddPostQuery);
 
-
-    var createGetPostQuery =
+    createGetPostQuery =
       "CREATE PROCEDURE getPostById(IN inputId int)\n"+
       "BEGIN\n" +
       "SELECT * FROM posts WHERE `id`=inputId;\n" +
       "END";
-
     query.push(createGetPostQuery);
 
-    var createGetPostAndAllSubsQuery =
+    createGetPostAndAllSubsQuery =
       "CREATE PROCEDURE getPostAndAllSubs(IN postId int)\n"+
       "SELECT * FROM posts WHERE `id` = postId \n"+
       "UNION\n" +
@@ -250,77 +248,79 @@ function update(){
 
     query.push(createGetPostAndAllSubsQuery);
 
-    var createGetAllPostsQuery =
+    createGetAllPostsQuery =
       "CREATE PROCEDURE getAllPosts()\n" +
       "BEGIN\n" +
       "SELECT * FROM posts;\n" +
       "END";
     query.push(createGetAllPostsQuery);
 
-    var createGetPostsByParentQuery =
+    createGetPostsByParentQuery =
       "CREATE PROCEDURE getPostsByParent(IN parentId int)\n" +
       "BEGIN\n" +
       "SELECT * FROM posts WHERE `parent`=parentId;\n" +
       "END";
     query.push(createGetPostsByParentQuery);
 
-    var createDeletePostQuery =
+
+
+    createDeletePostQuery =
       "CREATE PROCEDURE deletePostById(IN id int)\n"+
       "BEGIN\n" +
       "DELETE FROM posts WHERE `id`=id;\n" +
       "END";
     query.push(createDeletePostQuery);
 
-    var createUpvotePostQuery =
+    createUpvotePostQuery =
       "CREATE PROCEDURE upvotePostById(IN authorId VARCHAR(255), IN post INT)\n"+
       "BEGIN\n" +
       "INSERT INTO votes (author, postId, deltaUpvotes) VALUES(authorId, post, 1);\n" +
       "END";
     query.push(createUpvotePostQuery);
 
-    var createDownvotePostQuery =
+    createDownvotePostQuery =
       "CREATE PROCEDURE downvotePostById(IN authorId VARCHAR(255), IN post INT)\n"+
       "BEGIN\n" +
       "INSERT INTO votes (author, postId, deltaUpvotes) VALUES(authorId, post, -1);\n" +
       "END";
     query.push(createDownvotePostQuery);
 
-    var createGetDeltaVotesTotalQuery =
+    createGetDeltaVotesTotalQuery =
       "CREATE PROCEDURE getDeltaVotesTotal(IN post INT)\n"+
       "BEGIN\n" +
       "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post;\n"+
       "END";
     query.push(createGetDeltaVotesTotalQuery);
 
-    var createGetUpvotesTotalQuery =
+    createGetUpvotesTotalQuery =
       "CREATE PROCEDURE getUpvotesTotal(IN post INT)\n"+
       "BEGIN\n" +
       "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post AND `deltaUpvotes` = 1;\n"+
       "END";
     query.push(createGetUpvotesTotalQuery);
 
-    var createGetDownvotesTotalQuery =
+    createGetDownvotesTotalQuery =
       "CREATE PROCEDURE getDownvotesTotal(IN post INT)\n"+
       "BEGIN\n" +
       "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post AND `deltaUpvotes` = -1;\n"+
       "END";
     query.push(createGetDownvotesTotalQuery);
 
-    var createGetAuthorVoteForPostQuery =
+    createGetAuthorVoteForPostQuery =
       "CREATE PROCEDURE getAuthorVoteForPost(IN post INT, IN authorId VARCHAR(255))\n"+
       "BEGIN\n"+
       "SELECT deltaUpvotes FROM votes WHERE `author` = authorId AND `postId` = post;\n"+
       "END";
     query.push(createGetAuthorVoteForPostQuery);
 
-    var createUnvoteForPostQuery =
+    createUnvoteForPostQuery =
       "CREATE PROCEDURE unvoteForPost(IN post INT, IN authorId VARCHAR(255))\n"+
       "BEGIN\n"+
       "DELETE FROM votes WHERE `author` = authorId AND `postId` = post;\n"+
       "END";
     query.push(createUnvoteForPostQuery);
 
-    var createAddViewQuery =
+    createAddViewQuery =
       "CREATE PROCEDURE addView(IN post INT)\n"+
       "BEGIN\n"+
       "UPDATE posts SET `views` = views + 1 WHERE id = post;\n"+
@@ -366,6 +366,24 @@ function update(){
         "`user` VARCHAR(255) NOT NULL" +
         ");";
     query.push(createSitesByUserTableQuery);
+
+    createGetSitesByUserQuery =
+        "CREATE PROCEDURE getSitesByUser(IN emailInput varchar(255))\n"+
+        "BEGIN\n" +
+        "SELECT * FROM sites where id IN (SELECT site FROM sitesByUser WHERE 'email' = \"emailInput\");\n" +
+        "END";
+    query.push(createGetSitesByUserQuery);
+
+    createSiteQuery =
+        "CREATE PROCEDURE createSite(IN siteName VARCHAR(2048), IN userInput VARCHAR(255))\n" +
+        "BEGIN\n" +
+        "INSERT INTO sites(siteName) VALUES (siteName);\n" +
+        "SET @last_id_in_sites = LAST_INSERT_ID();\n" +
+        "INSERT INTO sitesByUser(user, site) VALUES (userInput, @last_id_in_sites);\n" +
+        "SELECT * FROM sitesByUser WHERE site=LAST_INSERT_ID();\n" +
+        "END";
+    query.push(createSiteQuery);
+
 
     createIndicatorsTableQuery =
         "CREATE TABLE indicators(" +

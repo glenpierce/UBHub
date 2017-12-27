@@ -21,23 +21,27 @@ router.get('/', function(req, res, next) {
 
 router.post('/', function(req, res){
     console.log(req.body);
-    // connection = mysql.createConnection({
-    //     host: config.rdsHost,
-    //     user: config.rdsUser,
-    //     password: config.rdsPassword,
-    //     database: config.rdsDatabase
-    // });
-    //
-    // connection.connect();
-    // query = 'insert into sites2 (siteName) values (' + req.body + ')';
-    // console.log(query);
-    // connection.query(query, function(err, rows, fields) {
-    //     if (!err) {
-    res.send('dashboard');
-    // return res.send('/changeLocation');
-    //     }
-    // });
-    // connection.end();
+    connection = mysql.createConnection({
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
+    });
+
+    connection.connect();
+    query = 'call createSite(\'' + req.body.siteName + '\', \'' + req.session.user + '\')';
+    console.log(query);
+    connection.query(query, function(err, rows, fields) {
+        if (!err) {
+            console.log(rows);
+            res.send('dashboard');
+        } else {
+            console.log('Error while performing Query.');
+            console.log(err.code);
+            console.log(err.message);
+        }
+    });
+    connection.end();
 });
 
 module.exports = router;

@@ -26,7 +26,7 @@ router.get('/', function(req, res, next) {
     });
 
     connection.connect();
-    query = 'SELECT * from sites2';
+    query = 'SELECT * from sites';
     console.log(query);
     connection.query(query, function(err, rows, fields) {
         if (!err) {
