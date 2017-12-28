@@ -69,9 +69,11 @@ mixin indexPostLinks(posts)
 
 mixin singlePostLink(post)
   div.singlePostLink
-    p.forumAsker #{post.author} asks:
-    h3(class="forumTitle" onclick="goToPost(#{post.id})" style="cursor:pointer;") #{post.subject}
-    +postMeta(post)
+    +postVotes(post)
+    div.postLinkContent
+      p.forumAsker #{post.author} asks:
+      h3(class="forumTitle" onclick="goToPost(#{post.id})" style="cursor:pointer;") #{post.subject}
+      +postLinkMeta(post)
 
 mixin responsePosts(posts)
   div.indexPostLinks
@@ -79,7 +81,9 @@ mixin responsePosts(posts)
       +singleResponsePost(post)
 
 mixin singleResponsePost(post)
-  div.singlePostLink
+  div.singlePostLink(class=post.acceptedAnswer ? "accepted" : "")
+    if post.acceptedAnswer
+      p.acceptedBadge Accepted Answer:
     p.forumAsker #{post.author} says:
     h3.forumTitle #{post.subject}
     p.postBody #{post.body}
@@ -104,20 +108,37 @@ mixin discussionResponseBox(post)
       input(type="hidden" name="questionTitle" value="Re: #{post.subject}")
       textarea(name="questionBody")
       input(type="hidden" name="parentPost" value="#{post.id}")
-      input(type="button" onClick="submitQuestion('responseForm#{post.id}')" value="Submit Comment")
+      input(type="button" onClick="submitQuestion('responseForm#{post.id}', true)" value="Submit Comment")
 
 
 mixin postMeta(post)
   div.forumPostMeta
     span.upvotes(onClick="vote(#{post.userVoteStatus}, 1, #{post.id})") +
-      span.number #{post.upvotes}
+      span.number(id="upvotes-#{post.id}") #{post.upvotes}
     span.downvotes(onClick="vote(#{post.userVoteStatus}, -1, #{post.id})") -
-      span.number #{post.downvotes}
+      span.number(id="downvotes-#{post.id}")  #{post.downvotes}
     span.views v
       span.number #{post.views}
     span.tag Tag1
     span.tag Tag2
     button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Reply
+    if post.canAccept
+      button(class="replyButton" onClick="accept(#{post.id}, #{post.parent})") Accept
+
+
+mixin postVotes(post)
+  div.forumPostVotes
+    span.upvotes +
+      span.number(id="upvotes-#{post.id}")  #{post.upvotes}
+    span.votesDelta
+      span.number(id="votes-#{post.id}") #{post.votesDelta}
+    span.downvotes –
+      span.number  #{post.downvotes}
+
+mixin postLinkMeta(post)
+  div.postLinkMeta
+    p.postLinkStatus Asked #{post.stringCreationDate}. #{post.stringAnsweredBy}
+      a(href="/forum/post?id=#{post.id}")  Join the discussion!
 
 mixin forumHeader()
   div.forumHeader

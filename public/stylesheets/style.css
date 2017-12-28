@@ -170,6 +170,41 @@ p.postBody {
   line-height: 1.4;
 }
 
+.forumPostVotes {
+  display: inline-block;
+  width: 36px;
+}
+
+.forumPostVotes>span {
+  display: block;
+  color: #333;
+
+}
+
+.forumPostVotes>span.votesDelta {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.forumPostVotes>span.upvotes, .forumPostVotes>span.downvotes {
+  font-size: 12px;
+  color: #666;
+}
+
+
+.postLinkContent {
+  display: inline-block;
+
+}
+
+.postLinkStatus {
+  font-size: 12px;
+}
+
+.postLinkStatus a{
+  font-weight: bold;
+}
+
 .forumPostMeta {
   padding: 12px 0;
 }
@@ -265,6 +300,23 @@ p.postBody {
 
 .singlePostLink h3 {transition: all 0.5s;}
 .singlePostLink h3:hover {color:#36806a;}
+
+.singlePostLink.accepted {
+  background-color: #d8ecd4;
+}
+
+.singlePostLink .acceptedBadge {
+  display: block;
+  background-color: #269973;
+  color: #fff;
+  padding: 12px;
+  margin-left: -24px;
+  border-radius: 0 5px 5px 0;
+  width: 180px;
+  font-weight: thin;
+  font-style: italic;
+  text-transform: uppercase;
+}
 
 
 /*
