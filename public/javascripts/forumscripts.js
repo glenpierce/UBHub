@@ -55,6 +55,7 @@ var replyTo = (postId, parentId) => {
     var responseForm = document.getElementById(responseFormId);
     responseForm.classList.remove("hide");
   }
+
 }
 
 var hideAllResponseForms = () => {
@@ -62,4 +63,40 @@ var hideAllResponseForms = () => {
   for(i = 0; i < responseForms.length; i++){
     responseForms[i].classList.add("hide");
   }
+}
+
+var vote = (status, vote, postId) => {
+
+  var url;
+
+  if(status == 0){
+    url = "/forum/vote";
+  } else if (status == vote){
+        url = "/forum/unvote";
+  } else {
+    alert("Can't vote again son");
+    return;
+  }
+
+  var data = {
+    status,
+    vote,
+    postId
+  }
+
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.onreadystatechange = function() {
+      if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+          callback(xmlHttp.responseText);
+  }
+  xmlHttp.open("POST", url, true); // true for asynchronous
+  xmlHttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+  var dataAsJson = JSON.stringify(data);
+  xmlHttp.send(dataAsJson);
+
+  //TODO Get response, callback updates vote count
+}
+
+var test = (t) => {
+  console.log(t);
 }

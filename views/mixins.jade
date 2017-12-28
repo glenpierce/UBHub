@@ -93,7 +93,7 @@ mixin responseComments(posts)
       +singleComment(post)
 
 mixin singleComment(post)
-  div.singleComment 
+  div.singleComment
     p.forumAsker #{post.author} says:
     p.postBody #{post.body}
 
@@ -109,12 +109,12 @@ mixin discussionResponseBox(post)
 
 mixin postMeta(post)
   div.forumPostMeta
-    span.upvotes +
-      span.number 23
-    span.downvotes -
-      span.number 11
+    span.upvotes(onClick="vote(#{post.userVoteStatus}, 1, #{post.id})") +
+      span.number #{post.upvotes}
+    span.downvotes(onClick="vote(#{post.userVoteStatus}, -1, #{post.id})") -
+      span.number #{post.downvotes}
     span.views v
-      span.number 203
+      span.number #{post.views}
     span.tag Tag1
     span.tag Tag2
     button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Reply
