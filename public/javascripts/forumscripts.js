@@ -2,7 +2,7 @@ var askQuestion = () => {
   window.location='/forum/ask';
 }
 
-var submitQuestion = (formId) => {
+var submitQuestion = (formId, refresh) => {
   var formElements = document.getElementById(formId).elements;
   var postData = {};
   for (var i = 0; i < formElements.length; i++)
@@ -13,6 +13,10 @@ var submitQuestion = (formId) => {
     postQuestion("/forum/submit/", postData, messageCallback);
   } else {
     console.log("no post data");
+  }
+
+  if(refresh){
+    location.reload();
   }
 
 }
@@ -74,7 +78,7 @@ var vote = (status, vote, postId) => {
   } else if (status == vote){
         url = "/forum/unvote";
   } else {
-    alert("Can't vote again son");
+    alert("Can't vote again");
     return;
   }
 
@@ -87,14 +91,41 @@ var vote = (status, vote, postId) => {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.onreadystatechange = function() {
       if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-          callback(xmlHttp.responseText);
+      //TODO: get response, update button
+
+        location.reload();
   }
   xmlHttp.open("POST", url, true); // true for asynchronous
   xmlHttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
   var dataAsJson = JSON.stringify(data);
+
   xmlHttp.send(dataAsJson);
+  location.reload();
 
   //TODO Get response, callback updates vote count
+}
+
+var accept = (postId, answerId) => {
+  var data = {
+    postId,
+    answerId
+  }
+
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.onreadystatechange = function() {
+      if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+        location.reload();
+          //callback(xmlHttp.responseText);
+          //TODO: get response, update button
+
+  }
+  xmlHttp.open("POST", "/forum/accept", true); // true for asynchronous
+  xmlHttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+  var dataAsJson = JSON.stringify(data);
+
+  xmlHttp.send(dataAsJson);
+  location.reload();
+
 }
 
 var test = (t) => {

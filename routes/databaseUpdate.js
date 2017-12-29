@@ -76,6 +76,8 @@ function update(){
         "keywords VARCHAR(2048)," +
         "status VARCHAR(255)," +
         "acceptedAnswerId INT" +
+        //TODO: add something like the below for foreign key constraint
+        //"FOREIGN KEY (author) REFERENCES users(email)"
       ");";
     query.push(createPostsTable);
 
@@ -83,7 +85,9 @@ function update(){
       "CREATE TABLE votes(" +
       "author VARCHAR(255) NOT NULL," +
       "postId INT NOT NULL," +
-      "deltaUpvotes INT" +
+      "deltaUpvotes INT," +
+      "FOREIGN KEY (author) REFERENCES users(email),"+
+      "FOREIGN KEY (postId) REFERENCES posts(id)"+
       ");";
     query.push(createVotesTable);
 
@@ -262,8 +266,6 @@ function update(){
       "END";
     query.push(createGetPostsByParentQuery);
 
-
-
     createDeletePostQuery =
       "CREATE PROCEDURE deletePostById(IN id int)\n"+
       "BEGIN\n" +
@@ -326,6 +328,13 @@ function update(){
       "UPDATE posts SET `views` = views + 1 WHERE id = post;\n"+
       "END";
     query.push(createAddViewQuery);
+
+    createAcceptPostQuery =
+      "CREATE PROCEDURE acceptPost(IN post INT, IN answerId INT)\n"+
+      "BEGIN\n"+
+      "UPDATE posts SET `acceptedAnswerId` = answerId WHERE id = post;\n"+
+      "END";
+    query.push(createAcceptPostQuery);
 
     createProgramsTableQuery =
         "CREATE TABLE programs(" +

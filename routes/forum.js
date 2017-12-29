@@ -103,13 +103,16 @@ router.post("/vote", function(req, res) {
         database: config.rdsDatabase
     });
 
-    var voteDelta = req.body.voteDelta;
+    console.log(req.body);
+
+    var voteDelta = req.body.vote;
     var user = req.session.user;
     var postId = req.body.postId;
     var query;
 
     //TODO: first check if vote is valid
 
+    console.log("Vote delta:", voteDelta);
     if(voteDelta == -1){
       query = `CALL downvotePostById("${user}", ${postId});`
     } else {
@@ -123,6 +126,8 @@ router.post("/vote", function(req, res) {
         console.log(err);
       }
     })
+
+     res.write = {test: "Test"};
 
   }
 
@@ -156,6 +161,34 @@ router.post("/unvote", function(req, res) {
         console.log(err);
       }
     })
+
+  }
+})
+
+router.post("/accept", function(req, res){
+  if (req.session && req.session.user) {
+    var connection = mysql.createConnection({
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
+    });
+
+    var postId = req.body.postId;
+    var answerId = req.body.answerId;
+
+    //TODO: verification of legality of move.
+
+    var query = `CALL acceptPost(${answerId}, ${postId})`;
+
+    connection.query(query, function(err, rows, fields) {
+      if(!err){
+        console.log("Scuces");
+      } else {
+        console.log(err);
+      }
+    })
+
 
   }
 })
@@ -227,7 +260,7 @@ var getPostsAsTree = function(postId, res, userId, callback) {
   })
   .then((votedPosts) => {
     addViews(votedPosts);
-    return createHierarchy(postId, votedPosts);
+    return createHierarchy(postId, votedPosts, userId);
   })
   .then((postTree) =>{
     callback(postTree, postId, res);
@@ -342,7 +375,7 @@ function addView(post, connection){
 //child nodes with parent of stem node. Each child node will have one layer of
 //children of their own.
 //TODO: make this less of a mess
-var createHierarchy = (topId, posts) => {
+var createHierarchy = (topId, posts, currentUserId) => {
 
 
   return new Promise((resolve, reject) => {
@@ -368,37 +401,47 @@ var createHierarchy = (topId, posts) => {
     }
 
     var entriesCount = posts.length;
+    var acceptedId = postTree.acceptedAnswerId;
 
-    postTree = insertIntoTree(posts, postTree);
+    postTree = insertIntoTree(posts, postTree, currentUserId, acceptedId);
     console.log(JSON.stringify(postTree, undefined, 2));
 
     resolve(postTree);
   });
 }
 
-function insertIntoTree(lop, t){
+function insertIntoTree(lop, t, u, a){
   if(lop.length <= 0){
     return t;
   }
 
   p = lop.shift();
+  if(p.id == a){
+    p.acceptedAnswer = true;
+  } else {
+    p.acceptedAnswer = false;
+  }
 
   if(t.id === p.parent) {
+      p.parentAuthor = t.author;
+      p = canAccept(p, t.acceptedAnswerId, u);
       t.children.push(p);
-      return insertIntoTree(lop, t);
+      return insertIntoTree(lop, t, u, a);
   } else {
     var notFound = true;
     var i = 0;
     while(notFound && i < t.children.length) {
       if(t.children[i].id === p.parent){
+        p.parentAuthor = t.children[i].author;
+        p = canAccept(p, t.children[i].acceptedAnswerId, u);
         t.children[i].children.push(p);
         notFound = false;
-        return insertIntoTree(lop, t);
+        return insertIntoTree(lop, t, u, a);
       }
     i++;
     }
     if (tried >= t.children.length){
-      console.log("Insertion options exhausted!");
+      console.log("Oh no! Insertion options exhausted!");
     }
   }
 }
@@ -427,6 +470,14 @@ function ForumPost(id, parent, author, subject, body, creationDate, upvotes, dow
   this.status = status;
   this.acceptedAnswerId = acceptedAnswerId;
   this.children = children; //Other post objects
+
+
+
+  //Vars for post output:
+  //TODO: make this more readable
+  this.stringCreationDate = creationDate.toDateString() + " at " + creationDate.toTimeString();
+  this.stringAnsweredBy = (acceptedAnswerId != null) ? "Answered with " + acceptedAnswerId : "Not answered yet.";
+
 }
 
 function forumPostFromRow(row){
@@ -447,6 +498,19 @@ function forumPostFromRow(row){
     row.status,
     row.acceptedAnswerId,
     []);
+}
+
+function canAccept(post, parentAcceptedId, currentUserId){
+
+  if(post.parent > -1 &&
+    post.author != currentUserId &&
+    post.parentAuthor == currentUserId &&
+    parentAcceptedId == null){
+    post.canAccept = true;
+    return post;
+  }
+  post.canAccept = false;
+  return post;
 }
 
 module.exports = router;
