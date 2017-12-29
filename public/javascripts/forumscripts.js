@@ -10,7 +10,7 @@ var submitQuestion = (formId, refresh) => {
           postData[formElements[i].name] = formElements[i].value;
   if(postData.questionTitle != "" && postData.questionBody != "") {
     console.log(postData);
-    postQuestion("/forum/submit/", postData, messageCallback);
+    postQuestion("/forum/submit", postData, messageCallback);
   } else {
     console.log("no post data");
   }

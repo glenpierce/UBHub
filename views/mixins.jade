@@ -149,6 +149,17 @@ mixin forumHeader()
     div.askOption
       button(value="Ask a Question" onclick="askQuestion()") Ask a Question
 
+mixin forumPager(posts)
+  div.forumPager
+    p PAGE
+    p.pager
+      if lastPage
+        a.pageButton(href="/forum?page=#{lastPage}") <
+      span.pageCount #{page}/#{finalPage}
+      if nextPage
+        a.pageButton(href="/forum?page=#{nextPage}") >
+
+
 
 mixin footer()
     div(style="margin:auto; max-width:1200px; display:flex; justify-content:space-between; padding-top:10px;")

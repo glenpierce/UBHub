@@ -16,9 +16,16 @@ app.use(session({
 }));
 
 router.get('/', function(req, res, next) {
-    console.log("forum");
-      if (req.session && req.session.user) {
-        getPostsAsList(renderPosts, res);
+
+    var page = req.query.page;
+    if(!page) {
+      page = 1;
+    }
+
+    var perPage = 5;
+
+    if (req.session && req.session.user) {
+        getPostsAsList(renderPosts, res, perPage, page);
     } else {
         req.session.reset();
         res.redirect('/');
@@ -53,9 +60,22 @@ router.get('/post', function(req, res, next) {
 });
 
 router.post("/submit", function (req, res) {
-    //TODO: make sure the post is legal etc.
+  //TODO: make sure the post is legal etc.
+  //Is user logged in? DONE
+  //Does user have post privileges? TODO
+  //Does the post have the required fields? (subject, body, parentPost) DONE
+  //Does the post pass spam filters TODO (if necessary)
 
-    if (req.session && req.session.user) {
+  var body = req.body.questionBody.trim();
+  var title = req.body.questionTitle.trim();
+  var parent = req.body.parentPost;
+  var date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+  if (req.session
+      && req.session.user
+      && body != ""
+      && title != ""
+      && parent != undefined) {
       var connection = mysql.createConnection({
           host: config.rdsHost,
           user: config.rdsUser,
@@ -65,7 +85,7 @@ router.post("/submit", function (req, res) {
 
       var path="";
       connection.connect();
-      query = `CALL AddForumPost('${req.session.user}', '${req.body.parentPost}', '${req.body.questionTitle}', '${req.body.questionBody}', '${new Date().toISOString().slice(0, 19).replace('T', ' ')}')`;
+      query = `CALL AddForumPost('${req.session.user}', '${parent}', '${title}', '${body}', '${date}')`;
       connection.query(query, function(err, rows, fields) {
           if (!err) {
               //If successful, redirect to the post page
@@ -87,13 +107,22 @@ router.post("/submit", function (req, res) {
       });
       connection.end();
     } else {
-      console.log("not logged in");
-      req.session.reset();
-      res.redirect('/');
+      console.log("Illegal post or no user found.");
     }
 });
 
 router.post("/vote", function(req, res) {
+
+  //TODO: first check if vote is valid
+  //Is user logged in? DONE
+  //Does user have vote privileges? TODO
+  //Has user ever voted for this post before? DONE
+
+  var voteDelta = req.body.vote;
+  var user = req.session.user;
+  var postId = req.body.postId;
+
+  console.log("Hit vote");
 
   if (req.session && req.session.user) {
     var connection = mysql.createConnection({
@@ -103,38 +132,39 @@ router.post("/vote", function(req, res) {
         database: config.rdsDatabase
     });
 
-    console.log(req.body);
+    connection.connect();
 
-    var voteDelta = req.body.vote;
-    var user = req.session.user;
-    var postId = req.body.postId;
-    var query;
+    getUserVoteForPost(postId, user, connection)
+    .then((pastVote) => {
+      if (pastVote === 0) {
 
-    //TODO: first check if vote is valid
+        var query;
 
-    console.log("Vote delta:", voteDelta);
-    if(voteDelta == -1){
-      query = `CALL downvotePostById("${user}", ${postId});`
-    } else {
-      query = `CALL upvotePostById("${user}", ${postId});`
-    }
+        if(voteDelta == -1){
+          query = `CALL downvotePostById("${user}", ${postId});`
+        } else {
+          query = `CALL upvotePostById("${user}", ${postId});`
+        }
 
-    connection.query(query, function(err, rows, fields) {
-      if(!err){
-
+        connection.query(query, function(err, rows, fields) {
+          if(err)
+            console.log(err);
+        });
       } else {
-        console.log(err);
+        console.log("Already voted for this post");
       }
-    })
-
-     res.write = {test: "Test"};
-
+    });
+  } else {
+      console.log("Not logged in");
   }
-
-})
+});
 
 
 router.post("/unvote", function(req, res) {
+
+  //TODO: Check if unvote is valid
+  //Is the correct user logged in? DONE
+  //Does user have vote privileges? TODO
 
   if (req.session && req.session.user) {
     var connection = mysql.createConnection({
@@ -148,24 +178,20 @@ router.post("/unvote", function(req, res) {
     var user = req.session.user;
     var postId = req.body.postId;
 
-
-    //TODO: first check if vote is valid
     var query = `CALL unvoteForPost(${postId}, "${user}");`
 
-    console.log(query);
-
     connection.query(query, function(err, rows, fields) {
-      if(!err){
-
-      } else {
+      if(err)
         console.log(err);
-      }
     })
-
   }
 })
 
 router.post("/accept", function(req, res){
+  //TODO: verification of legal accept
+  //Is user logged in? DONE
+  //Is user == to the parent post author?
+
   if (req.session && req.session.user) {
     var connection = mysql.createConnection({
         host: config.rdsHost,
@@ -174,34 +200,66 @@ router.post("/accept", function(req, res){
         database: config.rdsDatabase
     });
 
+    connection.connect();
+
     var postId = req.body.postId;
     var answerId = req.body.answerId;
 
-    //TODO: verification of legality of move.
+    getPostData(postId, connection)
+    .then((parentPost)=>{
+      if(parentPost.author === req.session.user){
 
-    var query = `CALL acceptPost(${answerId}, ${postId})`;
+        var query = `CALL acceptPost(${answerId}, ${postId})`;
 
-    connection.query(query, function(err, rows, fields) {
-      if(!err){
-        console.log("Scuces");
+        connection.query(query, function(err, rows, fields) {
+          if(err){
+            console.log(err);
+          }
+          connection.end();
+        })
       } else {
-        console.log(err);
+        console.log
       }
-    })
-
-
+    });
   }
 })
 
-var renderPosts = (posts, res) => {
-  res.render('forum', {posts: posts});
+var renderPosts = (posts, res, perPage, page) => {
+  //TODO: Probably not have the pagination and sorting run here, but this will
+  //work for prototype amounts of data.
+
+  //SORTING
+  //TODO: pick a sorting scheme, probably weighted by popularity and recency
+
+
+  //PAGINATION
+  page = parseInt(page);
+  perPage = parseInt(perPage);
+  var finalPage = Math.ceil(posts.length/perPage);
+  var postsToRender = posts.slice((page - 1)*perPage, page*perPage);
+  var lastPage = page === 1 ? false: page - 1;
+  var nextPage = page === finalPage ? false: page + 1;
+
+  console.log(posts.length);
+  console.log(perPage);
+  console.log(finalPage);
+  console.log("LP", lastPage);
+  console.log("NP", nextPage);
+
+  res.render('forum', {
+    posts: postsToRender,
+    nextPage,
+    page,
+    finalPage,
+    lastPage
+  });
 }
 
 var renderPostTree = (postId, postHierarchy, res) => {
   res.render('post', {postTree: postHierarchy});
 }
 
-var getPostsAsList = (callback, res) => {
+var getPostsAsList = (callback, res, perPage, page) => {
   //TODO: implement pagination
 
   var connection = mysql.createConnection({
@@ -226,7 +284,7 @@ var getPostsAsList = (callback, res) => {
     return attachVotes(posts, connection);
   })
   .then((posts) =>{
-    callback(posts, res);
+    callback(posts, res, perPage, page);
     connection.end();
   })
   .catch((err) => {
@@ -368,6 +426,41 @@ function addView(post, connection){
   });
 }
 
+function getUserVoteForPost(id, user, connection){
+  return new Promise((resolve, reject) => {
+
+    var query = `CALL getAuthorVoteForPost(${id}, "${user}")`;
+
+    connection.query(query, function(err, rows, fields){
+      if(!err){
+        if(rows[0].length <= 0) {
+          console.log(0);
+          resolve(0);
+        } else {
+          console.log(rows[0][0].deltaUpvotes);
+          resolve(rows[0][0].deltaUpvotes);
+        }
+      } else {
+        reject(err);
+      }
+    })
+
+  });
+}
+
+function getPostData(id, connection){
+  return new Promise((resolve, reject) => {
+    var query = `CALL getPostById(${id})`;
+    connection.query(query, function(err, rows, fields){
+      if(!err){
+        resolve(rows[0][0]);
+      } else {
+        reject(err);
+      }
+    })
+  });
+}
+
 
 
 //Consumes an array of posts and creates a hierarchical representation of them
@@ -376,7 +469,6 @@ function addView(post, connection){
 //children of their own.
 //TODO: make this less of a mess
 var createHierarchy = (topId, posts, currentUserId) => {
-
 
   return new Promise((resolve, reject) => {
 
@@ -405,6 +497,19 @@ var createHierarchy = (topId, posts, currentUserId) => {
 
     postTree = insertIntoTree(posts, postTree, currentUserId, acceptedId);
     console.log(JSON.stringify(postTree, undefined, 2));
+
+    //Now sort first-level children with ACCEPTED ANSWER first, then rest by votes
+
+    postTree.children.sort(function(a, b) {
+      if(a.id == postTree.acceptedAnswerId) {
+        return -1;
+      } else if (a.votesDelta >= b.votesDelta) {
+        return 0;
+      } else if (a.id < b.id){
+        return 1;
+      }
+    })
+
 
     resolve(postTree);
   });
@@ -475,6 +580,7 @@ function ForumPost(id, parent, author, subject, body, creationDate, upvotes, dow
 
   //Vars for post output:
   //TODO: make this more readable
+  //TODO: get name of accepted post's author
   this.stringCreationDate = creationDate.toDateString() + " at " + creationDate.toTimeString();
   this.stringAnsweredBy = (acceptedAnswerId != null) ? "Answered with " + acceptedAnswerId : "Not answered yet.";
 
