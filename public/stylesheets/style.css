@@ -318,6 +318,21 @@ p.postBody {
   text-transform: uppercase;
 }
 
+.forumPager {
+  text-align: center;
+
+}
+
+.forumPager .pager {
+  margin-top: 12px;
+  margin-bottom: 12px;
+  font-size: 24px;
+}
+
+.forumPager a.pageButton {
+  text-decoration: none;
+  margin: 12px;
+}
 
 /*
 Blue
