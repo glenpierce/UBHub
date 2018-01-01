@@ -128,6 +128,50 @@ var accept = (postId, answerId) => {
 
 }
 
+var resortBy = (sort) => {
+  reloadLocationWithNewParam("sort", sort);
+}
+
+var turnPage = (pg) => {
+  reloadLocationWithNewParam("page", pg);
+}
+
+var reloadLocationWithNewParam = (key, val) => {
+  //Splits the query parameters to an array of key-value pairs.
+  var params = window.location.search.substr(1).split("&&").map((x) => {
+    return x.split("=");
+  });
+
+  var paramsString = "?";
+  var found = false;
+
+  for (i = 0; i < params.length; i++){
+    //Check if this is the param we're modifying. If it is, change its value and
+    //set the found flag to true.
+    if(params[i][0] === key) {
+      params[i][1] = val;
+      found = true;
+    }
+
+    //If not undefined, concatenate this key value pair to the params string
+    if(params[i][1]){
+      paramsString += params[i][0] + "=" + params[i][1] + "&&";
+    }
+  }
+
+  //If found, no need for final &&s. Else, we need to keep the terminal &&s and
+  //add the new key value pair to the string.
+  if(found){
+    paramsString = paramsString.slice(0, -2);
+  } else {
+    paramsString += key + "=" + val;
+  }
+
+  //And awaaay we go.
+  var loc = window.location.origin + window.location.pathname + paramsString;
+  window.location.assign(loc);
+}
+
 var test = (t) => {
   console.log(t);
 }

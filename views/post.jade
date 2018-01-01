@@ -11,9 +11,15 @@ html
             }
 
       script(type='text/javascript').
-        var post = !{JSON.stringify(postTree)};
-        console.log(post);
-        console.log(post.author);
+        window.onload = function() {
+          var scrollPost = document.getElementById("#{scrollPost}");
+          scrollPost.classList.add("focused");
+          console.log(scrollPost);
+          scrollPost.scrollIntoView();
+          window.scrollBy(0, -84);
+        }
+
+
 
 body
     +header(true)

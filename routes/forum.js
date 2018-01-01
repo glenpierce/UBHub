@@ -15,6 +15,10 @@ app.use(session({
     activeDuration: 5 * 60 * 1000
 }));
 
+/********/
+/*ROUTES*/
+/********/
+
 router.get('/', function(req, res, next) {
 
     var page = req.query.page;
@@ -22,10 +26,43 @@ router.get('/', function(req, res, next) {
       page = 1;
     }
 
+    var sort = req.query.sort;
+    if(!sort) {
+      sort = "date";
+    }
+
     var perPage = 5;
 
     if (req.session && req.session.user) {
-        getPostsAsList(renderPosts, res, perPage, page);
+        getPostsAsList(renderPosts, res, perPage, page, sort, "");
+    } else {
+        req.session.reset();
+        res.redirect('/');
+    }
+});
+
+router.get('/search', function(req, res, next) {
+
+    var page = req.query.page;
+    if(!page) {
+      page = 1;
+    }
+
+    var sort = req.query.sort;
+    if(!sort) {
+      sort = "date";
+    }
+
+    var search = req.query.s;
+    if(!search) {
+      res.redirect('/');
+    }
+
+    var perPage = 5;
+
+    //TODO: better backend search
+    if (req.session && req.session.user) {
+        getPostsAsList(renderPosts, res, perPage, page, sort, search);
     } else {
         req.session.reset();
         res.redirect('/');
@@ -45,19 +82,28 @@ router.get('/ask', function(req, res, next) {
 
 router.get('/post', function(req, res, next) {
   if (req.session && req.session.user) {
-    var post_id = req.query.id;
-    //TODO: make this actually find the first ancestor post, generate THAT page,
-    //but #anchor down to the requested post.
-    //var ancestor_id = getFirstAncestor(post_id);
-      getPostsAsTree(post_id, res, req.session.user, (posts) => {
-        renderPostTree(post_id, posts, res);
+    var postId = req.query.id;
+    var pageId;
+
+
+    getFirstAncestor(postId)
+    .then((anc) => {
+      console.log("ANCESTOR", JSON.stringify(anc, undefined, 2));
+
+      pageId = anc.id;
+      getPostsAsTree(pageId, res, req.session.user, (posts) => {
+        renderPostTree(pageId, posts, res, postId);
       });
+
+    })
+
   } else {
       console.log("not logged in");
       req.session.reset();
       res.redirect('/');
   }
 });
+
 
 router.post("/submit", function (req, res) {
   //TODO: make sure the post is legal etc.
@@ -188,9 +234,6 @@ router.post("/unvote", function(req, res) {
 })
 
 router.post("/accept", function(req, res){
-  //TODO: verification of legal accept
-  //Is user logged in? DONE
-  //Is user == to the parent post author?
 
   if (req.session && req.session.user) {
     var connection = mysql.createConnection({
@@ -224,13 +267,45 @@ router.post("/accept", function(req, res){
   }
 })
 
-var renderPosts = (posts, res, perPage, page) => {
+
+/***********/
+/*RENDERING*/
+/***********/
+
+
+var renderPosts = (posts, res, perPage, page, sort, search) => {
+  //TODO: filter search results out earlier. This is just for alpha
   //TODO: Probably not have the pagination and sorting run here, but this will
   //work for prototype amounts of data.
 
-  //SORTING
-  //TODO: pick a sorting scheme, probably weighted by popularity and recency
+  //SEARCH
+  if(search) {
+    posts = posts.filter((post) => {
+      return (post.subject.includes(search) || post.body.includes(search));
+    })
+  }
 
+  //SORTING
+
+  if(sort === "score"){
+    posts.sort(function(a, b) {
+      if(a.votesDelta < b.votesDelta) {
+        return 1;
+      } else if (a.votesDelta >= b.votesDelta){
+        return -1;
+      }
+    });
+  } else {
+    //Default to by date modified (i.e. last commented on, edited, voted etc.).
+    //TODO: Make this last date MODIFIED, not CREATED
+    posts.sort(function(a, b) {
+      if(a.creationDate < b.creationDate) {
+        return 1;
+      } else if (a.creationDate >= b.creationDate){
+        return -1;
+      }
+    });
+  }
 
   //PAGINATION
   page = parseInt(page);
@@ -240,14 +315,9 @@ var renderPosts = (posts, res, perPage, page) => {
   var lastPage = page === 1 ? false: page - 1;
   var nextPage = page === finalPage ? false: page + 1;
 
-  console.log(posts.length);
-  console.log(perPage);
-  console.log(finalPage);
-  console.log("LP", lastPage);
-  console.log("NP", nextPage);
-
   res.render('forum', {
     posts: postsToRender,
+    sort,
     nextPage,
     page,
     finalPage,
@@ -255,11 +325,23 @@ var renderPosts = (posts, res, perPage, page) => {
   });
 }
 
-var renderPostTree = (postId, postHierarchy, res) => {
-  res.render('post', {postTree: postHierarchy});
+var renderPostTree = (pageId, postHierarchy, res, postId) => {
+  var scroll = "postTop";
+  if (pageId != postId){
+    scroll = "post" + postId;
+  }
+
+  res.render('post', {postTree: postHierarchy,
+                      scrollPost: scroll
+                    });
 }
 
-var getPostsAsList = (callback, res, perPage, page) => {
+
+/********/
+/*DATA***/
+/********/
+
+var getPostsAsList = (callback, res, perPage, page, sort, search) => {
   //TODO: implement pagination
 
   var connection = mysql.createConnection({
@@ -284,7 +366,10 @@ var getPostsAsList = (callback, res, perPage, page) => {
     return attachVotes(posts, connection);
   })
   .then((posts) =>{
-    callback(posts, res, perPage, page);
+    return getAnswersData(posts, connection);
+  })
+  .then((posts) =>{
+    callback(posts, res, perPage, page, sort, search);
     connection.end();
   })
   .catch((err) => {
@@ -374,6 +459,32 @@ function attachPostVotes(post, connection){
     });
   });
 }
+
+function getAnswersData(posts, connection) {
+  return Promise.all(posts.map(function (post) {
+    return getAnswerData(post, connection);
+  }));
+}
+
+function getAnswerData(post, connection){
+  return new Promise((resolve, reject) => {
+  if(!post.acceptedAnswerId){
+    resolve(post);
+  } else {
+    return getPostData(post.acceptedAnswerId, connection)
+      .then((answerData) => {
+        post.acceptedAnswer = forumPostFromRow(answerData);
+        post.stringAnsweredBy = `Answered with ${answerData.subject} by ${answerData.author}`;
+        resolve(post);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+    }
+  })
+}
+
+
 
 function attachVoteStatuses(posts, authorId, connection) {
   return Promise.all(posts.map(function (post) {
@@ -551,9 +662,55 @@ function insertIntoTree(lop, t, u, a){
   }
 }
 
+
+
 //Returns ancestor post with parent of -1.
 function getFirstAncestor(postId){
 
+  var connection = mysql.createConnection({
+      host: config.rdsHost,
+      user: config.rdsUser,
+      password: config.rdsPassword,
+      database: config.rdsDatabase
+  });
+
+  return new Promise((resolve, reject) =>{
+    getPostData(postId, connection)
+    .then((post) => {
+      if(post.parent == -1){
+        connection.end();
+        resolve(post);
+      } else {
+        return getPostData(post.parent, connection);
+      }
+    })
+    .then((parentPost) => {
+      console.log("Parent:" , parentPost);
+      if(parentPost) {
+        if(parentPost.parent == -1){
+          connection.end();
+          resolve(parentPost);
+        } else {
+          return getPostData(parentPost.parent, connection);
+        }
+      }
+    })
+    .then((grandparentPost) => {
+      if(grandparentPost) {
+        console.log("Grandparent:" , grandparentPost);
+        if(grandparentPost && grandparentPost.parent == -1){
+          connection.end();
+          resolve(grandparentPost);
+        } else {
+          reject("Something has gone wrong with post " + postId + " -- the tree is too deep!");
+        }
+      }
+    })
+    .catch((err) =>{
+      connection.end();
+      console.log(err);
+    })
+  })
 }
 
 //Note: this should mirror the posts table, created in databaseUpdate.js, but
@@ -576,8 +733,6 @@ function ForumPost(id, parent, author, subject, body, creationDate, upvotes, dow
   this.acceptedAnswerId = acceptedAnswerId;
   this.children = children; //Other post objects
 
-
-
   //Vars for post output:
   //TODO: make this more readable
   //TODO: get name of accepted post's author
@@ -587,7 +742,6 @@ function ForumPost(id, parent, author, subject, body, creationDate, upvotes, dow
 }
 
 function forumPostFromRow(row){
-
   return new ForumPost(
     row.id,
     row.parent,
@@ -606,6 +760,10 @@ function forumPostFromRow(row){
     []);
 }
 
+/*********/
+/*UTILITY*/
+/*********/
+
 function canAccept(post, parentAcceptedId, currentUserId){
 
   if(post.parent > -1 &&
@@ -618,5 +776,6 @@ function canAccept(post, parentAcceptedId, currentUserId){
   post.canAccept = false;
   return post;
 }
+
 
 module.exports = router;
