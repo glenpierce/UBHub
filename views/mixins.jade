@@ -68,7 +68,7 @@ mixin indexPostLinks(posts)
       +singlePostLink(post)
 
 mixin singlePostLink(post)
-  div.singlePostLink
+  div.singlePostLink(id="post#{post.id}")
     +postVotes(post)
     div.postLinkContent
       p.forumAsker #{post.author} asks:
@@ -81,7 +81,7 @@ mixin responsePosts(posts)
       +singleResponsePost(post)
 
 mixin singleResponsePost(post)
-  div.singlePostLink(class=post.acceptedAnswer ? "accepted" : "")
+  div.singlePostLink(id="post#{post.id}" class=post.acceptedAnswer ? "accepted" : "")
     if post.acceptedAnswer
       p.acceptedBadge Accepted Answer:
     p.forumAsker #{post.author} says:
@@ -143,9 +143,17 @@ mixin postLinkMeta(post)
 mixin forumHeader()
   div.forumHeader
     div.searchOption
-      form
-        input(type="text" placeholder="Search the forums for discussions and answers")
+      form(action="/forum/search"  method="GET")
+        input(type="text" placeholder="Search the forums for discussions and answers" name="s")
         button(value="Submit") Search
+    if sort
+      div.sortOption Sort by:
+        if sort == "score"
+          span(onclick="resortBy('date')") Most Recent |
+          span.active Best Voted
+        if sort == "date"
+          span.active Most Recent |
+          span(onclick="resortBy('score')") Best Voted
     div.askOption
       button(value="Ask a Question" onclick="askQuestion()") Ask a Question
 
@@ -154,10 +162,10 @@ mixin forumPager(posts)
     p PAGE
     p.pager
       if lastPage
-        a.pageButton(href="/forum?page=#{lastPage}") <
+        span.pageButton(onclick="turnPage(#{lastPage})") <
       span.pageCount #{page}/#{finalPage}
       if nextPage
-        a.pageButton(href="/forum?page=#{nextPage}") >
+        span.pageButton(onclick="turnPage(#{nextPage})") >
 
 
 

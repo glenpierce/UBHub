@@ -140,6 +140,21 @@ a {
 
 }
 
+.forumHeader .sortOption {
+  padding: 6px;
+}
+
+.forumHeader .sortOption span {
+  margin-left: 4px;
+  cursor:pointer;
+
+}
+
+.forumHeader .sortOption span.active {
+  font-weight: bold;
+  cursor: default;
+}
+
 .forumHeader .askOption{
   justify-content: flex-end;
 }
@@ -301,9 +316,15 @@ p.postBody {
 .singlePostLink h3 {transition: all 0.5s;}
 .singlePostLink h3:hover {color:#36806a;}
 
+.singlePostLink.focused {
+  background-color: #d8ecd4;
+}
+
+
 .singlePostLink.accepted {
   background-color: #d8ecd4;
 }
+
 
 .singlePostLink .acceptedBadge {
   display: block;
@@ -329,9 +350,10 @@ p.postBody {
   font-size: 24px;
 }
 
-.forumPager a.pageButton {
+.forumPager .pageButton {
   text-decoration: none;
   margin: 12px;
+  cursor:pointer;
 }
 
 /*
