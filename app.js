@@ -22,6 +22,7 @@ var yourUploads = require('./routes/yourUploads');
 var editUpload = require('./routes/editUpload');
 var createNewUpload = require('./routes/createNewUpload');
 var aboutUs = require('./routes/aboutUs');
+var resources = require('./routes/resources');
 var home = require('./routes/home');
 var databaseUpdate = require('./routes/databaseUpdate');
 
@@ -76,6 +77,7 @@ app.use('/yourUploads', yourUploads);
 app.use('/editUpload', editUpload);
 app.use('/createNewUpload', createNewUpload);
 app.use('/aboutUs', aboutUs);
+app.use('/resources', resources);
 app.use('/home', home);
 app.use('/databaseUpdate', databaseUpdate);
 

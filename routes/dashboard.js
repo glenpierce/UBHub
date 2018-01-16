@@ -16,11 +16,13 @@ app.use(session({
 }));
 
 router.get('/', function(req, res, next) {
+    console.log(req.query.id);
     console.log("dashboard");
     if (req.session && req.session.user) {
         console.log("logged in as " + req.session.user);
         query = `Call getSitesByUser('${req.session.user}')`;
         render = function(rows){
+            console.log(rows);
             res.render('dashboard', {rows: rows});
         };
         makeDbCall(query, render);

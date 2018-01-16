@@ -372,16 +372,25 @@ function update(){
     createSitesByUserTableQuery =
         "CREATE TABLE sitesByUser(" +
         "`site` INT NOT NULL, " +
-        "`user` VARCHAR(255) NOT NULL" +
+        "`user` VARCHAR(255) NOT NULL, " +
+        "`selected` BIT " +
         ");";
     query.push(createSitesByUserTableQuery);
 
     createGetSitesByUserQuery =
         "CREATE PROCEDURE getSitesByUser(IN emailInput varchar(255))\n"+
         "BEGIN\n" +
-        "SELECT * FROM sites where id IN (SELECT site FROM sitesByUser WHERE 'email' = \"emailInput\");\n" +
+        "SELECT * FROM sites where id IN (SELECT site FROM sitesByUser WHERE user = emailInput);\n" +
         "END";
     query.push(createGetSitesByUserQuery);
+
+    selectSiteForUser =
+        "CREATE PROCEDURE selectSiteForUser(IN emailInput varchar(255), IN siteSelected INT)\n"+
+        "BEGIN\n" +
+        "update sitesByUser SET selected = 0 WHERE user = emailInput;\n" +
+        "update sitesByUser SET selected = 1 WHERE user = emailInput AND site = siteSelected;\n" +
+        "END";
+    query.push(selectSiteForUser);
 
     createSiteQuery =
         "CREATE PROCEDURE createSite(IN siteName VARCHAR(2048), IN userInput VARCHAR(255))\n" +

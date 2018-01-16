@@ -26,12 +26,12 @@ router.get('/', function(req, res, next) {
     });
 
     connection.connect();
-    query = 'SELECT * from sites';
+    query = `Call getSitesByUser('${req.session.user}')`;
     console.log(query);
     connection.query(query, function(err, rows, fields) {
         if (!err) {
-            console.log(rows);
-            sites = rows;
+            console.log(rows[0]);
+            sites = rows[0];
             res.render('changeLocation', {sites:JSON.stringify(sites), username:req.session.user});
             console.log({sites:JSON.stringify(sites)});
         }

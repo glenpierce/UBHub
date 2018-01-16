@@ -18,7 +18,7 @@ mixin indicator(indicatorName, indicatorDescription, descriptionOfCalculation, i
         div(style="border:solid; align-self:center;") Add
 
 mixin site(siteName, siteDescription)
-    div(style="border:solid;")
+    div(style="border:solid;" onclick="selectSite(#{siteName})")
         div #{siteName}
         div #{siteDescription}
 
@@ -53,8 +53,8 @@ mixin header(displayLoginInfo)
                     div(style="display:flex; justify-content:space-between;")
                         div(style="display:flex; justify-content:space-around; flex-grow:1;")
                             div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/home'") Home
-                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Database
-                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Resources
+                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/map'") Database
+                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/resources'") Resources
                             div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") FAQs
                             div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/aboutUs'") About Us
                         div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Search
