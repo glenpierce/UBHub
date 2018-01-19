@@ -384,6 +384,13 @@ function update(){
         "END";
     query.push(createGetSitesByUserQuery);
 
+    createGetSelectedSiteByUserQuery =
+        "CREATE PROCEDURE getSelectedSiteByUserQuery(IN emailInput varchar(255))\n"+
+        "BEGIN\n" +
+        "SELECT * FROM sites where id IN (SELECT site FROM sitesByUser WHERE user = emailInput AND selected = 1);\n" +
+        "END";
+    query.push(createGetSelectedSiteByUserQuery);
+
     selectSiteForUser =
         "CREATE PROCEDURE selectSiteForUser(IN emailInput varchar(255), IN siteSelected INT)\n"+
         "BEGIN\n" +
@@ -392,12 +399,21 @@ function update(){
         "END";
     query.push(selectSiteForUser);
 
+    selectSiteForUserAndReturnIt =
+        "CREATE PROCEDURE selectSiteForUserAndReturnIt(IN emailInput varchar(255), IN siteSelected INT)\n"+
+        "BEGIN\n" +
+        "CALL selectSiteForUser(emailInput, siteSelected);\n" +
+        "CALL getSelectedSiteByUserQuery(emailInput);\n" +
+        "END";
+    query.push(selectSiteForUserAndReturnIt);
+
     createSiteQuery =
         "CREATE PROCEDURE createSite(IN siteName VARCHAR(2048), IN userInput VARCHAR(255))\n" +
         "BEGIN\n" +
         "INSERT INTO sites(siteName) VALUES (siteName);\n" +
         "SET @last_id_in_sites = LAST_INSERT_ID();\n" +
         "INSERT INTO sitesByUser(user, site) VALUES (userInput, @last_id_in_sites);\n" +
+        "CALL selectSiteForUser(userInput, @last_id_in_sites);\n" +
         "SELECT * FROM sitesByUser WHERE site=LAST_INSERT_ID();\n" +
         "END";
     query.push(createSiteQuery);
