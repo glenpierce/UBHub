@@ -1,0 +1,74 @@
+mixin mapHead
+  head
+      title Map
+      script(src="../javascripts/mapscript.js")
+      script.
+        function initMapOnPage() {
+          var mapData = !{mapData};
+          initMap(mapData);
+        }
+      script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&callback=initMapOnPage")
+      link(rel='stylesheet', href='/stylesheets/style.css')
+
+mixin filterMixin(filterBy, attributeList)
+    select(style="flex-grow:1; margin: 5px;" onchange="filter(this.value, #{filterBy})").border
+        option(value="none").option
+        each attributeItem in attributeList
+            option(value=attributeItem).option #{attributeItem}
+
+//mixin filterRangeMixin(filterBy, low, high)
+//    select(style="flex-grow:1; margin: 5px;" onchange="filterRange(this.value, #{filterBy})").border
+//        option(value="none").option
+//        each attributeItem in attributeList
+//            option(value=[low, high]).option #{low} < #{high}
+
+mixin checkboxMixin(value, label)
+    div
+        input(type="checkbox", name="#{value}").checkbox
+        span.label #{label}
+
+mixin checkBoxWithTextBoxMixin(value, label, textBoxValue)
+    div.inline
+        input(type="checkbox", name="#{value}").checkbox
+        span.label #{label}
+        input(type="text", name="#{value}", style="margin:5px; width:50%;").inline
+
+mixin textBoxMixin(value, label)
+    div(style="display:flex; width:100%;").fullLine
+        span.label #{label}
+        input(type="text", name="#{value}", style="flex-grow:1; margin-left:5px;")
+
+
+mixin mapInfoTab(label, contentId, color, reset)
+  div.mapInfoTab(style="background-color: #{color}")
+      div(onclick="togglePanelOpen('#{contentId}')") Show/hide #{label}
+      div.reset
+          if reset
+            div.resetButton(onclick="resetFilter()") RESET FILTERS
+          img(src="/images/arrow-right3.svg" style="transform:rotate(180deg); transform-origin:center; height:13px;")
+
+
+mixin mapInfoFilters
+  div.mapInfoContent(class="hide" id="filterSettings" style="background-color: #AAffff")
+    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+
+mixin mapInfoHighlights
+  div.mapInfoContent(class="hide" id="highlightSettings" tyle="background-color: #fff2cc")
+    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+
+
+mixin mapInfoSummary
+  div.mapInfoContent(class="hide" id="mapInfoSummary" style="background-color: #e7e6e6")
+    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+
+mixin mapInfoResults
+  div.mapInfoContent(class="hide" id="mapInfoResults" style="background-color: #e1efd8")
+    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])

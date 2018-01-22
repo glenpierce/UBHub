@@ -1,99 +1,30 @@
 doctype html
 include mixins
+include mapMixins
 html
-    head
-        title Map
-        script(src="../javascripts/mapscript.js")
-        script.
-          function initMapOnPage() {
-            var mapData = !{mapData};
-            initMap(mapData);
-          }
-        script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&callback=initMapOnPage")
-        link(rel='stylesheet', href='/stylesheets/style.css')
-
-mixin filterMixin(filterBy, attributeList)
-    select(style="flex-grow:1; margin: 5px;" onchange="filter(this.value, #{filterBy})").border
-        option(value="none").option
-        each attributeItem in attributeList
-            option(value=attributeItem).option #{attributeItem}
-
-//mixin filterRangeMixin(filterBy, low, high)
-//    select(style="flex-grow:1; margin: 5px;" onchange="filterRange(this.value, #{filterBy})").border
-//        option(value="none").option
-//        each attributeItem in attributeList
-//            option(value=[low, high]).option #{low} < #{high}
-
-mixin checkboxMixin(value, label)
-    div
-        input(type="checkbox", name="#{value}").checkbox
-        span.label #{label}
-
-mixin checkBoxWithTextBoxMixin(value, label, textBoxValue)
-    div.inline
-        input(type="checkbox", name="#{value}").checkbox
-        span.label #{label}
-        input(type="text", name="#{value}", style="margin:5px; width:50%;").inline
-
-mixin textBoxMixin(value, label)
-    div(style="display:flex; width:100%;").fullLine
-        span.label #{label}
-        input(type="text", name="#{value}", style="flex-grow:1; margin-left:5px;")
-
+    +mapHead
 body
-
     +header(true)
 
+    div(class="contentContainer noBorder")
+        div.mapIntro
+            strong Welcome to the pre-Alpha Website for CBI Coalition. <br> Thank you for your contribution to the site.
+            p CBI Coalition is compiling a database of urban biodiversity programs, data, and activities around the world. Below is a map of our current data.
+            p You may view your data or submit more data on
+              a.genericLink(onclick="window.location='/yourUploads'")  your uploads manager.
 
-    div(style="max-width:800px; margin:auto;")
+        h2.mapLabel Urban biodiversity activities map
 
-        div(style="padding-bottom:20px; max-width: 600px; margin:auto;")
-            div(style="text-align:center; padding-bottom:10px;") <b>Welcome to the pre-Alpha Website for CBI Coalition.</b><br> Thank you for your contribution to the site.
-            div(style="text-align:center;") CBI Coalition is compiling a database of urban biodiversity programs, data, and activities around the world. Below is a map of our current data.
-            div(style="text-align:center;")
-                div(style="display:inline;") You may view your data or submit more data on&nbsp;
-                div(style="display:inline; text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="window.location='/yourUploads'") your uploads manager
+        div#map
 
-        div(style="color:#4490ba; font-weight:bold; font-size:20px;") Urban biodiversity activities map
+        +mapInfoTab("Filter Settings", "filterSettings", "#326f90", true)
+        +mapInfoFilters
 
-        div(id="map" style="height:400px; width:100%; max-width:800px; padding-bottom:20px;")
+        +mapInfoTab("Highlight Settings", "highlightSettings", "#c58c2b", false)
+        +mapInfoHighlights
 
-        div(style="margin-top:10px; width:100%; max-width:790px; background-color:#326f90; padding:5px; display:flex; justify-content:space-between;")
-            div(onclick="tipDown(this)" style="color:white; font-style:italic; font-weight:700; cursor:pointer;") Show/hide filter settings
-            div(style="display:flex;")
-                div(onclick="resetFilter()" style="background-color:white; border-radius:5px; color:#326f90; padding-left:5px; padding-right:5px;") RESET FILTERS
-                img(src="/images/arrow-right3.svg" style="transform:rotate(180deg); transform-origin:center; height:13px;")
-        div.filters(style="background-color: #AAffff")
-          +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
-          +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+        +mapInfoTab("Summary Settings", "mapInfoSummary", "#bbbbbb", false)
+        +mapInfoSummary
 
-        div(style="margin-top:10px; width:100%; max-width:790px; background-color:#c58c2b; padding:5px; display:flex; justify-content:space-between;")
-            div(onclick="tipDown(this)" style="color:white; font-style:italic; font-weight:700; cursor:pointer;") Show/hide highlight settings
-            div(style="display:flex;")
-                img(src="/images/arrow-right3.svg" style="transform:rotate(180deg); transform-origin:center; height:13px;")
-
-        div(style="margin-top:10px; width:100%; max-width:790px; background-color:#bbbbbb; padding:5px; display:flex; justify-content:space-between;")
-            div(onclick="tipDown(this)" style="color:white; font-style:italic; font-weight:700; cursor:pointer;") Show/hide results settings
-            div(style="display:flex;")
-                img(src="/images/arrow-right3.svg" style="transform:rotate(180deg); transform-origin:center; height:13px;")
-
-        div(style="margin-top:10px; width:100%; max-width:790px; background-color:#269973; padding:5px; display:flex; justify-content:space-between;")
-            div(onclick="tipDown(this)" style="color:white; font-style:italic; font-weight:700; cursor:pointer;") Show/hide table of results
-            div(style="display:flex;")
-                img(src="/images/arrow-right3.svg" style="transform:rotate(180deg); transform-origin:center; height:13px;")
-        //div(style="display:flex; flex-wrap:wrap;").filters
-        //    select(style="flex-grow:1; margin: 5px;" onchange="filter(this.value, 'country')").border
-        //        option(value="none").option
-        //        option(value="England").option England
-        //        option(value="India").option India
-        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('Biophilic_cities')").border Biophilic Cities
-        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('IUCN_protected_area')").border IUCN Protected Area
-        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('MAB_urban')").border Man and the Biosphere
-        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('SI_status')").border Singapore Index
-        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('EF_year')").border Ecofootprint
-        //    div(style="padding:5px; margin: 5px;" onclick="filterArrayNotNull('LAB_CEPA', 'LAB_URBIS', 'LAB_joined', 'LAB_wetlands')").border LAB Participation
-        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('Durban_commitment')").border Durban Commitment
-        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('European_Green_Capital_award')").border European Green Capital Award
-        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('European_capital_biodiversity')").border European Capital Biodiversity
-        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('report_title')").border Biodiversity Report
-        //    div(style="padding:5px; margin: 5px;" onclick="filterNotNull('intplan_title')").border Biodiversity in a More General Plan
+        +mapInfoTab("Table of Results", "mapInfoResults", "#269973", false)
+        +mapInfoResults

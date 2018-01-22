@@ -12,6 +12,28 @@ function logOut(){
           marker.setVisible(marker.element[filterBy] == value);
       });
   };
+
+//UI
+
+function togglePanelOpen(panelId){
+  closeAllPanels();
+  var panel = document.getElementById(panelId);
+  var status = panel.classList.contains("hide");
+  if(status){
+    panel.classList.remove("hide");
+  }
+}
+
+function closeAllPanels(){
+  var panels = document.getElementsByClassName("mapInfoContent");
+  for(let i = 0; i < panels.length; i++){
+    panels[i].classList.add("hide");
+
+  }
+}
+
+//FILTER
+
   function filterNotNull(filterBy) {
       markers.forEach(function (marker) {
           if(marker.element[filterBy] != null){
@@ -68,7 +90,6 @@ function logOut(){
           anchor: new google.maps.Point(12, 46)
       };
       //var mapData =!{mapData};
-      console.log(JSON.stringify(mapData));
       center = {lat: 20, lng: 15};
       var map = new google.maps.Map(document.getElementById('map'), {
           zoom: 2,
@@ -135,8 +156,4 @@ function logOut(){
   }
   function submitForm(){
       console.log("form submitted!");
-  }
-
-  function tipDown(parent){
-
   }

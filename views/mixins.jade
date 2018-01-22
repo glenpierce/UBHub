@@ -27,7 +27,7 @@ mixin header(displayLoginInfo)
     div(class="showWhenNarrow")
         div Hi, I'm the special thing that only shows up when the screen is narrow :)
     div(class="hideWhenNarrow")
-        div(style="width:100%; position:fixed; display:flex; flex-grow:1;")
+        div(style="width:100%; position:fixed; display:flex; flex-grow:1; z-index: 2;")
             div(style="height:112px; background:white; flex-grow:1;")
             div(style="max-width:1200px; display:flex; justify-content:space-between; height: 40px; width:100%; flex-grow:5;")
                 div
