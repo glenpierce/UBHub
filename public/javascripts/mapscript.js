@@ -7,11 +7,13 @@ function logOut(){
   var yellowImage;
   var greenImage;
   var orangeImage;
-  function filter(value, filterBy){
-      markers.forEach(function (marker) {
-          marker.setVisible(marker.element[filterBy] == value);
-      });
-  };
+
+function filter(value, filterBy){
+  //TODO add something for ranges (for pop etc.)
+    markers.forEach(function (marker) {
+        marker.setVisible(marker.element[filterBy] == value);
+    });
+};
 
 //UI
 

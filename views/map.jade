@@ -16,9 +16,9 @@ body
         h2.mapLabel Urban biodiversity activities map
 
         div#map
-
+        
         +mapInfoTab("Filter Settings", "filterSettings", "#326f90", true)
-        +mapInfoFilters
+        +mapInfoFilters(mapFilterParameters)
 
         +mapInfoTab("Highlight Settings", "highlightSettings", "#c58c2b", false)
         +mapInfoHighlights

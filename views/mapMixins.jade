@@ -10,11 +10,14 @@ mixin mapHead
       script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&callback=initMapOnPage")
       link(rel='stylesheet', href='/stylesheets/style.css')
 
-mixin filterMixin(filterBy, attributeList)
-    select(style="flex-grow:1; margin: 5px;" onchange="filter(this.value, #{filterBy})").border
-        option(value="none").option
-        each attributeItem in attributeList
-            option(value=attributeItem).option #{attributeItem}
+mixin filterMixin(title, filterBy, attributeList)
+  div.formItem
+    label #{title}
+    div.selectBox
+      select(onchange="filter(this.value, '" + filterBy + "')")
+          option(value="none").option
+          each attributeItem in attributeList
+              option(value=attributeItem).option #{attributeItem}
 
 //mixin filterRangeMixin(filterBy, low, high)
 //    select(style="flex-grow:1; margin: 5px;" onchange="filterRange(this.value, #{filterBy})").border
@@ -48,27 +51,17 @@ mixin mapInfoTab(label, contentId, color, reset)
           img(src="/images/arrow-right3.svg" style="transform:rotate(180deg); transform-origin:center; height:13px;")
 
 
-mixin mapInfoFilters
+mixin mapInfoFilters(mapFilterParameters)
   div.mapInfoContent(class="hide" id="filterSettings" style="background-color: #AAffff")
-    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
-    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
-    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
+    each filterParameter in mapFilterParameters
+      +filterMixin(filterParameter.name, filterParameter.id, filterParameter.options)
 
 mixin mapInfoHighlights
   div.mapInfoContent(class="hide" id="highlightSettings" tyle="background-color: #fff2cc")
-    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
-    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
-    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
 
 
 mixin mapInfoSummary
   div.mapInfoContent(class="hide" id="mapInfoSummary" style="background-color: #e7e6e6")
-    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
-    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
-    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
 
 mixin mapInfoResults
   div.mapInfoContent(class="hide" id="mapInfoResults" style="background-color: #e1efd8")
-    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
-    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])
-    +filterMixin("'scale'", ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'])

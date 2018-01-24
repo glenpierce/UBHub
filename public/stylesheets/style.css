@@ -415,6 +415,7 @@ p.postBody {
   height: auto;
   opacity: 1;
   height: auto;
+
 }
 
 .mapInfoContent.hide {
@@ -422,6 +423,58 @@ p.postBody {
   height: 0;
   overflow: hidden;
 
+}
+
+.mapInfoContent .formItem {
+  display: inline-block;
+  width: calc(33% - 36px);
+  padding: 6px 18px
+
+}
+
+.mapInfoContent label {
+  display: block;
+  font-weight: bold;
+  padding-left: 4px;
+}
+
+
+
+.selectBox {
+  background-color: #fff;
+  border: 1px solid #326f90;
+  width: 220px;
+  overflow: hidden;
+  position: relative;
+  border-radius: 5px;
+}
+
+.selectBox:after {
+  width: 0;
+  height: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 6px solid #326f90;
+  position: absolute;
+  top: 40%;
+  right: 8px;
+  content: "";
+  z-index: 98;
+
+}
+
+.selectBox select {
+  width: 240px;
+  border: 0;
+  position: relative;
+  z-index: 99;
+  background: none;
+  margin: 0;
+  padding: 4px;
+}
+
+.mapInfoContent#filterSettings label {
+  color: #326f90;
 }
 
 /*
