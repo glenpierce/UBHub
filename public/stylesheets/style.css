@@ -477,6 +477,64 @@ p.postBody {
   color: #326f90;
 }
 
+div.quarters {
+  display: flex;
+}
+
+div.quarters>div {
+  width: 25%;
+}
+
+#highlightSettings label {
+  color: #c58c2b;
+  font-weight: bold;
+  margin: 6px;
+}
+
+.activityButton {
+  border-radius: 12px;
+  border: 1px solid #c58c2b;
+  background-color: #fff;
+  padding: 16px 24px;
+  font-size: 20px;
+  height: 72px;
+  text-align: center;
+  margin: 8px;
+  cursor: pointer;
+  align-content: middle;
+}
+
+.activityButton img {
+  max-width: 100%;
+}
+
+.activityButton.activeButton {
+  box-shadow: 3px 3px 0 #ffff00, -3px -3px 0 #ffff00, -3px 3px 0 #ffff00, 3px -3px 0 #ffff00;
+}
+
+.summaryStat {
+  padding: 24px;
+  font-size: 20px;
+  text-align: center;
+  border-radius: 5px;
+  background-color:#fff;
+  margin: 12px;
+}
+
+.summaryStat h3 {
+  font-size: 36px;
+  margin-bottom: 4px;
+}
+
+.summaryStat p {
+  margin-top: 4px;
+}
+
+
+table.mapValuesTable {
+
+}
+
 /*
 Blue
 1  07456b

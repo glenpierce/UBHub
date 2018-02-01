@@ -28,21 +28,25 @@ router.get('/', function(req, res, next) {
     });
 
     connection.connect();
-    query = 'SELECT * from locations limit 100';
+    query = 'SELECT * from locations limit 500';
     console.log(query);
-    console.log(JSON.stringify(mapFilterParameters));
     connection.query(query, function(err, rows, fields) {
         if (!err) {
             mapData = rows;
+            console.log(JSON.stringify(mapData));
+            mapSummary = getSummary(mapData);
+            console.log(mapSummary);
             if (req.session && req.session.user) {
                 res.render('map', {
                   mapFilterParameters: mapFilterParameters,
                   mapData:JSON.stringify(mapData),
+                  mapSummary: mapSummary,
                   username: req.session.user});
             } else {
                 res.render('map', {
                   mapFilterParameters: mapFilterParameters,
                   mapData:JSON.stringify(mapData),
+                  mapSummary: mapSummary,
                   username: null});
             }
         } else {
@@ -55,6 +59,26 @@ router.get('/', function(req, res, next) {
 router.get('/update', function(req, res, next) {
     // update();
 });
+
+function getSummary(data){
+  var summary = {};
+  summary.total = data.length;
+
+  summary.municipalities = data.filter((x) => {
+    return (x.scale == "municipality");
+  }).length;
+
+  summary.districts = data.filter((x) => {
+    return (x.scale == "district/county");
+  }).length;
+
+  summary.campuses = data.filter((x) => {
+    return (x.scale == "campus");
+  }).length;
+
+
+  return summary;
+}
 
 function update(){
     mapData = "";
@@ -87,32 +111,38 @@ var mapFilterParameters = [
   {
     name: "Scale",
     id: "scale",
-    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution']
+    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'],
+    type: "select"
   },
   {
     name: "Population",
     id: "population",
-    options: ['<20000', '20000–50000', '50000–100000', '100000–200000', '200000–500000', '500000–1000000', '1000000–2000000', '2000000–5000000', '>5000000']
+    options: ['<20000', '20000–50000', '50000–100000', '100000–200000', '200000–500000', '500000–1000000', '1000000–2000000', '2000000–5000000', '>5000000'],
+    type: "range"
   },
   {
     name: "Activity",
     id: "activity",
-    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution']
+    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'],
+    type: "select"
   },
   {
     name: "Area",
     id: "area",
-    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution']
+    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'],
+    type: "select"
   },
   {
     name: "Density",
     id: "density",
-    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution']
+    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'],
+    type: "range"
   },
   {
     name: "Program or Index",
     id: "programIndex",
-    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution']
+    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'],
+    type: "select"
   }];
 
 var mapActivities = [

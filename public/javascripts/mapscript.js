@@ -1,19 +1,76 @@
-function logOut(){
-      document.cookie = 'session' + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-      console.log("logout");
-      location.reload(true);
-  }
+
+
   var markers = [];
   var yellowImage;
   var greenImage;
   var orangeImage;
 
-function filter(value, filterBy){
-  //TODO add something for ranges (for pop etc.)
-    markers.forEach(function (marker) {
-        marker.setVisible(marker.element[filterBy] == value);
-    });
+  var currentActiveHighlightingButton;
+
+
+
+function filter(value, filterBy, type){
+
+  if(type == "select"){
+    filterValues(value, filterBy);
+  } else if (type == "range"){
+    filterRange(value, filterBy);
+  } else {
+    console.log("Unexpected filter type: " + type);
+  }
+
 };
+
+function filterValues(value, filterBy){
+  markers.forEach(function (marker) {
+      marker.setVisible(marker.element[filterBy] == value);
+  });
+}
+
+function filterRange(value, filterBy){
+  var upper;
+  var lower;
+  var values = value.split("–");
+  if(values.length != 2){
+    if(value[0] == "<") {
+      lower = 0;
+      upper = value.substr(1, value.length);
+    } else if (value[0] == ">"){
+      lower = value.substr(1, value.length);
+      upper = Number.MAX_VALUE;
+    }
+  } else {
+    upper = values[1];
+    lower = values[0];
+  }
+  markers.forEach(function (marker) {
+      marker.setVisible(marker.element[filterBy] > lower && marker.element[filterBy] < upper);
+  });
+}
+
+//TODO: filters need to remember all active filtering, not just latest
+
+function selectHighlight(filterBy, node){
+  highlightValues(filterBy);
+  if(currentActiveHighlightingButton != null){
+    currentActiveHighlightingButton.classList.remove("activeButton");
+  }
+  currentActiveHighlightingButton = node;
+  node.classList.add("activeButton");
+}
+
+
+function highlightValues(filterBy){
+  markers.forEach(function (marker) {
+      if(marker.element[filterBy] != null){
+          marker.setIcon(orangeImage);
+          marker.setZIndex(2);
+      } else {
+          marker.setIcon(greenImage);
+          marker.setZIndex(1);
+      }
+  });
+}
 
 //UI
 
@@ -73,6 +130,7 @@ function closeAllPanels(){
   };
 
   function initMap (mapData) {
+    console.log(mapData);
       yellowImage = {
           url: '/images/marker-yellow-det.png',
           size: new google.maps.Size(14, 46),
@@ -158,4 +216,9 @@ function closeAllPanels(){
   }
   function submitForm(){
       console.log("form submitted!");
+  }
+
+  function logOut(){
+        document.cookie = 'session' + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        location.reload(true);
   }

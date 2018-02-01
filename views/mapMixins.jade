@@ -10,14 +10,15 @@ mixin mapHead
       script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&callback=initMapOnPage")
       link(rel='stylesheet', href='/stylesheets/style.css')
 
-mixin filterMixin(title, filterBy, attributeList)
+mixin filterMixin(title, filterBy, attributeList, filterType)
   div.formItem
     label #{title}
     div.selectBox
-      select(onchange="filter(this.value, '" + filterBy + "')")
+      select(onchange="filter(this.value, '" + filterBy + "', '" + filterType + "')")
           option(value="none").option
           each attributeItem in attributeList
               option(value=attributeItem).option #{attributeItem}
+
 
 //mixin filterRangeMixin(filterBy, low, high)
 //    select(style="flex-grow:1; margin: 5px;" onchange="filterRange(this.value, #{filterBy})").border
@@ -54,14 +55,67 @@ mixin mapInfoTab(label, contentId, color, reset)
 mixin mapInfoFilters(mapFilterParameters)
   div.mapInfoContent(class="hide" id="filterSettings" style="background-color: #AAffff")
     each filterParameter in mapFilterParameters
-      +filterMixin(filterParameter.name, filterParameter.id, filterParameter.options)
+      +filterMixin(filterParameter.name, filterParameter.id, filterParameter.options, filterParameter.type)
 
 mixin mapInfoHighlights
   div.mapInfoContent(class="hide" id="highlightSettings" tyle="background-color: #fff2cc")
+    div
+      label Activities
+      div.quarters
+        div.activityButton(onclick="selectHighlight('biodiversity_url', this)") Biodiversity Website
+        div.activityButton Biodiversity Mainstreaming
+        div.activityButton Biodiversity Plan
+        div.activityButton Biodiversity Report
+      div.quarters
+        div
+          label Programs
+          div.activityButton(onclick="selectHighlight('LAB_joined', this)")
+            img(src="/images/LabProgrammeLogo.jpg")
+          div.activityButton Local Action for Biodiversity
+        div
+          label Indices
+          div.activityButton Local Action for Biodiversity
+          div.activityButton Local Action for Biodiversity
+        div
+          label Designations
+          div.activityButton Local Action for Biodiversity
+          div.activityButton Local Action for Biodiversity
+        div
+          label Awards
+          div.activityButton Local Action for Biodiversity
+          div.activityButton Local Action for Biodiversity
 
 
-mixin mapInfoSummary
+
+
+
+mixin mapInfoSummary(summary)
   div.mapInfoContent(class="hide" id="mapInfoSummary" style="background-color: #e7e6e6")
+    div.quarters
+      div.summaryStat
+        h3 #{summary.total}
+        p Total
+      div.summaryStat
+        h3 #{summary.municipalities}
+        p Municipalities
+      div.summaryStat
+        h3 #{summary.districts}
+        p Districts/Counties
+      div.summaryStat
+        h3 #{summary.campuses}
+        p Campuses
 
-mixin mapInfoResults
+mixin mapInfoResults(data)
   div.mapInfoContent(class="hide" id="mapInfoResults" style="background-color: #e1efd8")
+    +mapValuesTable(data)
+
+mixin mapValuesTable(data)
+  table.mapValuesTable
+    thead
+      tr
+        th Address
+        th Year
+        th Programs
+        th Associations
+    tbody
+      Set some filters to explore data below.
