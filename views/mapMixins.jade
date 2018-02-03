@@ -13,7 +13,7 @@ mixin mapHead
 mixin filterMixin(title, filterBy, attributeList, filterType)
   div.formItem
     label #{title}
-    div.selectBox
+    div.selectBox.filterBox
       select(onchange="filter(this.value, '" + filterBy + "', '" + filterType + "')")
           option(value="none").option
           each attributeItem in attributeList

@@ -13,6 +13,9 @@
 
 
 function filter(value, filterBy, type){
+    if(value == "none"){
+        return;
+    }
 
   if(type == "select"){
     filterValues(value, filterBy);
@@ -48,7 +51,9 @@ function filterRange(value, filterBy){
     lower = values[0];
   }
   markers.forEach(function (marker) {
-      marker.setVisible(marker.element[filterBy] > lower && marker.element[filterBy] < upper);
+      if(!(marker.element[filterBy] > lower && marker.element[filterBy] < upper)){
+          marker.setVisible(false);
+      }
   });
 }
 
@@ -126,6 +131,10 @@ function closeAllPanels(){
           marker.setVisible(true);
           marker.setIcon(greyImage);
       });
+      var selectBoxes = document.getElementsByClassName("filterBox");
+      for(i = 0; i < selectBoxes.length; i++){
+          selectBoxes.item(i).children[0].selectedIndex = 0;
+      }
   };
 
   function initMap (mapData) {
