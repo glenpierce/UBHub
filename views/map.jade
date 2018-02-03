@@ -8,23 +8,23 @@ body
 
     div(class="contentContainer noBorder")
         div.mapIntro
-            strong Welcome to the pre-Alpha Website for CBI Coalition. <br> Thank you for your contribution to the site.
-            p CBI Coalition is compiling a database of urban biodiversity programs, data, and activities around the world. Below is a map of our current data.
-            p You may view your data or submit more data on
-              a.genericLink(onclick="window.location='/yourUploads'")  your uploads manager.
+            //strong Welcome to the pre-Alpha Website for CBI Coalition. <br> Thank you for your contribution to the site.
+            //p CBI Coalition is compiling a database of urban biodiversity programs, data, and activities around the world. Below is a map of our current data.
+            //p You may view your data or submit more data on
+              //a.genericLink(onclick="window.location='/yourUploads'")  your uploads manager.
 
-        h2.mapLabel Urban biodiversity activities map
+        h2.mapLabel mapHUB
 
         div#map
-
-        +mapInfoTab("Filter Settings", "filterSettings", "#326f90", true)
-        +mapInfoFilters(mapFilterParameters)
-
-        +mapInfoTab("Highlight Settings", "highlightSettings", "#c58c2b", false)
+        
+        +mapInfoTab("Summary", "mapInfoSummary", "#b2b2b2", false)
+        +mapInfoSummary(mapSummary)
+        
+        +mapInfoTab("Highlight Settings", "highlightSettings", "#f69056", false)
         +mapInfoHighlights
 
-        +mapInfoTab("Summary Settings", "mapInfoSummary", "#bbbbbb", false)
-        +mapInfoSummary(mapSummary)
+        +mapInfoTab("Filter Settings", "filterSettings", "#6da4c7", true)
+        +mapInfoFilters(mapFilterParameters)
 
-        +mapInfoTab("Table of Results", "mapInfoResults", "#269973", false)
+        +mapInfoTab("Table of Results", "mapInfoResults", "#98d2bd", false)
         +mapInfoResults(mapData)

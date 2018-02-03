@@ -53,12 +53,12 @@ mixin mapInfoTab(label, contentId, color, reset)
 
 
 mixin mapInfoFilters(mapFilterParameters)
-  div.mapInfoContent(class="hide" id="filterSettings" style="background-color: #AAffff")
+  div.mapInfoContent(class="hide" id="filterSettings" style="background-color: #e9f6f9")
     each filterParameter in mapFilterParameters
       +filterMixin(filterParameter.name, filterParameter.id, filterParameter.options, filterParameter.type)
 
 mixin mapInfoHighlights
-  div.mapInfoContent(class="hide" id="highlightSettings" tyle="background-color: #fff2cc")
+  div.mapInfoContent(class="hide" id="highlightSettings" style="background-color: #fffceb")
     div
       label Activities
       div.quarters
@@ -90,7 +90,7 @@ mixin mapInfoHighlights
 
 
 mixin mapInfoSummary(summary)
-  div.mapInfoContent(class="hide" id="mapInfoSummary" style="background-color: #e7e6e6")
+  div.mapInfoContent(class="hide" id="mapInfoSummary" style="background-color: #f2f2f2")
     div.quarters
       div.summaryStat
         h3 #{summary.total}

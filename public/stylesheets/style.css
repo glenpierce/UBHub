@@ -74,7 +74,11 @@ a.genericLink {
 }
 
 .homePageWhiteBox{
-  background-color:white; border-radius:10px; height: 40px; width: 100px; padding:20px; margin:10px; color:#326f90; font-weight:700; display:flex; justify-content:center; align-items:center; text-align:center;
+  background-color:white; border-radius:10px; height: 40px; width: 120px; padding:20px; margin:10px; color:#326f90; font-weight:700; display:flex; justify-content:center; align-items:center; text-align:center;
+}
+
+.homePageWhiteBoxWide{
+  background-color:white; border-radius:10px; height: 40px; width: 160px; padding:20px; margin:10px; color:#326f90; font-weight:700; display:flex; justify-content:center; align-items:center; text-align:center;
 }
 
 .indexBox{
@@ -486,14 +490,14 @@ div.quarters>div {
 }
 
 #highlightSettings label {
-  color: #c58c2b;
+  color: #bb6d37;
   font-weight: bold;
   margin: 6px;
 }
 
 .activityButton {
   border-radius: 12px;
-  border: 1px solid #c58c2b;
+  border: 1px solid #bb6d37;
   background-color: #fff;
   padding: 16px 24px;
   font-size: 20px;
