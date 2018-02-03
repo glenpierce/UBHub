@@ -33,6 +33,7 @@ function filterValues(value, filterBy){
 function filterRange(value, filterBy){
   var upper;
   var lower;
+  value = value.replace(/\,/g,"");
   var values = value.split("–");
   if(values.length != 2){
     if(value[0] == "<") {
