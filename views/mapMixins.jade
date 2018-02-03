@@ -44,8 +44,8 @@ mixin textBoxMixin(value, label)
 
 
 mixin mapInfoTab(label, contentId, color, reset)
-  div.mapInfoTab(style="background-color: #{color}")
-      div(onclick="togglePanelOpen('#{contentId}')") Show/hide #{label}
+  div.mapInfoTab(style="background-color: #{color}" onclick="togglePanelOpenOrClosed('#{contentId}')")
+      div #{label}
       div.reset
           if reset
             div.resetButton(onclick="resetFilter()") RESET FILTERS

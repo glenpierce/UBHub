@@ -75,12 +75,13 @@ function highlightValues(filterBy){
 
 //UI
 
-function togglePanelOpen(panelId){
-  closeAllPanels();
+function togglePanelOpenOrClosed(panelId){
   var panel = document.getElementById(panelId);
   var status = panel.classList.contains("hide");
   if(status){
     panel.classList.remove("hide");
+  } else {
+      panel.classList.add("hide");
   }
 }
 
