@@ -459,6 +459,7 @@ function update(){
         "`name` VARCHAR(2048), " +
         "`indicator` INT, " +
         "`type` INT, " + //text, float, int / stage
+        //todo: build complex table-style entries
         "`required` BIT, " +
         "`orderInOperation` INT, " +
         "`rangeMin` FLOAT(10, 2), " +

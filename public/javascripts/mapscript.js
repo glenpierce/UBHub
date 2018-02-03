@@ -67,10 +67,8 @@ function highlightValues(filterBy){
   markers.forEach(function (marker) {
       if(marker.element[filterBy] != null){
           marker.setIcon(orangeImage);
-          marker.setZIndex(2);
       } else {
           marker.setIcon(greenImage);
-          marker.setZIndex(1);
       }
   });
 }
@@ -100,10 +98,8 @@ function closeAllPanels(){
       markers.forEach(function (marker) {
           if(marker.element[filterBy] != null){
               marker.setIcon(orangeImage);
-              marker.setZIndex(2);
           } else {
               marker.setIcon(greenImage);
-              marker.setZIndex(1);
           }
       });
   };
@@ -117,10 +113,8 @@ function closeAllPanels(){
           }
           if(toFilter){
               marker.setIcon(orangeImage);
-              marker.setZIndex(2);
           } else {
               marker.setIcon(greenImage);
-              marker.setZIndex(1);
           }
       });
   };
@@ -263,8 +257,7 @@ function closeAllPanels(){
                   map: map,
                   animation: google.maps.Animation.DROP,
                   title: element.name,
-                  icon: yellowImage,
-                  zIndex: 1
+                  icon: yellowImage
               });
               marker.element = element;
 
