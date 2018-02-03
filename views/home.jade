@@ -172,6 +172,9 @@ body
     +footer()
 
 script.
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
     var markers = [];
     var greyImage;
     var blueImage;
@@ -184,40 +187,41 @@ script.
     function initMap() {
       greyImage = {
           url: '/images/marker_0_grey_39x59.png',
-          scaledSize: new google.maps.Size(20, 30),
+          scaledSize: new google.maps.Size(20, 30)
           //origin: new google.maps.Point(0, 0),
           //anchor: new google.maps.Point(11, 35)
       };
       blueImage = {
           url: '/images/marker_1_blue_39x59.png',
-          scaledSize: new google.maps.Size(20, 30),
+          scaledSize: new google.maps.Size(20, 30)
           //origin: new google.maps.Point(0, 0),
           //anchor: new google.maps.Point(11, 35)
       };
       greenImage = {
           url: '/images/marker_2_green_39x59.png',
-          scaledSize: new google.maps.Size(20, 30),
+          scaledSize: new google.maps.Size(20, 30)
           //origin: new google.maps.Point(0, 0),
           //anchor: new google.maps.Point(11, 35)
       };
       yellowImage = {
           url: '/images/marker_3_yellow_39x59.png',
-          scaledSize: new google.maps.Size(20, 30),
+          scaledSize: new google.maps.Size(20, 30)
             //origin: new google.maps.Point(0, 0),
             //anchor: new google.maps.Point(11, 35)
       };
       lightOrangeImage = {
           url: '/images/marker_4_ltorange_39x59.png',
-          scaledSize: new google.maps.Size(20, 30),
+          scaledSize: new google.maps.Size(20, 30)
             //origin: new google.maps.Point(0, 0),
             //anchor: new google.maps.Point(12, 46)
       };
       orangeImage = {
           url: '/images/marker_5_orange_39x59.png',
-          scaledSize: new google.maps.Size(20, 30),
+          scaledSize: new google.maps.Size(20, 30)
             //origin: new google.maps.Point(0, 0),
             //anchor: new google.maps.Point(11, 35)
       };
+    var markerImages = [greyImage, blueImage, greenImage, yellowImage, lightOrangeImage, orangeImage];
         center = {lat: 20, lng: 15};
         var map = new google.maps.Map(document.getElementById('map'), {
             zoom: 3,
@@ -304,7 +308,7 @@ script.
                     map: map,
                     animation: google.maps.Animation.DROP,
                     title: element.name,
-                    icon: yellowImage
+                    icon: markerImages[getRandomInt(0, 5)]
                 });
                 marker.element = element;
 

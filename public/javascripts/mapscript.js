@@ -68,7 +68,7 @@ function highlightValues(filterBy){
       if(marker.element[filterBy] != null){
           marker.setIcon(orangeImage);
       } else {
-          marker.setIcon(greenImage);
+          marker.setIcon(greyImage);
       }
   });
 }
@@ -99,7 +99,7 @@ function closeAllPanels(){
           if(marker.element[filterBy] != null){
               marker.setIcon(orangeImage);
           } else {
-              marker.setIcon(greenImage);
+              marker.setIcon(greyImage);
           }
       });
   };
@@ -114,7 +114,7 @@ function closeAllPanels(){
           if(toFilter){
               marker.setIcon(orangeImage);
           } else {
-              marker.setIcon(greenImage);
+              marker.setIcon(greyImage);
           }
       });
   };
@@ -122,7 +122,7 @@ function closeAllPanels(){
   function resetFilter(){
       markers.forEach(function (marker) {
           marker.setVisible(true);
-          marker.setIcon(yellowImage);
+          marker.setIcon(greyImage);
       });
   };
 
@@ -257,7 +257,7 @@ function closeAllPanels(){
                   map: map,
                   animation: google.maps.Animation.DROP,
                   title: element.name,
-                  icon: yellowImage
+                  icon: greyImage
               });
               marker.element = element;
 
