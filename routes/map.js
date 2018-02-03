@@ -107,6 +107,33 @@ function update(){
     connection.end();
 }
 
+var mapActivities = [
+    {
+        name: "Biodiversity Website",
+        id: "biodiversityWebsite"
+    },
+    {
+        name: "Biodiversity Mainstreaming",
+        id: "biodiversityMainstreaming"
+    },
+    {
+        name: "Biodiversity Plan",
+        id: "biodiversityPlan"
+    },
+    {
+        name: "Biodiversity Report",
+        id: "biodiversityReport"
+    }
+];
+
+var mapIndices = [
+    {
+        name: "Local Action for Biodiversity",
+        id: "labJoined",
+        image: "LabProgrammeLogo.jpg"
+    }
+];
+
 var mapFilterParameters = [
   {
     name: "Scale",
@@ -117,59 +144,32 @@ var mapFilterParameters = [
   {
     name: "Population",
     id: "population",
-    options: ['<20,000', '20,000–50,000', '50,000–100,000', '100,000–200,000', '200,000–500,000', '500,000–1,000,000', '1,000,000–2,000,000', '2,000,000–5,000,000', '>5,000,000'],
+    options: ['<20,000', '20,000-50,000', '50,000-100,000', '100,000-200,000', '200,000-500,000', '500,000-1,000,000', '1,000,000-2,000,000', '2,000,000-5,000,000', '>5,000,000'],
     type: "range"
   },
   {
-    name: "Activity",
+    name: "Biodiversity Activity",
     id: "activity",
-    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'],
+    options: [mapActivities[0].name, mapActivities[1].name, mapActivities[2].name, mapActivities[3].name],
     type: "select"
   },
   {
-    name: "Area",
-    id: "area",
-    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'],
-    type: "select"
+    name: "Land Area (km\u00B2)",
+    id: "area_km2",
+    options: ['<50', '50-200', '200-500', '500-1,000', '1,000-2,000', '2,000-10,000', '10,000-20,000', '>20,000'],
+    type: "range"
   },
   {
-    name: "Density",
-    id: "density",
-    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'],
+    name: "Density (People/km\u00B2)",
+    id: "density_km2",
+    options: ['<300', '300-1,000', '1,000-4,000', '4,000-10,000', '>10,000'],
     type: "range"
   },
   {
     name: "Program or Index",
     id: "programIndex",
-    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'],
+    options: [mapIndices[0].name],
     type: "select"
   }];
-
-var mapActivities = [
-  {
-    name: "Biodiversity Website",
-    id: "biodiversityWebsite"
-  },
-  {
-    name: "Biodiversity Mainstreaming",
-    id: "biodiversityMainstreaming"
-  },
-  {
-    name: "Biodiversity Plan",
-    id: "biodiversityPlan"
-  },
-  {
-    name: "Biodiversity Report",
-    id: "biodiversityReport"
-  }
-]
-
-var mapIndices = [
-  {
-    name: "Local Action for Biodiversity",
-    id: "labJoined",
-    image: "LabProgrammeLogo.jpg"
-  }
-]
 
 module.exports = router;

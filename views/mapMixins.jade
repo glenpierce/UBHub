@@ -48,7 +48,7 @@ mixin mapInfoTab(label, contentId, color, reset)
       div #{label}
       div.reset
           if reset
-            div.resetButton(onclick="resetFilter()") RESET FILTERS
+            div.resetButton(onclick="event.stopPropagation(); resetFilter();") reset
           img(src="/images/arrow-right3.svg" style="transform:rotate(180deg); transform-origin:center; height:13px;")
 
 
