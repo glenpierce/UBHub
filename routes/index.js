@@ -14,17 +14,30 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/', function(req, res, next) {
+    console.log(req.body);
     userEmail = "";
     if(req.body.email){
         if(req.body.email.toString() === req.body['verify-email'].toString()){
-            userEmail = JSON.stringify(req.body);
-            userEmail.replace("\"", " ");
-            console.log(userEmail);
-            addEmailToList(userEmail);
+            console.log(req.body);
+            console.log(req.body['g-recaptcha-response']);
+            sendRecaptchaToGoogle(req.body['g-recaptcha-response'], req.body.email);
             res.render('index');
         }
     }
 });
+
+function sendRecaptchaToGoogle(response, email){
+    request.post("https://www.google.com/recaptcha/api/siteverify?secret=" + config.reCAPTCHASecret + "&response=" + response,
+        function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                body = JSON.parse(body);
+                console.log(body);
+                if(body.success == true)
+                    addEmailToList(email);
+            }
+        }
+    );
+}
 
 function addEmailToList(email){
     var connection = mysql.createConnection({
