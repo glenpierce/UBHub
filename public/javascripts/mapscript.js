@@ -137,6 +137,54 @@ function closeAllPanels(){
       }
   };
 
+  function getTableData(pg){
+    var xhr = new XMLHttpRequest();
+    var parameters = {page: pg};
+
+    xhr.onreadystatechange = () => {
+      if(xhr.readyState == 3) {
+        tableResponse("Processing");
+      } else if(xhr.readyState == 4 && xhr.status == 200) {
+        tableResponse(xhr.responseText);
+      }
+    };
+
+    xhr.open("GET", "/map/tableData?page=" + pg, true);
+    xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+    var parametersAsJSON = JSON.stringify(parameters);
+    xhr.send(parametersAsJSON);
+
+  }
+
+  function tableResponse(response){
+    document.getElementById("mapTableValues").innerHTML = response;
+  }
+
+  function tableNextPage(){
+    tablePage(1);
+  }
+
+  function tablePrevPage(){
+    tablePage(-1);
+  }
+
+  function tablePage(dx){
+    var tbody = document.getElementById("mapTableValues");
+    var num = parseInt(tbody.getAttribute("page"));
+    num += dx;
+    if(num > 0){
+      tbody.setAttribute("page", num);
+      getTableData(num);
+
+      if(num <= 1) {
+        document.getElementById("mapControlPrevious").classList.add("disabled");
+      } else {
+        document.getElementById("mapControlPrevious").classList.remove("disabled");
+      }
+    }
+
+  }
+
   function initMap (mapData) {
     console.log(mapData);
     greyImage = {
@@ -279,6 +327,8 @@ function closeAllPanels(){
           }
       });
   }
+
+
   function submitForm(){
       console.log("form submitted!");
   }

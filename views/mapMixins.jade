@@ -6,6 +6,7 @@ mixin mapHead
         function initMapOnPage() {
           var mapData = !{mapData};
           initMap(mapData);
+          tablePage(0);
         }
       script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&callback=initMapOnPage")
       link(rel='stylesheet', href='/stylesheets/style.css')
@@ -63,9 +64,9 @@ mixin mapInfoHighlights
       label Activities
       div.quarters
         div.activityButton(onclick="selectHighlight('biodiversity_url', this)") Biodiversity Website
-        div.activityButton Biodiversity Mainstreaming
-        div.activityButton Biodiversity Plan
-        div.activityButton Biodiversity Report
+        div.activityButton(onclick="selectHighlight('intplan_title', this)") Biodiversity Mainstreaming
+        div.activityButton(onclick="selectHighlight('plan1_title', this)") Biodiversity Plan
+        div.activityButton(onclick="selectHighlight('report_title', this)") Biodiversity Report
       div.quarters
         div
           label Programs
@@ -108,14 +109,20 @@ mixin mapInfoSummary(summary)
 mixin mapInfoResults(data)
   div.mapInfoContent(class="hide" id="mapInfoResults" style="background-color: #e1efd8")
     +mapValuesTable(data)
+    +mapValuesControl
 
 mixin mapValuesTable(data)
   table.mapValuesTable
     thead
       tr
-        th Address
-        th Year
-        th Programs
-        th Associations
-    tbody
-      Set some filters to explore data below.
+        th#mvTitle Title
+        th#mvYear Year
+        th#mvPrograms Programs
+        th#mvAssociations Associations
+    tbody#mapTableValues(page="1")
+
+
+mixin mapValuesControl
+  div.mapValuesControl
+    span#mapControlPrevious.disabled(onclick="tablePrevPage()") < PREVIOUS
+    span(onclick="tableNextPage()") NEXT >

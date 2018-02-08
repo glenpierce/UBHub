@@ -60,6 +60,42 @@ router.get('/update', function(req, res, next) {
     // update();
 });
 
+router.get('/tableData', function(req, res, next){
+
+  var mapData = "";
+  var string = "";
+  var page = req.query.page;
+  if(page == null){
+    page = 1;
+  }
+  var limit = 10;
+
+  connection = mysql.createConnection({
+      host: config.rdsHost,
+      user: config.rdsUser,
+      password: config.rdsPassword,
+      database: config.rdsDatabase
+  });
+
+  connection.connect();
+  var query = `SELECT * from locations limit ${limit} offset ${limit * (page - 1)}`;
+  console.log(query);
+  connection.query(query, function(err, rows, fields) {
+    //Output an appropriate tbody
+    for(i = 0; i < rows.length; i++){
+      string += `<tr>`;
+      string += `<td>${rows[i].title}</td>`;
+      string += `<td>2001</td>`;
+      string += `<td>Program 1, Program 2</td>`;
+      string += `<td>Associaiton 1, Association 2</td>`;
+      string += `</tr>`;
+    }
+
+
+    res.send(string);
+  });
+});
+
 function getSummary(data){
   var summary = {};
   summary.total = data.length;
@@ -105,6 +141,10 @@ function update(){
         }
     });
     connection.end();
+}
+
+function getData(){
+
 }
 
 var mapActivities = [
