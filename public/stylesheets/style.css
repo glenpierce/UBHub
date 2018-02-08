@@ -536,7 +536,42 @@ div.quarters>div {
 
 
 table.mapValuesTable {
+  width: 100%;
+}
 
+table.mapValuesTable tr td{
+  padding: 12px;
+  height: 30px;
+}
+
+table.mapValuesTable tr:nth-child(odd) {
+  background-color: #eff6e8;
+}
+
+table.mapValuesTable th {
+  background-color: #acd9bb;
+  padding: 12px;
+}
+
+table.mapValuesTable th#mvTitle {
+  width: 50%;
+}
+
+div.mapValuesControl {
+  text-align: center;
+}
+
+div.mapValuesControl span {
+  font-weight: bold;
+  color: #4490ba;
+  cursor: pointer;
+  margin: 12px;
+
+}
+
+div.mapValuesControl span.disabled {
+  color: #b6d5e3;
+  cursor: default;
 }
 
 /*
