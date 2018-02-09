@@ -85,9 +85,9 @@ router.get('/tableData', function(req, res, next){
     for(i = 0; i < rows.length; i++){
       string += `<tr>`;
       string += `<td>${rows[i].title}</td>`;
-      string += `<td>2001</td>`;
-      string += `<td>Program 1, Program 2</td>`;
-      string += `<td>Associaiton 1, Association 2</td>`;
+      string += `<td>${rows[i].country}</td>`;
+      string += `<td>${rows[i].scale}</td>`;
+      string += `<td>${getPlan1Title(rows[i])}</td>`;
       string += `</tr>`;
     }
 
@@ -95,6 +95,13 @@ router.get('/tableData', function(req, res, next){
     res.send(string);
   });
 });
+
+function getPlan1Title(location){
+  if(location.plan1_title != null){
+    return location.plan1_title;
+  }
+  return "";
+}
 
 function getSummary(data){
   var summary = {};

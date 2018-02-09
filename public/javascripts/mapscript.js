@@ -81,13 +81,15 @@ function highlightValues(filterBy){
 
 //UI
 
-function togglePanelOpenOrClosed(panelId){
+function togglePanelOpenOrClosed(tab, panelId){
   var panel = document.getElementById(panelId);
   var status = panel.classList.contains("hide");
   if(status){
     panel.classList.remove("hide");
+    tab.classList.add("active");
   } else {
-      panel.classList.add("hide");
+    panel.classList.add("hide");
+    tab.classList.remove("active");
   }
 }
 
@@ -138,7 +140,6 @@ function closeAllPanels(){
       }
 
       var activityButtons = document.getElementsByClassName("activeButton")
-
       for(i = 0; i < activityButtons.length; i++){
           activityButtons[0].classList.remove("activeButton");
       }
