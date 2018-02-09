@@ -131,10 +131,19 @@ function closeAllPanels(){
           marker.setVisible(true);
           marker.setIcon(greyImage);
       });
+
       var selectBoxes = document.getElementsByClassName("filterBox");
       for(i = 0; i < selectBoxes.length; i++){
           selectBoxes.item(i).children[0].selectedIndex = 0;
       }
+
+      var activityButtons = document.getElementsByClassName("activeButton")
+
+      for(i = 0; i < activityButtons.length; i++){
+          activityButtons[0].classList.remove("activeButton");
+      }
+
+
   };
 
   function getTableData(pg){

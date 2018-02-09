@@ -13,10 +13,11 @@ html
       script(type='text/javascript').
         window.onload = function() {
           var scrollPost = document.getElementById("#{scrollPost}");
-          scrollPost.classList.add("focused");
-          console.log(scrollPost);
-          scrollPost.scrollIntoView();
-          window.scrollBy(0, -84);
+          if(scrollPost){
+            scrollPost.classList.add("focused");
+            scrollPost.scrollIntoView();
+            window.scrollBy(0, -84);
+          }
         }
 
 

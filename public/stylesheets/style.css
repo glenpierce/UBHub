@@ -513,7 +513,7 @@ div.quarters>div {
 }
 
 .activityButton.activeButton {
-  box-shadow: 3px 3px 0 #ffff00, -3px -3px 0 #ffff00, -3px 3px 0 #ffff00, 3px -3px 0 #ffff00;
+  box-shadow: 3px 3px 0 #f69056, -3px -3px 0 #f69056, -3px 3px 0 #f69056, 3px -3px 0 #f69056;
 }
 
 .summaryStat {
