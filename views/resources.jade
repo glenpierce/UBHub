@@ -1,8 +1,255 @@
 doctype html
 include mixins
+include mapMixins
 html
  head
      link(rel='stylesheet', href='/stylesheets/style.css')
+     script.
+       function togglePanelOpenOrClosed(tab, panelId){
+         var panel = document.getElementById(panelId);
+         var status = panel.classList.contains("hide");
+         if(status){
+           panel.classList.remove("hide");
+           tab.classList.add("active");
+         } else {
+           panel.classList.add("hide");
+           tab.classList.remove("active");
+         }
+       }
 
 body
  +header(true)
+ div
+     div(style="width=100%; text-align:center; background:url('/images/blue_overlook_nightcity_horiz.png') darkblue; background-size: cover; height:180px; display:flex; justify-content:center;")
+         div(style="padding-left:20px; padding-right:20px; max-width:900px;")
+             div(style="color:white; font-weight:700; font-size:20px; margin-top:50px;") guideHub
+             div(style="background:white; height:1px; width:50%; margin:auto; margin-top:10px; margin-bottom:10px;")
+             div(style="color:white; padding-right:100px; padding-left:100px; padding-bottom:20px;") This guideHub section lists helpful urban biodiversity resources by type, and includes comparative description of various biodiversity measurement and planning frameworks.
+   div(style="width:100%; display: flex; justify-content: center;")
+    div(style="display:flex; width:800px; flex-direction:column;")
+      div
+        +mapInfoTab("Public Engagement Resources", "infant1", "#bb6d37", false)
+        div(id="infant1" class="mapInfoContent hide") 
+          <br> <b> Visuals and Handouts </b>
+          a(href="https://www.outdoorcardiff.com/wp-content/uploads/Variety-of-Life-on-earth-poster.pdf" target="_blank") <br> https://www.outdoorcardiff.com/wp-content/uploads/Variety-of-Life-on-earth-poster.pdf 
+          <br> Cardiff's series of posters from the UK explain the benefits of biodiversity through cartoons.
+          a(href="http://www.hedgelink.org.uk/index.php?page=7" target="_blank") Public education materials on Hedgerows from the UK.
+          div
+          a(href="https://www.amnh.org/our-research/center-for-biodiversity-conservation/resources-and-publications/biodiversity-guides-and-handbooks/life-in-the-leaf-litter" target="_blank") <br> Life in the Leaf Litter
+          <br> Guide to invertebrates found in leaf litter in New York City (in French and Spanish).
+          a(href="https://www.amnh.org/our-research/center-for-biodiversity-conservation/resources-and-publications/biodiversity-guides-and-handbooks/a-seasonal-guide-to-new-york-city-s-invertebrates" target="_blank") <br>  A Seasonal Guide to New York City's Invertebrates
+          <br> <br> <b> Comics Uniting Nations </b> 
+          a(href="https://wildfor.life/annas-forest-the-latest-comic-from-comics-uniting-nations" target="_blank") <br> Anna's Forest - a comic for children 
+          div (in English, French and Spanish)
+          <br> <b> Educator's Resources </b>  
+          a(href="https://www.amnh.org/our-research/center-for-biodiversity-conservation/resources-and-publications/for-educators/resources-for-educators/interpreting-biodiversity-a-manual-for-environmental-educators-in-the-tropics" target="_blank") <br> Interpreting Biodiversity: A Manual for Environmental Educators in the Tropics
+          div (in English, French and Spanish)
+          a(href="http://www.schoolofants.org/" target="_blank") <br> School of Ants
+          div Citizen science driven study of ants in urban areas for schools or households across the USA.
+          a(href="http://studentsdiscover.org/" target="_blank") <br> Students Discover
+          div Lesson plans for discovering biodiversity around the home for middle school students in the USA.
+          a(href="http://yourwildlife.org/" target="_blank") <br> Your Wild Life
+          div Citizen science on the biodiversity of microbes in the home and surrounding areas in the USA.
+          <br> <b> Lost & Found </b>  
+          a(href="http://www.lostandfoundnature.com/about-l-f.html" target="_blank") <br> http://www.lostandfoundnature.com/about-l-f.html
+          div Inspiring and true stories about saving species (in English, Spanish, French, Chinese and Portuguese).
+          <br> <b> #NatureforAll </b>  
+          a(href="https://natureforall.global/" target="_blank") <br> https://natureforall.global/
+          div Global movement to inspire people to love nature by the IUCN.
+          <br> <b> NatureParif</b> 
+          div Animated short films (in French and English) 
+          a(href="http://www.dailymotion.com/video/x6aplla" target="_blank") Ecological management: Let’s bring biodiversity to cities
+          a(href="http://www.dailymotion.com/video/x54g9bj" target="_blank") <br> Urbanism, architecture and biodiversity : when nature inspires cities and buildings
+          a(href="http://www.dailymotion.com/video/x65dxrm" target="_blank") <br> Gestion écologique : Accueillons la biodiversité en ville
+          a(href="http://www.dailymotion.com/video/x4u7w9l" target="_blank") <br> Bâtiment et biodiversité. Et si l'on pensait les villes et les bâtiments comme des écosystèmes.
+          <br> <br> <b> Public Engagement Feedback Forms</b> 
+          a(href="http://www.surrey.ca/files/CombinedSurreyEMSFirstResponseFormandMapMay13.pdf" target="_blank") Response Form
+          a(href="http://www.surrey.ca/files/CommentSheetforJune242010OpenHouse.pdf" target="_blank") <br> Feedback Response Form
+          div Environmental Management Strategy feedback forms as used in Surrey, Canada.
+      div
+        +mapInfoTab("Regulations and Policy Resources", "infant2", "#f69056", false)
+        div(id="infant2" class="mapInfoContent hide")
+          <br> <b> Biodiversity Offsets </b>  
+          a(href="https://www.westerncape.gov.za/text/2007/3/pgwcoffsetsguidelinedraft_5march_07.pdf" target="_blank") <br> Provincial Guideline on Biodiversity Offsets in South Africa
+          div
+          <br> <b> Transferable Development Rights </b>  
+          a(href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.884.1398&rep=rep1&type=pdf" target="_blank") <br> Transferrable Development Rights and Forest Protection: an exploratory analysis by Chomitz 2004.
+          a(href="http://www.forest-trends.org/documents/files/doc_655.pdf" target="_blank") <br> The Theory and Practice of Transferring Development Rights:The Institutions for Contracting for Biodiversity by Swanson 1995.
+          <br> <br> <b> Urban Ecology Policy Proposals </b>  
+          a(href="http://www.nyc.gov/html/gbee/downloads/pdf/urban_ecology.pdf" target="_blank") <br> http://www.nyc.gov/html/gbee/downloads/pdf/urban_ecology.pdf
+          div Proposed biodiversity legislation for New York City.
+          <br> <b> Urban Growth Management (Limiting Sprawl) </b>  
+          a(href="https://pdfs.semanticscholar.org/8f2a/6a65e2a52a7721658e584b8eb4a38f75cbcd.pdf" target="_blank") <br> Urban Growth Management i nNew South Wales by Williams.
+          div
+          <br> <b> Urban Nature Infrastructure Survey and Policy </b>  
+          a(href="http://greenmap.org.il/content?lang=en&pageid=50" target="_blank") <br> http://greenmap.org.il/content?lang=en&pageid=50
+          div Jerusalem has completed the first citywide Urban Nature Infrastructure Survey that covers public and private land and identifies habitat for special designation I nthe land use zoning (policy in Hebrew).
+      div
+        +mapInfoTab("Data Repositories", "infant3", "#fab279", false)
+        div(id="infant3" class="mapInfoContent hide") 
+          <br> <b> Atlas of Living Australia </b>  
+          a(href="http://www.ala.org.au/" target="_blank") <br> http://www.ala.org.au/
+          div Australia only.
+          <br> <b> Biodiversity Scotland </b>  
+          a(href="http://www.biodiversityscotland.gov.uk/duty/do-it/records/" target="_blank") <br> http://www.biodiversityscotland.gov.uk/duty/do-it/records/
+          div Scotland only.
+          <br> <b> Biodiversity Data Sets for Ireland </b>  
+          a(href="http://maps.biodiversityireland.ie/DataSet" target="_blank") <br> http://maps.biodiversityireland.ie/DataSet
+          div Ireland only.
+          <br> <b> Bird Count India </b>
+          a(href="https://birdcount.in/" target="_blank") <br> https://birdcount.in/
+          div Bird data and birding events in India only.
+          <br> <b> Cettia Île-de-France</b>
+          a(href="http://cettia-idf.fr/" target="_blank") <br> http://cettia-idf.fr/
+          div Paris region on line nature data capture tool and database (French).
+          <br> <b> Christmas Bird Count </b>
+          a(href="http://www.audubon.org/conservation/science/christmas-bird-count" target="_blank") <br> http://www.audubon.org/conservation/science/christmas-bird-count
+          div Annual citizen science driven count of birds, ongoing for over a century; USA and Canada only.
+          <br> <b> eBird </b>
+          a(href="http://ebird.org/" target="_blank") <br> http://ebird.org/
+          div eBird is a citizen science data recording website by Cornell University that provides worldwide spatial bird abundance and distribution data for viewing or download.
+          <br> <b> Encyclopaedia of Life </b>
+          a(href="http://www.eol.org/" target="_blank") <br> http://www.eol.org/
+          div Information and pictures of all species known to science.
+          <br> <b> Environmental Information System (ENVIS) </b>
+          a(href="http://envis.nic.in/" target="_blank") <br> http://envis.nic.in/
+          div Ecological and sustainability information for India only.
+          <br> <b> Falling Fruit </b>
+          a(href="https://fallingfruit.org" target="_blank") <br> https://fallingfruit.org
+          div Citizen science map and database of urban edibles for foraging or community agriculture worldwide.
+          <br> <b> Group on Earth Observations (GEO) BON </b>
+          a(href="http://geobon.org/" target="_blank") <br> http://geobon.org/
+          divA global biodiversity observation network that links scientists to one another and to assessment tools such as remote sensing.
+          <br> <br> <b> iNaturalist </b>
+          a(href="https://www.inaturalist.org/" target="_blank") <br> https://www.inaturalist.org/
+          div Citizen science and science data portal and mobile app with verification and download capabilities.
+          <br> <b> Global Biodiversity Information Facility (GBIF)</b> 
+          a(href="http://www.gbif.org/" target="_blank") <br> http://www.gbif.org/
+          div Open-data research infrastructure on species occurance worldwide.
+          a(href="http://www.gbif.es/" target="_blank") Spanish version
+          <br> <br> <b> Map of Life </b> 
+          a(href="https://mol.org/" target="_blank") <br> https://mol.org/
+          div Global species distribution maps consolidated from WWF, IUCN, GBIF and others.
+          <br> <b> National Biodiversity Network of the UK </b> 
+          a(href="https://nbn.org.uk/" target="_blank") <br> https://nbn.org.uk/
+          div Collates and verifies spatial wildlife viewing records from citizen science in the UK.
+          a(href="http://www.brc.ac.uk/" target="_blank") Biological Records Centre
+          div
+          <br> <b> Natura 2000 </b>
+          a(href="http://ec.europa.eu/environment/nature/natura2000/data/index_en.htm" target="_blank") <br> http://www.datacommons.psu.edu/commonswizard/
+          div Europe only.
+          <br> <b> Penn State Data Commons </b>
+          a(href="http://www.datacommons.psu.edu/commonswizard/" target="_blank") <br> http://www.datacommons.psu.edu/commonswizard/
+          div USA only.
+          <br> <b> Project Noah </b>
+          a(href="http://www.projectnoah.org" target="_blank") <br> http://www.projectnoah.org
+          div Citizen science database of plants, animals, and fungi sponsored by National Geographic.
+          <br> <b> Sauvages de ma Rue </b>
+          a(href="http://sauvagesdemarue.mnhn.fr/" target="_blank") <br> http://sauvagesdemarue.mnhn.fr/
+          div Urban plant observation program that uses a mobile app for citizen science. (in French)
+          <br> <b> South African National Biodiversity Institute (SANBI) </b>
+          a(href="https://www.sanbi.org/information" target="_blank") <br> https://www.sanbi.org/information
+          div Collected data sources on biodiversity for South Africa.
+          <br> <b> Sociedad Española de Ornitología (SEO) Bird Life </b>
+          a(href="http://sauvagesdemarue.mnhn.fr/" target="_blank") <br> http://sauvagesdemarue.mnhn.fr/
+          div Information on bird species in gardens in the cities of Spain (in Spanish).
+      div
+        +mapInfoTab("Networking and Partnership Programs", "infant4", "#4e9d7d", false)
+        div(id="infant4" class="mapInfoContent hide") pending
+      div
+        +mapInfoTab("News Sources and Blogs", "infant5", "#5ebd93", false)
+        div(id="infant5" class="mapInfoContent hide")
+          <br> <b> Humans and Nature </b> 
+          a(href="http://www.humansandnature.org/" target="_blank") <br> http://www.humansandnature.org/
+          div Blogs and discussions by contributors from around the world on resilience and nature.
+          <br> <b> Metropolitan Field Guide </b> 
+          a(href="http://www.metrofieldguide.com/" target="_blank") <br> http://www.metrofieldguide.com/
+          div Blog by Kelly Brenner on urban wildlife based out of Seattle.
+          <br> <b> Natusfera </b> 
+          a(href="http://natusferablog.creaf.cat/tag/biodiversidad-urbana/" target="_blank") <br> http://natusferablog.creaf.cat/tag/biodiversidad-urbana/
+          div Blog on urban nature (in Spanish).
+          <br> <b> Our Urban Jungle </b> 
+          a(href="https://oururbanjungle.wordpress.com/" target="_blank") <br> https://oururbanjungle.wordpress.com/
+          div Blog on adventures in urban wildlife and sustainability by Megan Draheim from the USA. 
+          <br> <b> Our Urban Wild </b> 
+          a(href="https://oururbanwilderness.wordpress.com/" target="_blank") <br> https://oururbanwilderness.wordpress.com/
+          div Tales of wildlife on the urban edge by Wilf Nussey and Liz Hardman from South Africa.
+          <br> <b> The Nature of Cities </b> 
+          a(href="https://www.thenatureofcities.com/" target="_blank") <br> https://www.thenatureofcities.com/
+          div Blog written by researchers and practitioners of urban biodiversity from around the world.
+          <br> <b> Urban Beasts </b> 
+          a(href="http://www.ozy.com/topic/urban-beasts" target="_blank") <br> http://www.ozy.com/topic/urban-beasts
+          div by Nick Dall at OZY
+      div
+        +mapInfoTab("Conferences", "infant6", "#9bd2b2", false)
+        div(id="infant6" class="mapInfoContent hide") 
+          <br> <b> Cities Alive </b> 
+          a(href="https://citiesalive.org/" target="_blank") <br> https://citiesalive.org/
+          div Conference on green roofs and walls around September.
+          <br> <b> EcoCity World Summit (IECS) </b> 
+          a(href="https://ecocitybuilders.org/ecocity-world-summit/" target="_blank") <br> hhttps://ecocitybuilders.org/ecocity-world-summit/
+          div Held every two years; 2019 to be hosted by BCIT in Vancouver, Canada 7-11 OCtober 2019.
+          <br> <b> European Conference on Biodiversity and Climate Change (ECBCC) </b> 
+          a(href="https://www.ecbcc2017.com/" target="_blank") <br> https://www.ecbcc2017.com/
+          div Held biannually. 2019 date and location not yet announced.
+          <br> <b> Global Biodiversity Summit of Cities (ICCLED) </b>
+          a(href="https://waset.org/conference/2018/09/paris/ICCLED" target="_blank") <br> https://waset.org/conference/2018/09/paris/ICCLED
+          div Parallel to the CBD COP in Sharm El-Sheikh, Egypt, 10 - 22 November 2018.
+          <br> <b> International Conference on City Landscape and Ecological Design (ICCLED) </b>
+          a(href="https://waset.org/conference/2018/09/paris/ICCLED" target="_blank") <br> https://waset.org/conference/2018/09/paris/ICCLED
+          div by the World Academy of Science, Engineering and Technology (WASET), in Paris 20-21 September 2018.
+          <br> <b> International Conference on Ecological Design for City Landscape (ICEDCL) </b>
+          a(href="https://waset.org/conference/2018/09/singapore/ICEDCL" target="_blank") <br> https://waset.org/conference/2018/09/singapore/ICEDCL
+          div by the World Academy of Science, Engineering and Technology (WASET), in Singapore 10-11 September 2018.
+          <br> <b> International Conference on Ecological Design of Urban Landscapes (ICEDUL) </b>
+          a(href="https://waset.org/conference/2018/08/prague/ICEDUL" target="_blank") <br> https://waset.org/conference/2018/08/prague/ICEDUL
+          div by the World Academy of Science, Engineering and Technology (WASET), in Prague 13-14 August 2018.
+          <br> <b> International Conference on Ecological Urbanism (ICEU) </b>
+          a(href="https://waset.org/conference/2018/09/tokyo/ICEU" target="_blank") <br> https://www.waset.org/conference/2017/10/dubai/ICUBD
+          div by the World Academy of Science, Engineering and Technology (WASET), in Istanbul 6-7 September 2018.
+          <br> <b> International Conference on Ecological Urbanism and Applications (ICEUA) </b>
+          a(href="https://waset.org/conference/2018/09/tokyo/ICEU" target="_blank") <br> https://www.waset.org/conference/2017/10/dubai/ICUBD
+          div by the World Academy of Science, Engineering and Technology (WASET), in Tokyo 10-11 September 2018.
+          <br> <b> International Conference on Ecological Urbanism and Design (ICEUD) </b>
+          a(href="https://waset.org/conference/2018/09/rome/ICEUD" target="_blank") <br> https://waset.org/conference/2018/09/rome/ICEUD
+          div by the World Academy of Science, Engineering and Technology (WASET), in Rome 17-18 September 2018.
+          <br> <b> International Conference on Ecological Urbanism and Sustainability (ICEUS) </b>
+          a(href="https://waset.org/conference/2018/09/prague/ICEUS" target="_blank") <br> https://waset.org/conference/2018/09/prague/ICEUS
+          div by the World Academy of Science, Engineering and Technology (WASET), in Prague 3-4 September 2018.
+          <br> <b> International Conference on Garden City Movement (ICGCM) </b>
+          a(href="https://waset.org/conference/2018/09/zurich/ICGCM" target="_blank") <br> https://waset.org/conference/2018/09/zurich/ICGCM
+          div by the World Academy of Science, Engineering and Technology (WASET), in Zurich 13-14 September 2018.
+          <br> <b> International Conference on Natural and Built Ecological Systems in Urban Environment (ICNBESUE) </b>
+          a(href="https://waset.org/conference/2018/08/prague/ICNBESUE" target="_blank") <br> https://waset.org/conference/2018/08/prague/ICNBESUE
+          div by the World Academy of Science, Engineering and Technology (WASET), in Prague 13-14 August 2018.
+          <br> <b> International Urban Wildlife Conference (IUWC) </b>
+          a(href="https://www.facebook.com/iuwc2019/" target="_blank") <br> https://www.facebook.com/iuwc2019/
+          div Held in Portland, Oregon 2-5 June 2019
+          <br> <b> International Network for Urban Biodiversity and Design Conference (URBIO) </b>
+          a(href="http://www.urbio2018.co.za/" target="_blank") <br> http://www.urbio2018.co.za/
+          div 2018 theme is Urban Biodiversity and Food Security. Held in Cape Town 11-14 September 2018.
+      div
+        +mapInfoTab("Measurement Tools and Models", "infant7", "#4490ba", false)
+        div(id="infant7" class="mapInfoContent hide") pending
+      div
+        +mapInfoTab("Research Institutes", "infant8", "#6da4c7", false)
+        div(id="infant8" class="mapInfoContent hide")
+          <br> <b> Designing green spaces for biodiversity and human wellbeing </b> 
+          a(href="https://urbangreenspace.info/" target="_blank") <br> https://urbangreenspace.info/
+          div Partnership between the Australian government, several universities, the City of Melbourne, NGOs, and private firms.
+          <br> <b>  (EKLIPSE) </b> 
+          a(href="http://www.eklipse-mechanism.eu/expert_working_group_on_nbs" target="_blank") <br> http://www.eklipse-mechanism.eu/expert_working_group_on_nbs
+          div EKLIPSE Expert Working Group on Nature‐based Solutions to Promote Climate Resilience in Urban Areas.
+          <br> <b> Intergovernmental Science-Policy Platform on Biodiversity and Ecosystem Services (IPBES) </b> 
+          a(href="https://www.ipbes.net/" target="_blank") <br> https://www.ipbes.net/
+          div
+          <br> <b> South African National Biodiversity Institute (SANBI) </b> 
+          a(href="https://www.sanbi.org/" target="_blank") <br> https://www.sanbi.org/
+          div
+          <br> <b> Stockholm Resilience Centre </b> 
+          a(href="http://www.stockholmresilience.org/" target="_blank") <br> http://www.stockholmresilience.org/
+          div
+          <br> <b> University of Copenhagen </b> 
+          a(href="http://greensurge.eu/" target="_blank") <br> Green Surge Handbook
+          div Policy briefs, fact sheets and recommendations for practitioners on how urban green infrastructure contributes to sustainability by the University of Copenhagen
+  div <br> <br>
