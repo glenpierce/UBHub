@@ -28,7 +28,7 @@ router.get('/', function(req, res, next) {
     });
 
     connection.connect();
-    query = 'SELECT * from locations limit 500';
+    query = 'SELECT * from locations limit 1000';
     console.log(query);
     connection.query(query, function(err, rows, fields) {
         if (!err) {
