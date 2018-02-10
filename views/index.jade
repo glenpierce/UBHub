@@ -96,7 +96,8 @@ body(style="font-family:helvetica; background-color:#d3e9d5;")
             div(class="g-recaptcha" data-sitekey="6LfgLSMUAAAAABRJzT1aYJTLTKHEc7zorV0nRPxm" style="margin:auto;")
         div(style="display:flex; align-items:center; width:100%;")
             input(type="submit" value="Add to mailing list" style="background-color:#3f836b; border-radius:5px; border:none; padding:5px; color: white; cursor:pointer; margin:auto;")
-
+    div <br> <br> <br> <br>
+            <p>
     script.
         function submitForm() {
             var formElements = document.getElementById("emailForm").elements;
@@ -109,3 +110,4 @@ body(style="font-family:helvetica; background-color:#d3e9d5;")
             else
                 window.alert("Sorry, but it seems that something is missing. Please verify that the \"Email\" and \"Verify Email\" fields have a valid email address and match each other.")
         }
+      
