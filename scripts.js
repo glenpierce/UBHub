@@ -1,33 +1,133 @@
 var express = require('express');
-var router = express.Router();
 var mysql = require('mysql');
-var session = require('client-sessions');
+var router = express.Router();
 var path = require("path");
-var http = require('http');
 var https = require('https');
+var config = require('./config.js');
+var session = require('client-sessions');
 
-var app = express();
+log = function () {
+    console.log('logging...');
+    console.log(process.env);
+};
 
-var config = require('../config.js');
+updateLocations = function(lower, upper) {
 
-app.use(session({
-    cookieName: 'session',
-    secret: config.secret,
-    duration: 30 * 60 * 1000,
-    activeDuration: 5 * 60 * 1000
-}));
+    config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
+    config.rdsUser="root";
+    config.rdsPassword="my-secret-pw";
 
-router.get('/', function(req, res, next) {
-    console.log("update available");
-    res.redirect('/');
-});
+    for (i = lower; i < upper; i++) {
+        connection = mysql.createConnection({
+            host: config.rdsHost,
+            user: config.rdsUser,
+            password: config.rdsPassword,
+            database: config.rdsDatabase
+        });
 
-router.get('/update', function(req, res, next) {
-    update();
-    res.redirect('/');
-});
+        connection.connect();
+        query = 'select id, address, lat from locations where id = ' + i + ";";
+        console.log(query);
+        connection.query(query, function (err, rows, fields) {
+            if (!err) {
+                console.log(rows);
+                console.log(rows[0].id);
+                if(rows[0].id && rows[0].lat == null) {
+                    getLatLong(rows[0].address, rows[0].id);
+                } else {
+                    console.log("lat not null");
+                }
+            } else {
+                console.log(err);
+            }
+        });
+        connection.end();
+    }
+};
 
-function update(){
+function getLatLong(address, id){
+    console.log("getLatLong");
+    if(address){
+        var addressQueryString = address.replace(/\s+/g, "+");
+        //https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs
+        var options = {
+            host: 'maps.googleapis.com',
+            path: '/maps/api/geocode/json?address=' + addressQueryString + "&key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs",
+            //since we are listening on a custom port, we need to specify it by hand
+            //port: '1337',
+            method: 'GET'
+            // useQuerystring: true,
+            // qs: 'address=' + "1600+Amphitheatre+Parkway,+Mountain+View,+CA" + "&key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs"
+        };
+
+        var req = https.request(options, function(response) {
+            var data = '';
+            response.on('data', function(chunk) {
+                data += chunk;
+            });
+            response.on('end', function() {
+                var result = JSON.parse(data);
+                // console.log(result);
+                // country = '';
+                if(result.results[0]){
+                    //     for(component in result.results[0].address_components){
+                    //         console.log("iterating");
+                    //         console.log(component);
+                    //         if(component.types){
+                    //             console.log(component.long_name);
+                    //             for(type in component.types){
+                    //                 if(type == 'country'){
+                    //                     country = component.long_name;
+                    //                 }
+                    //             }
+                    //         }
+                    //     }
+                    //     console.log("country=" + country);
+                    lat = result.results[0].geometry.location.lat;
+                    lng = result.results[0].geometry.location.lng;
+                    console.log(lat);
+                    console.log(lng);
+                    updateLocation(id, lat, lng);
+                } else {
+                    console.log(id + "no good");
+                }
+            });
+            response.on('error', function(err) {
+                console.log("google api error:" + err);
+            });
+        });
+        req.end();
+    } else {
+        console.log("missing address");
+    }
+}
+
+function updateLocation(id, lat, lng){
+    connection = mysql.createConnection({
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
+    });
+
+    connection.connect();
+    query = 'CALL updateLocation(' + id + ', "' + lat + '", "' + lng + '")';
+    console.log(query);
+    connection.query(query, function(err, rows, fields) {
+        if (!err) {
+            console.log("location updated");
+        } else {
+            console.log(err);
+        }
+    });
+    connection.end();
+}
+
+update = function(){
+
+    config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
+    config.rdsUser="root";
+    config.rdsPassword="my-secret-pw";
 
     connection = mysql.createConnection({
         host: config.rdsHost,
@@ -48,14 +148,14 @@ function update(){
 
     createUsersTableQuery =
         "CREATE TABLE users(" +
-            "email VARCHAR(255) NOT NULL," +
-            "userAddress VARCHAR(2000)," +
-            "hashedPassword CHAR(255) not null," + //pretty sure bcrypt only allows for 60 chars in a hash
-            "alias VARCHAR(255) NOT NULL," +
-            "privileges INT, " +
-            "PRIMARY KEY (email)," +
-            "UNIQUE INDEX (email)" +
-            ");";
+        "email VARCHAR(255) NOT NULL," +
+        "userAddress VARCHAR(2000)," +
+        "hashedPassword CHAR(255) not null," + //pretty sure bcrypt only allows for 60 chars in a hash
+        "alias VARCHAR(255) NOT NULL," +
+        "privileges INT, " +
+        "PRIMARY KEY (email)," +
+        "UNIQUE INDEX (email)" +
+        ");";
     query.push(createUsersTableQuery);
 
     // createDevelopmentUser =
@@ -64,7 +164,7 @@ function update(){
 
 
     createPostsTable =
-      "CREATE TABLE posts(" +
+        "CREATE TABLE posts(" +
         "id INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
         "parent INT," +
         "author VARCHAR(255) NOT NULL," +
@@ -78,93 +178,93 @@ function update(){
         "acceptedAnswerId INT" +
         //TODO: add something like the below for foreign key constraint
         //"FOREIGN KEY (author) REFERENCES users(email)"
-      ");";
+        ");";
     query.push(createPostsTable);
 
     createVotesTable =
-      "CREATE TABLE votes(" +
-      "author VARCHAR(255) NOT NULL," +
-      "postId INT NOT NULL," +
-      "deltaUpvotes INT," +
-      "FOREIGN KEY (author) REFERENCES users(email),"+
-      "FOREIGN KEY (postId) REFERENCES posts(id)"+
-      ");";
+        "CREATE TABLE votes(" +
+        "author VARCHAR(255) NOT NULL," +
+        "postId INT NOT NULL," +
+        "deltaUpvotes INT," +
+        "FOREIGN KEY (author) REFERENCES users(email),"+
+        "FOREIGN KEY (postId) REFERENCES posts(id)"+
+        ");";
     query.push(createVotesTable);
 
     createEmailsTableQuery =
         "CREATE TABLE emails (" +
-            "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-            "`email` VARCHAR(2048) CHARACTER SET utf8" +
+        "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+        "`email` VARCHAR(2048) CHARACTER SET utf8" +
         ");";
     query.push(createEmailsTableQuery);
 
     createLocationsTableQuery =
         "CREATE TABLE locations (" +
-            "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-            "`address` VARCHAR(204) CHARACTER SET utf8," +
-            "`lat` FLOAT( 10, 6 )," +
-            "`lng` FLOAT( 10, 6 )," +
-            "`title` VARCHAR(57) CHARACTER SET utf8," +
-            "`country` VARCHAR(51) CHARACTER SET utf8," +
-            "`scale` VARCHAR(51) CHARACTER SET utf8," +
-            "`intplan_year` INT," +
-            "`intplan_title` VARCHAR(102) CHARACTER SET utf8," +
-            "`intplan_url` VARCHAR(459) CHARACTER SET utf8," +
-            "`plan1_year` VARCHAR(19) CHARACTER SET utf8," +
-            "`plan1_title` VARCHAR(108) CHARACTER SET utf8," +
-            "`plan1_url` VARCHAR(459) CHARACTER SET utf8," +
-            "`plan2_year` VARCHAR(11) CHARACTER SET utf8," +
-            "`plan2_title` VARCHAR(102) CHARACTER SET utf8," +
-            "`plan2_url` VARCHAR(459) CHARACTER SET utf8," +
-            "`report_year` INT," +
-            "`report_title` VARCHAR(102) CHARACTER SET utf8," +
-            "`report_url` VARCHAR(459) CHARACTER SET utf8," +
-            "`EF_year` VARCHAR(10) CHARACTER SET utf8," +
-            "`EF_data_ghapercap` NUMERIC(5, 3)," +
-            "`EF_link` VARCHAR(459) CHARACTER SET utf8," +
-            "`LAB_joined` VARCHAR(102) CHARACTER SET utf8," +
-            "`Durban_commitment` VARCHAR(102) CHARACTER SET utf8," +
-            "`LAB_CEPA` VARCHAR(102) CHARACTER SET utf8," +
-            "`LAB_URBIS` VARCHAR(102) CHARACTER SET utf8," +
-            "`LAB_wetlands` VARCHAR(102) CHARACTER SET utf8," +
-            "`Biophilic_cities` VARCHAR(102) CHARACTER SET utf8," +
-            "`European_Green_Capital_award` INT," +
-            "`European_capital_biodiversity` INT," +
-            "`biodiversity_url` VARCHAR(459) CHARACTER SET utf8," +
-            "`wetland_profile` VARCHAR(102) CHARACTER SET utf8," +
-            "`wetland_report` VARCHAR(102) CHARACTER SET utf8," +
-            "`SI_status` VARCHAR(102) CHARACTER SET utf8," +
-            "`MAB_urban` INT," +
-            "`IUCN_protected_area` VARCHAR(102) CHARACTER SET utf8," +
-            "`grab_partner` VARCHAR(102) CHARACTER SET utf8," +
-            "`extra1_title` VARCHAR(102) CHARACTER SET utf8," +
-            "`extra1_url` VARCHAR(459) CHARACTER SET utf8," +
-            "`extra2_title` VARCHAR(102) CHARACTER SET utf8," +
-            "`extra2_link` VARCHAR(459) CHARACTER SET utf8," +
-            "`map` VARCHAR(102) CHARACTER SET utf8," +
-            "`map_link` VARCHAR(459) CHARACTER SET utf8," +
-            "`data_portal` VARCHAR(102) CHARACTER SET utf8," +
-            "`data_link` VARCHAR(459) CHARACTER SET utf8," +
-            "`contact_name` VARCHAR(102) CHARACTER SET utf8," +
-            "`contact_title` INT," +
-            "`contact_email` VARCHAR(102) CHARACTER SET utf8," +
-            "`rainfall` INT," +
-            "`elevation_m` INT," +
-            "`temperature` INT," +
-            "`coastal` INT," +
-            "`CBI_coalition` INT," +
-            "`update_date` INT," +
-            "`update_by` VARCHAR(102) CHARACTER SET utf8," +
-            "`update_verified` INT," +
-            "`population` INT," +
-            "`density_km2` NUMERIC(14, 9)," +
-            "`area_km2` NUMERIC(17, 11)," +
-            "`area_ha` NUMERIC(6, 1)," +
-            "`OnePlanet` VARCHAR(3) CHARACTER SET utf8," +
-            "`carrycap_year` VARCHAR(10) CHARACTER SET utf8," +
-            "`carrycap_ghapercap` NUMERIC(5, 4)," +
-            "`carrycap_source` VARCHAR(204) CHARACTER SET utf8," +
-            "`myJson` VARCHAR(2000)" +
+        "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+        "`address` VARCHAR(204) CHARACTER SET utf8," +
+        "`lat` FLOAT( 10, 6 )," +
+        "`lng` FLOAT( 10, 6 )," +
+        "`title` VARCHAR(57) CHARACTER SET utf8," +
+        "`country` VARCHAR(51) CHARACTER SET utf8," +
+        "`scale` VARCHAR(51) CHARACTER SET utf8," +
+        "`intplan_year` INT," +
+        "`intplan_title` VARCHAR(102) CHARACTER SET utf8," +
+        "`intplan_url` VARCHAR(459) CHARACTER SET utf8," +
+        "`plan1_year` VARCHAR(19) CHARACTER SET utf8," +
+        "`plan1_title` VARCHAR(108) CHARACTER SET utf8," +
+        "`plan1_url` VARCHAR(459) CHARACTER SET utf8," +
+        "`plan2_year` VARCHAR(11) CHARACTER SET utf8," +
+        "`plan2_title` VARCHAR(102) CHARACTER SET utf8," +
+        "`plan2_url` VARCHAR(459) CHARACTER SET utf8," +
+        "`report_year` INT," +
+        "`report_title` VARCHAR(102) CHARACTER SET utf8," +
+        "`report_url` VARCHAR(459) CHARACTER SET utf8," +
+        "`EF_year` VARCHAR(10) CHARACTER SET utf8," +
+        "`EF_data_ghapercap` NUMERIC(5, 3)," +
+        "`EF_link` VARCHAR(459) CHARACTER SET utf8," +
+        "`LAB_joined` VARCHAR(102) CHARACTER SET utf8," +
+        "`Durban_commitment` VARCHAR(102) CHARACTER SET utf8," +
+        "`LAB_CEPA` VARCHAR(102) CHARACTER SET utf8," +
+        "`LAB_URBIS` VARCHAR(102) CHARACTER SET utf8," +
+        "`LAB_wetlands` VARCHAR(102) CHARACTER SET utf8," +
+        "`Biophilic_cities` VARCHAR(102) CHARACTER SET utf8," +
+        "`European_Green_Capital_award` INT," +
+        "`European_capital_biodiversity` INT," +
+        "`biodiversity_url` VARCHAR(459) CHARACTER SET utf8," +
+        "`wetland_profile` VARCHAR(102) CHARACTER SET utf8," +
+        "`wetland_report` VARCHAR(102) CHARACTER SET utf8," +
+        "`SI_status` VARCHAR(102) CHARACTER SET utf8," +
+        "`MAB_urban` INT," +
+        "`IUCN_protected_area` VARCHAR(102) CHARACTER SET utf8," +
+        "`grab_partner` VARCHAR(102) CHARACTER SET utf8," +
+        "`extra1_title` VARCHAR(102) CHARACTER SET utf8," +
+        "`extra1_url` VARCHAR(459) CHARACTER SET utf8," +
+        "`extra2_title` VARCHAR(102) CHARACTER SET utf8," +
+        "`extra2_link` VARCHAR(459) CHARACTER SET utf8," +
+        "`map` VARCHAR(102) CHARACTER SET utf8," +
+        "`map_link` VARCHAR(459) CHARACTER SET utf8," +
+        "`data_portal` VARCHAR(102) CHARACTER SET utf8," +
+        "`data_link` VARCHAR(459) CHARACTER SET utf8," +
+        "`contact_name` VARCHAR(102) CHARACTER SET utf8," +
+        "`contact_title` INT," +
+        "`contact_email` VARCHAR(102) CHARACTER SET utf8," +
+        "`rainfall` INT," +
+        "`elevation_m` INT," +
+        "`temperature` INT," +
+        "`coastal` INT," +
+        "`CBI_coalition` INT," +
+        "`update_date` INT," +
+        "`update_by` VARCHAR(102) CHARACTER SET utf8," +
+        "`update_verified` INT," +
+        "`population` INT," +
+        "`density_km2` NUMERIC(14, 9)," +
+        "`area_km2` NUMERIC(17, 11)," +
+        "`area_ha` NUMERIC(6, 1)," +
+        "`OnePlanet` VARCHAR(3) CHARACTER SET utf8," +
+        "`carrycap_year` VARCHAR(10) CHARACTER SET utf8," +
+        "`carrycap_ghapercap` NUMERIC(5, 4)," +
+        "`carrycap_source` VARCHAR(204) CHARACTER SET utf8," +
+        "`myJson` VARCHAR(2000)" +
         ");";
     query.push(createLocationsTableQuery);
 
@@ -227,113 +327,113 @@ function update(){
     query.push(getAllUsersQuery);
 
     createAddPostQuery =
-      "CREATE PROCEDURE addForumPost(IN author varchar(255), IN parent varchar(255), IN subject varchar(255), IN body TEXT, IN creationDate DATETIME)\n" +
-      "BEGIN\n" +
-      "INSERT INTO posts (author, parent, subject, body, creationDate, upvotes, downvotes, views, status) VALUES (author, parent, subject, body, creationDate, 0, 0, 0, 'published');\n" +
-      "SELECT * FROM posts WHERE id=LAST_INSERT_ID();\n" +
-      "END";
+        "CREATE PROCEDURE addForumPost(IN author varchar(255), IN parent varchar(255), IN subject varchar(255), IN body TEXT, IN creationDate DATETIME)\n" +
+        "BEGIN\n" +
+        "INSERT INTO posts (author, parent, subject, body, creationDate, upvotes, downvotes, views, status) VALUES (author, parent, subject, body, creationDate, 0, 0, 0, 'published');\n" +
+        "SELECT * FROM posts WHERE id=LAST_INSERT_ID();\n" +
+        "END";
     query.push(createAddPostQuery);
 
     createGetPostQuery =
-      "CREATE PROCEDURE getPostById(IN inputId int)\n"+
-      "BEGIN\n" +
-      "SELECT * FROM posts WHERE `id`=inputId;\n" +
-      "END";
+        "CREATE PROCEDURE getPostById(IN inputId int)\n"+
+        "BEGIN\n" +
+        "SELECT * FROM posts WHERE `id`=inputId;\n" +
+        "END";
     query.push(createGetPostQuery);
 
     createGetPostAndAllSubsQuery =
-      "CREATE PROCEDURE getPostAndAllSubs(IN postId int)\n"+
-      "SELECT * FROM posts WHERE `id` = postId \n"+
-      "UNION\n" +
-      "SELECT * FROM posts WHERE `parent` = postId \n" +
-      "UNION\n" +
-      "SELECT * FROM posts WHERE `parent` in \n" +
-      "(SELECT id FROM posts WHERE `parent` = postId)";
+        "CREATE PROCEDURE getPostAndAllSubs(IN postId int)\n"+
+        "SELECT * FROM posts WHERE `id` = postId \n"+
+        "UNION\n" +
+        "SELECT * FROM posts WHERE `parent` = postId \n" +
+        "UNION\n" +
+        "SELECT * FROM posts WHERE `parent` in \n" +
+        "(SELECT id FROM posts WHERE `parent` = postId)";
 
     query.push(createGetPostAndAllSubsQuery);
 
     createGetAllPostsQuery =
-      "CREATE PROCEDURE getAllPosts()\n" +
-      "BEGIN\n" +
-      "SELECT * FROM posts;\n" +
-      "END";
+        "CREATE PROCEDURE getAllPosts()\n" +
+        "BEGIN\n" +
+        "SELECT * FROM posts;\n" +
+        "END";
     query.push(createGetAllPostsQuery);
 
     createGetPostsByParentQuery =
-      "CREATE PROCEDURE getPostsByParent(IN parentId int)\n" +
-      "BEGIN\n" +
-      "SELECT * FROM posts WHERE `parent`=parentId;\n" +
-      "END";
+        "CREATE PROCEDURE getPostsByParent(IN parentId int)\n" +
+        "BEGIN\n" +
+        "SELECT * FROM posts WHERE `parent`=parentId;\n" +
+        "END";
     query.push(createGetPostsByParentQuery);
 
     createDeletePostQuery =
-      "CREATE PROCEDURE deletePostById(IN id int)\n"+
-      "BEGIN\n" +
-      "DELETE FROM posts WHERE `id`=id;\n" +
-      "END";
+        "CREATE PROCEDURE deletePostById(IN id int)\n"+
+        "BEGIN\n" +
+        "DELETE FROM posts WHERE `id`=id;\n" +
+        "END";
     query.push(createDeletePostQuery);
 
     createUpvotePostQuery =
-      "CREATE PROCEDURE upvotePostById(IN authorId VARCHAR(255), IN post INT)\n"+
-      "BEGIN\n" +
-      "INSERT INTO votes (author, postId, deltaUpvotes) VALUES(authorId, post, 1);\n" +
-      "END";
+        "CREATE PROCEDURE upvotePostById(IN authorId VARCHAR(255), IN post INT)\n"+
+        "BEGIN\n" +
+        "INSERT INTO votes (author, postId, deltaUpvotes) VALUES(authorId, post, 1);\n" +
+        "END";
     query.push(createUpvotePostQuery);
 
     createDownvotePostQuery =
-      "CREATE PROCEDURE downvotePostById(IN authorId VARCHAR(255), IN post INT)\n"+
-      "BEGIN\n" +
-      "INSERT INTO votes (author, postId, deltaUpvotes) VALUES(authorId, post, -1);\n" +
-      "END";
+        "CREATE PROCEDURE downvotePostById(IN authorId VARCHAR(255), IN post INT)\n"+
+        "BEGIN\n" +
+        "INSERT INTO votes (author, postId, deltaUpvotes) VALUES(authorId, post, -1);\n" +
+        "END";
     query.push(createDownvotePostQuery);
 
     createGetDeltaVotesTotalQuery =
-      "CREATE PROCEDURE getDeltaVotesTotal(IN post INT)\n"+
-      "BEGIN\n" +
-      "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post;\n"+
-      "END";
+        "CREATE PROCEDURE getDeltaVotesTotal(IN post INT)\n"+
+        "BEGIN\n" +
+        "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post;\n"+
+        "END";
     query.push(createGetDeltaVotesTotalQuery);
 
     createGetUpvotesTotalQuery =
-      "CREATE PROCEDURE getUpvotesTotal(IN post INT)\n"+
-      "BEGIN\n" +
-      "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post AND `deltaUpvotes` = 1;\n"+
-      "END";
+        "CREATE PROCEDURE getUpvotesTotal(IN post INT)\n"+
+        "BEGIN\n" +
+        "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post AND `deltaUpvotes` = 1;\n"+
+        "END";
     query.push(createGetUpvotesTotalQuery);
 
     createGetDownvotesTotalQuery =
-      "CREATE PROCEDURE getDownvotesTotal(IN post INT)\n"+
-      "BEGIN\n" +
-      "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post AND `deltaUpvotes` = -1;\n"+
-      "END";
+        "CREATE PROCEDURE getDownvotesTotal(IN post INT)\n"+
+        "BEGIN\n" +
+        "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post AND `deltaUpvotes` = -1;\n"+
+        "END";
     query.push(createGetDownvotesTotalQuery);
 
     createGetAuthorVoteForPostQuery =
-      "CREATE PROCEDURE getAuthorVoteForPost(IN post INT, IN authorId VARCHAR(255))\n"+
-      "BEGIN\n"+
-      "SELECT deltaUpvotes FROM votes WHERE `author` = authorId AND `postId` = post;\n"+
-      "END";
+        "CREATE PROCEDURE getAuthorVoteForPost(IN post INT, IN authorId VARCHAR(255))\n"+
+        "BEGIN\n"+
+        "SELECT deltaUpvotes FROM votes WHERE `author` = authorId AND `postId` = post;\n"+
+        "END";
     query.push(createGetAuthorVoteForPostQuery);
 
     createUnvoteForPostQuery =
-      "CREATE PROCEDURE unvoteForPost(IN post INT, IN authorId VARCHAR(255))\n"+
-      "BEGIN\n"+
-      "DELETE FROM votes WHERE `author` = authorId AND `postId` = post;\n"+
-      "END";
+        "CREATE PROCEDURE unvoteForPost(IN post INT, IN authorId VARCHAR(255))\n"+
+        "BEGIN\n"+
+        "DELETE FROM votes WHERE `author` = authorId AND `postId` = post;\n"+
+        "END";
     query.push(createUnvoteForPostQuery);
 
     createAddViewQuery =
-      "CREATE PROCEDURE addView(IN post INT)\n"+
-      "BEGIN\n"+
-      "UPDATE posts SET `views` = views + 1 WHERE id = post;\n"+
-      "END";
+        "CREATE PROCEDURE addView(IN post INT)\n"+
+        "BEGIN\n"+
+        "UPDATE posts SET `views` = views + 1 WHERE id = post;\n"+
+        "END";
     query.push(createAddViewQuery);
 
     createAcceptPostQuery =
-      "CREATE PROCEDURE acceptPost(IN post INT, IN answerId INT)\n"+
-      "BEGIN\n"+
-      "UPDATE posts SET `acceptedAnswerId` = answerId WHERE id = post;\n"+
-      "END";
+        "CREATE PROCEDURE acceptPost(IN post INT, IN answerId INT)\n"+
+        "BEGIN\n"+
+        "UPDATE posts SET `acceptedAnswerId` = answerId WHERE id = post;\n"+
+        "END";
     query.push(createAcceptPostQuery);
 
     createProgramsTableQuery =
@@ -361,27 +461,51 @@ function update(){
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`siteName` VARCHAR(2048) CHARACTER SET utf8" +
         "" +
-            /*
-            set site profile index of data points to int values that are negative so that we can reference them from the indicators
-            example areaIndex INT = -1
-            calculation: density = population / -1
-            */
+        /*
+        set site profile index of data points to int values that are negative so that we can reference them from the indicators
+        example areaIndex INT = -1
+        calculation: density = population / -1
+        */
         ");";
     query.push(createSitesTableQuery);
 
     createSitesByUserTableQuery =
         "CREATE TABLE sitesByUser(" +
         "`site` INT NOT NULL, " +
-        "`user` VARCHAR(255) NOT NULL" +
+        "`user` VARCHAR(255) NOT NULL, " +
+        "`selected` BIT " +
         ");";
     query.push(createSitesByUserTableQuery);
 
     createGetSitesByUserQuery =
         "CREATE PROCEDURE getSitesByUser(IN emailInput varchar(255))\n"+
         "BEGIN\n" +
-        "SELECT * FROM sites where id IN (SELECT site FROM sitesByUser WHERE 'email' = \"emailInput\");\n" +
+        "SELECT * FROM sites where id IN (SELECT site FROM sitesByUser WHERE user = emailInput);\n" +
         "END";
     query.push(createGetSitesByUserQuery);
+
+    createGetSelectedSiteByUserQuery =
+        "CREATE PROCEDURE getSelectedSiteByUserQuery(IN emailInput varchar(255))\n"+
+        "BEGIN\n" +
+        "SELECT * FROM sites where id IN (SELECT site FROM sitesByUser WHERE user = emailInput AND selected = 1);\n" +
+        "END";
+    query.push(createGetSelectedSiteByUserQuery);
+
+    selectSiteForUser =
+        "CREATE PROCEDURE selectSiteForUser(IN emailInput varchar(255), IN siteSelected INT)\n"+
+        "BEGIN\n" +
+        "update sitesByUser SET selected = 0 WHERE user = emailInput;\n" +
+        "update sitesByUser SET selected = 1 WHERE user = emailInput AND site = siteSelected;\n" +
+        "END";
+    query.push(selectSiteForUser);
+
+    selectSiteForUserAndReturnIt =
+        "CREATE PROCEDURE selectSiteForUserAndReturnIt(IN emailInput varchar(255), IN siteSelected INT)\n"+
+        "BEGIN\n" +
+        "CALL selectSiteForUser(emailInput, siteSelected);\n" +
+        "CALL getSelectedSiteByUserQuery(emailInput);\n" +
+        "END";
+    query.push(selectSiteForUserAndReturnIt);
 
     createSiteQuery =
         "CREATE PROCEDURE createSite(IN siteName VARCHAR(2048), IN userInput VARCHAR(255))\n" +
@@ -389,6 +513,7 @@ function update(){
         "INSERT INTO sites(siteName) VALUES (siteName);\n" +
         "SET @last_id_in_sites = LAST_INSERT_ID();\n" +
         "INSERT INTO sitesByUser(user, site) VALUES (userInput, @last_id_in_sites);\n" +
+        "CALL selectSiteForUser(userInput, @last_id_in_sites);\n" +
         "SELECT * FROM sitesByUser WHERE site=LAST_INSERT_ID();\n" +
         "END";
     query.push(createSiteQuery);
@@ -434,6 +559,7 @@ function update(){
         "`name` VARCHAR(2048), " +
         "`indicator` INT, " +
         "`type` INT, " + //text, float, int / stage
+        //todo: build complex table-style entries
         "`required` BIT, " +
         "`orderInOperation` INT, " +
         "`rangeMin` FLOAT(10, 2), " +
@@ -624,6 +750,10 @@ function update(){
     }
 
     connection.end();
-}
+};
 
-module.exports = router;
+//var scripts = require('./scripts');
+
+module.exports.updateLocations = updateLocations;
+module.exports.log = log;
+module.exports.update = update;

@@ -3,6 +3,12 @@ include mixins
 html
     head
         link(rel='stylesheet', href='/stylesheets/style.css')
+        script.
+            selectSite = function(siteName){
+                console.log(siteName);
+                window.location='/dashboard?id=' + siteName;
+            }
+
 
 body
     +header(true)

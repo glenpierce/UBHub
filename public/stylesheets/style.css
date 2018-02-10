@@ -28,6 +28,11 @@ a {
   color: #00B7FF;
 }
 
+a.genericLink {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .border{
   border:solid; border-radius:5px; border-width:1px;
 }
@@ -69,7 +74,11 @@ a {
 }
 
 .homePageWhiteBox{
-  background-color:white; border-radius:10px; height: 40px; width: 100px; padding:20px; margin:10px; color:#326f90; font-weight:700; display:flex; justify-content:center; align-items:center; text-align:center;
+  background-color:white; border-radius:10px; height: 40px; width: 120px; padding:20px; margin:10px; color:#326f90; font-weight:700; display:flex; justify-content:center; align-items:center; text-align:center;
+}
+
+.homePageWhiteBoxWide{
+  background-color:white; border-radius:10px; height: 40px; width: 160px; padding:20px; margin:10px; color:#326f90; font-weight:700; display:flex; justify-content:center; align-items:center; text-align:center;
 }
 
 .indexBox{
@@ -355,6 +364,246 @@ p.postBody {
   margin: 12px;
   cursor:pointer;
 }
+
+/*Map*/
+.contentContainer.noBorder {
+  border-width: 0;
+}
+
+.mapIntro {
+  text-align: center;
+  margin: auto;
+  width: 600px;
+  padding-bottom: 10px;
+}
+
+.mapLabel {
+  color:#4490ba;
+  font-weight:bold;
+  font-size:20px;
+}
+
+#map {
+  height:400px;
+  width:100%;
+  max-width:800px;
+  padding-bottom:20px;
+}
+
+.mapInfoTab {
+  margin-top:10px;
+  width:100%;
+  max-width:790px;
+  padding:5px;
+  display:flex;
+  justify-content:space-between;
+  color:white;
+  font-style:italic;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.mapInfoTab .reset {
+  display: flex;
+}
+
+.mapInfoTab .reset .resetButton {
+  /*background-color:white;*/
+  /*border-radius:5px;*/
+  color:white;
+  /*padding-left:5px;*/
+  padding-right:5px;
+}
+
+.mapInfoTab img.tabArrow {
+  transform:rotate(180deg);
+  transform-origin:center;
+  height:13px;
+  transition: transform 0.25s;
+}
+
+.mapInfoTab.active img.tabArrow {
+  transform: rotate(90deg);
+}
+
+.mapInfoContent {
+  height: auto;
+  opacity: 1;
+  height: auto;
+
+}
+
+.mapInfoContent.hide {
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+
+}
+
+.mapInfoContent .formItem {
+  display: inline-block;
+  width: calc(33% - 36px);
+  padding: 6px 18px
+
+}
+
+.mapInfoContent label {
+  display: block;
+  font-weight: bold;
+  padding-left: 4px;
+}
+
+
+
+.selectBox {
+  background-color: #fff;
+  border: 1px solid #326f90;
+  width: 220px;
+  overflow: hidden;
+  position: relative;
+  border-radius: 5px;
+}
+
+.selectBox:after {
+  width: 0;
+  height: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 6px solid #326f90;
+  position: absolute;
+  top: 40%;
+  right: 8px;
+  content: "";
+  z-index: 98;
+
+}
+
+.selectBox select {
+  width: 240px;
+  border: 0;
+  position: relative;
+  z-index: 99;
+  background: none;
+  margin: 0;
+  padding: 4px;
+}
+
+.mapInfoContent#filterSettings label {
+  color: #326f90;
+}
+
+div.quarters {
+  display: flex;
+}
+
+div.quarters>div {
+  width: 25%;
+}
+
+div.thirds {
+  display: flex;
+}
+
+div.thirds>div {
+  width:33.33%;
+}
+
+#highlightSettings label {
+  color: #bb6d37;
+  font-weight: bold;
+  margin: 6px;
+}
+
+.activityButton {
+  border-radius: 12px;
+  border: 1px solid #bb6d37;
+  background-color: #fff;
+  padding: 16px 24px;
+  font-size: 16px;
+  height: 72px;
+  text-align: center;
+  margin: 8px;
+  cursor: pointer;
+  align-content: center;
+  position: relative;
+  display: flex;
+  justify-content: center; /* align horizontal */
+  align-items: center;
+}
+
+.activityButton img {
+  max-width: 100%;
+  max-height: 80px;
+}
+
+.activityButton>p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.activityButton.activeButton {
+  box-shadow: 3px 3px 0 #f69056, -3px -3px 0 #f69056, -3px 3px 0 #f69056, 3px -3px 0 #f69056;
+}
+
+.summaryStat {
+  padding: 24px;
+  font-size: 20px;
+  text-align: center;
+  border-radius: 5px;
+  background-color:#fff;
+  margin: 12px;
+}
+
+.summaryStat h3 {
+  font-size: 36px;
+  margin-bottom: 4px;
+}
+
+.summaryStat p {
+  margin-top: 4px;
+}
+
+
+table.mapValuesTable {
+  width: 100%;
+}
+
+table.mapValuesTable tr td{
+  padding: 12px;
+  height: 30px;
+}
+
+table.mapValuesTable tr:nth-child(odd) {
+  background-color: #eff6e8;
+}
+
+table.mapValuesTable th {
+  background-color: #acd9bb;
+  padding: 12px;
+}
+
+table.mapValuesTable th#mvTitle {
+  width: 50%;
+}
+
+div.mapValuesControl {
+  text-align: center;
+}
+
+div.mapValuesControl span {
+  font-weight: bold;
+  color: #4490ba;
+  cursor: pointer;
+  margin: 12px;
+
+}
+
+div.mapValuesControl span.disabled {
+  color: #b6d5e3;
+  cursor: default;
+}
+
+
 
 /*
 Blue

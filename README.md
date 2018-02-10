@@ -26,4 +26,10 @@ docker run --name ubhub -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql
 
 This container should be running when you are running the project.
 
-To setup the initial database schema, go to http://localhost:3000/databaseUpdate/update and the MySQL commands to setup the database will run.
+To setup the initial database schema, from the project's working directory, enter the node REPL terminal by typing node
+then, in the REPL type: var scripts = require('./scripts');
+press enter
+then type: scripts.update();
+press enter
+You should see a lot of logs indicating success on several different database queries.
+To exit the REPL, press ctl + c

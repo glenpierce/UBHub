@@ -1,10 +1,17 @@
 doctype html
+html(xmlns="http://www.w3.org/1999/xhtml" xmlns:fb="http://ogp.me/ns/fb#")
 html
     head
+        title UBHub
         link(rel='stylesheet', href='/stylesheets/cbiindicators.css')
         script(src='https://www.google.com/recaptcha/api.js')
+        meta(property="og:image" content="/images/UBHub_logo_horizwebsite.svg")
+        meta(property="og:description" content="Urban Biodiversity Hub (UBHub) increases the capacity of local governments to implement effective biodiversity planning, management, measurement, and collaboration.")
+        meta(property="og:title" content="Urban Biodiversity Hub")
+        meta(property="og:url" content="http://ubhub.org")
+        meta(property="og:type" content="website")
 
-body(style="font-family:helvetica; background-color:#daecf1;")
+body(style="font-family:helvetica; background-color:#d3e9d5;")
     block content
 
     script.
@@ -29,48 +36,66 @@ body(style="font-family:helvetica; background-color:#daecf1;")
           window.location = res;
         }
 
-    h1(style="text-align:center;") Welcome to the City Biodiversity Indicators Coalition
+    h1(style="text-align:center;") Welcome to the Urban Biodiversity Hub
 
-    div(style="display:flex; align-items:center; width:100%; padding-bottom:20px;")
-        img(src="/images/CBI_Coalition_logo_web_main.png" style="margin:auto; height:400px;")
+    //embed(src="https://drive.google.com/viewerng/viewer?embedded=true&url=/pdfs/A4BetaTesterHandout.pdf" width="500" height="375") //for browsers without native pdf viewing capabilities
+    //embed(src="/pdfs/A4BetaTesterHandout.pdf" width="800" height="675")
+    //embed(src="/pdfs/A5-handout-UBHub.pdf" width="800" height="675")
+
+    div(style="display:flex; justify-content:center;")
+      div
+        div(style="display:flex; align-items:center; width:100%; padding-bottom:20px;")
+            img(src="/images/UBHub_logo_bigwebsite.png" style="margin:auto; height:400px;")
+
+      div
+        div(style="display:flex; margin-left:20px; margin-right:20px;")
+            div(style="max-width:300px;") <b>About Us</b><p>The Urban Biodiversity Hub (UBHub) increases the capacity of local governments to implement effective biodiversity planning, management, measurement, and collaboration. UBHub serves two primary purposes: to be a public repository for urban biodiversity activities and resources and to aid local governments in planning and managing their approach to biodiversity conservation.<p>Find out more on our intro flyer at right.
+            a(href="/pdfs/A5-handout-UBHub.pdf" style="margin:20px;")
+                img(src="/images/handout-UBHub-thumbnail.png" height="150")
+        div(style="display:flex; margin:20px;")
+            div(style="max-width:300px;") <b>Beta Testing Programme</b><p>UBHub is seeking participants for our Beta Testing Programme who will test the myHub web tool during its early access phase. The myHub web tool supports local governments to develop, measure, and assess their biodiversity strategy.<p>Find out more on our Beta Tester handout at right.
+            a(href="/pdfs/A4BetaTesterHandout.pdf" style="margin:20px;")
+                img(src="/images/BetaHandoutThumbnail.png" height="150")
+
+  div
     div(style="text-align:center; padding-bottom:20px;") Thank you for your interest. This site is under construction.
 
-    div(style="display:flex; align-items:center; width:100%; padding-bottom:20px;")
-        div(style="display:flex; align-items:baseline; margin:auto;")
-            div Members&nbsp;
-            div(style="background-color:#4490ba; border-radius:5px; padding:5px; color: white; cursor:pointer;" onclick="window.location='/login';") &nbsp;login&nbsp;
-            div &nbsp;or&nbsp;
-            div(style="text-decoration:underline; cursor:pointer;" onclick="window.location='/createUser';") create a new user
+    //div(style="display:flex; align-items:center; width:100%; padding-bottom:20px;")
+        //div(style="display:flex; align-items:baseline; margin:auto;")
+            //div Members&nbsp;
+            //div(style="background-color:#3f836b; border-radius:5px; padding:5px; color: white; cursor:pointer;" onclick="window.location='/login';") &nbsp;login&nbsp;
+            //div &nbsp;or&nbsp;
+            //div(style="text-decoration:underline; cursor:pointer;" onclick="window.location='/createUser';") create a new user
 
     div(style="display:flex; align-items:center; width:100%; margin-bottom:20px;")
-        div(style="margin:auto; text-align:center;") If you would like more information, <br> you may contact us at <br> cbicoalition@gmail.com
+        div(style="margin:auto; text-align:center; line-height:1.5;") If you would like more information, <br> you may contact us at <br> <b>ubhub.org@gmail.com</b> <br> or sign up for notifications below.
             //<br> or register your contact information here:
 
     form(id="emailForm" name="emailForm", method="post" onsubmit="submitForm()")
         div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
             div(style="margin:auto; width:300px;")
                 div(style="display:inline-block; margin-top:4px;") First Name
-                input(name="nameFirst" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+                input(name="nameFirst" style="display:inline; float:right; border:solid; border-color:#316b59; border-radius:5px; border-width:1px; padding:4px;" type="text")
         div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
             div(style="margin:auto; width:300px;")
                 div(style="display:inline-block; margin-top:4px;") Last Name
-                input(name="nameLast" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+                input(name="nameLast" style="display:inline; float:right; border:solid; border-color:#316b59; border-radius:5px; border-width:1px; padding:4px;" type="text")
         div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
             div(style="margin:auto; width:300px;")
                 div(style="display:inline-block; margin-top:4px;") Organization
-                input(name="organization" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+                input(name="organization" style="display:inline; float:right; border:solid; border-color:#316b59; border-radius:5px; border-width:1px; padding:4px;" type="text")
         div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
             div(style="margin:auto; width:300px;")
                 div(style="display:inline-block; margin-top:4px;") Email
-                input(name="email" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+                input(name="email" style="display:inline; float:right; border:solid; border-color:#316b59; border-radius:5px; border-width:1px; padding:4px;" type="text")
         div(style="display:flex; align-items:center; width:100%; margin-bottom:20px;")
             div(style="margin:auto; width:300px;")
                 div(style="display:inline-block; margin-top:4px;") Verify Email
-                input(name="verify-email" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+                input(name="verify-email" style="display:inline; float:right; border:solid; border-color:#316b59; border-radius:5px; border-width:1px; padding:4px;" type="text")
         div(style="display:flex; align-items:center; width:100%; margin-bottom:20px;")
             div(class="g-recaptcha" data-sitekey="6LfgLSMUAAAAABRJzT1aYJTLTKHEc7zorV0nRPxm" style="margin:auto;")
         div(style="display:flex; align-items:center; width:100%;")
-            input(type="submit" value="Add to mailing list" style="background-color:#4490ba; border-radius:5px; border:none; padding:5px; color: white; cursor:pointer; margin:auto;")
+            input(type="submit" value="Add to mailing list" style="background-color:#3f836b; border-radius:5px; border:none; padding:5px; color: white; cursor:pointer; margin:auto;")
 
     script.
         function submitForm() {

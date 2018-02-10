@@ -7,10 +7,12 @@ html
             function goToDashboard() {
                 console.log("clicked");
             }
+            rows = !{JSON.stringify(rows)}
 
 
 body
     +header(true)
+    script console.log(rows);
 
     div(style="padding:40px;")
         div(style="width:100%; height: 200px; border:solid;") Program Snapshot

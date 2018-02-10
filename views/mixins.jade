@@ -18,7 +18,7 @@ mixin indicator(indicatorName, indicatorDescription, descriptionOfCalculation, i
         div(style="border:solid; align-self:center;") Add
 
 mixin site(siteName, siteDescription)
-    div(style="border:solid;")
+    div(style="border:solid;" onclick="selectSite(#{siteName})")
         div #{siteName}
         div #{siteDescription}
 
@@ -27,37 +27,38 @@ mixin header(displayLoginInfo)
     div(class="showWhenNarrow")
         div Hi, I'm the special thing that only shows up when the screen is narrow :)
     div(class="hideWhenNarrow")
-        div(style="width:100%; position:fixed; display:flex; flex-grow:1;")
-            div(style="height:112px; background:white; flex-grow:1;")
+        div(style="width:100%; position:fixed; display:flex; flex-grow:1; z-index: 2;")
+            div(style="height:100px; background:white; flex-grow:1;")
             div(style="max-width:1200px; display:flex; justify-content:space-between; height: 40px; width:100%; flex-grow:5;")
                 div
-                    div(style="position:fixed; width:100%; max-width:1200px; height:35px; background-color:#acd9bb; z-index:-1; top:0px;")
+                    div(style="position:fixed; width:100%; max-width:1200px; height:35px; background-color:#b8ddc3; z-index:-1; top:0px;")
                     div(style="position:fixed; width:100%; max-width:1200px; height:35px; background-color:#eff6e8; z-index:-1; top:35px;")
                     div(style="position:fixed; width:100%; max-width:1200px; height:5px; background:white; z-index:-1; top: 70px;")
-                    img(src="/images/CBI_logo_outlined.svg" style="height:120px; margin-bottom:10px;")
+                    img(src="/images/UBHub_logo_mainwebsite.svg" style="height:100px; margin-bottom:10px;")
                 div(style="width:100%;")
                     div
                         div(style="display:flex; justify-content:space-between;")
                             -if(displayLoginInfo){
-                                div(style="display:flex; justify-content:space-around; flex-grow:1;")
-                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/dashboard'") myCBI
-                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/indicators'") Indicators
-                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/forum'") Forum
-                                    div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Account
-                                div(style="padding:5px;")
-                                    div(style="background-color:#269973; color:white; padding:5px 10px 5px 10px; border-radius:20px; font-weight:700;") #{username} User Name
+                                div(style="padding:0px 100px 0px 50px; display:flex; justify-content:space-around; flex-grow:1;")
+                                    div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/dashboard'") myHub
+                                    div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/indicators'") Indicators
+                                    div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/forum'") Forum
+                                    div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;") Account
+                                div(style="padding:4px 5px 2px 2px;")
+                                    div(style="background-color:#d3e9d5; color:#316b59; padding:5px 30px 5px 30px; border-radius:20px; font-weight:700;") #{username} User Name
                                 //div(style="text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
                             -}else{
                                 div(style="color:#fab279; font-weight:700;") Signup / Log in
                             -}
                     div(style="display:flex; justify-content:space-between;")
                         div(style="display:flex; justify-content:space-around; flex-grow:1;")
-                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/home'") Home
-                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Database
-                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Resources
-                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") FAQs
-                            div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;" onclick="window.location='/aboutUs'") About Us
-                        div(style="padding:10px; cursor:pointer; color:#269973; font-weight:700;") Search
+                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/home'") Home
+                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/map'") mapHub
+                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/resources'") guideHub
+                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/aboutUs'") About US
+                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;") Get Involved
+                        div(style="padding:2px 5px 2px 2px;")
+                            div(style="background-color:#d3e9d5; cursor:pointer; color:#316b59; padding:5px 45px 5px 45px; border-radius:20px; font-weight:700;") Search
             div(style="height:75px; background:white; flex-grow:1;")
 
         div(style="width:100%; height:80px;")
@@ -172,11 +173,11 @@ mixin forumPager(posts)
 mixin footer()
     div(style="margin:auto; max-width:1200px; display:flex; justify-content:space-between; padding-top:10px;")
         div
-            img(src="/images/CBI Coalition logo.png" style="height:100px; margin-bottom:10px;")
-        div(style="width:200px;" class="smallText") The City Biodiversity Indicators (CBI) Coalition helps cities around the world to choose a biodiversity strategy, then measure and improve their Biodiversity Strategy and Action Plans (BSAPs).
+            img(src="/images/UBHub_logo_horizwebsite.svg" style="height:60px; margin-bottom:10px;")
+        div(style="width:200px;" class="smallText") The Urban Biodiversity Hub (UBHub) helps cities around the world to choose a biodiversity strategy, then measure and improve their Biodiversity Strategy and Action Plans (BSAPs).
         div
-            div(class="smallText") About CBI
-            div(class="smallText") CBI Toolkit
+            div(class="smallText") About
+            div(class="smallText") Toolkit
             div(class="smallText") Resources
             div(class="smallText") About Us
             div(class="smallText") Pricing / Fees
@@ -184,8 +185,8 @@ mixin footer()
             div(class="smallText") Sitemap
         div
             div(class="smallText") Contact us
-            div(class="smallText") info@cbicoalition.org
-            a(class="twitter-follow-button" href="https://twitter.com/cbicoalition") Follow @cbicoalition
+            div(class="smallText") ubhub.org@gmail.com
+            a(class="twitter-follow-button" href="https://twitter.com/ubhub_org") Follow @ubhub_org
         div
             div(class="smallText") copyright info
 
