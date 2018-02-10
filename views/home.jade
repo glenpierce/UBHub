@@ -43,8 +43,8 @@ body
             div(style="margin:auto; display:flex; align-items:center; flex-direction:column; margin-top:20px;")
                 div(style="display:flex; padding-right:80px;")
                     div(style="color:#326f90; font-weight:700;") Example locations:
-                    div(onclick="document.getElementById('key').style.display='flex';" style="cursor:pointer;") Show key
-                div(id="key" style="display:none; border:solid; border-radius:5px; width:200px; flex-direction:column; padding:10px;")
+                    div(onclick="document.getElementById('key').style.display='flex';" style="color:#326f90; font-weight:700; cursor:pointer; position:absolute; right:10px;") Show key
+                div(id="key" style="display:none; border:solid; border-radius:5px; background-color:white; width:200px; flex-direction:column; padding:10px; position:absolute; top: 710px; right: 0px;" onclick="document.getElementById('key').style.display='none';")
                     div Key:
                     div(class="keyFlexbox")
                         div(class="keyFlexboxLine")
@@ -136,8 +136,8 @@ body
 
     div(style="position:relative;")
         div(id="map" style="height:550px; width:100%; max-width:1600px; margin:auto; z-index:-1;")
-        div(style="background:white; border-radius:10px; color:#4490ba; text-align:center; width: 140px; position: absolute; top: 50%; left: 50%; font-size:20px; padding:20px; z-index:-1;") Go to<br>Interactive<br>Map
-        div(style="width:140px; height:60px; position: absolute; top: 50%; left: 50%; padding:20px; z-index:1; cursor:pointer;" onclick="window.location='/map'")
+        div(style="position: absolute; top: 50%; left: 50%;")
+            div(style="position: relative; margin-top: -25%; left: -50%; background:white; border-radius:10px; color:#4490ba; text-align:center; width: 140px; font-size:20px; padding:20px; z-index:1; cursor:pointer;" onclick="window.location='/map'") Go to<br>Interactive<br>Map
 
     div(style="width=100%; background:#4490ba; color:white; text-align:center; padding:10px; font-size:30px;") myHub Members' Page
 
@@ -153,7 +153,7 @@ body
             img(src="/images/sampleIndicatorsPage.PNG")
 
     div(style="display:flex; margin:auto; justify-content:space-around; align-items:center; margin:10px;")
-        div(class="largeBlueText" style="max-width:400px; text-align:center;font-size:20px;") myHub <b>Forum</b><br> Get answers to your urban biodiversity questions from experts and discuss common challenges with fellow practitioners on our forum.
+        div(class="largeBlueText" style="max-width:400px; text-align:center;font-size:20px; padding: 20px 0px 20px 25%;") myHub <b>Forum</b><br> Get answers to your urban biodiversity questions from experts and discuss common challenges with fellow practitioners on our forum.
         div(style="border-radius:10px; background-color:#fab279; color:white; text-align:center; width:80px; padding:10px; display:flex; align-items:center;") Learn more about membership
 
     div(style="background:url('/images/blue_overlook_nightcity_horiz.png') darkblue; display:flex; background-size: cover;")
