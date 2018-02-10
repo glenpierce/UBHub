@@ -19,8 +19,29 @@ function filter(value, filterBy, type){
 
   if(type == "select"){
     filterValues(value, filterBy);
-  } else if (type == "range"){
-    filterRange(value, filterBy);
+  } else if (type == "range") {
+      filterRange(value, filterBy);
+  } else if (type == "nullable") {
+        switch (value) {
+            case "Biodiversity Website":
+                nullableValue = "biodiversity_url";
+                break;
+            case "Biodiversity in a Comprehensive Plan":
+                nullableValue = "intplan_title";
+                break;
+            case "Biodiversity Plan":
+                nullableValue = "plan1_title";
+                break;
+            case "Biodiversity Report":
+                nullableValue = "report_title";
+                break;
+            case "Local Action for Biodiversity":
+                nullableValue = "LAB_joined";
+                break;
+            default:
+                return;
+        }
+        filterNotNull(nullableValue);
   } else {
     console.log("Unexpected filter type: " + type);
   }
@@ -105,10 +126,8 @@ function closeAllPanels(){
 
   function filterNotNull(filterBy) {
       markers.forEach(function (marker) {
-          if(marker.element[filterBy] != null){
-              marker.setIcon(orangeImage);
-          } else {
-              marker.setIcon(greyImage);
+          if(marker.element[filterBy] == null){
+              marker.setVisible(false);
           }
       });
   };

@@ -519,12 +519,12 @@ div.thirds>div {
   border: 1px solid #bb6d37;
   background-color: #fff;
   padding: 16px 24px;
-  font-size: 20px;
+  font-size: 16px;
   height: 72px;
   text-align: center;
   margin: 8px;
   cursor: pointer;
-  align-content: middle;
+  align-content: center;
   position: relative;
   display: flex;
   justify-content: center; /* align horizontal */

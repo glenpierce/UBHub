@@ -160,7 +160,7 @@ var mapActivities = [
         id: "biodiversityWebsite"
     },
     {
-        name: "Biodiversity Mainstreaming",
+        name: "Biodiversity in a Comprehensive Plan",
         id: "biodiversityMainstreaming"
     },
     {
@@ -198,7 +198,7 @@ var mapFilterParameters = [
     name: "Biodiversity Activity",
     id: "activity",
     options: [mapActivities[0].name, mapActivities[1].name, mapActivities[2].name, mapActivities[3].name],
-    type: "select"
+    type: "nullable"
   },
   {
     name: "Land Area (km\u00B2)",
@@ -216,7 +216,7 @@ var mapFilterParameters = [
     name: "Program or Index",
     id: "programIndex",
     options: [mapIndices[0].name],
-    type: "select"
+    type: "nullable"
   }];
 
 module.exports = router;
