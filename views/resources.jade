@@ -255,16 +255,14 @@ body
   div <br> <br>
 
 div(style="width:100%;")
-  table(style="width:800px; margin:auto;")
-    tr(width="100%")
-      td(width="33%") row 1 column 1
-      td(width="33%")
-      td(width="33%")
-    tr(width="100%")
-      td(width="33%")
-      td(width="33%") dead center
-      td(width="33%")
-    tr(width="100%")
-      td(width="33%")
-      td(width="33%")
-      td(width="33%") last row last colmn
+    div(style="width:800px; margin:auto;")
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1;") cell
+            div(style="flex-grow:1;") cell
+            div(style="flex-grow:1;") cell
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; background-color:black; color:white; font-weight:bold; padding:5px;") really big row that is the whole thing really big row that is the whole thingreally big row that is the whole thingreally big row that is the whole thingreally big row that is the whole thing
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1;") cell
+            div(style="flex-grow:1;") cell
+            div(style="flex-grow:1;") cell
