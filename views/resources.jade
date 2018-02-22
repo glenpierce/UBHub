@@ -16,19 +16,33 @@ html
            tab.classList.remove("active");
          }
        }
+       function scrollToComparison(id){
+         console.log("log");
+         element=document.getElementById(id);
+         element.scrollIntoView();
+         window.scrollBy(0,-80);
+       }
 
 body
  +header(true)
  div
-     div(style="width=100%; text-align:center; background:url('/images/blue_overlook_nightcity_horiz.png') darkblue; background-size: cover; height:180px; display:flex; justify-content:center;")
+     div(style="width=100%; text-align:center; background:url('/images/blue_overlook_nightcity_horiz.png') darkblue; background-size: cover; height:270px; display:flex; justify-content:center;")
          div(style="padding-left:20px; padding-right:20px; max-width:900px;")
              div(style="color:white; font-weight:700; font-size:20px; margin-top:50px;") guideHub
              div(style="background:white; height:1px; width:50%; margin:auto; margin-top:10px; margin-bottom:10px;")
-             div(style="color:white; padding-right:100px; padding-left:100px; padding-bottom:20px;") This guideHub section lists over 100 helpful urban biodiversity resources by type, and includes comparative description of various biodiversity measurement and planning frameworks.
-   div(style="width:100%; display: flex; justify-content: center;")
+             div(style="color:white; padding-right:100px; padding-left:100px; padding-bottom:5px;") Choose from below the two sections of guideHub: categorized resource lists over 100 helpful urban biodiversity resources, or comparisons of common biodiversity measurement and planning frameworks and indices.
+             div(style="display:flex; justify-content:space-around;")
+                 div
+                     div(style="display:flex; padding-left:20%;")
+                               div(class="homePageWhiteBoxWide") List of Resources
+                 div
+                     div(style="display:flex; padding-right:20%;")
+                         div(class="homePageWhiteBoxWide" onclick="scrollToComparison('comparisonButton')") Comparison of Frameworks and Indices
+   div(style="width:100%; display: flex; justify-content: center;") 
     div(style="display:flex; width:800px; flex-direction:column;")
-      div
-        +mapInfoTab("17 Public Engagement Resources", "infant1", "#bb6d37", false)
+      div <br>
+        div(style="font-size:18px; text-align:center; color:#07456b; width:100%; font-weight:bold;") List of Resources
+        +mapInfoTab("18 Public Engagement Resources", "infant1", "#07456b", false)
         div(id="infant1" class="mapInfoContent hide") 
           <br> <b> Visuals and Handouts </b>
           a(href="https://www.outdoorcardiff.com/wp-content/uploads/Variety-of-Life-on-earth-poster.pdf" target="_blank") <br> https://www.outdoorcardiff.com/wp-content/uploads/Variety-of-Life-on-earth-poster.pdf 
@@ -50,6 +64,9 @@ body
           div Lesson plans for discovering biodiversity around the home for middle school students in the USA.
           a(href="http://yourwildlife.org/" target="_blank") <br> Your Wild Life
           div Citizen science on the biodiversity of microbes in the home and surrounding areas in the USA.
+          <br> <b> Infographics </b>
+          a(href="http://icleicanada.org/resources/item/17-infographic-collection" target="_blank") <br> Biodiversity: Conservation Starts at the Local Level <br> Green Machines: Case Studies of Cities Full of Life 
+          div Infographics by ICLEI Canada
           <br> <b> Lost & Found </b>  
           a(href="http://www.lostandfoundnature.com/about-l-f.html" target="_blank") <br> http://www.lostandfoundnature.com/about-l-f.html
           div Inspiring and true stories about saving species (in English, Spanish, French, Chinese and Portuguese).
@@ -67,12 +84,12 @@ body
           a(href="http://www.surrey.ca/files/CommentSheetforJune242010OpenHouse.pdf" target="_blank") <br> Feedback Response Form
           div Environmental Management Strategy feedback forms as used in Surrey, Canada.
       div
-        +mapInfoTab("6 Regulations and Policy Resources", "infant2", "#f69056", false)
+        +mapInfoTab("6 Regulations and Policy Resources", "infant2", "#0d6082", false)
         div(id="infant2" class="mapInfoContent hide")
           <br> <b> Biodiversity Offsets </b>  
           a(href="https://www.westerncape.gov.za/text/2007/3/pgwcoffsetsguidelinedraft_5march_07.pdf" target="_blank") <br> Provincial Guideline on Biodiversity Offsets in South Africa
           div
-          <br> <b> Transferable Development Rights </b>  
+          <br> <b> Transferrable Development Rights </b>  
           a(href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.884.1398&rep=rep1&type=pdf" target="_blank") <br> Transferrable Development Rights and Forest Protection: an exploratory analysis by Chomitz 2004.
           a(href="http://www.forest-trends.org/documents/files/doc_655.pdf" target="_blank") <br> The Theory and Practice of Transferring Development Rights:The Institutions for Contracting for Biodiversity by Swanson 1995.
           <br> <br> <b> Urban Ecology Policy Proposals </b>  
@@ -85,7 +102,7 @@ body
           a(href="http://greenmap.org.il/content?lang=en&pageid=50" target="_blank") <br> http://greenmap.org.il/content?lang=en&pageid=50
           div Jerusalem has completed the first citywide Urban Nature Infrastructure Survey that covers public and private land and identifies habitat for special designation I nthe land use zoning (policy in Hebrew).
       div
-        +mapInfoTab("23 Data Repositories", "infant3", "#fab279", false)
+        +mapInfoTab("23 Data Repositories", "infant3", "#326f90", false)
         div(id="infant3" class="mapInfoContent hide") 
           <br> <b> Atlas of Living Australia </b>  
           a(href="http://www.ala.org.au/" target="_blank") <br> http://www.ala.org.au/
@@ -154,10 +171,44 @@ body
           a(href="http://sauvagesdemarue.mnhn.fr/" target="_blank") <br> http://sauvagesdemarue.mnhn.fr/
           div Information on bird species in gardens in the cities of Spain (in Spanish).
       div
-        +mapInfoTab("11 Networking and Partnership Programs", "infant4", "#4e9d7d", false)
-        div(id="infant4" class="mapInfoContent hide") pending
+        +mapInfoTab("11 Networking and Partnership Programs", "infant4", "#3c7fa4", false)
+        div(id="infant4" class="mapInfoContent hide")
+          <br> <b> Biophilic Cities Network</b> 
+          a(href="http://biophiliccities.org/" target="_blank") <br> http://biophiliccities.org/
+          div See more in the comparison of frameworks and indices below.
+          <br> <b> CEEWeb</b> 
+          a(href="http://www.ceeweb.org/" target="_blank") <br> http://www.ceeweb.org/
+          div
+          <br> <b> CoalitionWILD</b> 
+          a(href="https://coalitionwild.org/#page_id=block1" target="_blank") <br> https://coalitionwild.org/#page_id=block1
+          div
+          <br> <b> ICLEI LAB: Wetlands SA Programme</b> 
+          a(href="http://cbc.iclei.org/project/lab-wetlands-sa/" target="_blank") <br> http://cbc.iclei.org/project/lab-wetlands-sa/
+          a(href="http://cbc.iclei.org/wp-content/uploads/2017/02/WSAP-Guidelines.docx" target="_blank") <br> Wetland Strategy & Action Plan (WSAP) Guidelines
+          <br> <b> INTERACT-Bio</b> 
+          a(href="http://cbc.iclei.org/project/interact-bio/" target="_blank") <br> http://cbc.iclei.org/project/interact-bio/
+          div ICLEI program supporting nine pilot cities implement biodiversity strategies in Brazil, India, and Tanzania.
+          <br> <b> LAB Pioneer Programme</b> 
+          a(href="http://cbc.iclei.org/programmes/lab/" target="_blank") <br> http://cbc.iclei.org/programmes/lab/
+          div See more in the comparison of frameworks and indices below.
+          <br> <b> Man and the Biosphere (MAB) Programme</b> 
+          a(href="http://www.unesco.org/new/en/natural-sciences/environment/ecological-sciences/man-and-biosphere-programme/" target="_blank") <br> http://www.unesco.org/new/en/natural-sciences/environment/ecological-sciences/man-and-biosphere-programme/
+          div by UNESCO
+          <br> <b> Urban Bird Treaty</b> 
+          a(href="https://www.fws.gov/birds/grants/urban-bird-treaty.php" target="_blank") <br> https://www.fws.gov/birds/grants/urban-bird-treaty.php
+          div A program by the U.S. Fish & Wildlife Service that brings together city partners to conserve migratory birds through habitat conservation, hazard reductions, citizen science, and outreach and education in urban and suburban areas.
+          <br> <b> Urban Protected Areas</b> 
+          a(href="http://www.iucn-urban.org/" target="_blank") <br>http://www.iucn-urban.org/
+          a(href="https://portals.iucn.org/library/sites/library/files/documents/PAG-022.pdf" target="_blank") <br> Urban Protected Areas - Profiles and best practice guidelines
+          a(href="https://portals.iucn.org/library/sites/library/files/documents/PAPS-015.pdf" target="_blank") <br> The Urban Imperative: Urban Outreach Strategies for Protected Area Agencies
+          <br> <br> <b> Urban Protected Areas Network</b> 
+          a(href="http://www.upa-network.org/" target="_blank") <br> http://www.upa-network.org/
+          div by the Libertas Institute in Paris.
+          <br> <b> WILD Cities</b> 
+          a(href="http://wildcities.org/" target="_blank") <br> http://wildcities.org/
+          div by the WILD Foundation in the USA.
       div
-        +mapInfoTab("7 Blogs", "infant5", "#5ebd93", false)
+        +mapInfoTab("8 Blogs", "infant5", "#4490ba", false)
         div(id="infant5" class="mapInfoContent hide")
           <br> <b> Humans and Nature </b> 
           a(href="http://www.humansandnature.org/" target="_blank") <br> http://www.humansandnature.org/
@@ -180,8 +231,11 @@ body
           <br> <b> Urban Beasts </b> 
           a(href="http://www.ozy.com/topic/urban-beasts" target="_blank") <br> http://www.ozy.com/topic/urban-beasts
           div by Nick Dall at OZY
+          <br> <b> Your Wild Life </b> 
+          a(href="http://yourwildlife.org/blog/" target="_blank") <br> http://yourwildlife.org/blog/
+          div Weekly blog on citizen science and other discoveries from the Rob Dunn Lab at North Carolina State University.
       div
-        +mapInfoTab("15 Conferences", "infant6", "#9bd2b2", false)
+        +mapInfoTab("15 Conferences", "infant6", "#3c7fa4", false)
         div(id="infant6" class="mapInfoContent hide") 
           <br> <b> Cities Alive </b> 
           a(href="https://citiesalive.org/" target="_blank") <br> https://citiesalive.org/
@@ -229,10 +283,52 @@ body
           a(href="http://www.urbio2018.co.za/" target="_blank") <br> http://www.urbio2018.co.za/
           div 2018 theme is Urban Biodiversity and Food Security. Held in Cape Town 11-14 September 2018.
       div
-        +mapInfoTab("12 Measurement Tools and Models", "infant7", "#4490ba", false)
-        div(id="infant7" class="mapInfoContent hide") pending
+        +mapInfoTab("14 Measurement Tools and Models", "infant7", "#326f90", false)
+        div(id="infant7" class="mapInfoContent hide") 
+          <br> <b> Building for Birds</b>
+          a(href="http://wec.ifas.ufl.edu/buildingforbirds/web/home.html" target="_blank") <br> http://wec.ifas.ufl.edu/buildingforbirds/web/home.html
+          div Online tool calculates your forested habitat for birds within a given development area.
+          <br> <b> Capitales Françaises de la Biodiversité</b>
+          a(href="http://www.capitale-biodiversite.fr/" target="_blank") <br> http://www.capitale-biodiversite.fr/
+          div Annual reporting and award system on biodiversity for French cities (in French).
+          <br> <b> Circles of Sustainability</b>
+          a(href="http://www.circlesofsustainability.org/about/" target="_blank") <br> http://www.circlesofsustainability.org/about/
+          div by the  Institute for Culture and Society at Western Sydney University
+          <br> <b> EKLIPSE</b>
+          a(href="http://www.eklipse-mechanism.eu/apps/Eklipse_data/website/EKLIPSE_Report1-NBS_FINAL_Complete-08022017_LowRes_4Web.pdf" target="_blank") <br> http://www.eklipse-mechanism.eu/apps/Eklipse_data/website/EKLIPSE_Report1-NBS_FINAL_Complete-08022017_LowRes_4Web.pdf
+          div An impact evaluation framework to support planning and evaluation of nature-based solutions projects
+          <br> <b> GLOBIO</b>
+          a(href="http://www.globio.info/" target="_blank") <br> http://www.globio.info/
+          div Tool that models human impact on biodiversity.
+          <br> <b> GRaBS (Green and Blue Space Adaptation for Urban Areas and Eco Towns) project</b>
+          a(href="http://ec.europa.eu/environment/nature/ecosystems/docs/6_DS_GI_191110.pdf" target="_blank") <br> About GRaBS
+          div
+          <br> <b> Indicateurs Biodiversite Collectivites</b>
+          a(href="http://www.observatoire-biodiversite-paca.org/environnement/biodiversite/indicateurs-de-biodiversite-pour-les-collectivites~206.html" target="_blank") <br> http://www.observatoire-biodiversite-paca.org/environnement/biodiversite/indicateurs-de-biodiversite-pour-les-collectivites~206.html
+          div See more in the comparison of frameworks and indices below.
+          <br> <b> Japanese City Biodiversity Index (JCBI)</b>
+          a(href="http://www.mlit.go.jp/toshi/park/toshi_parkgreen_tk_000022.html" target="_blank") <br> http://www.mlit.go.jp/toshi/park/toshi_parkgreen_tk_000022.html
+          div See more in the comparison of frameworks and indices below.
+          <br> <b> Mayor's Monarch Pledge</b>
+          a(href="http://www.nwf.org/Garden-For-Wildlife/About/National-Initiatives/Mayors-Monarch-Pledge.aspx" target="_blank") <br> http://www.nwf.org/Garden-For-Wildlife/About/National-Initiatives/Mayors-Monarch-Pledge.aspx
+          div North American (Mexico, Canada, and USA)
+          <br> <b> One Planet Living</b>
+          a(href="http://www.bioregional.com/oneplanetliving/" target="_blank") <br> http://www.bioregional.com/oneplanetliving/
+          div
+          <br> <b> Singapore Index</b>
+          a(href="https://www.nparks.gov.sg/biodiversity/urban-biodiversity/the-singapore-index-on-cities-biodiversity" target="_blank") <br> https://www.nparks.gov.sg/biodiversity/urban-biodiversity/the-singapore-index-on-cities-biodiversity
+          div See more in the comparison of frameworks and indices below.
+          <br> <b> State of Environment Reporting: Guidelines for Municipalities</b>
+          a(href="http://soer.deat.gov.za/dm_documents/DEAT_SoE_Guidelines_DMMb3_ptOmu.pdf" target="_blank") <br> http://soer.deat.gov.za/dm_documents/DEAT_SoE_Guidelines_DMMb3_ptOmu.pdf
+          div for South African local governments.
+          <br> <b> Step-by-Step Methodology to Reduce Biodiversity Losses</b>
+          a(href="http://ec.europa.eu/environment/integration/research/newsalert/pdf/60na4_en.pdf" target="_blank") <br> http://ec.europa.eu/environment/integration/research/newsalert/pdf/60na4_en.pdf
+          div Proposes a socioeconomic pressure analysis to address the underlying causes of biodiversity loss.
+          <br> <b> Urban Sustainability Framework by the World Bank</b>
+          a(href="http://documents.worldbank.org/curated/en/339851517836894370/Urban-Sustainability-Framework-USF-first-edition" target="_blank") <br> http://documents.worldbank.org/curated/en/339851517836894370/Urban-Sustainability-Framework-USF-first-edition
+          div Features a guideline on preparing a sustainability plan and a measurement framework with indicators in four categories:  (1) urban economies, (2) natural environment and resources, (3) climate action and resilience, and (4) inclusivity and quality of life.
       div
-        +mapInfoTab("6 Research Institutes", "infant8", "#6da4c7", false)
+        +mapInfoTab("6 Research Institutes", "infant8", "#0d6082", false)
         div(id="infant8" class="mapInfoContent hide")
           <br> <b> Designing green spaces for biodiversity and human wellbeing </b> 
           a(href="https://urbangreenspace.info/" target="_blank") <br> https://urbangreenspace.info/
@@ -252,17 +348,201 @@ body
           <br> <b> University of Copenhagen </b> 
           a(href="http://greensurge.eu/" target="_blank") <br> Green Surge Handbook
           div Policy briefs, fact sheets and recommendations for practitioners on how urban green infrastructure contributes to sustainability by the University of Copenhagen
-  div <br> <br>
+      div
+        +mapInfoTab("14 Guidelines and Toolkits", "infant9", "#07456b", false)
+        div(id="infant9" class="mapInfoContent hide")  
+          <p> <b> Guidelines for Urban Biodiversity in General </b> 
+          a(href="http://www.icleicanada.org/component/k2/item/221-biodivercities-a-handbook-for-municipal-biodiversity-planning-and-management" target="_blank") <br>BiodiverCities Methodology</a> by ICLEI Canada.
+          a(href="https://www.amnh.org/our-research/center-for-biodiversity-conservation/resources-and-publications/biodiversity-guides-and-handbooks/biodiversity-assessment-handbook-for-new-york-city" target="_blank") <br> Biodiversity Assessment Handbook for New York City</a> by the American Museum of Natural History
+          a(href="http://www.sustainablesites.org/" target="_blank") <br> Sustainable Sites Initiative:</a> Sustainable certification system for landscapes in the USA.
+          a(href="http://www.teebweb.org/publication/teeb-for-local-and-regional-policy-makers-2/" target="_blank") <br> The Economics of Ecosystems and Biodiversity (TEEB) for Local and Regional Policy
+          <br> See more in the comparison of frameworks and indices below.
+          <p> <b> Guidelines for Specific Aspects of Urban Biodiversity</b> 
 
-div(style="width:100%;")
+img(style="width:250px; position:absolute; z-index:-1; right:0;" src="/images/Possum2.svg" id="comparisonButton")
+div(style="height:153px")
+div(style="width:100%; color:#07456b;")
     div(style="width:800px; margin:auto;")
+        div(style="font-size:18px; text-align:center; padding-bottom:10px; width:100%; font-weight:bold;") Comparison of Frameworks and Indices
         div(style="display:flex; width:100%; ")
-            div(style="flex-grow:1;") cell
-            div(style="flex-grow:1;") cell
-            div(style="flex-grow:1;") cell
+            div(style="flex-grow:1; background-color:#07456b; color:#b6d5e3; font-weight:bold; padding:10px;") <a style="color:white; text-decoration:underline;" href="http://archive.iclei.org/index.php?id=6238" target="_blank;"> The Local Action for Biodiversity (LAB) Pioneer Programme</a> is a five-step programme for local governments run by the ICLEI Cities Biodiversity Center.  The LAB programme requires participants to prepare and politically commit to a biodiversity report and strategy and to implement three local biodiversity projects.  UBHub supports ICLEI’s Programme on our site by including its five steps on myHUB for self-reporting purposes whether or not a city is officially a part of ICLEI’s program.  ICLEI offers LAB Pioneers additional capacity-building support and networking in return for a fee as part of the Programme.
         div(style="display:flex; width:100%; ")
-            div(style="flex-grow:1; background-color:black; color:white; font-weight:bold; padding:5px;") really big row that is the whole thing really big row that is the whole thingreally big row that is the whole thingreally big row that is the whole thingreally big row that is the whole thing
+            div(style="flex-grow:1; width:40%; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") 5 Steps:
+              div(style="padding-bottom:5px;") 1. Create and publish a biodiversity report.
+              div(style="padding-bottom:5px;") 2. Sign the Durban Commitment
+              div(style="padding-bottom:5px;") 3. Publish an LBSAP: Specify the overall strategy and related actions to fulfill the city's biodiversity goals and align with the national biodiversity plan.
+              div(style="padding-bottom:5px;") 4. Commit politically to the LBSAP
+              div(style="padding-bottom:5px;") 5. Implement three biodiversity projects: projects are broadly defined and can be new or pre-existing policies or on-the-ground actions.
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left:5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Participation Requirements:
+              div(style="padding-bottom:5px;") Program is no longer active. Voluntary participation and basic tools are free, but one-time membership fees are assessed to be part of the program.  Intended as a one-time stepwise program.
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left;5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Pros:
+              div(style="padding-bottom:10px;") Participants and their plans are featured on ICLEI‘s website. Capacity-building support (webinars, etc.) provided by ICLEI.  
+              div(style="padding-bottom:5px; font-weight:bold;") Cons:
+              div(style="padding-bottom:5px;") No differentiation between cities at the various stages of completion.
+        <br>
         div(style="display:flex; width:100%; ")
-            div(style="flex-grow:1;") cell
-            div(style="flex-grow:1;") cell
-            div(style="flex-grow:1;") cell
+            div(style="flex-grow:1; background-color:#07456b; color:#b6d5e3; font-weight:bold; padding:10px;") <a style="color:white; text-decoration:underline;" href="http://www.mlit.go.jp/common/001152339.pdf" target="_blank;"> The Japanese City Biodiversity Index (JCBI)</a> was published by the Japanese Ministry of Land, Infrastructure, Transport and Tourism. JCBI is a tool for local public authorities to realise and objectively evaluate their cities’ biodiversity, to facilitate better schemes and policy making regarding biodiversity. Applying the JCBI is a simple process of calculating 7 biodiversity indicators, requiring self-reviews and providing data online for all local public authorities. <br> <a style="color:white; text-decoration:underline;" href="http://www.mlit.go.jp/common/001152339.pdf" target="_blank;">「都市における生物多様性指標」</a> は、地方公共団体が都市の生物多様性の状況及びその確保に向けた取り組みの状況を客観的に把握・評価し、今後の施策や取組・普及の促進に活かせるよう、国土交通省が公表した生物多様性指標である。地方公共団体によって調査の実施状況や精度、データの収集・分析・評価が困難であることを踏まえ、2016年に簡易版が査定され、全国の地方公共団体が容易に入手できるデータ及びアンケートによる自己評価によって全7項目の指標値の算出ができるようになった。 
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; width:40%; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Steps:
+              div(style="padding-bottom:5px;") 1. Access the JCBI pdf file that is available from Ministry of Land, Infrastructure, Transport and Tourism. 国土交通省のウェブサイトからJCBIのPDFファイルを入手
+              div(style="padding-bottom:5px;") 2. Follow the guideline and calculate each indicator (for indicators 1, 3 and 5, data is available from digital national land information.) PDFのガイドラインに沿って各指標を計算(指標1,3,5で使用するデータは 国土数値情報ダウンロードサービス にて入手可能)
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left:5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Participation Requirements:
+              div(style="padding-bottom:5px;") Tools freely available in Japanese and all required data would be easily  accessible.「都市における生物多様性指標」は、地方公共団体が都市の生物多様性の状況及びその確保に向けた取り組
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left;5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Pros:
+              div(style="padding-bottom:10px;") Easy to access and to evaluate. 容易に評価ができる  
+              div(style="padding-bottom:5px; font-weight:bold;") Cons:
+              div(style="padding-bottom:5px;") No monitoring by MLITT. Indicators might be too simple to evaluate accurately. 国土交通省によるモニタリングは無し 指標の簡易化による評価の正確性の欠如が懸念される
+        <br>
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; background-color:#07456b; color:#b6d5e3; font-weight:bold; padding:10px;") <a style="color:white; text-decoration:underline;" href="http://biophiliccities.org/" target="_blank;"> The Biophilic Cities Network</a> aims to increase the connection between humans and nature in urban environments.  They connect citizens and policy makers so they can share goals and best practices to bring nature explicitly into the planning and design of cities. To participate, a city must prepare a narrative statement describing their existing initiatives and future aspirations related to bringing nature into the city.  Cities set their own indicators and benchmarks.  The network publishes a monthly newsletter, hosts a bi-annual conference, and produces webinars throughout the year.  They are also active on social media. 
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; width:40%; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") 4 Steps:
+              div(style="padding-bottom:5px;") 1. Adopt a resolution to participate in the network which is approved by the local government.
+              div(style="padding-bottom:5px;") 2. Submit a narrative statement of current and planned activities.
+              div(style="padding-bottom:5px;") 3. Select and commit to monitoring 5 indicators, such as: <br> a. Natural infrastructure (canopy coverage, park access, green roofs, native habitat areas, new projects) <br> b. Public engagement (park visitation, resident knowledge, outdoor clubs) <br> c. Governance (budget allocation, planning documents, policies, public curricula, global assistance contributions)
+              div(style="padding-bottom:5px;") 4. Participate in network activities and designate an official coordinator/contact person.
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left:5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Participation Requirements:
+              div(style="padding-bottom:5px;") Tools are to be provided freely online.  One-time membership fees of $250 USD are assessed.
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left;5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Pros:
+              div(style="padding-bottom:10px;") Partner Cities are featured on the Biophilic Cities webpage, with status up for review every 2 years. Shares best practices throughout the network.  Includes webinars and newsletter.  
+              div(style="padding-bottom:5px; font-weight:bold;") Cons:
+              div(style="padding-bottom:5px;") Newer system just launched in 2013.
+        <br>
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; background-color:#07456b; color:#b6d5e3; font-weight:bold; padding:10px;") <a style="color:white; text-decoration:underline;" href="https://www.nparks.gov.sg/~/media/nparks-real-content/biodiversity/singapore-index/users-manual-on-the-singapore-index-on-cities-biodiversity.pdf?la=en" target="_blank;"> The Singapore Index</a> allows cities to assess and monitor the progress of their biodiversity conservation efforts against their own benchmarks. Its 23 indicators measure native biodiversity in the city, ecosystem services, and governance and management of biodiversity. Each indicator is assigned a score. Participating cities are required to conduct a baseline scoring when they begin using the Singapore Index. After that, cities are asked to conduct further scorings every three years.  
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; width:40%; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Sections:
+              div(style="padding-bottom:5px;") 1. City Profile section specifies contextual elements of the city’s economic, demographic, geographic, and political conditions.
+              div(style="padding-bottom:5px;") 2. Native Biodiversity includes indicators for species assessments, natural areas, invasive assessments.
+              div(style="padding-bottom:5px;") 3. Ecosystem Services includes indicators for water cycle regulation, climate regulation, educational and recreational opportunities.
+              div(style="padding-bottom:5px;") 4. Governance and management includes indicators for budget allocation, projects, plans, interdepartmental cooperation, public participation, education programs, and outreach.
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left:5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Participation Requirements:
+              div(style="padding-bottom:5px;") Tools and participation are free but also not supported or monitored. <br> <br>Intended as a quantifiable system to allow cities to compare against their own progress. 23 indicators are each worth up to 4 points and can be summed to provide a single numerical score.
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left;5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Pros:
+              div(style="padding-bottom:10px;") Provides a numerical result that can be used for target-setting, but not for comparison across cities.  
+              div(style="padding-bottom:5px; font-weight:bold;") Cons:
+              div(style="padding-bottom:5px;") Best suited for cities with existing data. Questions for application can be submitted to Singapore, but there is no longer any dedicated program supporting the index specifically.
+        <br>
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; background-color:#07456b; color:#b6d5e3; font-weight:bold; padding:10px;") <a style="color:white; text-decoration:underline;" href="https://www.footprintnetwork.org/our-work/ecological-footprint/" target="_blank;"> The Ecological Footprint</a> is an ecological accounting method that indicates the amount of terrestrial and aquatic areas impacted by all activities of people in a given area.  It requires the input of consumption data for all economic aspects, including land and buildings, transportation, food, waste production, etc.  The output is in units of global hectares, which is a measure of productive land and sea area.  This can then be compared with the biocapacity of the same area to determine whether the people in the area are living sustainably and to see which aspects of their lives have the greatest environmental impact. <br> <br> The World Wildlife Fund (WWF) made <a style="color:white; text-decoration:underline;" href="http://www.gdrc.org/uem/footprints/wwf-ecologicalfootprints.pdf"> this guide </a> to the Ecological Footprint for Local Governments. 
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; width:40%; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;")
+              div(style="padding-bottom:5px;") As this is a calculation method rather than a system, there are no given steps for this method, however, there is an EcoCity Toolkit in pilot testing out of BCIT in Burnaby, BC, Canada, and the Ecological Footprint Network is also seeking ways to assist local governments.
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left:5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Participation Requirements:
+              div(style="padding-bottom:5px;") There is no widespread system for local-level support, so local governments often either adapt national calculations to local conditions or rely on academics to complete the analysis on their behalf.
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left;5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Pros:
+              div(style="padding-bottom:10px;") Quantifiable data provides results that can be compared across locations and over time. Useful for goal-setting.  
+              div(style="padding-bottom:5px; font-weight:bold;") Cons:
+              div(style="padding-bottom:5px;") Requires a considerable amount of data collection and analysis.
+        <br>
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; background-color:#07456b; color:#b6d5e3; font-weight:bold; padding:10px;") <a style="color:white; text-decoration:underline;" href="http://www.icleicanada.org/component/k2/item/221-biodivercities-a-handbook-for-municipal-biodiversity-planning-and-management" target="_blank;"> The BiodiverCities Methodology</a> is published by ICLEI Canada and Toronto and Region Conservation Authority. It is a companion document to the Urban Biodiversity Management Guidebook. A compilation which discusses why, who & how of integrating urban biodiversity to build resilient and sustainable communities. It puts forth best practices by discussing various successful examples and case studies which have shown positive results and have the potential to be replicated by the local governments and decision makers.  
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; width:40%; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Steps:
+              div(style="padding-bottom:5px;") 1. Stakeholder analysis.
+              div(style="padding-bottom:5px;") 2. Research local geography and biodiversity.
+              div(style="padding-bottom:5px;") 3. Create a Biodiversity Conservation Plan that includes baseline data, budgeting, actions, roles and responsibilities, and monitoring indicators.
+              div(style="padding-bottom:5px;") 4. Implement the plan in partnership with the community and attain council approval.
+              div(style="padding-bottom:5px;") 5. Monitor/review the plan and update it.
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left:5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Participation Requirements:
+              div(style="padding-bottom:5px;") It is not a program, but an approach that calls for a cyclical, iterative approach to biodiversity planning.  Thus, there are no barriers to using the approach outlined in the guide.
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left;5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Pros:
+              div(style="padding-bottom:10px;") Simple program with no required commitments or costs.  
+              div(style="padding-bottom:5px; font-weight:bold;") Cons:
+              div(style="padding-bottom:5px;") No official membership recognition or tracking.
+        <br>
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; background-color:#07456b; color:#b6d5e3; font-weight:bold; padding:10px;") <a style="color:white; text-decoration:underline;" href="http://uicn.fr/wp-content/uploads/2016/08/UICN_Indicateurs_biodiversite__collectivites.pdf" target="_blank;"> UICN Biodiversity indicators for Local authorities</a> Engaged in 2012, within the framework of the working group "Local authorities & Biodiversity " in the french context, this project aims to identify a common and synthetic set of biodiversity indicators adapted to subnational territorial scales, primarily regional, based mainly on the Singapore Index. Through this reference game, the regions will have a common self-assessment tool that will also allow them to report on their responses to the Aichi targets and the National Biodiversity Strategy. <br> <a style="color:white; text-decoration:underline;" href="http://uicn.fr/wp-content/uploads/2016/08/UICN_Indicateurs_biodiversite__collectivites.pdf" target="_blank;"> UICN Indicateurs de Biodiversité pour les Collectivités Territoriales</a> Engagé en 2012, dans le cadre du groupe de travail «  Collectivités territoriales & Biodiversité  » dans le contexte français, ce projet vise à identifier un jeu commun et synthétique d’indicateurs de biodiversité adaptés aux échelons territoriaux infranationaux, en premier lieu régional, en se basant essentiellement sur l’Indice de Singapour. Grâce à ce jeu de référence, les régions disposent d’un outil commun d’auto-évaluation leur permettant également de rendre compte de leurs réponses aux objectifs d’Aichi et de la Stratégie nationale pour la biodiversité.
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; width:40%; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Indicator Sections:
+              div(style="padding-bottom:5px;") 1. Pressures on biodiversity in the territory
+              div(style="padding-bottom:5px;") 2. State of biodiversity in the territory
+              div(style="padding-bottom:5px;") 3. Impacts of the evolution of biodiversity for actors in the territory
+              div(style="padding-bottom:5px;") 4. Reactions by actors in the territory to preserve biodiversity
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left:5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Participation Requirements:
+              div(style="padding-bottom:5px;") Unknown.
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left;5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Pros:
+              div(style="padding-bottom:10px;") Adapts the Singapore Index adn the Aichi Targets to produce a regional standard.  
+              div(style="padding-bottom:5px; font-weight:bold;") Cons:
+              div(style="padding-bottom:5px;") Only in France.  Does not provide a comparative score.
+        <br>
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; background-color:#07456b; color:#b6d5e3; font-weight:bold; padding:10px;") <a style="color:white; text-decoration:underline;" href="http://www.teebweb.org/publication/teeb-for-local-and-regional-policy-makers-2/" target="_blank;"> The Economics of Ecosystems & Biodiversity (TEEB) for Local and Regional Policy Makers</a> focuses on ecosystem services, such as clean air, healthy food, protection against floods, and pollination, just to name a few, which they further by guiding decision and policy making.  They collect and provide information to stakeholders, focusing primarily on showing the economic advantages of investing in ecosystem services.   
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; width:40%; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Steps:
+              div(style="padding-bottom:5px;") 1. Specify and agree on the policy issue with public and interdepartmental stakeholders.
+              div(style="padding-bottom:5px;") 2. Prioritize ecosystem services.
+              div(style="padding-bottom:5px;") 3. Define information needs and select methods, including cultural services, awareness, ecosystem monitoring, and payment schemes.
+              div(style="padding-bottom:5px;") 4. Assess ecosystem services via socio-ecological, economic, ecological, and/or developmental frameworks.
+              div(style="padding-bottom:5px;") 5. Identify and compare policy long-term impacts via participatory debate and cost-benefit analysis using multiple criteria.
+              div(style="padding-bottom:5px;") 6. Determine distributional impacts using tools such as poverty assessment and a Sustainable Livelihoods Approach to determine dependence.
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left:5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Participation Requirements:
+              div(style="padding-bottom:5px;") Tools are free. Focuses on livelihoods and economic benefits of biodiversity via ecosystem services.  Provides a plethora of options from which cities can choose (less prescriptive than other programs).
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left;5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Pros:
+              div(style="padding-bottom:10px;") Good for entry-level or economically-focused local governments. Integration of economic tools eases integration and mainstreaming.  
+              div(style="padding-bottom:5px; font-weight:bold;") Cons:
+              div(style="padding-bottom:5px;") There is no network or organizational support.
+        <br>
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; background-color:#07456b; color:#b6d5e3; font-weight:bold; padding:10px;") <a style="color:white; text-decoration:underline;" href="https://ggarrardresearch.files.wordpress.com/2012/11/bsud-final_reduced-size2.pdf" target="_blank;"> Biodiversity Sensitive Urban Design (BSUD)</a> is a protocol for ecologically restorative suburban design that quantitatively measures impacts on biodiversity.  It seeks to create suburban environments that provide net benefit through onsite restoration and conservation activities to native species and ecosystems. Their process entails identifying local ecological values, identifying and setting objectives, deciding upon actions, and quantifying the results.  
+        div(style="display:flex; width:100%; ")
+            div(style="flex-grow:1; width:40%; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") 6 Steps:
+              div(style="padding-bottom:5px;") 1. Map current and historical ecological properties.
+              div(style="padding-bottom:5px;") 2. Define ecological objectives.
+              div(style="padding-bottom:5px;") 3. Identify development objectives and requirements.
+              div(style="padding-bottom:5px;") 4. Identify actions that will meet the project’s objectives and consider the 5 BSUD principles: <br> a. Habitat creation/preservation for target species <br> b. Facilitation of species movement <br> c. Minimization of disturbance <br> d. Facilitate natural processes/functions <br> e. Facilitate community engagement in positive interactions with nature
+              div(style="padding-bottom:5px;") 5. Assess projected biodiversity impacts quantitatively.
+              div(style="padding-bottom:5px;") 6. Identify actions that best meet development and biodiversity objectives
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left:5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Participation Requirements:
+              div(style="padding-bottom:5px;") Tools freely available, but technical guides for quantitative assessment not found.
+            div(style="background:#07456b; height:flex; width:1px; margin:auto; margin:8px;")
+            div(style="flex-grow:1; width:25%; margin-left;5px; margin-top:5px; color:#07456b;") 
+              div(style="padding-bottom:5px; font-weight:bold;") Pros:
+              div(style="padding-bottom:10px;") Best suited for high capacity projects involving new development (particularly residential) on city edges.  
+              div(style="padding-bottom:5px; font-weight:bold;") Cons:
+              div(style="padding-bottom:5px;") Institutional support unclear.
+    <br> <br>
+ +footer(true)
