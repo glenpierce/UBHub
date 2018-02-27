@@ -17,7 +17,8 @@ router.post('/', function(req, res, next) {
     userEmail = "";
     if(req.body.email){
         if(req.body.email.toString() === req.body['verify-email'].toString()){
-            sendRecaptchaToGoogle(req.body['g-recaptcha-response'], req.body.email);
+            var string = "firstName: " + req.body.nameFirst + ", " + "lastName: " + req.body.nameLast + ", " + "Org: " + req.body.organization + ", " + "Email: " + req.body.email;
+            sendRecaptchaToGoogle(req.body['g-recaptcha-response'], string);
             res.render('index');
         }
     }
