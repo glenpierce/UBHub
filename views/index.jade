@@ -105,9 +105,12 @@ body(style="font-family:helvetica; background-color:#d3e9d5;")
             for (var i = 0; i < formElements.length; i++)
                 if (formElements[i].type != "submit")//we dont want to include the submit-buttom
                     postData[formElements[i].name] = formElements[i].value;
-            if(postData.email === postData["verify-email"] && postData.email.toString().length > 0)
+            if(postData.email === postData["verify-email"] && postData.email.toString().length > 0 && postData["g-recaptcha-response"].length > 0)
                 window.alert("Thank you " + postData.nameFirst);
             else
-                window.alert("Sorry, but it seems that something is missing. Please verify that the \"Email\" and \"Verify Email\" fields have a valid email address and match each other.")
+                if(postData['g-recaptcha-response'].length < 1)
+                    window.alert("Sorry, you need to check the box that says you\'re not a robot.")
+                else
+                    window.alert("Sorry, but it seems that something is missing. Please verify that the \"Email\" and \"Verify Email\" fields have a valid email address and match each other.")
         }
       
