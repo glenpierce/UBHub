@@ -8,7 +8,7 @@ var session = require('client-sessions');
 
 log = function () {
     console.log('logging...');
-    console.log(process.env);
+    // console.log(process.env);
 };
 
 updateLocations = function(lower, upper) {
@@ -44,6 +44,20 @@ updateLocations = function(lower, upper) {
         connection.end();
     }
 };
+
+function getLatLongAddresses(){
+    addresses = [
+        "address 1",
+        "address 2"
+    ];
+    for(i = 0; i < addresses.length; i++){
+        getLatLongSimple(addresses[i]);
+    }
+}
+
+function getLatLongSimple(address) {
+    getLatLong(address, null);
+}
 
 function getLatLong(address, id){
     console.log("getLatLong");
@@ -85,11 +99,11 @@ function getLatLong(address, id){
                     //     console.log("country=" + country);
                     lat = result.results[0].geometry.location.lat;
                     lng = result.results[0].geometry.location.lng;
-                    console.log(lat);
-                    console.log(lng);
-                    updateLocation(id, lat, lng);
+                    console.log(address + "$" + lat + "#" + lng);
+                    if(id != null)
+                        updateLocation(id, lat, lng);
                 } else {
-                    console.log(id + "no good");
+                    console.log(address + "no good");
                 }
             });
             response.on('error', function(err) {
@@ -557,9 +571,8 @@ update = function(){
         "CREATE TABLE indicatorValues(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`name` VARCHAR(2048), " +
-        "`indicator` INT, " +
+        "`subIndicator` INT, " +
         "`type` INT, " + //text, float, int / stage
-        //todo: build complex table-style entries
         "`required` BIT, " +
         "`orderInOperation` INT, " +
         "`rangeMin` FLOAT(10, 2), " +
@@ -622,7 +635,8 @@ update = function(){
         "`site` INT," +
         "`program` INT, " +
         "`year` INT, " +
-        // "`indicator` INT, " +
+        "`indicatorId` INT, " +
+        "`subIndicatorId` INT, " +
         "`indicatorValue` INT, " +
         "`numericalValue` FLOAT(10, 2), " +
         "`textValue` VARCHAR(2048), " +
@@ -752,8 +766,11 @@ update = function(){
     connection.end();
 };
 
+//node
 //var scripts = require('./scripts');
 
 module.exports.updateLocations = updateLocations;
 module.exports.log = log;
 module.exports.update = update;
+module.exports.getLatLong = getLatLong;
+module.exports.getLatLongAddresses = getLatLongAddresses;
