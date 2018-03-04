@@ -33,9 +33,9 @@ router.get('/', function(req, res, next) {
     connection.query(query, function(err, rows, fields) {
         if (!err) {
             mapData = rows;
-            console.log(JSON.stringify(mapData));
+            //console.log(JSON.stringify(mapData));
             mapSummary = getSummary(mapData);
-            console.log(mapSummary);
+            //console.log(mapSummary);
             if (req.session && req.session.user) {
                 res.render('map', {
                   mapFilterParameters: mapFilterParameters,
@@ -60,15 +60,21 @@ router.get('/update', function(req, res, next) {
     // update();
 });
 
-router.get('/tableData', function(req, res, next){
+router.post('/tableData', function(req, res, next){
 
   var mapData = "";
   var string = "";
-  var page = req.query.page;
+  var page = req.body.page;
+  var filters = req.body.filters;
+  console.log(filters);
+
   if(page == null){
     page = 1;
   }
+
   var limit = 10;
+
+  var query = buildLocationsQuery(page, limit, filters);
 
   connection = mysql.createConnection({
       host: config.rdsHost,
@@ -78,8 +84,8 @@ router.get('/tableData', function(req, res, next){
   });
 
   connection.connect();
-  var query = `SELECT * from locations limit ${limit} offset ${limit * (page - 1)}`;
   console.log(query);
+
   connection.query(query, function(err, rows, fields) {
     //Output an appropriate tbody
     for(i = 0; i < rows.length; i++){
@@ -95,6 +101,46 @@ router.get('/tableData', function(req, res, next){
     res.send(string);
   });
 });
+
+function buildLocationsQuery(page, limit, filters){
+  //PICK FIELDS
+  var query = `SELECT * from locations `;
+
+  //DEAL WITH FILTERS
+  if(filters.length > 0){
+
+    query+= "WHERE "
+
+    for(i = 0; i < filters.length; i++){
+
+      switch(filters[i].type){
+        case("select"):
+          query+= filters[i].key + "='" + filters[i].val + "' ";
+          break;
+        case("range"):
+          query+= filters[i].key + " BETWEEN " + filters[i].lower + " AND " + filters[i].upper + " ";
+          break;
+        case("nullable"):
+          //TODO: fix this when new data is in db
+          query+= " true = true "
+          break;
+
+
+      }
+
+      query += " AND ";
+
+
+    }
+
+    query = query.substr(0, query.length - 4);
+
+  }
+
+  query += `limit ${limit} offset ${limit * (page - 1)}`;
+  return query;
+}
+
 
 function getPlan1Title(location){
   if(location.plan1_title != null){

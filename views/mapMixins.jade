@@ -15,7 +15,7 @@ mixin filterMixin(title, filterBy, attributeList, filterType)
   div.formItem
     label #{title}
     div.selectBox.filterBox
-      select(onchange="filter(this.value, '" + filterBy + "', '" + filterType + "')")
+      select(onchange="addFilter('#{filterBy}', this.value, '" + filterType + "')")
           option(value="none").option
           each attributeItem in attributeList
               option(value=attributeItem).option #{attributeItem}

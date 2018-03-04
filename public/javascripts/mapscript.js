@@ -55,7 +55,13 @@ function filter(value, filterBy, type){
 
 function runFilters(){
   markers.forEach((marker) => {
-    //TODO: filter markers
+    var retain = true;
+    activeFilters.forEach((filter) => {
+      if(retain) {
+        retain = evaluateFilterOnMarker(filter, marker);
+      }
+    })
+    marker.setVisible(retain);
   });
 
   //Also update the table of results
@@ -92,12 +98,40 @@ function filterRange(value, filterBy){
 }
 
 function addFilter(filterKey, filterValue, filterType){
+
+  var upper = null;
+  var lower = null;
+  if(filterType == "range") {
+    var value = filterValue.replace(/\,/g,"");
+    var values = value.split("-");
+    if(values.length != 2){
+      if(values[0] == "<") {
+        lower = 0;
+        upper = values.substr(1, value.length);
+      } else if (values[0] == ">"){
+        lower = values.substr(1, value.length);
+        upper = Number.MAX_VALUE;
+      }
+    } else {
+      upper = values[1];
+      lower = values[0];
+    }
+  }
+
+
   removeFilter(filterKey);
   activeFilters.push({
     key: filterKey,
     val: filterValue,
-    type: filterType
+    type: filterType,
+    upper: upper,
+    lower: lower
   });
+
+
+  onFilterUpdate();
+
+  //console.log(activeFilters);
 }
 
 function removeFilter(filterKey){
@@ -106,8 +140,36 @@ function removeFilter(filterKey){
   });
 }
 
+function clearInactiveFilters(){
+  activeFilters = activeFilters.filter( (x) => {
+    return x.val != "none" ;
+  });
+}
+
 function clearFiltersList(){
   activeFilters = [];
+}
+
+function evaluateFilterOnMarker(filter, marker){
+  switch(filter.type){
+    case "select":
+      return (marker.element[filter.key] == filter.val);
+      break;
+    case "range":
+      return ((marker.element[filter.key] > filter.lower && marker.element[filter.key] < filter.upper));
+      break;
+    case "nullable":
+      return false;
+      break;
+    default:
+      return false;
+  }
+}
+
+function onFilterUpdate(){
+  clearInactiveFilters();
+  runFilters();
+  getTableData(1, activeFilters);
 }
 
 //TODO: filters need to remember all active filtering, not just latest
@@ -199,9 +261,14 @@ function closeAllPanels(){
 
   };
 
-  function getTableData(pg){
+  function getTableData(pg, filters){
+    if(pg < 1) pg = 1;
     var xhr = new XMLHttpRequest();
-    var parameters = {page: pg};
+    var parameters =
+      {
+        page: pg,
+        filters: filters
+      };
 
     xhr.onreadystatechange = () => {
       if(xhr.readyState == 3) {
@@ -211,7 +278,8 @@ function closeAllPanels(){
       }
     };
 
-    xhr.open("GET", "/map/tableData?page=" + pg, true);
+    //xhr.open("GET", "/map/tableData?page=" + pg + "&&filters==" + JSON.stringify(filters), true);
+    xhr.open("POST", "/map/tableData", true);
     xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
     var parametersAsJSON = JSON.stringify(parameters);
     xhr.send(parametersAsJSON);
@@ -236,7 +304,7 @@ function closeAllPanels(){
     num += dx;
     if(num > 0){
       tbody.setAttribute("page", num);
-      getTableData(num);
+      getTableData(num, activeFilters);
 
       if(num <= 1) {
         document.getElementById("mapControlPrevious").classList.add("disabled");
