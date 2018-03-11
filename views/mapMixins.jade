@@ -122,16 +122,16 @@ mixin mapInfoSummary(summary)
   div.mapInfoContent(class="hide" id="mapInfoSummary" style="background-color: #f2f2f2")
     div.quarters
       div.summaryStat
-        h3 #{summary.total}
+        h3#summaryTotal #{summary.total}
         p Total
       div.summaryStat
-        h3 #{summary.municipalities}
+        h3#summaryMunicipalities #{summary.municipalities}
         p Municipalities
       div.summaryStat
-        h3 #{summary.districts}
+        h3#summaryDistricts #{summary.districts}
         p Districts/Counties
       div.summaryStat
-        h3 #{summary.campuses}
+        h3#summaryCampuses #{summary.campuses}
         p Campuses
 
 mixin mapInfoResults(data)

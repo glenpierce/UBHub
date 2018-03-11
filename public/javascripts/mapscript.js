@@ -170,6 +170,7 @@ function onFilterUpdate(){
   clearInactiveFilters();
   runFilters();
   getTableData(1, activeFilters);
+  getResultCounts(activeFilters);
 }
 
 //TODO: filters need to remember all active filtering, not just latest
@@ -258,6 +259,8 @@ function closeAllPanels(){
           activityButtons[0].classList.remove("activeButton");
       }
 
+      activeFilters = [];
+      onFilterUpdate();
 
   };
 
@@ -311,6 +314,47 @@ function closeAllPanels(){
       } else {
         document.getElementById("mapControlPrevious").classList.remove("disabled");
       }
+    }
+  }
+
+  function getResultCounts(filters){
+    var xhr = new XMLHttpRequest();
+    var parameters =
+      {
+        filters: filters
+      };
+
+    xhr.onreadystatechange = () => {
+      if(xhr.readyState == 3) {
+        getResultCountsResponse("Processing");
+      } else if(xhr.readyState == 4 && xhr.status == 200) {
+        getResultCountsResponse(xhr.responseText);
+      }
+    };
+
+    //xhr.open("GET", "/map/tableData?page=" + pg + "&&filters==" + JSON.stringify(filters), true);
+    xhr.open("POST", "/map/resultCounts", true);
+    xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+    var parametersAsJSON = JSON.stringify(parameters);
+    xhr.send(parametersAsJSON);
+  }
+
+  function getResultCountsResponse(responseText){
+    if(responseText == "Processing" ){
+
+      document.getElementById("summaryTotal").innerHTML = "...";
+      document.getElementById("summaryMunicipalities").innerHTML = "...";
+      document.getElementById("summaryDistricts").innerHTML = "...";
+      document.getElementById("summaryCampuses").innerHTML = "...";
+
+    } else {
+       var response = JSON.parse(responseText);
+
+       document.getElementById("summaryTotal").innerHTML = response.total;
+       document.getElementById("summaryMunicipalities").innerHTML = response.municipalities;
+       document.getElementById("summaryDistricts").innerHTML = response.districts;
+       document.getElementById("summaryCampuses").innerHTML = response.campuses;
+
     }
   }
 

@@ -66,7 +66,6 @@ router.post('/tableData', function(req, res, next){
   var string = "";
   var page = req.body.page;
   var filters = req.body.filters;
-  console.log(filters);
 
   if(page == null){
     page = 1;
@@ -74,7 +73,7 @@ router.post('/tableData', function(req, res, next){
 
   var limit = 10;
 
-  var query = buildLocationsQuery(page, limit, filters);
+  var query = buildLocationsQuery(filters, page, limit);
 
   connection = mysql.createConnection({
       host: config.rdsHost,
@@ -88,21 +87,57 @@ router.post('/tableData', function(req, res, next){
 
   connection.query(query, function(err, rows, fields) {
     //Output an appropriate tbody
-    for(i = 0; i < rows.length; i++){
-      string += `<tr>`;
-      string += `<td>${rows[i].title}</td>`;
-      string += `<td>${rows[i].country}</td>`;
-      string += `<td>${rows[i].scale}</td>`;
-      string += `<td>${getPlan1Title(rows[i])}</td>`;
-      string += `</tr>`;
+    if(rows != undefined){
+      for(i = 0; i < rows.length; i++){
+        string += `<tr>`;
+        string += `<td>${rows[i].title}</td>`;
+        string += `<td>${rows[i].country}</td>`;
+        string += `<td>${rows[i].scale}</td>`;
+        string += `<td>${getPlan1Title(rows[i])}</td>`;
+        string += `</tr>`;
+      }
+      res.send(string);
+    } else {
+      res.send("Processing....");
     }
 
 
-    res.send(string);
+
   });
 });
 
-function buildLocationsQuery(page, limit, filters){
+router.post('/resultCounts', function(req, res, next){
+  var filters = req.body.filters;
+  var query = buildLocationsQuery(filters, -1, -1);
+
+  connection = mysql.createConnection({
+      host: config.rdsHost,
+      user: config.rdsUser,
+      password: config.rdsPassword,
+      database: config.rdsDatabase
+  });
+
+  connection.connect();
+  console.log(query);
+
+  connection.query(query, function(err, rows, fields) {
+    var counts;
+    if(rows != undefined){
+      counts = {
+        total: rows.length,
+        municipalities: rows.filter(x => x.scale == "municipality").length,
+        districts: rows.filter(x => x.scale == "district/county").length,
+        campuses: rows.filter(x => x.scale == "campus").length
+      }
+    } else {
+      counts = {};
+    }
+
+    res.send(JSON.stringify(counts));
+  });
+});
+
+function buildLocationsQuery(filters, page, limit){
   //PICK FIELDS
   var query = `SELECT * from locations `;
 
@@ -137,7 +172,10 @@ function buildLocationsQuery(page, limit, filters){
 
   }
 
-  query += `limit ${limit} offset ${limit * (page - 1)}`;
+  if(page > -1 && limit > -1){
+    query += `limit ${limit} offset ${limit * (page - 1)}`;
+  }
+
   return query;
 }
 
