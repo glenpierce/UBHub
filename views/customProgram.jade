@@ -51,7 +51,7 @@ body
             var data = ev.dataTransfer.getData("text");
             var id = ev.dataTransfer.getData("id");
             var i = 0;
-            var element = ev.target
+            var element = ev.target;
             while (!element.getAttribute("ondrop") && i < 100) {
                 element = element.parentElement;
                 i++;

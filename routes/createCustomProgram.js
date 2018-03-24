@@ -15,6 +15,10 @@ app.use(session({
     activeDuration: 5 * 60 * 1000
 }));
 
+router.get('/editor', function(req, res, next) {
+    res.render('programEditor');
+});
+
 router.get('/', function(req, res, next) {
     var indicators = "";
 
