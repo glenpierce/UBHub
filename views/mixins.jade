@@ -118,9 +118,12 @@ mixin postMeta(post)
       span.number(id="upvotes-#{post.id}") #{post.upvotes}
     span.downvotes(onClick="vote(#{post.userVoteStatus}, -1, #{post.id})") -
       span.number(id="downvotes-#{post.id}")  #{post.downvotes}
-    span.views v
+    span.views views:
       span.number #{post.views}
-    -var tags = post.tags.split(',');
+    -var tags = {};
+    -if(post.tags && post.tags.length > 0){
+    -tags = post.tags.split(',');
+    -}
     each tag in tags
         span.tag #{tag}
     button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Reply
