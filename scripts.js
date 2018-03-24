@@ -343,7 +343,7 @@ update = function(){
     createAddPostQuery =
         "CREATE PROCEDURE addForumPost(IN author varchar(255), IN parent varchar(255), IN subject varchar(255), IN body TEXT, IN creationDate DATETIME)\n" +
         "BEGIN\n" +
-        "INSERT INTO posts (author, parent, subject, body, creationDate, upvotes, downvotes, views, status) VALUES (author, parent, subject, body, creationDate, 0, 0, 0, 'published');\n" +
+        "INSERT INTO posts (author, parent, subject, body, creationDate, views, status) VALUES (author, parent, subject, body, creationDate, 0, 'published');\n" +
         "SELECT * FROM posts WHERE id=LAST_INSERT_ID();\n" +
         "END";
     query.push(createAddPostQuery);
