@@ -341,9 +341,9 @@ update = function(){
     query.push(getAllUsersQuery);
 
     createAddPostQuery =
-        "CREATE PROCEDURE addForumPost(IN author varchar(255), IN parent varchar(255), IN subject varchar(255), IN body TEXT, IN creationDate DATETIME)\n" +
+        "CREATE PROCEDURE addForumPost(IN author varchar(255), IN parent varchar(255), IN subject varchar(255), IN body TEXT, IN creationDate DATETIME, IN tags varchar(2048))\n" +
         "BEGIN\n" +
-        "INSERT INTO posts (author, parent, subject, body, creationDate, views, status) VALUES (author, parent, subject, body, creationDate, 0, 'published');\n" +
+        "INSERT INTO posts (author, parent, subject, body, creationDate, views, status, tags) VALUES (author, parent, subject, body, creationDate, 0, 'published', tags);\n" +
         "SELECT * FROM posts WHERE id=LAST_INSERT_ID();\n" +
         "END";
     query.push(createAddPostQuery);
@@ -746,7 +746,7 @@ update = function(){
     // }
 
 
-    // query = [useDbQuery, ];
+    // query = [useDbQuery, dropAddPostQuery, createAddPostQuery];
 
     for(var i = 0; i < query.length; i++) {
 

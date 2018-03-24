@@ -19,7 +19,7 @@ var submitQuestion = (formId, refresh) => {
     location.reload();
   }
 
-}
+};
 
 
 var postQuestion = (theUrl, questionObject, callback) => {
@@ -34,7 +34,7 @@ var postQuestion = (theUrl, questionObject, callback) => {
     var dataAsJson = JSON.stringify(data);
     xmlHttp.send(dataAsJson);
 
-}
+};
 
 
 var goToPost = (id) => {
@@ -86,7 +86,7 @@ var vote = (status, vote, postId) => {
     status,
     vote,
     postId
-  }
+  };
 
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.onreadystatechange = function() {
@@ -94,7 +94,7 @@ var vote = (status, vote, postId) => {
       //TODO: get response, update button
 
         location.reload();
-  }
+  };
   xmlHttp.open("POST", url, true); // true for asynchronous
   xmlHttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
   var dataAsJson = JSON.stringify(data);
@@ -103,13 +103,13 @@ var vote = (status, vote, postId) => {
   location.reload();
 
   //TODO Get response, callback updates vote count
-}
+};
 
 var accept = (postId, answerId) => {
   var data = {
     postId,
     answerId
-  }
+  };
 
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.onreadystatechange = function() {
@@ -118,7 +118,7 @@ var accept = (postId, answerId) => {
           //callback(xmlHttp.responseText);
           //TODO: get response, update button
 
-  }
+  };
   xmlHttp.open("POST", "/forum/accept", true); // true for asynchronous
   xmlHttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
   var dataAsJson = JSON.stringify(data);
@@ -130,11 +130,11 @@ var accept = (postId, answerId) => {
 
 var resortBy = (sort) => {
   reloadLocationWithNewParam("sort", sort);
-}
+};
 
 var turnPage = (pg) => {
   reloadLocationWithNewParam("page", pg);
-}
+};
 
 var reloadLocationWithNewParam = (key, val) => {
   //Splits the query parameters to an array of key-value pairs.

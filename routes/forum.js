@@ -117,11 +117,8 @@ router.post("/submit", function (req, res) {
   var parent = req.body.parentPost;
   var date = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-  if (req.session
-      && req.session.user
-      && body != ""
-      && title != ""
-      && parent != undefined) {
+  if (req.session && req.session.user && body != "" && title != "" && parent != undefined) {
+      var tags = req.body.tags.split(',');
       var connection = mysql.createConnection({
           host: config.rdsHost,
           user: config.rdsUser,
@@ -131,7 +128,7 @@ router.post("/submit", function (req, res) {
 
       var path="";
       connection.connect();
-      query = `CALL AddForumPost('${req.session.user}', '${parent}', '${title}', '${body}', '${date}')`;
+      query = `CALL AddForumPost('${req.session.user}', '${parent}', '${title}', '${body}', '${date}', '${tags}')`;
       connection.query(query, function(err, rows, fields) {
           if (!err) {
               //If successful, redirect to the post page
@@ -323,7 +320,7 @@ var renderPosts = (posts, res, perPage, page, sort, search) => {
     finalPage,
     lastPage
   });
-}
+};
 
 var renderPostTree = (pageId, postHierarchy, res, postId) => {
   var scroll = "postTop";
@@ -331,10 +328,13 @@ var renderPostTree = (pageId, postHierarchy, res, postId) => {
     scroll = "post" + postId;
   }
 
+  console.log("postHierarchy:");
+  console.log(postHierarchy);
+
   res.render('post', {postTree: postHierarchy,
                       scrollPost: scroll
                     });
-}
+};
 
 
 /********/
