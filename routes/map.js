@@ -18,7 +18,7 @@ app.use(session({
 }));
 
 router.get('/', function(req, res, next) {
-    var mapData = "";
+    //var mapData = "";
 
     connection = mysql.createConnection({
         host: config.rdsHost,
@@ -28,32 +28,39 @@ router.get('/', function(req, res, next) {
     });
 
     connection.connect();
-    query = 'SELECT * from locations limit 1000';
-    console.log(query);
-    connection.query(query, function(err, rows, fields) {
-        if (!err) {
-            mapData = rows;
-            //console.log(JSON.stringify(mapData));
-            mapSummary = getSummary(mapData);
-            //console.log(mapSummary);
-            if (req.session && req.session.user) {
-                res.render('map', {
-                  mapFilterParameters: mapFilterParameters,
-                  mapData:JSON.stringify(mapData),
-                  mapSummary: mapSummary,
-                  username: req.session.user});
-            } else {
-                res.render('map', {
-                  mapFilterParameters: mapFilterParameters,
-                  mapData:JSON.stringify(mapData),
-                  mapSummary: mapSummary,
-                  username: null});
-            }
+    locationsQuery = 'SELECT * from locations limit 1000';
+
+
+    getMapData(connection, locationsQuery)
+    .then((mapData) => {
+      mapSummary = getSummary(mapData);
+      buttonsQuery = 'SELECT * from mapButtons';
+      getMapData(connection, buttonsQuery)
+      .then((buttons) => {
+        var mapButtons = categorizeButtons(buttons);
+        console.log(JSON.stringify(mapButtons));
+        if (req.session && req.session.user) {
+            res.render('map', {
+              mapFilterParameters: mapFilterParameters,
+              mapData:JSON.stringify(mapData),
+              mapSummary: mapSummary,
+              mapButtons: mapButtons,
+              username: req.session.user});
         } else {
-            console.log('Error while performing Query.');
+            res.render('map', {
+              mapFilterParameters: mapFilterParameters,
+              mapData:JSON.stringify(mapData),
+              mapSummary: mapSummary,
+              mapButtons: mapButtons,
+              username: null});
         }
-    });
-    connection.end();
+        connection.end();
+      })
+    })
+    .catch((err) =>{
+      console.log(err);
+      connection.end();
+    })
 });
 
 router.get('/update', function(req, res, next) {
@@ -118,7 +125,6 @@ router.post('/resultCounts', function(req, res, next){
   });
 
   connection.connect();
-  console.log(query);
 
   connection.query(query, function(err, rows, fields) {
     var counts;
@@ -135,6 +141,30 @@ router.post('/resultCounts', function(req, res, next){
 
     res.send(JSON.stringify(counts));
   });
+});
+
+router.post('/getProgramMembers', function(req, res, next) {
+  var programName = req.body.programName;
+  var query = "SELECT * FROM participation WHERE `part_name` = '" + programName + "'";
+
+  connection = mysql.createConnection({
+      host: config.rdsHost,
+      user: config.rdsUser,
+      password: config.rdsPassword,
+      database: config.rdsDatabase
+  });
+
+  connection.connect();
+
+  connection.query(query, function(err, rows, fields) {
+    var members = []
+    if(rows != undefined){
+      members = rows;
+    }
+
+    res.send(JSON.stringify(rows));
+  });
+
 });
 
 function buildLocationsQuery(filters, page, limit){
@@ -187,6 +217,46 @@ function getPlan1Title(location){
   return "";
 }
 
+function getMapData(connection, query){
+  return new Promise((resolve, reject) => {
+    connection.query(query, function(err, rows, fields) {
+      if (!err) {
+        resolve(rows);
+      } else {
+        reject(err);
+      }
+    })
+  });
+}
+
+function categorizeButtons(buttons) {
+  var mapButtonCategories = [];
+  for (i = 0; i < buttons.length; i++) {
+
+    var found = false;
+    var j = 0;
+
+    while (j < mapButtonCategories.length && !found) {
+      if (buttons[i].button_category == mapButtonCategories[j].categoryName){
+        mapButtonCategories[j].buttons.push(buttons[i]);
+        found = true;
+      }
+      j++
+    }
+
+    if(!found) {
+      var newCategory = {
+        categoryName: buttons[i].button_category,
+        buttons: [buttons[i]]
+      }
+      mapButtonCategories.push(newCategory);
+    }
+  }
+
+  return mapButtonCategories;
+}
+
+
 function getSummary(data){
   var summary = {};
   summary.total = data.length;
@@ -234,9 +304,6 @@ function update(){
     connection.end();
 }
 
-function getData(){
-
-}
 
 var mapActivities = [
     {

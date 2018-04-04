@@ -8,8 +8,12 @@
   var lightOrangeImage;
   var orangeImage;
 
+
   var currentActiveHighlightingButton;
   var activeFilters = [];
+
+  var activeZindex = 100;
+  var inactiveZindex = 5;
 
 
 function filter(value, filterBy, type){
@@ -175,24 +179,118 @@ function onFilterUpdate(){
 
 //TODO: filters need to remember all active filtering, not just latest
 
-function selectHighlight(filterBy, node){
-  highlightValues(filterBy);
+function selectHighlight(filterBy, colorBy, colorLevels, buttonNode){
+  highlightValues(filterBy, colorBy, colorLevels);
   if(currentActiveHighlightingButton != null){
     currentActiveHighlightingButton.classList.remove("activeButton");
   }
-  currentActiveHighlightingButton = node;
-  node.classList.add("activeButton");
+  currentActiveHighlightingButton = buttonNode;
+  buttonNode.classList.add("activeButton");
 }
 
 
-function highlightValues(filterBy){
-  markers.forEach(function (marker) {
-      if(marker.element[filterBy] != null){
-          marker.setIcon(orangeImage);
-      } else {
-          marker.setIcon(greyImage);
+function highlightValues(filterBy, colorBy, colorLevels){
+  var callback = (markers, programs) => {
+    var iconArray = makeIconArray(colorLevels);
+
+    markers.forEach(function (marker) {
+      var found = false;
+
+      programs.forEach(function (program) {
+
+        if(marker.element.id == program.inst_id) {
+
+          switch (colorBy) {
+
+            case "part_level":
+              var icon = blueImage;
+
+              for (i = 0; i < iconArray.length; i++) {
+                if (iconArray[i].level == program.part_level) {
+                  icon = iconArray[i].icon;
+                }
+              }
+
+              marker.setIcon(icon);
+
+            break;
+
+            default:
+              marker.setIcon(orangeImage);
+            break;
+
+          }
+          found = true;
+          setMarkerFocusZindex(marker, true);
+
+
+        }
+      });
+      if (!found) {
+        marker.setIcon(greyImage);
+        setMarkerFocusZindex(marker, false);
       }
-  });
+    });
+  }
+  var programs = getPrograms(filterBy, markers, callback);
+
+
+}
+
+function getPrograms(partName, markers, callback){
+  var xhr = new XMLHttpRequest();
+  var parameters =
+    {
+      programName: partName
+    };
+
+  xhr.onreadystatechange = () => {
+    if(xhr.readyState == 3) {
+
+    } else if(xhr.readyState == 4 && xhr.status == 200) {
+      callback(markers, JSON.parse(xhr.responseText));
+    }
+  };
+
+  xhr.open("POST", "/map/getProgramMembers", true);
+  xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+  var parametersAsJSON = JSON.stringify(parameters);
+  xhr.send(parametersAsJSON);
+}
+
+function makeIconArray(colorLevels) {
+  var levels = colorLevels.split(", ");
+  var iconArray = [];
+  for (i = 0; i < levels.length; i++){
+    var icon = getIconByIndex(i);
+    var entry = {
+      level: levels[i],
+      icon: icon
+    }
+    iconArray.push(entry);
+  }
+  return iconArray;
+}
+
+
+
+function getIconByIndex(index) {
+  var activeIcons = [
+    orangeImage,
+    lightOrangeImage,
+    yellowImage,
+    greenImage,
+    blueImage
+  ]
+  return activeIcons[index];
+}
+
+function setMarkerFocusZindex(marker, highlight){
+  if (highlight) {
+    marker.setZIndex(activeZindex);
+  } else {
+    marker.setZIndex(inactiveZindex);
+  }
 }
 
 //UI
