@@ -358,6 +358,32 @@ function closeAllPanels(){
     }
   }
 
+/*Map popup display functions*/
+  function getMapPopupContent(entry) {
+      if (entry == undefined) {
+        return "undefined";
+      }
+
+        var contentString = '<div id="content">' +
+            '<div id="siteNotice">' +
+            '</div>' +
+            '<div style="font-weight:bold; font-size:20px;">' + entry.inst_title + '</div>' +
+            '<div id="bodyContent">' +
+            (entry.scale  !== null ?  '<div">' + entry.scale + '</div>' : "") +
+            (entry.biodiversity_url  !== null ?  '<div><a href="' + entry.biodiversity_url + '" rel="noopener noreferrer" target="_blank"">Main link</a></div>' : "") +
+
+            //TODO: add current program information, available docs etc. here
+
+
+            '</div>' +
+        '</div>';
+        return contentString;
+  }
+
+  function outputLinkForMapPopup(label, url) {
+
+  }
+
   function initMap (mapData) {
     //console.log(mapData);
     greyImage = {
@@ -444,40 +470,7 @@ function closeAllPanels(){
           { "featureType": "water", "elementType": "labels.text.fill", "stylers": [ { "color": "#4e6d70" } ] } ]});
       mapData.forEach(function (element) {
           if(element.lat){
-              var contentString =
-                  '<div id="content">' +
-                      '<div id="siteNotice">' +
-                      '</div>' +
-                      '<div style="font-weight:bold; font-size:20px;">' + element.title + '</div>' +
-                      '<div id="bodyContent">' +
-                      (element.scale  !== null ?  '<div">' + element.scale + '</div>' : "") +
-
-                      (element.biodiversity_url  !== null ?  '<div><a href="' + element.biodiversity_url + '" rel="noopener noreferrer" target="_blank"">Main link</a></div>' : "") +
-
-                      (element.intplan_title  !== null ?  '<p>' + (element.intplan_year !== null ? element.intplan_year : "") + ' ' + element.intplan_title + " " : "") +
-                      (element.intplan_url  !== null ?  '<a href="' + element.intplan_url + '" rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
-
-                      (element.plan1_title !== null ? '<p>' + (element.plan1_year !== null ? element.plan1_year : "") + ' ' + element.plan1_title + " " : "") +
-                      (element.plan1_url !== null ? '<a href="' + element.plan1_url + '" rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
-
-                      (element.plan2_title !== null ? '<p>' + (element.plan2_year !== null ? element.plan2_year : "") + ' ' + element.plan2_title + " " : "") +
-                      (element.plan2_url !== null ? '<a href="' + element.plan2_url + '" rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
-
-                      (element.report_title !== null ? '<p>' + (element.report_year !== null ? element.report_year : "") + ' ' + element.report_title + " " : "") +
-                      (element.report_url !== null ? '<a href="' + element.report_url + '" rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
-
-                      (element.extra1_title !== null ? '<p>' + element.extra1_title + ' ' : "") +
-                      (element.extra1_url !== null ? '<a href="' + element.extra1_url + '" rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
-
-                      (element.extra2_title !== null ? '<p>' + element.extra2_title + ' ': "") +
-                      (element.extra2_url !== null && typeof extra2_url !== "undefined" ? '<a href="' + element.extra2_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
-
-                      (element.EF_data_ghapercap !== null ? '<p>' + (element.EF_year !== null ? element.EF_year : "") + ' Ecological Footprint ' + element.EF_data_ghapercap + "gha/cap " : "") +
-                      (element.EF_link !== null ? '<a href="' + element.EF_link + '" rel="noopener noreferrer" target="_blank"">source</a></p>' : "</p>") +
-
-
-                      '</div>' +
-                  '</div>';
+              var contentString = getMapPopupContent(element);
 
               var infowindow = new google.maps.InfoWindow({
                   content: contentString

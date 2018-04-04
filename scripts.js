@@ -13,7 +13,8 @@ log = function () {
 
 updateLocations = function(lower, upper) {
 
-    config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
+    //config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
+    config.rdsHost="127.17.0.2";
     config.rdsUser="root";
     config.rdsPassword="my-secret-pw";
 
@@ -139,7 +140,8 @@ function updateLocation(id, lat, lng){
 
 update = function(){
 
-    config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
+    //config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
+    config.rdsHost="127.17.0.2"; //this should be your Docker container's IP address
     config.rdsUser="root";
     config.rdsPassword="my-secret-pw";
 
@@ -213,73 +215,21 @@ update = function(){
     query.push(createEmailsTableQuery);
 
     createLocationsTableQuery =
-        "CREATE TABLE locations (" +
-        "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-        "`address` VARCHAR(204) CHARACTER SET utf8," +
-        "`lat` FLOAT( 10, 6 )," +
-        "`lng` FLOAT( 10, 6 )," +
-        "`title` VARCHAR(57) CHARACTER SET utf8," +
-        "`country` VARCHAR(51) CHARACTER SET utf8," +
-        "`scale` VARCHAR(51) CHARACTER SET utf8," +
-        "`intplan_year` INT," +
-        "`intplan_title` VARCHAR(102) CHARACTER SET utf8," +
-        "`intplan_url` VARCHAR(459) CHARACTER SET utf8," +
-        "`plan1_year` VARCHAR(19) CHARACTER SET utf8," +
-        "`plan1_title` VARCHAR(108) CHARACTER SET utf8," +
-        "`plan1_url` VARCHAR(459) CHARACTER SET utf8," +
-        "`plan2_year` VARCHAR(11) CHARACTER SET utf8," +
-        "`plan2_title` VARCHAR(102) CHARACTER SET utf8," +
-        "`plan2_url` VARCHAR(459) CHARACTER SET utf8," +
-        "`report_year` INT," +
-        "`report_title` VARCHAR(102) CHARACTER SET utf8," +
-        "`report_url` VARCHAR(459) CHARACTER SET utf8," +
-        "`EF_year` VARCHAR(10) CHARACTER SET utf8," +
-        "`EF_data_ghapercap` NUMERIC(5, 3)," +
-        "`EF_link` VARCHAR(459) CHARACTER SET utf8," +
-        "`LAB_joined` VARCHAR(102) CHARACTER SET utf8," +
-        "`Durban_commitment` VARCHAR(102) CHARACTER SET utf8," +
-        "`LAB_CEPA` VARCHAR(102) CHARACTER SET utf8," +
-        "`LAB_URBIS` VARCHAR(102) CHARACTER SET utf8," +
-        "`LAB_wetlands` VARCHAR(102) CHARACTER SET utf8," +
-        "`Biophilic_cities` VARCHAR(102) CHARACTER SET utf8," +
-        "`European_Green_Capital_award` INT," +
-        "`European_capital_biodiversity` INT," +
-        "`biodiversity_url` VARCHAR(459) CHARACTER SET utf8," +
-        "`wetland_profile` VARCHAR(102) CHARACTER SET utf8," +
-        "`wetland_report` VARCHAR(102) CHARACTER SET utf8," +
-        "`SI_status` VARCHAR(102) CHARACTER SET utf8," +
-        "`MAB_urban` INT," +
-        "`IUCN_protected_area` VARCHAR(102) CHARACTER SET utf8," +
-        "`grab_partner` VARCHAR(102) CHARACTER SET utf8," +
-        "`extra1_title` VARCHAR(102) CHARACTER SET utf8," +
-        "`extra1_url` VARCHAR(459) CHARACTER SET utf8," +
-        "`extra2_title` VARCHAR(102) CHARACTER SET utf8," +
-        "`extra2_link` VARCHAR(459) CHARACTER SET utf8," +
-        "`map` VARCHAR(102) CHARACTER SET utf8," +
-        "`map_link` VARCHAR(459) CHARACTER SET utf8," +
-        "`data_portal` VARCHAR(102) CHARACTER SET utf8," +
-        "`data_link` VARCHAR(459) CHARACTER SET utf8," +
-        "`contact_name` VARCHAR(102) CHARACTER SET utf8," +
-        "`contact_title` INT," +
-        "`contact_email` VARCHAR(102) CHARACTER SET utf8," +
-        "`rainfall` INT," +
-        "`elevation_m` INT," +
-        "`temperature` INT," +
-        "`coastal` INT," +
-        "`CBI_coalition` INT," +
-        "`update_date` INT," +
-        "`update_by` VARCHAR(102) CHARACTER SET utf8," +
-        "`update_verified` INT," +
+      "CREATE TABLE locations (" +
+        "`id` INT," +
+        "`inst_address` VARCHAR(255) CHARACTER SET utf8," +
+        "`lat` NUMERIC(9, 7)," +
+        "`lng` NUMERIC(10, 7)," +
+        "`inst_title` VARCHAR(255) CHARACTER SET utf8," +
+        "`country` VARCHAR(255) CHARACTER SET utf8," +
+        "`scale` VARCHAR(255) CHARACTER SET utf8," +
         "`population` INT," +
-        "`density_km2` NUMERIC(14, 9)," +
+        "`density_km2` NUMERIC(12, 6)," +
         "`area_km2` NUMERIC(17, 11)," +
-        "`area_ha` NUMERIC(6, 1)," +
-        "`OnePlanet` VARCHAR(3) CHARACTER SET utf8," +
-        "`carrycap_year` VARCHAR(10) CHARACTER SET utf8," +
-        "`carrycap_ghapercap` NUMERIC(5, 4)," +
-        "`carrycap_source` VARCHAR(204) CHARACTER SET utf8," +
-        "`myJson` VARCHAR(2000)" +
-        ");";
+        "`area_ha` NUMERIC(7, 2)," +
+        "`biodiversity_url` VARCHAR(512) CHARACTER SET utf8," +
+        "`url_verifydate` DATETIME" +
+        ");"
     query.push(createLocationsTableQuery);
 
 
@@ -592,11 +542,53 @@ update = function(){
     query.push(createIndicatorRatingsTableQuery);
 
     createDocumentsTableQuery =
-        "CREATE TABLE documents(" +
-        "`documentName` VARCHAR(255), " +
-        "`documentUrl` VARCHAR(2048)" +
-        ");";
+      "CREATE TABLE documents (" +
+          "`id` INT," +
+          "`inst_id` INT," +
+          "`doc_type` VARCHAR(255) CHARACTER SET utf8," +
+          "`doc_year` INT," +
+          "`doc_title` VARCHAR(255) CHARACTER SET utf8," +
+          "`doc_url` VARCHAR(255) CHARACTER SET utf8," +
+          "`keywords` VARCHAR(512) CHARACTER SET utf8," +
+          "`source_url` VARCHAR(255) CHARACTER SET utf8," +
+          "`link_verified` VARCHAR(255) CHARACTER SET utf8" +
+      ");"
     query.push(createDocumentsTableQuery);
+
+    createParticipationTableQuery =
+      "CREATE TABLE participation (" +
+          "`id` INT," +
+          "`inst_id` INT," +
+          "`part_category` VARCHAR(255) CHARACTER SET utf8," +
+          "`part_name` VARCHAR(255) CHARACTER SET utf8," +
+          "`part_year` INT," +
+          "`part_data` NUMERIC(8, 5)," +
+          "`part_units` VARCHAR(255) CHARACTER SET utf8," +
+          "`part_level` VARCHAR(255) CHARACTER SET utf8," +
+          "`part_link_label` VARCHAR(255) CHARACTER SET utf8," +
+          "`part_link` VARCHAR(512) CHARACTER SET utf8," +
+          "`part_link_label2` VARCHAR(255) CHARACTER SET utf8," +
+          "`part_link2` VARCHAR(512) CHARACTER SET utf8," +
+          "`part_link_label3` VARCHAR(255) CHARACTER SET utf8," +
+          "`part_link3` VARCHAR(512) CHARACTER SET utf8," +
+          "`keywords` VARCHAR(1024) CHARACTER SET utf8," +
+          "`link_verified` VARCHAR(255) CHARACTER SET utf8" +
+      ");"
+
+    query.push(createParticipationTableQuery);
+
+    createMapButtonsTableQuery =
+      "CREATE TABLE mapButtons (" +
+        "`part_name` VARCHAR(255) CHARACTER SET utf8," +
+        "`button_category` VARCHAR(255) CHARACTER SET utf8," +
+        "`button_text` VARCHAR(255) CHARACTER SET utf8," +
+        "`image` VARCHAR(512) CHARACTER SET utf8," +
+        "`marker_colors_by` VARCHAR(255) CHARACTER SET utf8," +
+        "`marker_colors` VARCHAR(255) CHARACTER SET utf8" +
+      ");"
+
+    query.push(createMapButtonsTableQuery);
+
 
     createCategoriesTableQuery =
         "CREATE TABLE categories(" +
