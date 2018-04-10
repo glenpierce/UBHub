@@ -31,14 +31,13 @@ router.get('/', function(req, res, next) {
     locationsQuery = 'SELECT * from locations limit 1000';
 
 
-    getMapData(connection, locationsQuery)
+    getMapLocations(connection, locationsQuery)
     .then((mapData) => {
       mapSummary = getSummary(mapData);
       buttonsQuery = 'SELECT * from mapButtons';
       getMapData(connection, buttonsQuery)
       .then((buttons) => {
         var mapButtons = categorizeButtons(buttons);
-        console.log(JSON.stringify(mapButtons));
         if (req.session && req.session.user) {
             res.render('map', {
               mapFilterParameters: mapFilterParameters,
@@ -90,7 +89,6 @@ router.post('/tableData', function(req, res, next){
   });
 
   connection.connect();
-  console.log(query);
 
   connection.query(query, function(err, rows, fields) {
     //Output an appropriate tbody
@@ -189,17 +187,11 @@ function buildLocationsQuery(filters, page, limit){
           //TODO: fix this when new data is in db
           query+= " true = true "
           break;
-
-
       }
-
       query += " AND ";
-
-
     }
 
     query = query.substr(0, query.length - 4);
-
   }
 
   if(page > -1 && limit > -1){
@@ -217,6 +209,29 @@ function getPlan1Title(location){
   return "";
 }
 
+function getMapLocations(connection, query){
+  return new Promise((resolve, reject) => {
+    getMapData(connection, query)
+    .then ((locations) => {
+
+      var partQueryIds = locations.map((x) => {
+        return x.id;
+      })
+
+      var partQueryStrings = partQueryIds.join(", ");
+
+
+      var partQuery = "SELECT * FROM participation WHERE inst_id in (" + partQueryStrings + ")";
+
+      getMapData(connection, partQuery)
+      .then((partData => {
+        locations = mapParticipitationDataToLocations(partData, locations);
+        resolve(locations);
+      }))
+    });
+  });
+}
+
 function getMapData(connection, query){
   return new Promise((resolve, reject) => {
     connection.query(query, function(err, rows, fields) {
@@ -227,6 +242,38 @@ function getMapData(connection, query){
       }
     })
   });
+}
+
+function mapParticipitationDataToLocations(participationData, locations){
+  //TODO: optimize this
+  participationData.forEach((part) => {
+    var found = false;
+    var i = 0;
+
+    while (!found && i < locations.length) {
+
+      if(locations[i].id == part.inst_id) {
+        locations[i] = attachParticipation(locations[i], part);
+        found = true;
+      }
+      i++;
+    }
+
+  });
+
+  return locations;
+}
+
+function attachParticipation(location, part) {
+  //location.participation = [part];
+
+  if(location.participation == undefined) {
+    location.participation = [part];
+  } else {
+    location.participation.push(part);
+  }
+
+  return location;
 }
 
 function categorizeButtons(buttons) {
@@ -321,13 +368,17 @@ var mapActivities = [
     {
         name: "Biodiversity Report",
         id: "biodiversityReport"
+    },
+    {
+        name: "Ecological Footprint",
+        id: "Ecological Footprint"
     }
 ];
 
 var mapIndices = [
     {
-        name: "Local Action for Biodiversity",
-        id: "labJoined",
+        name: "LAB Wetlands",
+        id: "LAB Wetlands",
         image: "LabProgrammeLogo.jpg"
     }
 ];
@@ -347,9 +398,9 @@ var mapFilterParameters = [
   },
   {
     name: "Biodiversity Activity",
-    id: "activity",
-    options: [mapActivities[0].name, mapActivities[1].name, mapActivities[2].name, mapActivities[3].name],
-    type: "nullable"
+    id: "part_category",
+    options: [mapActivities[0].name, mapActivities[1].name, mapActivities[2].name, mapActivities[3].name, mapActivities[4].name],
+    type: "program"
   },
   {
     name: "Land Area (km\u00B2)",
@@ -365,9 +416,9 @@ var mapFilterParameters = [
   },
   {
     name: "Program or Index",
-    id: "programIndex",
+    id: "part_name",
     options: [mapIndices[0].name],
-    type: "nullable"
+    type: "program"
   }];
 
 module.exports = router;

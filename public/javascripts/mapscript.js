@@ -16,226 +16,7 @@
   var inactiveZindex = 5;
 
 
-function filter(value, filterBy, type){
-    if(value == "none"){
-        return;
-    }
 
-  if(type == "select"){
-
-    filterValues(value, filterBy);
-
-  } else if (type == "range") {
-
-    filterRange(value, filterBy);
-
-
-  } else if (type == "nullable") {
-        switch (value) {
-            case "Biodiversity Website":
-                nullableValue = "biodiversity_url";
-                break;
-            case "Biodiversity in a Comprehensive Plan":
-                nullableValue = "intplan_title";
-                break;
-            case "Biodiversity Plan":
-                nullableValue = "plan1_title";
-                break;
-            case "Biodiversity Report":
-                nullableValue = "report_title";
-                break;
-            case "Local Action for Biodiversity":
-                nullableValue = "LAB_joined";
-                break;
-            default:
-                return;
-        }
-        filterNotNull(nullableValue);
-  } else {
-    console.log("Unexpected filter type: " + type);
-  }
-
-};
-
-function runFilters(){
-  markers.forEach((marker) => {
-    var retain = true;
-    activeFilters.forEach((filter) => {
-      if(retain) {
-        retain = evaluateFilterOnMarker(filter, marker);
-      }
-    })
-    marker.setVisible(retain);
-  });
-
-  //Also update the table of results
-}
-
-function filterValues(value, filterBy){
-  markers.forEach(function (marker) {
-      marker.setVisible(marker.element[filterBy] == value);
-  });
-}
-
-function filterRange(value, filterBy){
-  var upper;
-  var lower;
-  value = value.replace(/\,/g,"");
-  var values = value.split("-");
-  if(values.length != 2){
-    if(value[0] == "<") {
-      lower = 0;
-      upper = value.substr(1, value.length);
-    } else if (value[0] == ">"){
-      lower = value.substr(1, value.length);
-      upper = Number.MAX_VALUE;
-    }
-  } else {
-    upper = values[1];
-    lower = values[0];
-  }
-  markers.forEach(function (marker) {
-      if(!(marker.element[filterBy] > lower && marker.element[filterBy] < upper)){
-          marker.setVisible(false);
-      }
-  });
-}
-
-function addFilter(filterKey, filterValue, filterType){
-
-  var upper = null;
-  var lower = null;
-  if(filterType == "range") {
-    var value = filterValue.replace(/\,/g,"");
-    var values = value.split("-");
-    if(values.length != 2){
-      if(values[0] == "<") {
-        lower = 0;
-        upper = values.substr(1, value.length);
-      } else if (values[0] == ">"){
-        lower = values.substr(1, value.length);
-        upper = Number.MAX_VALUE;
-      }
-    } else {
-      upper = values[1];
-      lower = values[0];
-    }
-  }
-
-
-  removeFilter(filterKey);
-  activeFilters.push({
-    key: filterKey,
-    val: filterValue,
-    type: filterType,
-    upper: upper,
-    lower: lower
-  });
-
-
-  onFilterUpdate();
-
-  //console.log(activeFilters);
-}
-
-function removeFilter(filterKey){
-  activeFilters = activeFilters.filter( (x) => {
-    return x.key != filterKey;
-  });
-}
-
-function clearInactiveFilters(){
-  activeFilters = activeFilters.filter( (x) => {
-    return x.val != "none" ;
-  });
-}
-
-function clearFiltersList(){
-  activeFilters = [];
-}
-
-function evaluateFilterOnMarker(filter, marker){
-  switch(filter.type){
-    case "select":
-      return (marker.element[filter.key] == filter.val);
-      break;
-    case "range":
-      return ((marker.element[filter.key] > filter.lower && marker.element[filter.key] < filter.upper));
-      break;
-    case "nullable":
-      return false;
-      break;
-    default:
-      return false;
-  }
-}
-
-function onFilterUpdate(){
-  clearInactiveFilters();
-  runFilters();
-  getTableData(1, activeFilters);
-  getResultCounts(activeFilters);
-}
-
-//TODO: filters need to remember all active filtering, not just latest
-
-function selectHighlight(filterBy, colorBy, colorLevels, buttonNode){
-  highlightValues(filterBy, colorBy, colorLevels);
-  if(currentActiveHighlightingButton != null){
-    currentActiveHighlightingButton.classList.remove("activeButton");
-  }
-  currentActiveHighlightingButton = buttonNode;
-  buttonNode.classList.add("activeButton");
-}
-
-
-function highlightValues(filterBy, colorBy, colorLevels){
-  var callback = (markers, programs) => {
-    var iconArray = makeIconArray(colorLevels);
-
-    markers.forEach(function (marker) {
-      var found = false;
-
-      programs.forEach(function (program) {
-
-        if(marker.element.id == program.inst_id) {
-
-          switch (colorBy) {
-
-            case "part_level":
-              var icon = blueImage;
-
-              for (i = 0; i < iconArray.length; i++) {
-                if (iconArray[i].level == program.part_level) {
-                  icon = iconArray[i].icon;
-                }
-              }
-
-              marker.setIcon(icon);
-
-            break;
-
-            default:
-              marker.setIcon(orangeImage);
-            break;
-
-          }
-          found = true;
-          setMarkerFocusZindex(marker, true);
-
-
-        }
-      });
-      if (!found) {
-        marker.setIcon(greyImage);
-        setMarkerFocusZindex(marker, false);
-      }
-    });
-  }
-  var programs = getPrograms(filterBy, markers, callback);
-
-
-}
 
 function getPrograms(partName, markers, callback){
   var xhr = new XMLHttpRequest();
@@ -316,6 +97,259 @@ function closeAllPanels(){
 }
 
 //FILTER
+/*function filter(value, filterBy, type){
+  console.log(activeFilters);
+    if(value == "none"){
+        return;
+    }
+
+  if(type == "select"){
+
+    filterValues(value, filterBy);
+
+  } else if (type == "range") {
+
+    filterRange(value, filterBy);
+
+  } else if (type == "program") {
+    console.log("p");
+    filterHasProgram(value, "part_name");
+
+  } else if (type == "nullable") {
+        switch (value) {
+            case "Biodiversity Website":
+                nullableValue = "biodiversity_url";
+                break;
+            case "Biodiversity in a Comprehensive Plan":
+                nullableValue = "intplan_title";
+                break;
+            case "Biodiversity Plan":
+                nullableValue = "plan1_title";
+                break;
+            case "Biodiversity Report":
+                nullableValue = "report_title";
+                break;
+            case "Local Action for Biodiversity":
+                nullableValue = "LAB_joined";
+                break;
+            default:
+                return;
+        }
+        filterNotNull(nullableValue);
+  } else {
+    console.log("Unexpected filter type: " + type);
+  }
+
+};*/
+
+function runFilters(){
+  markers.forEach((marker) => {
+    var retain = true;
+    activeFilters.forEach((filter) => {
+      if(retain) {
+        retain = evaluateFilterOnMarker(filter, marker);
+      }
+    })
+    marker.setVisible(retain);
+  });
+
+  //Also update the table of results
+}
+
+function filterValues(value, filterBy){
+  markers.forEach(function (marker) {
+      marker.setVisible(marker.element[filterBy] == value);
+  });
+}
+
+function filterRange(value, filterBy){
+  var upper;
+  var lower;
+  value = value.replace(/\,/g,"");
+  var values = value.split("-");
+  if(values.length != 2){
+    if(value[0] == "<") {
+      lower = 0;
+      upper = value.substr(1, value.length);
+    } else if (value[0] == ">"){
+      lower = value.substr(1, value.length);
+      upper = Number.MAX_VALUE;
+    }
+  } else {
+    upper = values[1];
+    lower = values[0];
+  }
+  markers.forEach(function (marker) {
+      if(!(marker.element[filterBy] > lower && marker.element[filterBy] < upper)){
+          marker.setVisible(false);
+      }
+  });
+}
+
+function filterHasProgram(value, field){
+
+  markers.forEach(function (marker) {
+    marker.participation.forEach(function (part) {
+      if(part.part_category != value) {
+        marker.setVisible(false);
+      }
+    });
+  });
+}
+
+function markerHasProgramField(marker, value, field) {
+
+  if (marker.element.participation == undefined) {
+    return false;
+  }
+
+    var found = false;
+
+    marker.element.participation.forEach(function (part) {
+      if (field == "part_category" && part.part_category == value) {
+        found = true;
+      } else if (field == "part_name" && part.part_name == value) {
+        found = true;
+      }
+    });
+
+    return found;
+
+}
+
+
+function addFilter(filterKey, filterValue, filterType){
+
+  var upper = null;
+  var lower = null;
+  if(filterType == "range") {
+    var value = filterValue.replace(/\,/g,"");
+    var values = value.split("-");
+    if(values.length != 2){
+      if(values[0] == "<") {
+        lower = 0;
+        upper = values.substr(1, value.length);
+      } else if (values[0] == ">"){
+        lower = values.substr(1, value.length);
+        upper = Number.MAX_VALUE;
+      }
+    } else {
+      upper = values[1];
+      lower = values[0];
+    }
+  }
+
+
+  removeFilter(filterKey);
+  activeFilters.push({
+    key: filterKey,
+    val: filterValue,
+    type: filterType,
+    upper: upper,
+    lower: lower
+  });
+
+
+  onFilterUpdate();
+
+  //console.log(activeFilters);
+}
+
+function removeFilter(filterKey){
+  activeFilters = activeFilters.filter( (x) => {
+    return x.key != filterKey;
+  });
+}
+
+function clearInactiveFilters(){
+  activeFilters = activeFilters.filter( (x) => {
+    return x.val != "none" ;
+  });
+}
+
+function clearFiltersList(){
+  activeFilters = [];
+}
+
+function evaluateFilterOnMarker(filter, marker){
+  switch(filter.type){
+    case "select":
+      return (marker.element[filter.key] == filter.val);
+      break;
+    case "range":
+      return ((marker.element[filter.key] > filter.lower && marker.element[filter.key] < filter.upper));
+      break;
+    case "program":
+      return markerHasProgramField(marker, filter.val, filter.key);
+      break;
+    default:
+      return false;
+  }
+}
+
+function onFilterUpdate(){
+  clearInactiveFilters();
+  runFilters();
+  getTableData(1, activeFilters);
+  getResultCounts(activeFilters);
+}
+
+//TODO: filters need to remember all active filtering, not just latest
+
+function selectHighlight(filterBy, colorBy, colorLevels, buttonNode){
+  highlightValues(filterBy, colorBy, colorLevels);
+  if(currentActiveHighlightingButton != null){
+    currentActiveHighlightingButton.classList.remove("activeButton");
+  }
+  currentActiveHighlightingButton = buttonNode;
+  buttonNode.classList.add("activeButton");
+}
+
+
+function highlightValues(filterBy, colorBy, colorLevels){
+  var callback = (markers, programs) => {
+    var iconArray = makeIconArray(colorLevels);
+
+    markers.forEach(function (marker) {
+      var found = false;
+
+      programs.forEach(function (program) {
+        if(marker.element.id == program.inst_id) {
+
+          switch (colorBy) {
+
+            case "part_level":
+              var icon = blueImage;
+              for (i = 0; i < iconArray.length; i++) {
+                if (iconArray[i].level == program.part_level) {
+                  icon = iconArray[i].icon;
+                }
+              }
+              marker.setIcon(icon);
+            break;
+
+            default:
+              marker.setIcon(orangeImage);
+            break;
+
+          }
+          found = true;
+          setMarkerFocusZindex(marker, true);
+        }
+      });
+
+      if (!found) {
+        marker.setIcon(greyImage);
+        setMarkerFocusZindex(marker, false);
+      }
+
+    });
+  }
+
+  getPrograms(filterBy, markers, callback);
+}
+
+
 
   function filterNotNull(filterBy) {
       markers.forEach(function (marker) {
@@ -466,15 +500,29 @@ function closeAllPanels(){
             '<div id="siteNotice">' +
             '</div>' +
             '<div style="font-weight:bold; font-size:20px;">' + entry.inst_title + '</div>' +
-            '<div id="bodyContent">' +
-            (entry.scale  !== null ?  '<div">' + entry.scale + '</div>' : "") +
-            (entry.biodiversity_url  !== null ?  '<div><a href="' + entry.biodiversity_url + '" rel="noopener noreferrer" target="_blank"">Main link</a></div>' : "") +
+            '<div class="bodyContent">' +
+            (entry.scale  !== null ?  '<div>' + entry.scale + '</div>' : "") +
+            (entry.biodiversity_url  !== null ?  '<div><a href="' + entry.biodiversity_url + '" rel="noopener noreferrer" target="_blank"">Main link</a></div>' : "");
 
             //TODO: add current program information, available docs etc. here
 
+        if (entry.participation != undefined) {
+          contentString += '<h4>Programs:</h4>'
+          entry.participation.forEach((part) => {
+            contentString += '<p>';
+            if (part.part_year != null) {
+              contentString += part.part_year + " ";
+            }
+            contentString += '<a href="' + part.part_link + '" target="_blank">' + part.part_name +'</a>';
 
-            '</div>' +
-        '</div>';
+            if (part.part_level != null) {
+              contentString += ' (' + part.part_level + ')';
+            }
+            contentString += '</p>';
+          });
+        }
+
+        contentString += '</div></div>';
         return contentString;
   }
 
@@ -483,7 +531,7 @@ function closeAllPanels(){
   }
 
   function initMap (mapData) {
-    //console.log(mapData);
+    console.log(mapData);
     greyImage = {
         url: '/images/marker_0_grey_39x59.png',
         scaledSize: new google.maps.Size(20, 30),
