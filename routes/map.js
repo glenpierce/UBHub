@@ -380,6 +380,75 @@ var mapIndices = [
         name: "LAB Wetlands",
         id: "LAB Wetlands",
         image: "LabProgrammeLogo.jpg"
+    },
+    {
+        name: "Pioneer Programme"
+    },
+    {
+        name: "Biocapacity"
+    },
+    {
+        name: "Biodiversity Communication"
+    },
+    {
+        name: "Education and Public Awareness (CEPA)"
+    },
+    {
+        name: "Biophilic Cities"
+    },
+    {
+        name: "Capitale Francaise de la Biodiversite"
+    },
+    {
+        name: "Community Wildlife Habitat"
+    },
+    {
+        name: "Durban Commitment"
+    },
+    {
+        name: "European Capitals of Biodiversity"
+    },
+    {
+        name: "European Green Capital Award"
+    },
+    {
+        name: "Footprint"
+    },
+    {
+        name: "Green and Blue Space Adaptation for Urban Areas and Eco Towns(GRaBS)"
+    },
+    {
+        name: "INTERACT-Bio"
+    },
+    {
+        name: "Mayor's Monarch Pledge"
+    },
+    {
+        name: "One Planet Living"
+    },
+    {
+        name: "Pioneer Programme"
+    },
+    {
+        name: "Singapore Index"
+    },
+    {
+        name: "Urban Biosphere Reserves"
+    },
+    {
+        name: "Urban Bird Treaty"
+    },
+    {
+        name: "Urban Protected Area"
+    },
+    {
+        name: "Urban Wildlife Refuge"
+    },
+    {
+        name: "URBIS"
+    },
+    {
+        name: "WILD Cities"
     }
 ];
 
@@ -417,7 +486,9 @@ var mapFilterParameters = [
   {
     name: "Program or Index",
     id: "part_name",
-    options: [mapIndices[0].name],
+    options: [mapIndices[0].name, mapIndices[1].name, mapIndices[2].name, mapIndices[3].name, mapIndices[4].name, mapIndices[5].name, mapIndices[6].name, mapIndices[7].name, mapIndices[8].name, mapIndices[9].name, mapIndices[10].name,
+            mapIndices[11].name, mapIndices[12].name, mapIndices[13].name, mapIndices[14].name, mapIndices[15].name, mapIndices[16].name, mapIndices[17].name, mapIndices[18].name, mapIndices[19].name, mapIndices[20].name,
+            mapIndices[21].name, mapIndices[22].name],
     type: "program"
   }];
 

@@ -13,13 +13,13 @@ log = function () {
 
 updateLocations = function(lower, upper) {
 
-    //config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
-    config.rdsHost="127.17.0.2";
+    config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
+    // config.rdsHost="127.17.0.2";
     config.rdsUser="root";
     config.rdsPassword="my-secret-pw";
 
-    for (i = lower; i < upper; i++) {
-        connection = mysql.createConnection({
+    for (let i = lower; i < upper; i++) {
+        let connection = mysql.createConnection({
             host: config.rdsHost,
             user: config.rdsUser,
             password: config.rdsPassword,
@@ -27,7 +27,7 @@ updateLocations = function(lower, upper) {
         });
 
         connection.connect();
-        query = 'select id, address, lat from locations where id = ' + i + ";";
+        let query = 'select id, address, lat from locations where id = ' + i + ";";
         console.log(query);
         connection.query(query, function (err, rows, fields) {
             if (!err) {
@@ -47,11 +47,11 @@ updateLocations = function(lower, upper) {
 };
 
 function getLatLongAddresses(){
-    addresses = [
+    let addresses = [
         "address 1",
         "address 2"
     ];
-    for(i = 0; i < addresses.length; i++){
+    for(let i = 0; i < addresses.length; i++){
         getLatLongSimple(addresses[i]);
     }
 }
@@ -63,9 +63,9 @@ function getLatLongSimple(address) {
 function getLatLong(address, id){
     console.log("getLatLong");
     if(address){
-        var addressQueryString = address.replace(/\s+/g, "+");
+        let addressQueryString = address.replace(/\s+/g, "+");
         //https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs
-        var options = {
+        let options = {
             host: 'maps.googleapis.com',
             path: '/maps/api/geocode/json?address=' + addressQueryString + "&key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs",
             //since we are listening on a custom port, we need to specify it by hand
@@ -75,13 +75,13 @@ function getLatLong(address, id){
             // qs: 'address=' + "1600+Amphitheatre+Parkway,+Mountain+View,+CA" + "&key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs"
         };
 
-        var req = https.request(options, function(response) {
-            var data = '';
+        let req = https.request(options, function(response) {
+            let data = '';
             response.on('data', function(chunk) {
                 data += chunk;
             });
             response.on('end', function() {
-                var result = JSON.parse(data);
+                let result = JSON.parse(data);
                 // console.log(result);
                 // country = '';
                 if(result.results[0]){
@@ -140,8 +140,8 @@ function updateLocation(id, lat, lng){
 
 update = function(){
 
-    //config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
-    config.rdsHost="127.17.0.2"; //this should be your Docker container's IP address
+    config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
+    // config.rdsHost="127.17.0.2"; //this should be your Docker container's IP address
     config.rdsUser="root";
     config.rdsPassword="my-secret-pw";
 
@@ -154,15 +154,15 @@ update = function(){
 
     connection.connect();
 
-    var query = [];
+    let query = [];
 
-    createDbQuery = "CREATE DATABASE ubhub;";
+    let createDbQuery = "CREATE DATABASE ubhub;";
     query.push(createDbQuery);
 
-    useDbQuery = "use ubhub;";
+    let useDbQuery = "use ubhub;";
     query.push(useDbQuery);
 
-    createUsersTableQuery =
+    let createUsersTableQuery =
         "CREATE TABLE users(" +
         "email VARCHAR(255) NOT NULL," +
         "userAddress VARCHAR(2000)," +
@@ -179,7 +179,7 @@ update = function(){
     // query.push(createDevelopmentUser);
 
 
-    createPostsTable =
+    let createPostsTable =
         "CREATE TABLE posts(" +
         "id INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
         "parent INT," +
@@ -197,7 +197,7 @@ update = function(){
         ");";
     query.push(createPostsTable);
 
-    createVotesTable =
+    let createVotesTable =
         "CREATE TABLE votes(" +
         "author VARCHAR(255) NOT NULL," +
         "postId INT NOT NULL," +
@@ -207,40 +207,40 @@ update = function(){
         ");";
     query.push(createVotesTable);
 
-    createEmailsTableQuery =
+    let createEmailsTableQuery =
         "CREATE TABLE emails (" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
         "`email` VARCHAR(2048) CHARACTER SET utf8" +
         ");";
     query.push(createEmailsTableQuery);
 
-    createLocationsTableQuery =
+    let createLocationsTableQuery =
       "CREATE TABLE locations (" +
         "`id` INT," +
         "`inst_address` VARCHAR(255) CHARACTER SET utf8," +
-        "`lat` NUMERIC(9, 7)," +
+        "`lat` NUMERIC(10, 7)," +
         "`lng` NUMERIC(10, 7)," +
         "`inst_title` VARCHAR(255) CHARACTER SET utf8," +
         "`country` VARCHAR(255) CHARACTER SET utf8," +
         "`scale` VARCHAR(255) CHARACTER SET utf8," +
         "`population` INT," +
-        "`density_km2` NUMERIC(12, 6)," +
+        "`density_km2` NUMERIC(14, 9)," +
         "`area_km2` NUMERIC(17, 11)," +
         "`area_ha` NUMERIC(7, 2)," +
         "`biodiversity_url` VARCHAR(512) CHARACTER SET utf8," +
         "`url_verifydate` DATETIME" +
-        ");"
+        ");";
     query.push(createLocationsTableQuery);
 
 
-    createUserQuery =
+    let createUserQuery =
         "CREATE PROCEDURE createUser(IN emailInput VARCHAR(255), IN passwordHash VARCHAR(255), IN alias VARCHAR(255), IN userAddress VARCHAR(2000))\n" +
         "BEGIN\n" +
         "insert into users (email, hashedPassword, alias, userAddress) values(emailInput, passwordHash, alias, userAddress);\n" +
         "END";
     query.push(createUserQuery);
 
-    createLocationSimpleQuery =
+    let createLocationSimpleQuery =
         "CREATE PROCEDURE createLocationSimple(IN address VARCHAR(204), IN title VARCHAR(200), IN updateBy VARCHAR(255), IN country VARCHAR(51), IN scale VARCHAR(51), IN myJson VARCHAR(2000))\n" +
         "BEGIN\n" +
         "INSERT INTO locations (address, title, update_by, country, scale, myJson) VALUES (address, title, updateBy, country, scale, myJson);\n" +
@@ -248,49 +248,49 @@ update = function(){
         "END";
     query.push(createLocationSimpleQuery);
 
-    loginQuery =
+    let loginQuery =
         "CREATE PROCEDURE login(IN emailInput VARCHAR(255))\n" +
         "BEGIN\n" +
         "SELECT email, hashedPassword from users WHERE email = emailInput;\n" +
         "END";
     query.push(loginQuery);
 
-    updateLocationQuery =
+    let updateLocationQuery =
         "CREATE PROCEDURE updateLocation(IN idEntry INT, IN lat FLOAT( 10, 6 ), IN lng FLOAT( 10, 6 ))\n" +
         "BEGIN\n" +
         "UPDATE locations SET lat = lat, lng = lng where id = idEntry;" +
         "END";
     query.push(updateLocationQuery);
 
-    addEmailQuery =
+    let addEmailQuery =
         "CREATE PROCEDURE addEmail(IN email VARCHAR(2048))\n" +
         "BEGIN\n" +
         "INSERT INTO emails (email) VALUES (email);\n" +
         "END";
     query.push(addEmailQuery);
 
-    getAllUploadsByUserQuery =
+    let getAllUploadsByUserQuery =
         "CREATE PROCEDURE getAllUploadsByUser(IN userId VARCHAR(2048))\n" +
         "BEGIN\n" +
         "SELECT * from locations where update_by = userId;\n" +
         "END";
     query.push(getAllUploadsByUserQuery);
 
-    getUploadByIdQuery =
+    let getUploadByIdQuery =
         "CREATE PROCEDURE getUploadById(IN inputId int(11))\n" +
         "BEGIN\n" +
         "SELECT * from locations where id = inputId;" +
         "END";
     query.push(getUploadByIdQuery);
 
-    getAllUsersQuery =
+    let getAllUsersQuery =
         "CREATE PROCEDURE GetAllUsers(emailInput char(255))\n" +
         "BEGIN\n" +
         "SELECT * FROM Users where email = emailInput;\n" +
         "END";
     query.push(getAllUsersQuery);
 
-    createAddPostQuery =
+    let createAddPostQuery =
         "CREATE PROCEDURE addForumPost(IN author varchar(255), IN parent varchar(255), IN subject varchar(255), IN body TEXT, IN creationDate DATETIME, IN tags varchar(2048))\n" +
         "BEGIN\n" +
         "INSERT INTO posts (author, parent, subject, body, creationDate, views, status, tags) VALUES (author, parent, subject, body, creationDate, 0, 'published', tags);\n" +
@@ -298,14 +298,14 @@ update = function(){
         "END";
     query.push(createAddPostQuery);
 
-    createGetPostQuery =
+    let createGetPostQuery =
         "CREATE PROCEDURE getPostById(IN inputId int)\n"+
         "BEGIN\n" +
         "SELECT * FROM posts WHERE `id`=inputId;\n" +
         "END";
     query.push(createGetPostQuery);
 
-    createGetPostAndAllSubsQuery =
+    let createGetPostAndAllSubsQuery =
         "CREATE PROCEDURE getPostAndAllSubs(IN postId int)\n"+
         "SELECT * FROM posts WHERE `id` = postId \n"+
         "UNION\n" +
@@ -316,91 +316,91 @@ update = function(){
 
     query.push(createGetPostAndAllSubsQuery);
 
-    createGetAllPostsQuery =
+    let createGetAllPostsQuery =
         "CREATE PROCEDURE getAllPosts()\n" +
         "BEGIN\n" +
         "SELECT * FROM posts;\n" +
         "END";
     query.push(createGetAllPostsQuery);
 
-    createGetPostsByParentQuery =
+    let createGetPostsByParentQuery =
         "CREATE PROCEDURE getPostsByParent(IN parentId int)\n" +
         "BEGIN\n" +
         "SELECT * FROM posts WHERE `parent`=parentId;\n" +
         "END";
     query.push(createGetPostsByParentQuery);
 
-    createDeletePostQuery =
+    let createDeletePostQuery =
         "CREATE PROCEDURE deletePostById(IN id int)\n"+
         "BEGIN\n" +
         "DELETE FROM posts WHERE `id`=id;\n" +
         "END";
     query.push(createDeletePostQuery);
 
-    createUpvotePostQuery =
+    let createUpvotePostQuery =
         "CREATE PROCEDURE upvotePostById(IN authorId VARCHAR(255), IN post INT)\n"+
         "BEGIN\n" +
         "INSERT INTO votes (author, postId, deltaUpvotes) VALUES(authorId, post, 1);\n" +
         "END";
     query.push(createUpvotePostQuery);
 
-    createDownvotePostQuery =
+    let createDownvotePostQuery =
         "CREATE PROCEDURE downvotePostById(IN authorId VARCHAR(255), IN post INT)\n"+
         "BEGIN\n" +
         "INSERT INTO votes (author, postId, deltaUpvotes) VALUES(authorId, post, -1);\n" +
         "END";
     query.push(createDownvotePostQuery);
 
-    createGetDeltaVotesTotalQuery =
+    let createGetDeltaVotesTotalQuery =
         "CREATE PROCEDURE getDeltaVotesTotal(IN post INT)\n"+
         "BEGIN\n" +
         "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post;\n"+
         "END";
     query.push(createGetDeltaVotesTotalQuery);
 
-    createGetUpvotesTotalQuery =
+    let createGetUpvotesTotalQuery =
         "CREATE PROCEDURE getUpvotesTotal(IN post INT)\n"+
         "BEGIN\n" +
         "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post AND `deltaUpvotes` = 1;\n"+
         "END";
     query.push(createGetUpvotesTotalQuery);
 
-    createGetDownvotesTotalQuery =
+    let createGetDownvotesTotalQuery =
         "CREATE PROCEDURE getDownvotesTotal(IN post INT)\n"+
         "BEGIN\n" +
         "SELECT SUM(deltaUpvotes) from votes WHERE `postId` = post AND `deltaUpvotes` = -1;\n"+
         "END";
     query.push(createGetDownvotesTotalQuery);
 
-    createGetAuthorVoteForPostQuery =
+    let createGetAuthorVoteForPostQuery =
         "CREATE PROCEDURE getAuthorVoteForPost(IN post INT, IN authorId VARCHAR(255))\n"+
         "BEGIN\n"+
         "SELECT deltaUpvotes FROM votes WHERE `author` = authorId AND `postId` = post;\n"+
         "END";
     query.push(createGetAuthorVoteForPostQuery);
 
-    createUnvoteForPostQuery =
+    let createUnvoteForPostQuery =
         "CREATE PROCEDURE unvoteForPost(IN post INT, IN authorId VARCHAR(255))\n"+
         "BEGIN\n"+
         "DELETE FROM votes WHERE `author` = authorId AND `postId` = post;\n"+
         "END";
     query.push(createUnvoteForPostQuery);
 
-    createAddViewQuery =
+    let createAddViewQuery =
         "CREATE PROCEDURE addView(IN post INT)\n"+
         "BEGIN\n"+
         "UPDATE posts SET `views` = views + 1 WHERE id = post;\n"+
         "END";
     query.push(createAddViewQuery);
 
-    createAcceptPostQuery =
+    let createAcceptPostQuery =
         "CREATE PROCEDURE acceptPost(IN post INT, IN answerId INT)\n"+
         "BEGIN\n"+
         "UPDATE posts SET `acceptedAnswerId` = answerId WHERE id = post;\n"+
         "END";
     query.push(createAcceptPostQuery);
 
-    createProgramsTableQuery =
+    let createProgramsTableQuery =
         "CREATE TABLE programs(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`programName` VARCHAR(2048) CHARACTER SET utf8, " +
@@ -412,7 +412,7 @@ update = function(){
         ");";
     query.push(createProgramsTableQuery);
 
-    createProgramQuery =
+    let createProgramQuery =
         "CREATE PROCEDURE createProgram(IN programName VARCHAR(2048), IN author VARCHAR(255))\n" +
         "BEGIN\n" +
         "INSERT INTO programs(programName, author) VALUES (programName, author);\n" +
@@ -420,7 +420,7 @@ update = function(){
         "END";
     query.push(createProgramQuery);
 
-    createSitesTableQuery =
+    let createSitesTableQuery =
         "CREATE TABLE sites(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`siteName` VARCHAR(2048) CHARACTER SET utf8" +
@@ -433,7 +433,7 @@ update = function(){
         ");";
     query.push(createSitesTableQuery);
 
-    createSitesByUserTableQuery =
+    let createSitesByUserTableQuery =
         "CREATE TABLE sitesByUser(" +
         "`site` INT NOT NULL, " +
         "`user` VARCHAR(255) NOT NULL, " +
@@ -441,21 +441,21 @@ update = function(){
         ");";
     query.push(createSitesByUserTableQuery);
 
-    createGetSitesByUserQuery =
+    let createGetSitesByUserQuery =
         "CREATE PROCEDURE getSitesByUser(IN emailInput varchar(255))\n"+
         "BEGIN\n" +
         "SELECT * FROM sites where id IN (SELECT site FROM sitesByUser WHERE user = emailInput);\n" +
         "END";
     query.push(createGetSitesByUserQuery);
 
-    createGetSelectedSiteByUserQuery =
+    let createGetSelectedSiteByUserQuery =
         "CREATE PROCEDURE getSelectedSiteByUserQuery(IN emailInput varchar(255))\n"+
         "BEGIN\n" +
         "SELECT * FROM sites where id IN (SELECT site FROM sitesByUser WHERE user = emailInput AND selected = 1);\n" +
         "END";
     query.push(createGetSelectedSiteByUserQuery);
 
-    selectSiteForUser =
+    let selectSiteForUser =
         "CREATE PROCEDURE selectSiteForUser(IN emailInput varchar(255), IN siteSelected INT)\n"+
         "BEGIN\n" +
         "update sitesByUser SET selected = 0 WHERE user = emailInput;\n" +
@@ -463,7 +463,7 @@ update = function(){
         "END";
     query.push(selectSiteForUser);
 
-    selectSiteForUserAndReturnIt =
+    let selectSiteForUserAndReturnIt =
         "CREATE PROCEDURE selectSiteForUserAndReturnIt(IN emailInput varchar(255), IN siteSelected INT)\n"+
         "BEGIN\n" +
         "CALL selectSiteForUser(emailInput, siteSelected);\n" +
@@ -471,7 +471,7 @@ update = function(){
         "END";
     query.push(selectSiteForUserAndReturnIt);
 
-    createSiteQuery =
+    let createSiteQuery =
         "CREATE PROCEDURE createSite(IN siteName VARCHAR(2048), IN userInput VARCHAR(255))\n" +
         "BEGIN\n" +
         "INSERT INTO sites(siteName) VALUES (siteName);\n" +
@@ -483,7 +483,7 @@ update = function(){
     query.push(createSiteQuery);
 
 
-    createIndicatorsTableQuery =
+    let createIndicatorsTableQuery =
         "CREATE TABLE indicators(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`indicatorName` VARCHAR(2048) CHARACTER SET utf8, " +
@@ -501,7 +501,7 @@ update = function(){
         ");";
     query.push(createIndicatorsTableQuery);
 
-    createIndicatorQuery =
+    let createIndicatorQuery =
         "CREATE PROCEDURE createIndicator(IN indicatorName VARCHAR(2048), IN author VARCHAR(255))\n" +
         "BEGIN\n" +
         "INSERT INTO indicators(indicatorName, author) VALUES (indicatorName, author);\n" +
@@ -509,7 +509,7 @@ update = function(){
         "END";
     query.push(createIndicatorQuery);
 
-    createIndicatorInProgramQuery =
+    let createIndicatorInProgramQuery =
         "CREATE PROCEDURE createIndicatorInProgram(IN indicatorName VARCHAR(2048), positionInCategory INT, categoryId INT)\n" +
         "BEGIN\n" +
         "INSERT INTO indicators(indicatorName, positionInCategory, categoryId) VALUES (indicatorName, positionInCategory, categoryId);\n" +
@@ -517,7 +517,7 @@ update = function(){
         "END";
     query.push(createIndicatorInProgramQuery);
 
-    createIndicatorValuesTableQuery =
+    let createIndicatorValuesTableQuery =
         "CREATE TABLE indicatorValues(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`name` VARCHAR(2048), " +
@@ -533,7 +533,7 @@ update = function(){
         ");";
     query.push(createIndicatorValuesTableQuery);
 
-    createIndicatorRatingsTableQuery =
+    let createIndicatorRatingsTableQuery =
         "CREATE TABLE indicatorRatings(" +
         "`indicator` INT, " +
         "`user` VARCHAR(255), " +
@@ -541,7 +541,7 @@ update = function(){
         ");";
     query.push(createIndicatorRatingsTableQuery);
 
-    createDocumentsTableQuery =
+    let createDocumentsTableQuery =
       "CREATE TABLE documents (" +
           "`id` INT," +
           "`inst_id` INT," +
@@ -552,10 +552,10 @@ update = function(){
           "`keywords` VARCHAR(512) CHARACTER SET utf8," +
           "`source_url` VARCHAR(255) CHARACTER SET utf8," +
           "`link_verified` VARCHAR(255) CHARACTER SET utf8" +
-      ");"
+      ");";
     query.push(createDocumentsTableQuery);
 
-    createParticipationTableQuery =
+    let createParticipationTableQuery =
       "CREATE TABLE participation (" +
           "`id` INT," +
           "`inst_id` INT," +
@@ -573,11 +573,10 @@ update = function(){
           "`part_link3` VARCHAR(512) CHARACTER SET utf8," +
           "`keywords` VARCHAR(1024) CHARACTER SET utf8," +
           "`link_verified` VARCHAR(255) CHARACTER SET utf8" +
-      ");"
-
+      ");";
     query.push(createParticipationTableQuery);
 
-    createMapButtonsTableQuery =
+    let createMapButtonsTableQuery =
       "CREATE TABLE mapButtons (" +
         "`part_name` VARCHAR(255) CHARACTER SET utf8," +
         "`button_category` VARCHAR(255) CHARACTER SET utf8," +
@@ -585,12 +584,11 @@ update = function(){
         "`image` VARCHAR(512) CHARACTER SET utf8," +
         "`marker_colors_by` VARCHAR(255) CHARACTER SET utf8," +
         "`marker_colors` VARCHAR(255) CHARACTER SET utf8" +
-      ");"
-
+      ");";
     query.push(createMapButtonsTableQuery);
 
 
-    createCategoriesTableQuery =
+    let createCategoriesTableQuery =
         "CREATE TABLE categories(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`program` INT, " +
@@ -604,7 +602,7 @@ update = function(){
         ");";
     query.push(createCategoriesTableQuery);
 
-    createCategoryQuery =
+    let createCategoryQuery =
         "CREATE PROCEDURE createCategory(IN categoryName VARCHAR(2048), IN positionInProgram INT, IN program INT)\n" +
         "BEGIN\n" +
         "INSERT INTO categories(categoryName, positionInProgram, program) VALUES (categoryName, positionInProgram, program);\n" +
@@ -612,7 +610,7 @@ update = function(){
         "END";
     query.push(createCategoryQuery);
 
-    createPermissionsTableQuery =
+    let createPermissionsTableQuery =
         "CREATE TABLE permissions(" +
         "`user` VARCHAR(255) NOT NULL, " +
         "`permissionLevel` INT, " +
@@ -622,7 +620,7 @@ update = function(){
         ");";
     query.push(createPermissionsTableQuery);
 
-    createUserDataTableQuery =
+    let createUserDataTableQuery =
         "CREATE TABLE userData(" +
         "`site` INT," +
         "`program` INT, " +
@@ -640,7 +638,7 @@ update = function(){
 
 
 
-    insertIntoIndicatorsQuery =
+    let insertIntoIndicatorsQuery =
         "insert into programs(programName, description, programType, private) values('Singapore Index', 'An index made in Singapore', 0, 0);" +
 
         "insert into indicators(indicatorName, positionInCategory, categoryId, archetype, weight, required, description, descriptionOfCalculation, calculation, private) values(Proportion of Natural Areas in the City, 1, 1, " +
@@ -740,7 +738,7 @@ update = function(){
 
     // query = [useDbQuery, dropAddPostQuery, createAddPostQuery];
 
-    for(var i = 0; i < query.length; i++) {
+    for(let i = 0; i < query.length; i++) {
 
         console.log(query[i]);
         connection.query(query[i], function (err, rows, fields) {
