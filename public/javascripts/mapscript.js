@@ -198,24 +198,32 @@ function filterHasProgram(value, field){
 }
 
 function markerHasProgramField(marker, value, field) {
-
-  if (marker.element.participation == undefined) {
-    return false;
-  }
-
-    var found = false;
+    if (marker.element.participation == undefined) {
+        return false;
+    }
 
     marker.element.participation.forEach(function (part) {
-      if (field == "part_category" && part.part_category == value) {
-        found = true;
-      } else if (field == "part_name" && part.part_name == value) {
-        found = true;
+      if (field == "part_name" && part.part_name == value) {
+        return true;
       }
     });
 
-    return found;
-
+    return false;
 }
+
+  function markerHasDocumentField(marker, value, field) {
+      if (marker.element.document== undefined) {
+          return false;
+      }
+
+      marker.element.document.forEach(function (part) {
+          if (field == "doc_type" && part.doc_type == value) {
+              return true;
+          }
+      });
+
+      return false;
+  }
 
 
 function addFilter(filterKey, filterValue, filterType){
@@ -275,13 +283,12 @@ function evaluateFilterOnMarker(filter, marker){
   switch(filter.type){
     case "select":
       return (marker.element[filter.key] == filter.val);
-      break;
     case "range":
       return ((marker.element[filter.key] > filter.lower && marker.element[filter.key] < filter.upper));
-      break;
     case "program":
       return markerHasProgramField(marker, filter.val, filter.key);
-      break;
+    case "document":
+      return markerHasDocumentField(marker, filter.val, filter.key);
     default:
       return false;
   }

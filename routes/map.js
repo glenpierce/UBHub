@@ -216,7 +216,7 @@ function getMapLocations(connection, query){
 
       var partQueryIds = locations.map((x) => {
         return x.id;
-      })
+      });
 
       var partQueryStrings = partQueryIds.join(", ");
 
@@ -226,8 +226,13 @@ function getMapLocations(connection, query){
       getMapData(connection, partQuery)
       .then((partData => {
         locations = mapParticipitationDataToLocations(partData, locations);
-        resolve(locations);
       }))
+      .then(() => {
+          const documentQuery = "SELECT * FROM documents WHERE inst_id in (" + partQueryStrings + ")";
+          getMapData(connection, documentQuery)
+          .then((documentData) => locations = mapDocumentDataToLocations(documentData, locations))
+          .then((() => resolve(locations)));
+      })
     });
   });
 }
@@ -264,6 +269,25 @@ function mapParticipitationDataToLocations(participationData, locations){
   return locations;
 }
 
+function mapDocumentDataToLocations(documentData, locations){
+    documentData.forEach((document) => {
+        var found = false;
+        var i = 0;
+
+        while (!found && i < locations.length) {
+
+            if(locations[i].id == document.inst_id) {
+                locations[i] = attachDocument(locations[i], document);
+                found = true;
+            }
+            i++;
+        }
+
+    });
+
+    return locations;
+}
+
 function attachParticipation(location, part) {
   //location.participation = [part];
 
@@ -274,6 +298,18 @@ function attachParticipation(location, part) {
   }
 
   return location;
+}
+
+function attachDocument(location, document) {
+    //location.participation = [part];
+
+    if(location.document == undefined) {
+        location.document = [document];
+    } else {
+        location.document.push(document);
+    }
+
+    return location;
 }
 
 function categorizeButtons(buttons) {
@@ -354,44 +390,61 @@ function update(){
 
 var mapActivities = [
     {
-        name: "Biodiversity Website",
-        id: "biodiversityWebsite"
+        name: "Biodiversity Data Portal"
     },
     {
-        name: "Biodiversity in a Comprehensive Plan",
-        id: "biodiversityMainstreaming"
+        name: "Biodiversity Online Map"
     },
     {
-        name: "Biodiversity Plan",
-        id: "biodiversityPlan"
+        name: "Biodiversity Plan"
     },
     {
-        name: "Biodiversity Report",
-        id: "biodiversityReport"
+        name: "Biodiversity Report"
     },
     {
-        name: "Ecological Footprint",
-        id: "Ecological Footprint"
+        name: "Comprehensive Plan"
+    },
+    {
+        name: "Developer Guide"
+    },
+    {
+        name: "Engagement Activity"
+    },
+    {
+        name: "Habitat Plan"
+    },
+    {
+        name: "Informational Handout"
+    },
+    {
+        name: "Local Program"
+    },
+    {
+        name: "Public Policy"
+    },
+    {
+        name: "Species Plan"
+    },
+    {
+        name: "Supporting Document"
+    },
+    {
+        name: "Sustainability Plan"
+    },
+    {
+        name: "Urban Forest Plan"
+    },
+    {
+        name: "Water Management Plan"
     }
 ];
 
 var mapIndices = [
     {
-        name: "LAB Wetlands",
-        id: "LAB Wetlands",
-        image: "LabProgrammeLogo.jpg"
-    },
-    {
-        name: "Pioneer Programme"
-    },
-    {
         name: "Biocapacity"
     },
     {
-        name: "Biodiversity Communication"
-    },
-    {
-        name: "Education and Public Awareness (CEPA)"
+        name: "Biodiversity Communication, Education and Public Awareness (CEPA)"
     },
     {
         name: "Biophilic Cities"
@@ -415,10 +468,15 @@ var mapIndices = [
         name: "Footprint"
     },
     {
-        name: "Green and Blue Space Adaptation for Urban Areas and Eco Towns(GRaBS)"
+        name: "Green and Blue Space Adaptation for Urban Areas and Eco Towns (GRaBS)"
     },
     {
         name: "INTERACT-Bio"
+    },
+    {
+        name: "LAB Wetlands",
+        id: "LAB Wetlands",
+        image: "LabProgrammeLogo.jpg"
     },
     {
         name: "Mayor's Monarch Pledge"
@@ -427,7 +485,7 @@ var mapIndices = [
         name: "One Planet Living"
     },
     {
-        name: "Pioneer Programme"
+        name: "Pioneer Programme" //todo: rename Lab Pioneer Programme
     },
     {
         name: "Singapore Index"
@@ -467,8 +525,9 @@ var mapFilterParameters = [
   },
   {
     name: "Biodiversity Activity",
-    id: "part_category",
-    options: [mapActivities[0].name, mapActivities[1].name, mapActivities[2].name, mapActivities[3].name, mapActivities[4].name],
+    id: "doc_type",
+    options: [mapActivities[0].name, mapActivities[1].name, mapActivities[2].name, mapActivities[3].name, mapActivities[4].name, mapActivities[5].name, mapActivities[6].name, mapActivities[7].name, mapActivities[8].name, mapActivities[9].name, mapActivities[10].name,
+            mapActivities[11].name, mapActivities[12].name, mapActivities[13].name, mapActivities[14].name, mapActivities[15].name],
     type: "program"
   },
   {
@@ -488,7 +547,7 @@ var mapFilterParameters = [
     id: "part_name",
     options: [mapIndices[0].name, mapIndices[1].name, mapIndices[2].name, mapIndices[3].name, mapIndices[4].name, mapIndices[5].name, mapIndices[6].name, mapIndices[7].name, mapIndices[8].name, mapIndices[9].name, mapIndices[10].name,
             mapIndices[11].name, mapIndices[12].name, mapIndices[13].name, mapIndices[14].name, mapIndices[15].name, mapIndices[16].name, mapIndices[17].name, mapIndices[18].name, mapIndices[19].name, mapIndices[20].name,
-            mapIndices[21].name, mapIndices[22].name],
+            mapIndices[21].name],
     type: "program"
   }];
 
