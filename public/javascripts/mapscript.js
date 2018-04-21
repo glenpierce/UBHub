@@ -143,14 +143,23 @@ function closeAllPanels(){
 };*/
 
 function runFilters(){
+    console.log(activeFilters);
   markers.forEach((marker) => {
     var retain = true;
     activeFilters.forEach((filter) => {
+        if(marker.element.id == 45){
+            console.log(marker);
+        }
       if(retain) {
         retain = evaluateFilterOnMarker(filter, marker);
       }
-    })
+        if(marker.element.id == 45){
+            console.log("retain=" + retain);
+        }
+    });
     marker.setVisible(retain);
+    if(retain)
+        console.log("retained");
   });
 
   //Also update the table of results
@@ -202,27 +211,34 @@ function markerHasProgramField(marker, value, field) {
         return false;
     }
 
+    let returnValue = false;
+
     marker.element.participation.forEach(function (part) {
       if (field == "part_name" && part.part_name == value) {
-        return true;
+        returnValue = true;
       }
     });
 
-    return false;
+    return returnValue;
 }
 
   function markerHasDocumentField(marker, value, field) {
-      if (marker.element.document== undefined) {
+      if (marker.element.document == undefined) {
           return false;
       }
 
-      marker.element.document.forEach(function (part) {
-          if (field == "doc_type" && part.doc_type == value) {
-              return true;
+      let returnValue = false;
+
+      marker.element.document.forEach(function (document) {
+          if(marker.element.id == 45){
+              console.log(document);
+          }
+          if (field == "doc_type" && document.doc_type == value) {
+              returnValue = true;
           }
       });
 
-      return false;
+      return returnValue;
   }
 
 
@@ -280,6 +296,9 @@ function clearFiltersList(){
 }
 
 function evaluateFilterOnMarker(filter, marker){
+    if(marker.element.id == 45){
+        console.log("evaluateFilterOnMarker");
+    }
   switch(filter.type){
     case "select":
       return (marker.element[filter.key] == filter.val);

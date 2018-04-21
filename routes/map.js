@@ -528,7 +528,7 @@ var mapFilterParameters = [
     id: "doc_type",
     options: [mapActivities[0].name, mapActivities[1].name, mapActivities[2].name, mapActivities[3].name, mapActivities[4].name, mapActivities[5].name, mapActivities[6].name, mapActivities[7].name, mapActivities[8].name, mapActivities[9].name, mapActivities[10].name,
             mapActivities[11].name, mapActivities[12].name, mapActivities[13].name, mapActivities[14].name, mapActivities[15].name],
-    type: "program"
+    type: "document"
   },
   {
     name: "Land Area (km\u00B2)",
