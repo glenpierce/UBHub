@@ -143,23 +143,14 @@ function closeAllPanels(){
 };*/
 
 function runFilters(){
-    console.log(activeFilters);
   markers.forEach((marker) => {
     var retain = true;
     activeFilters.forEach((filter) => {
-        if(marker.element.id == 45){
-            console.log(marker);
-        }
       if(retain) {
         retain = evaluateFilterOnMarker(filter, marker);
       }
-        if(marker.element.id == 45){
-            console.log("retain=" + retain);
-        }
     });
     marker.setVisible(retain);
-    if(retain)
-        console.log("retained");
   });
 
   //Also update the table of results
@@ -230,9 +221,6 @@ function markerHasProgramField(marker, value, field) {
       let returnValue = false;
 
       marker.element.document.forEach(function (document) {
-          if(marker.element.id == 45){
-              console.log(document);
-          }
           if (field == "doc_type" && document.doc_type == value) {
               returnValue = true;
           }
@@ -296,9 +284,6 @@ function clearFiltersList(){
 }
 
 function evaluateFilterOnMarker(filter, marker){
-    if(marker.element.id == 45){
-        console.log("evaluateFilterOnMarker");
-    }
   switch(filter.type){
     case "select":
       return (marker.element[filter.key] == filter.val);
