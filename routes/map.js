@@ -172,7 +172,7 @@ function buildLocationsQuery(filters, page, limit){
   //DEAL WITH FILTERS
   if(filters.length > 0){
 
-    query+= "WHERE "
+    query+= "WHERE ";
 
     for(i = 0; i < filters.length; i++){
 
@@ -185,7 +185,7 @@ function buildLocationsQuery(filters, page, limit){
           break;
         case("nullable"):
           //TODO: fix this when new data is in db
-          query+= " true = true "
+          query+= " true = true ";
           break;
       }
       query += " AND ";
@@ -331,7 +331,7 @@ function categorizeButtons(buttons) {
       var newCategory = {
         categoryName: buttons[i].button_category,
         buttons: [buttons[i]]
-      }
+      };
       mapButtonCategories.push(newCategory);
     }
   }

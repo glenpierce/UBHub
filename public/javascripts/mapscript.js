@@ -238,10 +238,11 @@ function addFilter(filterKey, filterValue, filterType){
     var value = filterValue.replace(/\,/g,"");
     var values = value.split("-");
     if(values.length != 2){
-      if(values[0] == "<") {
+        values = values[0].toString();
+      if(values.charAt(0) == "<") {
         lower = 0;
         upper = values.substr(1, value.length);
-      } else if (values[0] == ">"){
+      } else if (values.charAt(0) == ">"){
         lower = values.substr(1, value.length);
         upper = Number.MAX_VALUE;
       }
@@ -355,7 +356,7 @@ function highlightValues(filterBy, colorBy, colorLevels){
       }
 
     });
-  }
+  };
 
   getPrograms(filterBy, markers, callback);
 }
@@ -397,7 +398,7 @@ function highlightValues(filterBy, colorBy, colorLevels){
           selectBoxes.item(i).children[0].selectedIndex = 0;
       }
 
-      var activityButtons = document.getElementsByClassName("activeButton")
+      var activityButtons = document.getElementsByClassName("activeButton");
       for(i = 0; i < activityButtons.length; i++){
           activityButtons[0].classList.remove("activeButton");
       }
