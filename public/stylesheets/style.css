@@ -581,6 +581,8 @@ table.mapValuesTable {
 table.mapValuesTable tr td{
   padding: 12px;
   height: 30px;
+  vertical-align: top;
+
 }
 
 table.mapValuesTable tr:nth-child(odd) {
@@ -590,10 +592,35 @@ table.mapValuesTable tr:nth-child(odd) {
 table.mapValuesTable th {
   background-color: #acd9bb;
   padding: 12px;
+  text-align: left;
 }
 
 table.mapValuesTable th#mvTitle {
-  width: 50%;
+  width: 20%;
+}
+
+table.mapValuesTable th#mvPrograms {
+  width: 60%;
+}
+
+table.mapValuesTable td.mvPrograms p {
+  margin-top: 3px;
+  margin-bottom: 3px;
+  font-size: 13px;
+}
+
+table.mapValuesTable td.mvPrograms h4 {
+  margin-bottom: 3px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+table.mapValuesTable td.mvPrograms h4:first-child {
+  margin-top: 0 !important;
+}
+
+table.mapValuesTable td.mvTitle {
+  font-weight: bold;
 }
 
 div.mapValuesControl {
