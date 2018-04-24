@@ -635,6 +635,17 @@ update = function(){
         ");";
     query.push(createUserDataTableQuery);
 
+    let getRepByUser =
+        "CREATE PROCEDURE getRepByUser(IN inUser VARCHAR(255))\n" +
+        "BEGIN\n" +
+        "SELECT SUM(votes.deltaUpvotes) AS totalScore\n" +
+        "FROM posts\n" +
+        "JOIN votes\n" +
+        "ON votes.postId = posts.id\n" +
+        "WHERE posts.author = inUser;\n" +
+        "END\n";
+    query.push(getRepByUser);
+
 
 
 
