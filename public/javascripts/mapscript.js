@@ -238,10 +238,11 @@ function addFilter(filterKey, filterValue, filterType){
     var value = filterValue.replace(/\,/g,"");
     var values = value.split("-");
     if(values.length != 2){
-      if(values[0] == "<") {
+        values = values[0].toString();
+      if(values.charAt(0) == "<") {
         lower = 0;
         upper = values.substr(1, value.length);
-      } else if (values[0] == ">"){
+      } else if (values.charAt(0) == ">"){
         lower = values.substr(1, value.length);
         upper = Number.MAX_VALUE;
       }
@@ -355,7 +356,7 @@ function highlightValues(filterBy, colorBy, colorLevels){
       }
 
     });
-  }
+  };
 
   getPrograms(filterBy, markers, callback);
 }
@@ -397,7 +398,7 @@ function highlightValues(filterBy, colorBy, colorLevels){
           selectBoxes.item(i).children[0].selectedIndex = 0;
       }
 
-      var activityButtons = document.getElementsByClassName("activeButton")
+      var activityButtons = document.getElementsByClassName("activeButton");
       for(i = 0; i < activityButtons.length; i++){
           activityButtons[0].classList.remove("activeButton");
       }
@@ -507,7 +508,7 @@ function highlightValues(filterBy, colorBy, colorLevels){
         return "undefined";
       }
 
-        var contentString = '<div id="content">' +
+        var contentString = '<div id="content" style="max-height: 200px;">' +
             '<div id="siteNotice">' +
             '</div>' +
             '<div style="font-weight:bold; font-size:20px;">' + entry.inst_title + '</div>' +
@@ -518,7 +519,7 @@ function highlightValues(filterBy, colorBy, colorLevels){
             //TODO: add current program information, available docs etc. here
 
         if (entry.participation != undefined) {
-          contentString += '<h4>Programs:</h4>'
+          contentString += '<h4>Biodiversity Programs:</h4>';
           entry.participation.forEach((part) => {
             contentString += '<p>';
             if (part.part_year != null) {
@@ -532,6 +533,22 @@ function highlightValues(filterBy, colorBy, colorLevels){
             contentString += '</p>';
           });
         }
+
+      if (entry.document != undefined) {
+          contentString += '<h4>Biodiversity Activities:</h4>';
+          entry.document.forEach((document) => {
+              contentString += '<p>';
+              if (document.doc_year != null) {
+                  contentString += document.doc_year + " ";
+              }
+              contentString += '<a href="' + document.doc_url + '" target="_blank">' + document.doc_title +'</a>';
+
+              if (document.doc_type != null) {
+                  contentString += ' (' + document.doc_type + ')';
+              }
+              contentString += '</p>';
+          });
+      }
 
         contentString += '</div></div>';
         return contentString;

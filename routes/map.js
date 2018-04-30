@@ -91,17 +91,24 @@ router.post('/tableData', function(req, res, next){
   connection.connect();
 
   connection.query(query, function(err, rows, fields) {
-    //Output an appropriate tbody
+
+
     if(rows != undefined){
-      for(i = 0; i < rows.length; i++){
-        string += `<tr>`;
-        string += `<td>${rows[i].title}</td>`;
-        string += `<td>${rows[i].country}</td>`;
-        string += `<td>${rows[i].scale}</td>`;
-        string += `<td>${getPlan1Title(rows[i])}</td>`;
-        string += `</tr>`;
-      }
-      res.send(string);
+
+      attachProgramsToGivenInstitutions(connection, rows)
+      .then((rows) => {
+            console.log(rows);
+              for(i = 0; i < rows.length; i++){
+                string += `<tr>`;
+                string += `<td class="mvTitle">${rows[i].inst_title}</td>`;
+                string += `<td>${rows[i].country}</td>`;
+                string += `<td>${rows[i].scale}</td>`;
+                string += `<td class="mvPrograms">${outputProgramsAndActivities(rows[i])}</td>`;
+                string += `</tr>`;
+              }
+              res.send(string);
+      })
+
     } else {
       res.send("Processing....");
     }
@@ -172,7 +179,7 @@ function buildLocationsQuery(filters, page, limit){
   //DEAL WITH FILTERS
   if(filters.length > 0){
 
-    query+= "WHERE "
+    query+= "WHERE ";
 
     for(i = 0; i < filters.length; i++){
 
@@ -185,7 +192,7 @@ function buildLocationsQuery(filters, page, limit){
           break;
         case("nullable"):
           //TODO: fix this when new data is in db
-          query+= " true = true "
+          query+= " true = true ";
           break;
       }
       query += " AND ";
@@ -202,12 +209,31 @@ function buildLocationsQuery(filters, page, limit){
 }
 
 
-function getPlan1Title(location){
-  if(location.plan1_title != null){
-    return location.plan1_title;
-  }
-  return "";
+function attachProgramsToGivenInstitutions(connection, locations){
+
+
+  institutionIds = locations.map((x) => {
+    return x.id;
+  })
+
+  var institutionIdsString = institutionIds.join(", ");
+
+  partQuery = "SELECT * from participation WHERE inst_id in (" + institutionIdsString + ")";
+  return new Promise((resolve, reject) => {
+    getMapData(connection, partQuery)
+    .then(partData => {
+      locations = mapParticipitationDataToLocations(partData, locations);
+      var documentQuery = "SELECT * FROM documents WHERE inst_id in (" + institutionIdsString + ")";
+      getMapData(connection, documentQuery)
+      .then((documentData) => {
+        locations = mapDocumentDataToLocations(documentData, locations);
+        resolve(locations);
+
+      })
+    })
+  })
 }
+
 
 function getMapLocations(connection, query){
   return new Promise((resolve, reject) => {
@@ -331,12 +357,54 @@ function categorizeButtons(buttons) {
       var newCategory = {
         categoryName: buttons[i].button_category,
         buttons: [buttons[i]]
-      }
+      };
       mapButtonCategories.push(newCategory);
     }
   }
 
   return mapButtonCategories;
+}
+
+function outputProgramsAndActivities(entry) {
+  var contentString = "";
+
+  if (entry.biodiversity_url != undefined) {
+    contentString += `<a href="${entry.biodiversity_url}" target="_blank"><p>Biodiversity Website</p></a>`;
+  }
+
+  if (entry.participation != undefined) {
+    contentString += '<h4>Programs</h4>';
+    entry.participation.forEach((part) => {
+      contentString += '<p>';
+      if (part.part_year != null) {
+        contentString += part.part_year + " ";
+      }
+      contentString += '<a href="' + part.part_link + '" target="_blank">' + part.part_name +'</a>';
+
+      if (part.part_level != null) {
+        contentString += ' (' + part.part_level + ')';
+      }
+      contentString += '</p>';
+    });
+  }
+
+  if (entry.document != undefined) {
+      contentString += '<h4>Activities</h4>';
+      entry.document.forEach((document) => {
+          contentString += '<p>';
+          if (document.doc_year != null) {
+              contentString += document.doc_year + " ";
+          }
+          contentString += '<a href="' + document.doc_url + '" target="_blank">' + document.doc_title +'</a>';
+
+          if (document.doc_type != null) {
+              contentString += ' (' + document.doc_type + ')';
+          }
+          contentString += '</p>';
+      });
+  }
+
+  return contentString;
 }
 
 

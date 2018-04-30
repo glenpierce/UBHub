@@ -1,0 +1,13 @@
+doctype html
+include mixins
+
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        // -console.log(userName);
+
+body
+    +header(true)
+
+
+    div(class="contentContainer" style="font-size:30px;") #{userName} has #{userRep} reputation. Great job!
