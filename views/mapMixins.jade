@@ -92,10 +92,10 @@ mixin mapInfoSummary(summary)
         h3#summaryCampuses #{summary.campuses}
         p Campuses
 
-mixin mapInfoResults(data)
+mixin mapInfoResults(data, pageCount)
   div.mapInfoContent(class="hide" id="mapInfoResults" style="background-color: #e1efd8")
     +mapValuesTable(data)
-    +mapValuesControl
+    +mapValuesControl(pageCount)
 
 mixin mapValuesTable(data)
   table.mapValuesTable
@@ -108,7 +108,8 @@ mixin mapValuesTable(data)
     tbody#mapTableValues(page="1")
 
 
-mixin mapValuesControl
+mixin mapValuesControl(pageCount)
   div.mapValuesControl
     span#mapControlPrevious.disabled(onclick="tablePrevPage()") < PREVIOUS
+    span#mapControlPageCount 1/#{pageCount}
     span(onclick="tableNextPage()") NEXT >

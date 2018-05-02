@@ -15,7 +15,7 @@
   var activeZindex = 100;
   var inactiveZindex = 5;
 
-
+  var resultsPerPage = 10;
 
 
 function getPrograms(partName, markers, callback){
@@ -304,6 +304,7 @@ function onFilterUpdate(){
   runFilters();
   getTableData(1, activeFilters);
   getResultCounts(activeFilters);
+  getTablePageNumbers(1, activeFilters);
 }
 
 //TODO: filters need to remember all active filtering, not just latest
@@ -433,16 +434,50 @@ function highlightValues(filterBy, colorBy, colorLevels){
 
   }
 
+
+
   function tableResponse(response){
     document.getElementById("mapTableValues").innerHTML = response;
   }
 
+  function getTablePageNumbers(pg){
+    if(pg < 1) pg = 1;
+    var xhr = new XMLHttpRequest();
+    var parameters =
+      {
+        filters: activeFilters
+      };
+
+    xhr.onreadystatechange = () => {
+      if(xhr.readyState == 4 && xhr.status == 200) {
+        pageCountResponse(pg, xhr.responseText);
+      }
+    };
+
+    //xhr.open("GET", "/map/tableData?page=" + pg + "&&filters==" + JSON.stringify(filters), true);
+    xhr.open("POST", "/map/resultCounts", true);
+    xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+    var parametersAsJSON = JSON.stringify(parameters);
+    xhr.send(parametersAsJSON);
+  }
+
+  function pageCountResponse(page, data){
+    var  data = JSON.parse(data);
+    var  pagesTotal = Math.ceil(data.total/resultsPerPage);
+    var  pageString = page + "/" + pagesTotal;
+
+    document.getElementById("mapControlPageCount").innerHTML = pageString;
+  }
+
   function tableNextPage(){
-    tablePage(1);
+    var num = tablePage(1);
+    getTablePageNumbers(num);
   }
 
   function tablePrevPage(){
-    tablePage(-1);
+    var num = tablePage(-1);
+    getTablePageNumbers(num);
+
   }
 
   function tablePage(dx){
@@ -459,6 +494,7 @@ function highlightValues(filterBy, colorBy, colorLevels){
         document.getElementById("mapControlPrevious").classList.remove("disabled");
       }
     }
+    return num;
   }
 
   function getResultCounts(filters){

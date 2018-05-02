@@ -8,6 +8,7 @@ var https = require('https');
 
 var app = express();
 
+
 var config = require('../config.js');
 
 app.use(session({
@@ -34,6 +35,7 @@ router.get('/', function(req, res, next) {
     getMapLocations(connection, locationsQuery)
     .then((mapData) => {
       mapSummary = getSummary(mapData);
+      mapPageCount = Math.ceil(mapSummary.total/10);
       buttonsQuery = 'SELECT * from mapButtons';
       getMapData(connection, buttonsQuery)
       .then((buttons) => {
@@ -44,6 +46,7 @@ router.get('/', function(req, res, next) {
               mapData:JSON.stringify(mapData),
               mapSummary: mapSummary,
               mapButtons: mapButtons,
+              mapPageCount: mapPageCount,
               username: req.session.user});
         } else {
             res.render('map', {
@@ -51,6 +54,7 @@ router.get('/', function(req, res, next) {
               mapData:JSON.stringify(mapData),
               mapSummary: mapSummary,
               mapButtons: mapButtons,
+              mapPageCount: mapPageCount,
               username: null});
         }
         connection.end();
@@ -97,7 +101,6 @@ router.post('/tableData', function(req, res, next){
 
       attachProgramsToGivenInstitutions(connection, rows)
       .then((rows) => {
-            console.log(rows);
               for(i = 0; i < rows.length; i++){
                 string += `<tr>`;
                 string += `<td class="mvTitle">${rows[i].inst_title}</td>`;
@@ -182,7 +185,7 @@ function buildLocationsQuery(filters, page, limit){
     query+= "WHERE ";
 
     for(i = 0; i < filters.length; i++){
-
+      console.log(filters[i].type);
       switch(filters[i].type){
         case("select"):
           query+= filters[i].key + "='" + filters[i].val + "' ";
@@ -190,9 +193,12 @@ function buildLocationsQuery(filters, page, limit){
         case("range"):
           query+= filters[i].key + " BETWEEN " + filters[i].lower + " AND " + filters[i].upper + " ";
           break;
-        case("nullable"):
-          //TODO: fix this when new data is in db
-          query+= " true = true ";
+        case("document"):
+          query += 'EXISTS (SELECT 1 FROM documents WHERE locations.id = documents.inst_id AND documents.doc_type = "'+ filters[i].val +'")';
+          break;
+        case("program"):
+          query += 'EXISTS (SELECT 1 FROM participation WHERE locations.id = participation.inst_id AND participation.part_name = "'+ filters[i].val +'")';
+          console.log(query);
           break;
       }
       query += " AND ";
@@ -440,12 +446,10 @@ function update(){
 
     connection.connect();
     query = 'SELECT * from locations where lat is null';
-    console.log(query);
     connection.query(query, function(err, rows, fields) {
         if (!err) {
             mapData = rows;
             rows.forEach(function (element){
-                console.log("updating id=" + element.id);
                 getLatLong(element.address, element.id);
             });
         } else {
