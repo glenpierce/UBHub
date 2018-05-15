@@ -1,14 +1,15 @@
-var express = require('express');
-var router = express.Router();
-var mysql = require('mysql');
-var session = require('client-sessions');
-var path = require("path");
-var http = require('http');
-var https = require('https');
+const express = require('express');
+const router = express.Router();
+const mysql = require('mysql');
+const session = require('client-sessions');
+const path = require("path");
+const http = require('http');
+const https = require('https');
+const pool = require('../ConnectionPool.js').pool;
 
-var app = express();
+const app = express();
 
-var config = require('../config.js');
+const config = require('../config.js');
 
 app.use(session({
     cookieName: 'session',
@@ -20,46 +21,42 @@ app.use(session({
 router.get('/', function(req, res, next) {
     //var mapData = "";
 
-    connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
+    pool.getConnection(function (error, connection) {
+
+        locationsQuery = 'SELECT * from locations limit 1000';
+
+        getMapLocations(connection, locationsQuery)
+        .then((mapData) => {
+            mapSummary = getSummary(mapData);
+            buttonsQuery = 'SELECT * from mapButtons';
+            getMapData(connection, buttonsQuery)
+                .then((buttons) => {
+                    connection.release();
+                    var mapButtons = categorizeButtons(buttons);
+                    if (req.session && req.session.user) {
+                        res.render('map', {
+                            mapFilterParameters: mapFilterParameters,
+                            mapData: JSON.stringify(mapData),
+                            mapSummary: mapSummary,
+                            mapButtons: mapButtons,
+                            username: req.session.user
+                        });
+                    } else {
+                        res.render('map', {
+                            mapFilterParameters: mapFilterParameters,
+                            mapData: JSON.stringify(mapData),
+                            mapSummary: mapSummary,
+                            mapButtons: mapButtons,
+                            username: null
+                        });
+                    }
+                })
+        })
+        .catch((err) => {
+            console.log(err);
+            connection.release();
+        })
     });
-
-    connection.connect();
-    locationsQuery = 'SELECT * from locations limit 1000';
-
-
-    getMapLocations(connection, locationsQuery)
-    .then((mapData) => {
-      mapSummary = getSummary(mapData);
-      buttonsQuery = 'SELECT * from mapButtons';
-      getMapData(connection, buttonsQuery)
-      .then((buttons) => {
-        var mapButtons = categorizeButtons(buttons);
-        if (req.session && req.session.user) {
-            res.render('map', {
-              mapFilterParameters: mapFilterParameters,
-              mapData:JSON.stringify(mapData),
-              mapSummary: mapSummary,
-              mapButtons: mapButtons,
-              username: req.session.user});
-        } else {
-            res.render('map', {
-              mapFilterParameters: mapFilterParameters,
-              mapData:JSON.stringify(mapData),
-              mapSummary: mapSummary,
-              mapButtons: mapButtons,
-              username: null});
-        }
-        connection.end();
-      })
-    })
-    .catch((err) =>{
-      console.log(err);
-      connection.end();
-    })
 });
 
 router.get('/update', function(req, res, next) {
@@ -68,108 +65,81 @@ router.get('/update', function(req, res, next) {
 
 router.post('/tableData', function(req, res, next){
 
-  var mapData = "";
-  var string = "";
-  var page = req.body.page;
-  var filters = req.body.filters;
+    var mapData = "";
+    var string = "";
+    var page = req.body.page;
+    var filters = req.body.filters;
 
-  if(page == null){
-    page = 1;
-  }
-
-  var limit = 10;
-
-  var query = buildLocationsQuery(filters, page, limit);
-
-  connection = mysql.createConnection({
-      host: config.rdsHost,
-      user: config.rdsUser,
-      password: config.rdsPassword,
-      database: config.rdsDatabase
-  });
-
-  connection.connect();
-
-  connection.query(query, function(err, rows, fields) {
-
-
-    if(rows != undefined){
-
-      attachProgramsToGivenInstitutions(connection, rows)
-      .then((rows) => {
-            console.log(rows);
-              for(i = 0; i < rows.length; i++){
-                string += `<tr>`;
-                string += `<td class="mvTitle">${rows[i].inst_title}</td>`;
-                string += `<td>${rows[i].country}</td>`;
-                string += `<td>${rows[i].scale}</td>`;
-                string += `<td class="mvPrograms">${outputProgramsAndActivities(rows[i])}</td>`;
-                string += `</tr>`;
-              }
-              res.send(string);
-      })
-
-    } else {
-      res.send("Processing....");
+    if(page == null){
+        page = 1;
     }
 
+    var limit = 10;
 
+    var query = buildLocationsQuery(filters, page, limit);
 
-  });
+    pool.getConnection(function (error, connection) {
+        connection.query(query, function(err, rows, fields) {
+            connection.release();
+            if(rows != undefined){
+                attachProgramsToGivenInstitutions(connection, rows)
+                .then((rows) => {
+                    console.log(rows);
+                    for(i = 0; i < rows.length; i++){
+                        string += `<tr>`;
+                        string += `<td class="mvTitle">${rows[i].inst_title}</td>`;
+                        string += `<td>${rows[i].country}</td>`;
+                        string += `<td>${rows[i].scale}</td>`;
+                        string += `<td class="mvPrograms">${outputProgramsAndActivities(rows[i])}</td>`;
+                        string += `</tr>`;
+                    }
+                    res.send(string);
+                })
+            } else {
+                res.send("Processing....");
+            }
+        });
+    });
 });
 
 router.post('/resultCounts', function(req, res, next){
-  var filters = req.body.filters;
-  var query = buildLocationsQuery(filters, -1, -1);
+    var filters = req.body.filters;
+    var query = buildLocationsQuery(filters, -1, -1);
 
-  connection = mysql.createConnection({
-      host: config.rdsHost,
-      user: config.rdsUser,
-      password: config.rdsPassword,
-      database: config.rdsDatabase
-  });
+    pool.getConnection(function (error, connection) {
+        connection.query(query, function (err, rows, fields) {
+            connection.release();
+            var counts;
+            if (rows != undefined) {
+                counts = {
+                    total: rows.length,
+                    municipalities: rows.filter(x => x.scale == "municipality").length,
+                    districts: rows.filter(x => x.scale == "district/county").length,
+                    campuses: rows.filter(x => x.scale == "campus").length
+                }
+            } else {
+                counts = {};
+            }
 
-  connection.connect();
-
-  connection.query(query, function(err, rows, fields) {
-    var counts;
-    if(rows != undefined){
-      counts = {
-        total: rows.length,
-        municipalities: rows.filter(x => x.scale == "municipality").length,
-        districts: rows.filter(x => x.scale == "district/county").length,
-        campuses: rows.filter(x => x.scale == "campus").length
-      }
-    } else {
-      counts = {};
-    }
-
-    res.send(JSON.stringify(counts));
-  });
+            res.send(JSON.stringify(counts));
+        });
+    });
 });
 
 router.post('/getProgramMembers', function(req, res, next) {
-  var programName = req.body.programName;
-  var query = "SELECT * FROM participation WHERE `part_name` = '" + programName + "'";
+    var programName = req.body.programName;
+    var query = "SELECT * FROM participation WHERE `part_name` = '" + programName + "'";
 
-  connection = mysql.createConnection({
-      host: config.rdsHost,
-      user: config.rdsUser,
-      password: config.rdsPassword,
-      database: config.rdsDatabase
-  });
-
-  connection.connect();
-
-  connection.query(query, function(err, rows, fields) {
-    var members = []
-    if(rows != undefined){
-      members = rows;
-    }
-
-    res.send(JSON.stringify(rows));
-  });
-
+    pool.getConnection(function (error, connection) {
+        connection.query(query, function (err, rows, fields) {
+            connection.release();
+            var members = [];
+            if (rows != undefined) {
+                members = rows;
+            }
+            res.send(JSON.stringify(rows));
+        });
+    });
 });
 
 function buildLocationsQuery(filters, page, limit){
@@ -211,10 +181,9 @@ function buildLocationsQuery(filters, page, limit){
 
 function attachProgramsToGivenInstitutions(connection, locations){
 
-
   institutionIds = locations.map((x) => {
     return x.id;
-  })
+  });
 
   var institutionIdsString = institutionIds.join(", ");
 
@@ -428,32 +397,32 @@ function getSummary(data){
   return summary;
 }
 
-function update(){
-    mapData = "";
-
-    connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
-    });
-
-    connection.connect();
-    query = 'SELECT * from locations where lat is null';
-    console.log(query);
-    connection.query(query, function(err, rows, fields) {
-        if (!err) {
-            mapData = rows;
-            rows.forEach(function (element){
-                console.log("updating id=" + element.id);
-                getLatLong(element.address, element.id);
-            });
-        } else {
-            console.log('Error while performing Query.');
-        }
-    });
-    connection.end();
-}
+// function update(){
+//     mapData = "";
+//
+//     connection = mysql.createConnection({
+//         host: config.rdsHost,
+//         user: config.rdsUser,
+//         password: config.rdsPassword,
+//         database: config.rdsDatabase
+//     });
+//
+//     connection.connect();
+//     query = 'SELECT * from locations where lat is null';
+//     console.log(query);
+//     connection.query(query, function(err, rows, fields) {
+//         if (!err) {
+//             mapData = rows;
+//             rows.forEach(function (element){
+//                 console.log("updating id=" + element.id);
+//                 getLatLong(element.address, element.id);
+//             });
+//         } else {
+//             console.log('Error while performing Query.');
+//         }
+//     });
+//     connection.end();
+// }
 
 
 var mapActivities = [
