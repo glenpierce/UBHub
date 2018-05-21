@@ -80,11 +80,11 @@ router.post('/tableData', function(req, res, next){
 
     pool.getConnection(function (error, connection) {
         connection.query(query, function(err, rows, fields) {
-            connection.release();
             if(rows != undefined){
                 attachProgramsToGivenInstitutions(connection, rows)
                 .then((rows) => {
-                    console.log(rows);
+                    connection.release();
+                    // console.log(rows);
                     for(i = 0; i < rows.length; i++){
                         string += `<tr>`;
                         string += `<td class="mvTitle">${rows[i].inst_title}</td>`;
@@ -96,6 +96,7 @@ router.post('/tableData', function(req, res, next){
                     res.send(string);
                 })
             } else {
+                connection.release();
                 res.send("Processing....");
             }
         });
@@ -147,29 +148,42 @@ function buildLocationsQuery(filters, page, limit){
   var query = `SELECT * from locations `;
 
   //DEAL WITH FILTERS
-  if(filters.length > 0){
+    if (filters.length > 0) {
 
-    query+= "WHERE ";
+        query += "WHERE ";
 
-    for(i = 0; i < filters.length; i++){
+        for (i = 0; i < filters.length; i++) {
+            let addAND = true;
 
-      switch(filters[i].type){
-        case("select"):
-          query+= filters[i].key + "='" + filters[i].val + "' ";
-          break;
-        case("range"):
-          query+= filters[i].key + " BETWEEN " + filters[i].lower + " AND " + filters[i].upper + " ";
-          break;
-        case("nullable"):
-          //TODO: fix this when new data is in db
-          query+= " true = true ";
-          break;
-      }
-      query += " AND ";
+            switch (filters[i].type) {
+                case("select"):
+                    query += filters[i].key + "='" + filters[i].val + "' ";
+                    break;
+                case("range"):
+                    query += filters[i].key + " BETWEEN " + filters[i].lower + " AND " + filters[i].upper + " ";
+                    break;
+                case("document"):
+                    addAND = false;
+                    break;
+                case("program"):
+                    addAND = false;
+                    break;
+                case("nullable"):
+                    //TODO: fix this when new data is in db
+                    query += " true = true ";
+                    break;
+                // default:
+                //     addAND = false;
+                //     break;
+            }
+            if(addAND){
+                query += " AND ";
+            }
+        }
+
+        query = query.substr(0, query.length - 4);
+        console.log(query);
     }
-
-    query = query.substr(0, query.length - 4);
-  }
 
   if(page > -1 && limit > -1){
     query += `limit ${limit} offset ${limit * (page - 1)}`;

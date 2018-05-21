@@ -234,15 +234,15 @@ p.postBody {
 }
 
 .forumPostMeta>span{
-  background: #ccc;
-  padding: 8px 18px;
+  background: #d3e9d5;
+  padding: 4px 8px;
   margin-right: 4px;
   border-radius: 16px;
   font-weight: 700;
 }
 
 .forumPostMeta span span.number {
-  background-color: #ccc;
+  background-color: #d3e9d5;
   padding: 2px;
   margin-left: 4px;
   font-weight: 400;
@@ -625,6 +625,7 @@ table.mapValuesTable td.mvTitle {
 
 div.mapValuesControl {
   text-align: center;
+  margin-bottom: 60px;
 }
 
 div.mapValuesControl span {
