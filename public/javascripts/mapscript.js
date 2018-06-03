@@ -541,7 +541,13 @@ function highlightValues(filterBy, colorBy, colorLevels){
               if (document.doc_year != null) {
                   contentString += document.doc_year + " ";
               }
-              contentString += '<a href="' + document.doc_url + '" target="_blank">' + document.doc_title +'</a>';
+              if(document.doc_url != null) {
+                  if (document.doc_url.startsWith('/pdf')) {
+                      contentString += '<a href="' + 'https://s3.ca-central-1.amazonaws.com/ubhubpdfstorage/public' + document.doc_url + '" target="_blank">' + document.doc_title + '</a>';
+                  } else {
+                      contentString += '<a href="' + document.doc_url + '" target="_blank">' + document.doc_title + '</a>';
+                  }
+              }
 
               if (document.doc_type != null) {
                   contentString += ' (' + document.doc_type + ')';
