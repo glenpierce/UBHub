@@ -130,7 +130,16 @@ router.post("/submit", function (req, res) {
 
       let path = "";
       connection.connect();
-      const query = `CALL AddForumPost('${req.session.user}', '${parent}', '${title}', '${body}', '${date}', '${tags}')`;
+      const escapedUser = connection.escape(req.session.user);
+      const escapedParent = connection.escape(parent);
+      const escapedTitle = connection.escape(title);
+      const escapedBody = connection.escape(body);
+      const escapedDate = connection.escape(date);
+      let escapedTags = connection.escape(tags);
+      if(escapedTags.length == 0){
+          escapedTags = '\'\'';
+      }
+      const query = `CALL AddForumPost(${escapedUser}, ${escapedParent}, ${escapedTitle}, ${escapedBody}, ${escapedDate}, ${escapedTags})`;
       connection.query(query, function(err, rows, fields) {
           if (!err) {
               //If successful, redirect to the post page
