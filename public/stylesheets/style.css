@@ -578,6 +578,7 @@ table.mapValuesTable {
   width: 100%;
 }
 
+
 table.mapValuesTable tr td{
   padding: 12px;
   height: 30px;
@@ -621,6 +622,11 @@ table.mapValuesTable td.mvPrograms h4:first-child {
 
 table.mapValuesTable td.mvTitle {
   font-weight: bold;
+}
+
+table.mapValuesTable #mapTableValues>p {
+  padding: 12px;
+  width: 300px;
 }
 
 div.mapValuesControl {

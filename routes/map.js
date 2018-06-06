@@ -80,11 +80,11 @@ router.post('/tableData', function(req, res, next){
 
     pool.getConnection(function (error, connection) {
         connection.query(query, function(err, rows, fields) {
-            if(rows != undefined){
+            if(rows != undefined && rows.length > 0){
                 attachProgramsToGivenInstitutions(connection, rows)
                 .then((rows) => {
                     connection.release();
-                    // console.log(rows);
+
                     for(i = 0; i < rows.length; i++){
                         string += `<tr>`;
                         string += `<td class="mvTitle">${rows[i].inst_title}</td>`;
@@ -94,10 +94,17 @@ router.post('/tableData', function(req, res, next){
                         string += `</tr>`;
                     }
                     res.send(string);
+                }, function(error) {
+                  console.log(error);
+                  res.send("No data");
                 })
+
+            } else if (rows != undefined && rows.length == 0) {
+              connection.release();
+              res.send("<p>No data for given parameters.</p>");
             } else {
                 connection.release();
-                res.send("Processing....");
+                res.send("<p>Processing...</p>");
             }
         });
     });
@@ -145,55 +152,71 @@ router.post('/getProgramMembers', function(req, res, next) {
 
 function buildLocationsQuery(filters, page, limit){
   //PICK FIELDS
-  var query = `SELECT * from locations `;
+  var query = `SELECT * from locations as l `;
+  var useWhere = false;
+
+  var whereClause = "";
+  var joinClause = "";
+  var firstWhere = true;
 
   //DEAL WITH FILTERS
     if (filters.length > 0) {
 
-        query += "WHERE ";
-
+        //do WHERE filters first
         for (i = 0; i < filters.length; i++) {
-            let addAND = true;
 
             switch (filters[i].type) {
                 case("select"):
-                    query += filters[i].key + "='" + filters[i].val + "' ";
+                  if (!firstWhere){ whereClause += " AND "; }
+                    whereClause += ` l.${filters[i].key}="${filters[i].val}"`;
+                    firstWhere = false;
                     break;
+
                 case("range"):
-                    query += filters[i].key + " BETWEEN " + filters[i].lower + " AND " + filters[i].upper + " ";
+                    if (!firstWhere){ whereClause += " AND "; }
+                    whereClause += ` l.${filters[i].key} BETWEEN ${filters[i].lower} AND ${filters[i].upper}`;
+                    firstWhere = false;
                     break;
-                case("document"):
-                    addAND = false;
-                    break;
-                case("program"):
-                    addAND = false;
-                    break;
+
                 case("nullable"):
                     //TODO: fix this when new data is in db
-                    query += " true = true ";
+                    whereClause += " true = true ";
+                    useWhere = true;
                     break;
-                // default:
-                //     addAND = false;
-                //     break;
-            }
-            if(addAND){
-                query += " AND ";
             }
         }
 
-        query = query.substr(0, query.length - 4);
-        console.log(query);
+        //then do JOINs:
+        for (i = 0; i < filters.length; i++){
+          switch (filters[i].type) {
+            case("document"):
+                joinClause += ` INNER JOIN (select inst_id, doc_type from documents d where d.doc_type = "${filters[i].val}" group by inst_id) as dq on dq.inst_id = l.id `;
+                break;
+            case("program"):
+                joinClause += ` INNER JOIN (select inst_id, part_name from participation p where p.part_name = "${filters[i].val}" group by inst_id) as pq on pq.inst_id = l.id `;
+                break;
+          }
+        }
+
+        if (whereClause != ""){
+          whereClause = " WHERE " + whereClause;
+        }
+
+        query += joinClause + " " + whereClause;
+
     }
 
   if(page > -1 && limit > -1){
-    query += `limit ${limit} offset ${limit * (page - 1)}`;
+    query += ` limit ${limit} offset ${limit * (page - 1)}`;
   }
 
+  console.log(query);
   return query;
 }
 
 
 function attachProgramsToGivenInstitutions(connection, locations){
+
 
   institutionIds = locations.map((x) => {
     return x.id;
