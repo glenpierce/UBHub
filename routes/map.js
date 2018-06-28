@@ -594,7 +594,7 @@ var mapFilterParameters = [
   {
     name: "Scale",
     id: "scale",
-    options: ['global/universal', 'international', 'city-state/autonomous city', 'subnational/provincial', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'],
+    options: ['international', 'national', 'city-state/autonomous city', 'subnational/provincial', 'watershed', 'district/county', 'metro region', 'municipality', 'community', 'urban reserve', 'campus', 'institution'],
     type: "select"
   },
   {
