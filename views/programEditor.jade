@@ -2,7 +2,6 @@ html
     head
         script.
             var objectToBeSent = [];
-            var x;
             function drag(event) {
                 event.dataTransfer.setData("text", event.target.textContent);
                 event.dataTransfer.setData("id", event.target.id);
@@ -108,44 +107,43 @@ html
                 radioButtonPanel.appendChild(radioButtonLabel);
                 radioButtonLabel.dataObject = {"title": ""};
                 radioButtonLabel.addEventListener('input', function () {
-                    radioButtonLabel.dataObject.title = this.value;
-                    target.parentElement.dataObject.children = [];
-                    console.log(target);
-                    x = target;
-                    for(var child in target.parentElement.children) {
-                        console.log(child);
-                        if(child.value){
-                            target.parentElement.dataObject.children.push(child.value);
-                        }
-                    }
+                    // radioButtonLabel.dataObject.title = this.value;
+                    // target.parentElement.dataObject.children = [];
+                    // console.log(target);
+                    // for(var child in target.parentElement.children) {
+                    //     console.log(child);
+                    //     if(child.value){
+                    //         target.parentElement.dataObject.children.push(child.value);
+                    //     }
+                    // }
                 }, false);
 
                 target.parentElement.appendChild(radioButtonPanel);
-                // target.parentElement.dataObject.children.push(radioButtonLabel.dataObject);
+                target.parentElement.dataObject.children.push(radioButtonLabel.dataObject);
             }
 
             var valuesArray = [];
             
             function save() {
                 console.log(objectToBeSent);
-                // var editor = document.getElementById("editor");
-                //
-                // console.log(editor);
-                // var arr = Array.prototype.slice.call(editor.children);
-                // console.log(arr);
-                // recursivelyGetValue(editor);
-                // console.log(valuesArray);
-            }
+                var xhr = new XMLHttpRequest();
+                var parameters =
+                    {
+                        "newProgram": objectToBeSent
+                    };
 
-            function recursivelyGetValue(element) {
-                if(element.value){
-                    valuesArray.push(element.value);
-                }
-                if(element.children && element.children.length > 0){
-                    element.children.forEach(function(childElement){
-                        recursivelyGetValue(childElement);
-                    });
-                }
+                xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 3) {
+
+                        } else if (xhr.readyState == 4 && xhr.status == 200) {
+                            console.log(xhr);
+                        }
+                    };
+
+                xhr.open("POST", "/createCustomProgram/editor", true);
+                xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                var parametersAsJSON = JSON.stringify(parameters);
+                xhr.send(parametersAsJSON);
             }
 
 body
