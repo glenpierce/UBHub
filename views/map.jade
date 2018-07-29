@@ -3,6 +3,15 @@ include mixins
 include mapMixins
 html
     +mapHead
+    script.
+        function searchMap(){
+            filterBySearch(document.getElementById("searchBox").value);
+        }
+        function triggerSearch(event) {
+            if(event.keyCode == 13){
+                searchMap();
+            }
+        }
 body
     +header(true)
 
@@ -13,7 +22,11 @@ body
             //p You may view your data or submit more data on
               //a.genericLink(onclick="window.location='/yourUploads'")  your uploads manager.
 
-        h2.mapLabel mapHub
+        div(style="display:flex; justify-content:space-between;")
+            h2.mapLabel mapHub
+            div(style="display:flex; justify-content:flex-end;")
+                input(type="text" id="searchBox" style="width: 150px; align-self:center; margin-right:10px; padding: 10px 10px 10px 10px; font-weight: 400; border: 1; border-radius: 3px; outline: 0; border-color:#b2b2b2;" onkeydown="triggerSearch(event)")
+                h2.mapLabel(style="cursor:pointer;" onclick="searchMap()") search
 
         div#map
 

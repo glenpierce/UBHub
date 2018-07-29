@@ -162,6 +162,21 @@ function filterValues(value, filterBy){
   });
 }
 
+function filterBySearch(searchTerm){
+    markers.forEach(function (marker) {
+        let found = marker.element.inst_title.toLowerCase().includes(searchTerm.toLowerCase());
+        if(!found && marker.element.document) {
+            marker.element.document.forEach(function (document) {
+                if (document.doc_title.toLowerCase().includes(searchTerm.toLowerCase()))
+                    found = true;
+            });
+        }
+        marker.setVisible(found);
+        if(found)
+            console.log(marker);
+    });
+}
+
 function filterRange(value, filterBy){
   var upper;
   var lower;
