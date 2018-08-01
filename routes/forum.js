@@ -11,8 +11,8 @@ const config = require('../config.js');
 app.use(session({
     cookieName: 'session',
     secret: config.secret,
-    duration: 30 * 60 * 1000,
-    activeDuration: 5 * 60 * 1000
+    duration: 24 * 60 * 60 * 1000,
+    activeDuration: 24 * 60 * 60 * 1000
 }));
 
 /********/
