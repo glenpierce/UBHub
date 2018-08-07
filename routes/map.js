@@ -630,6 +630,24 @@ var mapFilterParameters = [
             mapIndices[11].name, mapIndices[12].name, mapIndices[13].name, mapIndices[14].name, mapIndices[15].name, mapIndices[16].name, mapIndices[17].name, mapIndices[18].name, mapIndices[19].name, mapIndices[20].name,
             mapIndices[21].name],
     type: "program"
+  },
+  {
+      name: "Biodiversity Hotspot",
+      id: "density_km2",
+      options: ['<300', '300-1,000', '1,000-4,000', '4,000-10,000', '>10,000'],
+      type: "range"
+  },
+  {
+      name: "Biome (WWF)",
+      id: "density_km2",
+      options: ['<300', '300-1,000', '1,000-4,000', '4,000-10,000', '>10,000'],
+      type: "range"
+  },
+  {
+      name: "Conservation Status (WWF)",
+      id: "density_km2",
+      options: ['<300', '300-1,000', '1,000-4,000', '4,000-10,000', '>10,000'],
+      type: "range"
   }];
 
 module.exports = router;
