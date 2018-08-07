@@ -585,6 +585,9 @@ function highlightValues(filterBy, colorBy, colorLevels){
 
   }
 
+  var hotspotsLayer1, hotspotsLayer2, hotspotsLayer3, hotspotsLayer4;
+  var map;
+
   function initMap (mapData) {
     console.log(mapData);
     greyImage = {
@@ -625,7 +628,7 @@ function highlightValues(filterBy, colorBy, colorLevels){
     };
       //var mapData =!{mapData};
       center = {lat: 20, lng: 15};
-      var map = new google.maps.Map(document.getElementById('map'), {
+      map = new google.maps.Map(document.getElementById('map'), {
           zoom: 2, streetViewControl: false,
           center: center,
           styles: [{"elementType": "geometry","stylers": [{"color": "#b6d5e3"}]},
@@ -693,6 +696,41 @@ function highlightValues(filterBy, colorBy, colorLevels){
               markers.push(marker);
           }
       });
+      hotspotsLayer1 = new google.maps.KmlLayer({
+          url: 'https://s3.ca-central-1.amazonaws.com/ubhubpdfstorage/public/hotspots_sea.kml',
+          map: null,
+          preserveViewport: true
+      });
+      hotspotsLayer2 = new google.maps.KmlLayer({
+          url: 'https://s3.ca-central-1.amazonaws.com/ubhubpdfstorage/public/hotspots_land_1of3C.kml',
+          map: null,
+          preserveViewport: true
+      });
+      hotspotsLayer3 = new google.maps.KmlLayer({
+          url: 'https://s3.ca-central-1.amazonaws.com/ubhubpdfstorage/public/hotspots_land_2of3D.kml',
+          map: null,
+          preserveViewport: true
+      });
+      hotspotsLayer4 = new google.maps.KmlLayer({
+          url: 'https://s3.ca-central-1.amazonaws.com/ubhubpdfstorage/public/hotspots_land_3of3D.kml',
+          map: null,
+          preserveViewport: true
+      });
+
+  }
+
+  function toggleKmlLayers(){
+      if(hotspotsLayer1.map == map){
+          hotspotsLayer1.setMap(null);
+          hotspotsLayer2.setMap(null);
+          hotspotsLayer3.setMap(null);
+          hotspotsLayer4.setMap(null);
+      } else {
+          hotspotsLayer1.setMap(map);
+          hotspotsLayer2.setMap(map);
+          hotspotsLayer3.setMap(map);
+          hotspotsLayer4.setMap(map);
+      }
   }
 
 

@@ -24,9 +24,12 @@ body
 
         div(style="display:flex; justify-content:space-between;")
             h2.mapLabel mapHub
-            div(style="display:flex; justify-content:flex-end;")
-                input(type="text" id="searchBox" style="width: 150px; align-self:center; margin-right:10px; padding: 10px 10px 10px 10px; font-weight: 400; border: 1; border-radius: 3px; outline: 0; border-color:#b2b2b2;" onkeydown="triggerSearch(event)")
-                h2.mapLabel(style="cursor:pointer;" onclick="searchMap()") search
+            div(style="display:flex; align-items:center; justify-content:flex-end;")
+                input(type="text" id="searchBox" style="width: 150px; align-self:center; margin-right:5px; padding: 5px 5px 5px 10px; font-weight: 400; border-style:solid; border-radius: 30px; outline: 0; border-color:#eaeaea; background:#eaeaea;" onkeydown="triggerSearch(event)")
+                div(style="cursor:pointer; color: #4490ba; font-weight: bold; font-size: 14px;" onclick="searchMap()") search
+        div(style="display:flex; align-items:center; justify-content:flex-end;")
+            div(style="color: #4490ba; font-weight: bold; font-size: 14px;") Show biodiversity hotspots
+            input(type="checkbox" oninput="toggleKmlLayers()" checked=false style="width:20px; height:20px;")
 
         div#map
 

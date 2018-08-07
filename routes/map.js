@@ -14,8 +14,9 @@ const config = require('../config.js');
 app.use(session({
     cookieName: 'session',
     secret: config.secret,
-    duration: config.duration,
-    activeDuration: config.activeDuration
+    cookie: {
+        maxAge: new Date(Date.now() + (config.expires))
+    }
 }));
 
 router.get('/', function(req, res, next) {

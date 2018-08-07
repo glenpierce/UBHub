@@ -57,8 +57,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
     cookieName: 'session',
     secret: config.secret,
-    duration: config.duration,
-    activeDuration: config.activeDuration
+    cookie: {
+        maxAge: new Date(Date.now() + (config.expires))
+    }
 }));
 
 app.use('/', index);
