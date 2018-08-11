@@ -164,16 +164,33 @@ function filterValues(value, filterBy){
 
 function filterBySearch(searchTerm){
     markers.forEach(function (marker) {
-        let found = marker.element.inst_title.toLowerCase().includes(searchTerm.toLowerCase());
+        let found = marker.element.inst_address.toLowerCase().includes(searchTerm.toLowerCase());
+        if(!found){
+          found = marker.element.country.toLowerCase().includes(searchTerm.toLowerCase());
+        }
         if(!found && marker.element.document) {
             marker.element.document.forEach(function (document) {
-                if (document.doc_title.toLowerCase().includes(searchTerm.toLowerCase()))
+                if (!found && document.doc_title.toLowerCase().includes(searchTerm.toLowerCase())){
                     found = true;
+                }
+                if(!found && document.keywords && document.keywords.toLowerCase().includes(searchTerm.toLowerCase())){
+                  found = true;
+                }
             });
         }
+        if(!found && marker.element.participation){
+          marker.element.participation.forEach(function (particpation) {
+            if(!found && particpation.part_category && particpation.part_category.toLowerCase().includes(searchTerm.toLowerCase())){
+              found = true;
+            }
+            if(!found && particpation.keywords && particpation.keywords.toLowerCase().includes(searchTerm.toLowerCase())){
+              found = true;
+            }
+          });
+        }
         marker.setVisible(found);
-        if(found)
-            console.log(marker);
+        // if(found)
+        //     console.log(marker);
     });
 }
 
