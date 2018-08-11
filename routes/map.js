@@ -169,7 +169,11 @@ function buildLocationsQuery(filters, page, limit){
             switch (filters[i].type) {
                 case("select"):
                   if (!firstWhere){ whereClause += " AND "; }
+                  if(filters[i].val == "all"){
+                    whereClause += ` l.${filters[i].key} IS NOT NULL`;
+                  } else {
                     whereClause += ` l.${filters[i].key}="${filters[i].val}"`;
+                  }
                     firstWhere = false;
                     break;
 
@@ -634,7 +638,7 @@ var mapFilterParameters = [
   {
       name: "Biodiversity Hotspot",
       id: "hotspot",
-      options: ['Japan', 'Mediterranean Basin', 'Maputaland-Pondoland-Albany', 'Mesoamerica', 'New Zealand', 'Sundaland', 'Indo-Burma', 'Caribbean Islands', 'Cape Floristic Region', 'California Floristic Province', 'Atlantic Forest', 'Tropical Andes', 'Coastal Forests of Eastern Africa', 'Guinean Forests of West Africa', 'Western Ghats and Sri Lanka', 'Philippines', 'North American Coastal Plain', 'Southwest Australia', 'Eastern Afromontane', 'Forests of East Australia', 'Madagascar and the Indian Ocean Islands', 'Polynesia-Micronesia', 'Chilean Winter Rainfall and Valdivian Forests', 'Irano-Anatolian', 'Cerrado', 'Caucasus', 'Mountains of Southwest China', 'Himalaya'],
+      options: ['all', 'Japan', 'Mediterranean Basin', 'Maputaland-Pondoland-Albany', 'Mesoamerica', 'New Zealand', 'Sundaland', 'Indo-Burma', 'Caribbean Islands', 'Cape Floristic Region', 'California Floristic Province', 'Atlantic Forest', 'Tropical Andes', 'Coastal Forests of Eastern Africa', 'Guinean Forests of West Africa', 'Western Ghats and Sri Lanka', 'Philippines', 'North American Coastal Plain', 'Southwest Australia', 'Eastern Afromontane', 'Forests of East Australia', 'Madagascar and the Indian Ocean Islands', 'Polynesia-Micronesia', 'Chilean Winter Rainfall and Valdivian Forests', 'Irano-Anatolian', 'Cerrado', 'Caucasus', 'Mountains of Southwest China', 'Himalaya'],
       type: "select"
   },
   {

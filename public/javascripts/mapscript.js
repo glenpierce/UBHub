@@ -302,7 +302,11 @@ function clearFiltersList(){
 function evaluateFilterOnMarker(filter, marker){
   switch(filter.type){
     case "select":
+    if(filter.val == 'all'){
+      return (marker.element[filter.key] != null);
+    } else {
       return (marker.element[filter.key] == filter.val);
+    }
     case "range":
       return ((marker.element[filter.key] > filter.lower && marker.element[filter.key] < filter.upper));
     case "program":
