@@ -633,21 +633,21 @@ var mapFilterParameters = [
   },
   {
       name: "Biodiversity Hotspot",
-      id: "density_km2",
-      options: ['<300', '300-1,000', '1,000-4,000', '4,000-10,000', '>10,000'],
-      type: "range"
+      id: "hotspot",
+      options: ['Japan', 'Mediterranean Basin', 'Maputaland-Pondoland-Albany', 'Mesoamerica', 'New Zealand', 'Sundaland', 'Indo-Burma', 'Caribbean Islands', 'Cape Floristic Region', 'California Floristic Province', 'Atlantic Forest', 'Tropical Andes', 'Coastal Forests of Eastern Africa', 'Guinean Forests of West Africa', 'Western Ghats and Sri Lanka', 'Philippines', 'North American Coastal Plain', 'Southwest Australia', 'Eastern Afromontane', 'Forests of East Australia', 'Madagascar and the Indian Ocean Islands', 'Polynesia-Micronesia', 'Chilean Winter Rainfall and Valdivian Forests', 'Irano-Anatolian', 'Cerrado', 'Caucasus', 'Mountains of Southwest China', 'Himalaya'],
+      type: "select"
   },
   {
       name: "Biome (WWF)",
-      id: "density_km2",
-      options: ['<300', '300-1,000', '1,000-4,000', '4,000-10,000', '>10,000'],
-      type: "range"
+      id: "wwf_biome",
+      options: ['Temperate Broadleaf & Mixed Forests', 'Deserts & Xeric Shrublands', 'Mediterranean Forests, Woodlands & Scrub', 'Montane Grasslands & Shrublands', 'Tropical & Subtropical Moist Broadleaf Forests', 'Temperate Grasslands, Savannas & Shrublands', 'Mangroves', 'Tropical & Subtropical Grasslands, Savannas & Shrublands', 'Tropical & Subtropical Dry Broadleaf Forests', 'Boreal Forests/Taiga', 'Temperate Conifer Forests', 'Flooded Grasslands & Savannas', 'Tundra'],
+      type: "select"
   },
   {
       name: "Conservation Status (WWF)",
-      id: "density_km2",
-      options: ['<300', '300-1,000', '1,000-4,000', '4,000-10,000', '>10,000'],
-      type: "range"
+      id: "conservation_status_wwf",
+      options: ['critical or endangered', 'vulnerable', 'relatively stable or intact'],
+      type: "select"
   }];
 
 module.exports = router;
