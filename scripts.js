@@ -14,7 +14,7 @@ log = function () {
 updateLocations = function(lower, upper) {
 
     config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
-    // config.rdsHost="127.17.0.2";
+    // config.rdsHost="127.0.0.1";
     config.rdsUser="root";
     config.rdsPassword="my-secret-pw";
 
@@ -141,7 +141,7 @@ function updateLocation(id, lat, lng){
 update = function(){
 
     config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
-    // config.rdsHost="127.17.0.2"; //this should be your Docker container's IP address
+    // config.rdsHost="127.0.0.1"; //this should be your Docker container's IP address
     config.rdsUser="root";
     config.rdsPassword="my-secret-pw";
 
@@ -225,10 +225,14 @@ update = function(){
         "`scale` VARCHAR(255) CHARACTER SET utf8," +
         "`population` INT," +
         "`density_km2` NUMERIC(14, 9)," +
-        "`area_km2` NUMERIC(17, 11)," +
+        "`area_km2` NUMERIC(12,3)," +
         "`area_ha` NUMERIC(7, 2)," +
         "`biodiversity_url` VARCHAR(512) CHARACTER SET utf8," +
-        "`url_verifydate` DATETIME" +
+        "`url_verifydate` DATETIME," +
+        "`wwf_biome` VARCHAR(255) CHARACTER SET utf8," +
+        "`wwf_terrestrial_ecoregion` VARCHAR(255) CHARACTER SET utf8," +
+        "`hotspot` VARCHAR(255) CHARACTER SET utf8," +
+        "`conservation_status_wwf` VARCHAR(255) CHARACTER SET utf8" +
         ");";
     query.push(createLocationsTableQuery);
 
@@ -747,7 +751,7 @@ update = function(){
     // }
 
 
-    // query = [useDbQuery, dropAddPostQuery, createAddPostQuery];
+    // query = [useDbQuery, createLocationsTableQuery];
 
     for(let i = 0; i < query.length; i++) {
 
