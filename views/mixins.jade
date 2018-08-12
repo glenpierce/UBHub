@@ -23,6 +23,8 @@ mixin site(siteName, siteDescription)
         div #{siteDescription}
 
 mixin header(displayLoginInfo)
+    script
+      var userName = #{username};
     //the header should behave like this one: rubygarage.org
     div(class="showWhenNarrow")
         div Hi, I'm the special thing that only shows up when the screen is narrow :)
@@ -45,7 +47,11 @@ mixin header(displayLoginInfo)
                                     div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/forum'") Forum
                                     div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;") Account
                                 div(style="padding:4px 5px 2px 2px;")
-                                    div(style="background-color:#d3e9d5; color:#316b59; padding:5px 30px 5px 30px; border-radius:20px; font-weight:700;") #{username} User Name
+                                  -if(username){
+                                  div(style="background-color:#d3e9d5; color:#316b59; padding:5px 30px 5px 30px; border-radius:20px; font-weight:700;") #{username}
+                                  -} else {
+                                  div(style="background-color:#d3e9d5; color:#316b59; padding:5px 30px 5px 30px; border-radius:20px; font-weight:700; cursor:pointer;" onclick="window.location='/login'") Log in
+                                  -}
                                 //div(style="text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
                             -}else{
                                 div(style="color:#fab279; font-weight:700;") Signup / Log in
