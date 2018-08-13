@@ -35,7 +35,7 @@ router.get('/', function(req, res, next) {
     const perPage = 5;
 
     if (req.session && req.session.user) {
-        getPostsAsList(renderPosts, res, perPage, page, sort, "");
+        getPostsAsList(renderPosts, req, res, perPage, page, sort, "");
     } else {
         req.session.reset();
         res.redirect('/');
@@ -63,7 +63,7 @@ router.get('/search', function(req, res, next) {
 
     //TODO: better backend search
     if (req.session && req.session.user) {
-        getPostsAsList(renderPosts, res, perPage, page, sort, search);
+        getPostsAsList(renderPosts, req, res, perPage, page, sort, search);
     } else {
         req.session.reset();
         res.redirect('/');
@@ -73,7 +73,7 @@ router.get('/search', function(req, res, next) {
 router.get('/ask', function(req, res, next) {
   if (req.session && req.session.user) {
       console.log("logged in as " + req.session.user);
-      res.render('ask');
+      res.render('ask', {username: req.session.user});
   } else {
       console.log("not logged in");
       req.session.reset();
@@ -93,7 +93,7 @@ router.get('/post', function(req, res, next) {
 
       pageId = anc.id;
       getPostsAsTree(pageId, res, req.session.user, (posts) => {
-        renderPostTree(pageId, posts, res, postId);
+        renderPostTree(pageId, posts, req.session.user, res, postId);
       });
 
     })
@@ -282,7 +282,7 @@ router.post("/accept", function(req, res){
 /***********/
 
 
-const renderPosts = (posts, res, perPage, page, sort, search) => {
+const renderPosts = (posts, req, res, perPage, page, sort, search) => {
   //TODO: filter search results out earlier. This is just for alpha
   //TODO: Probably not have the pagination and sorting run here, but this will
   //work for prototype amounts of data.
@@ -330,11 +330,12 @@ const renderPosts = (posts, res, perPage, page, sort, search) => {
     nextPage,
     page,
     finalPage,
-    lastPage
+    lastPage,
+    username: req.session.user
   });
 };
 
-const renderPostTree = (pageId, postHierarchy, res, postId) => {
+const renderPostTree = (pageId, postHierarchy, userId, res, postId) => {
   let scroll = "postTop";
   if (pageId != postId){
     scroll = "post" + postId;
@@ -344,7 +345,8 @@ const renderPostTree = (pageId, postHierarchy, res, postId) => {
   console.log(postHierarchy);
 
   res.render('post', {postTree: postHierarchy,
-                      scrollPost: scroll
+                      scrollPost: scroll,
+                      username: userId
                     });
 };
 
@@ -353,7 +355,7 @@ const renderPostTree = (pageId, postHierarchy, res, postId) => {
 /*DATA***/
 /********/
 
-const getPostsAsList = (callback, res, perPage, page, sort, search) => {
+const getPostsAsList = (callback, req, res, perPage, page, sort, search) => {
   //TODO: implement pagination
 
   const connection = mysql.createConnection({
@@ -381,7 +383,7 @@ const getPostsAsList = (callback, res, perPage, page, sort, search) => {
     return getAnswersData(posts, connection);
   })
   .then((posts) =>{
-    callback(posts, res, perPage, page, sort, search);
+    callback(posts, req, res, perPage, page, sort, search);
     connection.end();
   })
   .catch((err) => {
@@ -418,7 +420,8 @@ const getPostsAsTree = function(postId, res, userId, callback) {
     return createHierarchy(postId, votedPosts, userId);
   })
   .then((postTree) =>{
-    callback(postTree, postId, res);
+    console.log(userId);
+    callback(postTree, postId, userId, res, userId);
     connection.end();
   })
   .catch((err) =>{
