@@ -59,9 +59,8 @@ $red6: #fab279;
 }
 
 body{
-    background-color: white;
-    font-family: helvetica;
-    font-size:14px;
+    margin: 0px;
+    font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 .border{

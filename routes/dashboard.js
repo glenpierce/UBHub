@@ -182,10 +182,10 @@ router.get('/', function(req, res, next){
     getSelectedSite().then(function (values) {
         console.log(values[0][0].siteName);
         getUserData(values[0][0].id);
-        res.render('dashboard');
+        res.render('dashboard', {username: req.session.user});
     }).catch(function(error) {
             console.log(error);
-            res.render('dashboard');
+            res.render('dashboard', {username: req.session.user});
         }
     );
 

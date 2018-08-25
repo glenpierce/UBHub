@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
     // if(req.session && req.session.user)
     //     return res.redirect('indicators');
     // else
-    res.render('resources');
+    res.render('resources', {username: req.session.user});
 });
 
 

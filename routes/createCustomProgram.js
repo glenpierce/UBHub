@@ -17,7 +17,7 @@ app.use(session({
 }));
 
 router.get('/editor', function(req, res, next) {
-    res.render('programEditor');
+    res.render('programEditor', {username: req.session.user});
 });
 
 router.post('/editor', function(req, res, next) {

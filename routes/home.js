@@ -26,7 +26,7 @@ router.get('/', function(req, res, next) {
             res.render('home', {mapData:JSON.stringify(mapData), username: req.session.user});
         } else {
             console.log('Error while performing Query.');
-            res.render('home', {mapData:null});
+            res.render('home', {mapData:null, username: req.session.user});
         }
     });
     connection.end();

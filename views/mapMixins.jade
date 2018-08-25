@@ -20,13 +20,6 @@ mixin filterMixin(title, filterBy, attributeList, filterType)
           each attributeItem in attributeList
               option(value=attributeItem).option #{attributeItem}
 
-
-//mixin filterRangeMixin(filterBy, low, high)
-//    select(style="flex-grow:1; margin: 5px;" onchange="filterRange(this.value, #{filterBy})").border
-//        option(value="none").option
-//        each attributeItem in attributeList
-//            option(value=[low, high]).option #{low} < #{high}
-
 mixin checkboxMixin(value, label)
     div
         input(type="checkbox", name="#{value}").checkbox

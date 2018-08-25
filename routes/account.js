@@ -15,7 +15,7 @@ router.get('/', function(req, res, next) {
                 res.render('account', {userName: req.session.user, userRep: userRep});
             } else {
                 // res.render('account', {userName: req.session.user, userRep: null});
-                res.render('index');
+                res.render('index', {username: req.session.user});
             }
         });
     });
