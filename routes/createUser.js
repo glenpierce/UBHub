@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 var mysql = require('mysql');
 var bcrypt = require('bcryptjs');
-
 var config = require('../config.js');
 
 router.get('/', function(req, res, next){
@@ -20,7 +19,7 @@ router.post('/', function(req, res){
         database: config.rdsDatabase
     });
 
-    var salt = bcrypt.genSaltSync(10);
+    var salt = bcrypt.genSaltSync(10) + req.body.username.toLowerCase() + config.salt;
     var hash = bcrypt.hashSync(req.body.password, salt); //todo: bcrypt.hashSync(req.body.password + "salty salt", salt);
 
     connection.connect();

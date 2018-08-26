@@ -42,10 +42,13 @@ router.post('/', function(req, res){
                 if(response){
                     req.session.user = req.body.username;
                     return res.send('/map');
+                } else {
+                    return res.send('/login');
                 }
             });
         } else {
             console.log('Error while performing Query.');
+            return res.send('/login');
         }
     });
 
