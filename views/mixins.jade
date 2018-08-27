@@ -70,11 +70,11 @@ mixin indexPostLinks(posts)
 
 mixin singlePostLink(post)
   div.singlePostLink(id="post#{post.id}")
-    +postVotes(post)
-    div.postLinkContent
-      p.forumAsker #{post.author} asks:
-      h3(class="forumTitle" onclick="goToPost(#{post.id})" style="cursor:pointer;") #{post.subject}
-      +postLinkMeta(post)
+        +postVotes(post)
+        div.postLinkContent
+          p.forumAsker #{post.author} asks:
+          h3(class="forumTitle" onclick="goToPost(#{post.id})" style="cursor:pointer;") #{post.subject}
+          +postLinkMeta(post)
 
 mixin responsePosts(posts)
   div.indexPostLinks
@@ -86,14 +86,14 @@ mixin singleResponsePost(post)
     div.singlePostLink(id="post#{post.id}" class="accepted")
   else
     div.singlePostLink(id="post#{post.id}")
-    if post.acceptedAnswer
-      p.acceptedBadge Accepted Answer:
-    p.forumAsker #{post.author} says:
-    h3.forumTitle #{post.subject}
-    p.postBody #{post.body}
-    +postMeta(post)
-    +responseComments(post.children)
-    +discussionResponseBox(post)
+        if post.acceptedAnswer
+          p.acceptedBadge Accepted Answer:
+        p.forumAsker #{post.author} says:
+        h3.forumTitle #{post.subject}
+        p.postBody #{post.body}
+        +postMeta(post)
+        +responseComments(post.children)
+        +discussionResponseBox(post)
 
 mixin responseComments(posts)
   div.comments
@@ -123,9 +123,9 @@ mixin postMeta(post)
       span.number(id="downvotes-#{post.id}")  #{post.downvotes}
     span.views views:
       span.number #{post.views}
-    var tags = {};
+    -tags = {};
     if(post.tags && post.tags.length > 0)
-        tags = post.tags.split(',');
+        -tags = post.tags.split(',');
 
     if(tags)
       each tag in tags
