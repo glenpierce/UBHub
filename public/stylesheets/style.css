@@ -34,11 +34,15 @@ a.genericLink {
 }
 
 button {
-  background-color: white;
+  background-color: #daecf1;
   border-style: solid;
   border-color: black;
   border-width: 1px;
   border-radius: 5px;
+}
+
+button:hover {
+  background-color: #e9f6f9;
 }
 
 .border{

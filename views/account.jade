@@ -10,8 +10,7 @@ html
             }
             
             function passwordChanged(response) {
-                document.getElementById('oldPassword').value="";
-                document.getElementById('newPassword').value="";
+                clearFields();
                 if(response === "true"){
                     showPasswordChangedPopup();
                 } else {
@@ -27,14 +26,24 @@ html
                 window.alert("Password changed failed")
             }
 
-            function cancel() {
+            function showForgotPasswordPopup() {
+                window.alert("You can start the password recovery process by emailing us at ubhub.org@gmail.com Please include the email associated with your account, your username, full name, and address in the message.");
+            }
+
+            function clearFields() {
                 document.getElementById('oldPassword').value = "";
                 document.getElementById('newPassword').value = "";
+                document.getElementById('confirmNewPassword').value="";
             }
             
             function httpPostAsync(theUrl, callback) {
                 let oldPassword = document.getElementById('oldPassword').value;
                 let newPassword = document.getElementById('newPassword').value;
+                let confirmNewPassword = document.getElementById('confirmNewPassword').value;
+                if(newPassword !== confirmNewPassword){
+                    window.alert("New password must match confirm password");
+                    return;
+                }
                 let data = {
                     "oldPassword" : oldPassword,
                     "newPassword": newPassword
@@ -53,15 +62,19 @@ html
 body
     +header(true)
 
-    div(style="display:flex; flex-direction:column; height:200px;")
-        div(class="contentContainer" style="font-size:30px; width:60%;") #{userName} has #{userRep} reputation. Great job!
-        div(class="contentContainer" style="width:60%; cursor:pointer;")
-            div Change password
+    div(style="display:flex; flex-direction:column; height:200px; margin:auto; width:100%; align-items:center;")
+        div(style="margin: 50px 0px 50px 0px;") #{userName} has earned #{userRep} reputation.
+        div(style="width:60%;")
+            div(style="margin-bottom:10px;") <b>Change password</b>
             div Current password
-            input(type="text" id="oldPassword" style="border-radius:5px; border-style:solid; border-width:1px;")
+            input(type="password" id="oldPassword" style="border-radius:5px; border-style:solid; border-width:1px;")
+            div(style="color:blue; font-size:10px; cursor:pointer; margin-bottom:10px;" onclick="showForgotPasswordPopup()") Forgot password
             div New password
-            input(type="text" id="newPassword" style="border-radius:5px; border-style:solid; border-width:1px;")
+            input(type="password" id="newPassword" style="border-radius:5px; border-style:solid; border-width:1px; margin-bottom:10px;")
+            div Confirm new password
+            input(type="password" id="confirmNewPassword" style="border-radius:5px; border-style:solid; border-width:1px;")
             div
                 button(onclick="changePassword()" style="margin:10px;") Change password
-                button(onclick="cancel()" style="margin:10px;") Cancel
-        div(class="contentContainer" style="width:60%; cursor:pointer;" onclick="window.location='/account/logout'") logout
+                //button(onclick="clearFields()" style="margin:10px; background-color:white;") Cancel
+        div()
+            button(style="cursor:pointer;" onclick="window.location='/account/logout'") logout

@@ -127,7 +127,8 @@ mixin postMeta(post)
     if(post.tags && post.tags.length > 0)
         tags = post.tags.split(',');
 
-    each tag in tags
+    if(tags)
+      each tag in tags
         span.tag #{tag}
     button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Reply
     if post.canAccept

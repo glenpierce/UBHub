@@ -37,7 +37,7 @@ router.post('/', function(req, res){
     connection.query('CALL login("' + req.body.username + '")', function(err, rows, fields){
         if (!err && rows[0][0] != undefined) {
             console.log(rows);
-            bcrypt.compare(req.body.password, rows[0][0].hashedPassword, function(err, response) {  //todo: bcrypt.compare(req.body.password + "salty salt", rows[0][0].hashedPassword, function(err, response) {
+            bcrypt.compare(req.body.password, rows[0][0].hashedPassword, function(err, response) {
                 console.log(response);
                 if(response){
                     req.session.user = req.body.username;
