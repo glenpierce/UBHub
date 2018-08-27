@@ -84,16 +84,20 @@ mixin responsePosts(posts)
 mixin singleResponsePost(post)
   if(post.acceptedAnswer)
     div.singlePostLink(id="post#{post.id}" class="accepted")
+      +singleResponsePostBody(post)
   else
     div.singlePostLink(id="post#{post.id}")
-        if post.acceptedAnswer
-          p.acceptedBadge Accepted Answer:
-        p.forumAsker #{post.author} says:
-        h3.forumTitle #{post.subject}
-        p.postBody #{post.body}
-        +postMeta(post)
-        +responseComments(post.children)
-        +discussionResponseBox(post)
+        +singleResponsePostBody(post)
+
+mixin singleResponsePostBody(post)
+    if post.acceptedAnswer
+        p.acceptedBadge Accepted Answer:
+    p.forumAsker #{post.author} says:
+    h3.forumTitle #{post.subject}
+    p.postBody #{post.body}
+    +postMeta(post)
+    +responseComments(post.children)
+    +discussionResponseBox(post)
 
 mixin responseComments(posts)
   div.comments
@@ -130,7 +134,10 @@ mixin postMeta(post)
     if(tags)
       each tag in tags
         span.tag #{tag}
-    button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Reply
+    if(post.parent == -1)
+      button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Answer
+    else
+      button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Comment
     if post.canAccept
       button(class="replyButton" onClick="accept(#{post.id}, #{post.parent})") Accept
 

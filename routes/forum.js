@@ -781,12 +781,9 @@ function forumPostFromRow(row){
 
 function canAccept(post, parentAcceptedId, currentUserId){
 
-  if(post.parent > -1 &&
-    post.author != currentUserId &&
-    post.parentAuthor == currentUserId &&
-    parentAcceptedId == null){
-    post.canAccept = true;
-    return post;
+  if(post.parent > -1 && post.parentAuthor == currentUserId && parentAcceptedId == null){
+        post.canAccept = true;
+        return post;
   }
   post.canAccept = false;
   return post;

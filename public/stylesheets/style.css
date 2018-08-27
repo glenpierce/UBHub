@@ -274,6 +274,10 @@ p.postBody {
   margin-top: 12px;
 }
 
+.comments {
+  padding-left: 25px;
+}
+
 .responseBox.hide {
   display: none;
 }

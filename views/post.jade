@@ -14,7 +14,6 @@ html
         window.onload = function() {
           var scrollPost = document.getElementById("#{scrollPost}");
           if(scrollPost){
-            scrollPost.classList.add("focused");
             scrollPost.scrollIntoView();
             window.scrollBy(0, -84);
           }
@@ -34,7 +33,7 @@ body
       div
         +responsePosts(postTree.children)
         form(action="" id="askForm")
-          label Your Response:
+          label Your Answer:
           input(type="text" name="questionTitle")
           label Details:
           textarea(name="questionBody")
