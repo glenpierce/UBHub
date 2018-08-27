@@ -275,7 +275,7 @@ p.postBody {
 }
 
 .comments {
-  padding-left: 25px;
+  padding-left: 40px;
 }
 
 .responseBox.hide {
@@ -331,11 +331,11 @@ p.postBody {
 }
 
 .indexPostLinks .singlePostLink {
-  padding: 24px;
+  padding: 10px 10px 10px 40px;
   background-color: #fff;
   border: 1px #36806a solid;
   border-radius: 5px;
-  margin-top: 12px;
+  margin-top: 5px;
 }
 
 .singlePostLink h3 {transition: all 0.5s;}
