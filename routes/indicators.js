@@ -198,7 +198,6 @@ var cityIndicators = {
 };
 
 router.get('/', function(req, res, next) {
-    console.log("logged in as " + req.session.user);
     res.render('indicators',{userName: req.session.user, cityIndicators:cityIndicators});
 });
 
