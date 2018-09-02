@@ -20,7 +20,7 @@ router.post('/', function(req, res){
     });
 
     var salt = bcrypt.genSaltSync(10) + req.body.username.toLowerCase() + config.salt;
-    var hash = bcrypt.hashSync(req.body.password, salt); //todo: bcrypt.hashSync(req.body.password + "salty salt", salt);
+    var hash = bcrypt.hashSync(req.body.password, salt);
 
     connection.connect();
 

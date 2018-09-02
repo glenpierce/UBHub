@@ -1,8 +1,3 @@
-var loadData = function(){
-
-    $("#userName").html("UserName");
-};
-
 function httpGetAsync(theUrl, callback){
     var user = "";
     var pass = "";

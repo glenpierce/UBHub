@@ -15,7 +15,7 @@ router.get('/', function(req, res, next) {
                 connection.release();
                 if (!err) {
                     const userRep = rows[0][0].totalScore;
-                    res.render('account', {userName: req.session.user, userRep: userRep});
+                    res.render('account', {username: req.session.user, userRep: userRep});
                 } else {
                     res.render('index', {username: req.session.user});
                 }

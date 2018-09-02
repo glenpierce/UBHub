@@ -11,9 +11,11 @@ body(style="font-family:helvetica; background-color:#eff6e8;")
         function httpPostAsync(theUrl, callback){
                 let user = document.getElementById('username').value;
                 let pass = document.getElementById('password').value;
+                let userAddress = document.getElementById('userAddress').value + " organization:" + document.getElementById('organization').value;
                 let data = {
                     "username": user,
-                    "password": pass
+                    "password": pass,
+                    "userAddress": userAddress
                 }
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function() {
@@ -45,6 +47,10 @@ body(style="font-family:helvetica; background-color:#eff6e8;")
             div(style="margin:auto; width:300px;")
                 div(style="display:inline-block; margin-top:4px;") Mailing Address
                 input(name="userAddress" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+        div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
+            div(style="margin:auto; width:300px;")
+                div(style="display:inline-block; margin-top:4px;") Organization
+                input(name="organization" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
         div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
             div(style="margin:auto; width:300px;")
                 div(style="display:inline-block; margin-top:4px;") Email

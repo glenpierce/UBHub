@@ -39,11 +39,15 @@ mixin header(displayLoginInfo)
                     div
                         div(style="display:flex; justify-content:space-between;")
                             if(displayLoginInfo)
-                                div(style="padding:0px 100px 0px 50px; display:flex; justify-content:space-around; flex-grow:1;")
-                                    div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/dashboard'") myHub
-                                    div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/indicators'") Indicators
-                                    div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/forum'") Forum
-                                    div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/account'") Account
+                                if(username)
+                                    div(style="padding:0px 100px 0px 50px; display:flex; justify-content:space-around; flex-grow:1;")
+                                        div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/dashboard'") myHub
+                                        div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/indicators'") Indicators
+                                        div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/forum'") Forum
+                                        div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/account'") Account
+                                else
+                                    div(style="padding:0px 100px 0px 50px; display:flex; justify-content:flex-end; flex-grow:1;")
+                                        div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/createUser'") Sign up
                                 div(style="padding:4px 5px 2px 2px;")
                                   if(username)
                                     div(style="background-color:#d3e9d5; color:#316b59; padding:5px 30px 5px 30px; border-radius:20px; font-weight:700;") #{username}
@@ -56,7 +60,7 @@ mixin header(displayLoginInfo)
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/home'") Home
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/map'") mapHub
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/resources'") guideHub
-                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/aboutUs'") About US
+                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/aboutUs'") About Us
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;") Get Involved
                         div(style="padding:2px 5px 2px 2px;")
                             div(style="background-color:#d3e9d5; cursor:pointer; color:#316b59; padding:5px 45px 5px 45px; border-radius:20px; font-weight:700;") Search

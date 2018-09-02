@@ -198,7 +198,11 @@ var cityIndicators = {
 };
 
 router.get('/', function(req, res, next) {
-    res.render('indicators',{userName: req.session.user, cityIndicators:cityIndicators});
+    if(req.session.user) {
+        res.render('indicators', {username: req.session.user, cityIndicators: cityIndicators});
+    } else {
+        res.redirect('home');
+    }
 });
 
 router.post('/', function(req, res){
