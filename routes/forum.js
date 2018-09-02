@@ -119,9 +119,9 @@ router.post("/submit", function (req, res) {
   const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
   if (req.session && req.session.user && body != "" && title != "" && parent != undefined) {
-      let tags = [];
+      let tags = "";
       if(req.body.tags)
-          tags = req.body.tags.split(',');
+          tags = req.body.tags;
       const connection = mysql.createConnection({
           host: config.rdsHost,
           user: config.rdsUser,
@@ -137,9 +137,6 @@ router.post("/submit", function (req, res) {
       const escapedBody = connection.escape(body);
       const escapedDate = connection.escape(date);
       let escapedTags = connection.escape(tags);
-      if(escapedTags.length == 0){
-          escapedTags = '\'\'';
-      }
       const query = `CALL AddForumPost(${escapedUser}, ${escapedParent}, ${escapedTitle}, ${escapedBody}, ${escapedDate}, ${escapedTags})`;
       connection.query(query, function(err, rows, fields) {
           if (!err) {

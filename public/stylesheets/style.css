@@ -663,6 +663,13 @@ div.mapValuesControl span.disabled {
   cursor: default;
 }
 
+.bioBackground {
+  background:#daecf1; padding:10px 7px 10px 13px; height:280px; border-radius:0px 20px 20px 0px; width:100%;
+}
+
+.aboutUsHeader {
+  background:#07456b; color:white; text-align:center; padding:5px; font-size:22px;
+}
 
 
 /*
