@@ -10,15 +10,16 @@ router.get('/', function(req, res, next) {
     // if(req.session && req.session.user)
     //     return res.redirect('indicators');
     // else
-        res.render('index');
+        res.render('index', {username: req.session.user});
 });
 
 router.post('/', function(req, res, next) {
     userEmail = "";
     if(req.body.email){
         if(req.body.email.toString() === req.body['verify-email'].toString()){
-            sendRecaptchaToGoogle(req.body['g-recaptcha-response'], req.body.email);
-            res.render('index');
+            var string = "firstName: " + req.body.nameFirst + ", " + "lastName: " + req.body.nameLast + ", " + "Org: " + req.body.organization + ", " + "Email: " + req.body.email;
+            sendRecaptchaToGoogle(req.body['g-recaptcha-response'], string);
+            res.render('index', {username: req.session.user});
         }
     }
 });

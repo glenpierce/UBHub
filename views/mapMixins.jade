@@ -15,17 +15,10 @@ mixin filterMixin(title, filterBy, attributeList, filterType)
   div.formItem
     label #{title}
     div.selectBox.filterBox
-      select(onchange="filter(this.value, '" + filterBy + "', '" + filterType + "')")
+      select(onchange="addFilter('#{filterBy}', this.value, '" + filterType + "')")
           option(value="none").option
           each attributeItem in attributeList
               option(value=attributeItem).option #{attributeItem}
-
-
-//mixin filterRangeMixin(filterBy, low, high)
-//    select(style="flex-grow:1; margin: 5px;" onchange="filterRange(this.value, #{filterBy})").border
-//        option(value="none").option
-//        each attributeItem in attributeList
-//            option(value=[low, high]).option #{low} < #{high}
 
 mixin checkboxMixin(value, label)
     div
@@ -58,60 +51,18 @@ mixin mapInfoFilters(mapFilterParameters)
     each filterParameter in mapFilterParameters
       +filterMixin(filterParameter.name, filterParameter.id, filterParameter.options, filterParameter.type)
 
-mixin mapInfoHighlights
+mixin mapInfoHighlights(mapButtons)
   div.mapInfoContent(class="hide" id="highlightSettings" style="background-color: #fffceb")
+    div.quarters
+      each cat in mapButtons
+        div
+          label #{cat.categoryName}
+          each btn in cat.buttons
+            div.activityButton(onclick="selectHighlight('#{btn.part_name}', '#{btn.marker_colors_by}', '#{btn.marker_colors}', this)")
+              p #{btn.button_text}
+              if (btn.image != null)
+                img(src="#{btn.image}")
 
-      div.quarters
-        div
-          label Activities
-            div.activityButton(onclick="selectHighlight('biodiversity_url', this)")
-              p Biodiversity Website
-            div.activityButton(onclick="selectHighlight('intplan_title', this)")
-              p Biodiversity in a Comprehensive Plan
-            div.activityButton(onclick="selectHighlight('plan1_title', this)")
-              p Biodiversity Plan
-            div.activityButton(onclick="selectHighlight('report_title', this)")
-              p Biodiversity Report
-            div.activityButton(onclick="selectHighlight('map', this)")
-              p Biodiversity Map
-            div.activityButton(onclick="selectHighlight('data_portal', this)")
-              p Biodiversity Data
-        div
-          label Programs
-          div.activityButton(onclick="selectHighlight('LAB_joined', this)")
-            img(src="/images/LabProgrammeLogo.jpg")
-          div.activityButton(onclick="selectHighlight('Biophilic_cities', this)")
-            img(src="/images/logo_biophilicCities.png")
-          div.activityButton(onclick="selectHighlight('interact-bio', this)")
-            img(src="/images/logo_interact-Bio.png")
-          div.activityButton(onclick="selectHighlight('wild_cities', this)")
-            img(src="/images/logo_wildCities.png")
-          div.activityButton(onclick="selectHighlight('urban_bird_treaty', this)")
-            img(src="/images/logo_urbanBirdTreaty.png")
-          div.activityButton(onclick="selectHighlight('mayors-monarch', this)")
-            p Mayor's Monarch Pledge
-          div.activityButton(onclick="selectHighlight('urban_wildlife_partnership_city', this)")
-            img(src="/images/logo_urbanWildlifePartnership.png")
-
-        div
-          label Designations & Awards
-          div.activityButton(onclick="selectHighlight('MAB_urban', this)")
-            img(src="/images/logo_manAndTheBiosphereProgramme.png")
-          div.activityButton(onclick="selectHighlight('IUCN_protected_area', this)")
-            img(src="/images/logo_iucn.png")
-          div.activityButton(onclick="selectHighlight('European_Green_Capital_award', this)")
-            img(src="/images/logo_europeanGreenCapital.png")
-          div.activityButton(onclick="selectHighlight('European_capital_biodiversity', this)")
-            img(src="/images/logo_europeanCapitalsOfBiodiversity.png")
-          div.activityButton(onclick="selectHighlight('capitale_francaise', this)")
-            img(src="/images/logo_capitaleFrancaiseBiodiversite.png")
-
-        div
-          label Indices
-          div.activityButton(onclick="selectHighlight('EF_data_ghapercap', this)")
-            p Ecological Footprint
-          div.activityButton(onclick="selectHighlight('SI_status', this)")
-            p Singapore Index
 
 
 
@@ -122,16 +73,16 @@ mixin mapInfoSummary(summary)
   div.mapInfoContent(class="hide" id="mapInfoSummary" style="background-color: #f2f2f2")
     div.quarters
       div.summaryStat
-        h3 #{summary.total}
+        h3#summaryTotal #{summary.total}
         p Total
       div.summaryStat
-        h3 #{summary.municipalities}
+        h3#summaryMunicipalities #{summary.municipalities}
         p Municipalities
       div.summaryStat
-        h3 #{summary.districts}
+        h3#summaryDistricts #{summary.districts}
         p Districts/Counties
       div.summaryStat
-        h3 #{summary.campuses}
+        h3#summaryCampuses #{summary.campuses}
         p Campuses
 
 mixin mapInfoResults(data)
@@ -146,7 +97,7 @@ mixin mapValuesTable(data)
         th#mvTitle Title
         th#mvCountry Country
         th#mvScale Scale
-        th#mvPlan Plan
+        th#mvPrograms Biodiversity Programs & Activities
     tbody#mapTableValues(page="1")
 
 

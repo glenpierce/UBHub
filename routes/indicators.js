@@ -11,8 +11,9 @@ var config = require('../config.js');
 app.use(session({
     cookieName: 'session',
     secret: config.secret,
-    duration: 30 * 60 * 1000,
-    activeDuration: 5 * 60 * 1000
+    cookie: {
+        maxAge: new Date(Date.now() + (config.expires))
+    }
 }));
 
 // router.get('/', function(req, res, next) {
@@ -197,8 +198,11 @@ var cityIndicators = {
 };
 
 router.get('/', function(req, res, next) {
-    console.log("logged in as " + req.session.user);
-    res.render('indicators',{userName: req.session.user, cityIndicators:cityIndicators});
+    if(req.session.user) {
+        res.render('indicators', {username: req.session.user, cityIndicators: cityIndicators});
+    } else {
+        res.redirect('home');
+    }
 });
 
 router.post('/', function(req, res){

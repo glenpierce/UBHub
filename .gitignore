@@ -2,4 +2,5 @@
 .DS_Store
 config.js
 package-lock.json
+/.idea/
 /.vs/

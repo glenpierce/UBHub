@@ -14,7 +14,6 @@ html
         window.onload = function() {
           var scrollPost = document.getElementById("#{scrollPost}");
           if(scrollPost){
-            scrollPost.classList.add("focused");
             scrollPost.scrollIntoView();
             window.scrollBy(0, -84);
           }
@@ -27,14 +26,15 @@ body
     div.spacer
     div.contentContainer
       +forumHeader()
-      p.forumAsker #{postTree.author} asks:
-      h2.forumTitle #{postTree.subject}
-      p.postBody #{postTree.body}
-      +postMeta(postTree)
+      div(style="background-color:#eff6e8; padding:10px; border-radius:5px;")
+          p.forumAsker #{postTree.author} asks:
+          h2.forumTitle #{postTree.subject}
+          p.postBody #{postTree.body}
+          +postMeta(postTree)
       div
         +responsePosts(postTree.children)
         form(action="" id="askForm")
-          label Your Response:
+          label Your Answer:
           input(type="text" name="questionTitle")
           label Details:
           textarea(name="questionBody")

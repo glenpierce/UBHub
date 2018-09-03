@@ -1,0 +1,162 @@
+html
+    head
+        script.
+            var objectToBeSent = [];
+            function drag(event) {
+                event.dataTransfer.setData("text", event.target.textContent);
+                event.dataTransfer.setData("id", event.target.id);
+            }
+
+            function drop(event) {
+                event.preventDefault();
+                var data = event.dataTransfer.getData("text");
+                var id = event.dataTransfer.getData("id");
+                var element = event.target;
+                event.target.style.background = "";
+                var i = 0;
+                var position;
+                while (!element.getAttribute("ondrop") && i < 100) {
+                    position = element.nextElementSibling;
+                    element = element.parentElement;
+                    i++;
+                }
+                var newElement = document.createElement("div");
+                switch (data){
+                    case "Add Text Indicator":
+                        textElement = document.createElement("textarea");
+                        newElement.textContent = "Enter text here";
+                        newElement.appendChild(textElement);
+                        newElement.dataObject = {"type":"Text", "title": ""};
+                        textElement.addEventListener('input', function () {
+                            newElement.dataObject.title = this.value;
+                        }, false);
+                        break;
+                    case "Add Radio Button Group Indicator":
+                        newElement.style = "display:flex; flex-direction:column;";
+
+                        addRadioButtonButton = document.createElement("button");
+                        addRadioButtonButton.textContent = "add a radio button";
+                        addRadioButtonButton.onclick = function (event){
+                            addRadioButton(this);
+                        };
+                        newElement.appendChild(addRadioButtonButton);
+
+                        radioButtonGroupName = document.createElement("textarea");
+                        radioButtonGroupName.textContent = "This is the title of these radio buttons";
+                        newElement.appendChild(radioButtonGroupName);
+                        newElement.dataObject = {"type":"RadioButtonGroup", "children": []};
+                        break;
+                    case "Add Check Box Group Indicator":
+                        newElement.style = "display:flex; flex-direction:column;";
+
+                        addCheckboxButton = document.createElement("button");
+                        addCheckboxButton.textContent = "add a checkbox";
+                        addCheckboxButton.onclick = function (event) {
+                            addCheckbox(this);
+                        };
+                        newElement.appendChild(addCheckboxButton);
+
+                        checkboxGroupName = document.createElement("textarea");
+                        checkboxGroupName.textContent = "This is the title of these check boxes";
+                        newElement.appendChild(checkboxGroupName);
+                        newElement.dataObject = {"type":"CheckBoxGroup", "children": []};
+                        break;
+                    default:
+                        newElement.textContent = data;
+                        newElement.dataObject = {"type":"Category"};
+                        break;
+                }
+                element.insertBefore(newElement, position);
+                var nodes = Array.prototype.slice.call(element.children);
+                objectToBeSent.splice(nodes.indexOf(newElement) - 1, 0, newElement.dataObject);
+                console.log(objectToBeSent);
+            }
+
+            function allowDrop(event) {
+                event.target.className = "dropzone";
+                event.target.style.background = "#bbbbbbbb";
+                event.preventDefault();
+            }
+
+            document.addEventListener("dragleave", function (event) {
+                // reset background of potential drop target when the draggable element leaves it
+                if (event.target.className == "dropzone") {
+                    event.target.style.background = "";
+                }
+
+            }, false);
+
+            function addRadioButton(target) {
+                addButton(target, "radio");
+            }
+
+            function addCheckbox(target) {
+                addButton(target, "checkbox");
+            }
+
+            function addButton(target, type) {
+                radioButtonPanel = document.createElement("div");
+                radioButtonPanel.style = "display:flex;";
+
+                radioButton = document.createElement("input");
+                radioButton.type = type;
+                radioButton.disabled = true;
+                radioButtonPanel.appendChild(radioButton);
+
+                radioButtonLabel = document.createElement("textarea");
+                radioButtonPanel.appendChild(radioButtonLabel);
+                radioButtonLabel.dataObject = {"title": ""};
+                radioButtonLabel.addEventListener('input', function () {
+                    // radioButtonLabel.dataObject.title = this.value;
+                    // target.parentElement.dataObject.children = [];
+                    // console.log(target);
+                    // for(var child in target.parentElement.children) {
+                    //     console.log(child);
+                    //     if(child.value){
+                    //         target.parentElement.dataObject.children.push(child.value);
+                    //     }
+                    // }
+                }, false);
+
+                target.parentElement.appendChild(radioButtonPanel);
+                target.parentElement.dataObject.children.push(radioButtonLabel.dataObject);
+            }
+
+            var valuesArray = [];
+            
+            function save() {
+                console.log(objectToBeSent);
+                var xhr = new XMLHttpRequest();
+                var parameters =
+                    {
+                        "newProgram": objectToBeSent
+                    };
+
+                xhr.onreadystatechange = function() {
+                        if (xhr.readyState == 3) {
+
+                        } else if (xhr.readyState == 4 && xhr.status == 200) {
+                            console.log(xhr);
+                        }
+                    };
+
+                xhr.open("POST", "/createCustomProgram/editor", true);
+                xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                var parametersAsJSON = JSON.stringify(parameters);
+                xhr.send(parametersAsJSON);
+            }
+
+body
+
+        div(style="display:flex; width: 100%; justify-content:space-between;")
+            textarea(style="name")
+            button(onclick="save()") Save
+
+        div(style="display:flex;")
+            div(style="overflow-y:auto;")
+                div(draggable="true" ondragstart="drag(event)") Add Category
+                div(draggable="true" ondragstart="drag(event)") Add Check Box Group Indicator
+                div(draggable="true" ondragstart="drag(event)") Add Radio Button Group Indicator
+                div(draggable="true" ondragstart="drag(event)") Add Text Indicator
+            div(style="overflow-y:auto; border:solid; flex-grow:1;" ondrop="drop(event)" ondragover="allowDrop(event)" id="editor")
+                div Main Panel

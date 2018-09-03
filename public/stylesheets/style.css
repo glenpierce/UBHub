@@ -33,6 +33,18 @@ a.genericLink {
   cursor: pointer;
 }
 
+button {
+  background-color: #daecf1;
+  border-style: solid;
+  border-color: black;
+  border-width: 1px;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #e9f6f9;
+}
+
 .border{
   border:solid; border-radius:5px; border-width:1px;
 }
@@ -191,6 +203,7 @@ h3.forumTitle {
 }
 
 p.postBody {
+  white-space: pre-wrap;
   line-height: 1.4;
 }
 
@@ -234,15 +247,15 @@ p.postBody {
 }
 
 .forumPostMeta>span{
-  background: #ccc;
-  padding: 8px 18px;
+  background: #d3e9d5;
+  padding: 4px 8px;
   margin-right: 4px;
   border-radius: 16px;
   font-weight: 700;
 }
 
 .forumPostMeta span span.number {
-  background-color: #fff;
+  background-color: #d3e9d5;
   padding: 2px;
   margin-left: 4px;
   font-weight: 400;
@@ -260,6 +273,10 @@ p.postBody {
 .singleComment {
   border-top: 1px solid #aaa;
   margin-top: 12px;
+}
+
+.comments {
+  padding-left: 40px;
 }
 
 .responseBox.hide {
@@ -315,11 +332,11 @@ p.postBody {
 }
 
 .indexPostLinks .singlePostLink {
-  padding: 24px;
+  padding: 10px 10px 10px 40px;
   background-color: #fff;
   border: 1px #36806a solid;
   border-radius: 5px;
-  margin-top: 12px;
+  margin-top: 5px;
 }
 
 .singlePostLink h3 {transition: all 0.5s;}
@@ -453,6 +470,16 @@ p.postBody {
   padding-left: 4px;
 }
 
+#map .bodyContent h4 {
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+#map .bodyContent p{
+  margin-top: 2px;
+  margin-bottom: 0;
+}
+
 
 
 .selectBox {
@@ -519,7 +546,7 @@ div.thirds>div {
   border: 1px solid #bb6d37;
   background-color: #fff;
   padding: 16px 24px;
-  font-size: 16px;
+  font-size: 15px;
   height: 72px;
   text-align: center;
   margin: 8px;
@@ -568,9 +595,12 @@ table.mapValuesTable {
   width: 100%;
 }
 
+
 table.mapValuesTable tr td{
   padding: 12px;
   height: 30px;
+  vertical-align: top;
+
 }
 
 table.mapValuesTable tr:nth-child(odd) {
@@ -580,14 +610,45 @@ table.mapValuesTable tr:nth-child(odd) {
 table.mapValuesTable th {
   background-color: #acd9bb;
   padding: 12px;
+  text-align: left;
 }
 
 table.mapValuesTable th#mvTitle {
-  width: 50%;
+  width: 20%;
+}
+
+table.mapValuesTable th#mvPrograms {
+  width: 60%;
+}
+
+table.mapValuesTable td.mvPrograms p {
+  margin-top: 3px;
+  margin-bottom: 3px;
+  font-size: 13px;
+}
+
+table.mapValuesTable td.mvPrograms h4 {
+  margin-bottom: 3px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+table.mapValuesTable td.mvPrograms h4:first-child {
+  margin-top: 0 !important;
+}
+
+table.mapValuesTable td.mvTitle {
+  font-weight: bold;
+}
+
+table.mapValuesTable #mapTableValues>p {
+  padding: 12px;
+  width: 300px;
 }
 
 div.mapValuesControl {
   text-align: center;
+  margin-bottom: 60px;
 }
 
 div.mapValuesControl span {
@@ -603,6 +664,13 @@ div.mapValuesControl span.disabled {
   cursor: default;
 }
 
+.bioBackground {
+  background:#daecf1; padding:10px 7px 10px 13px; height:280px; border-radius:0px 20px 20px 0px; width:100%;
+}
+
+.aboutUsHeader {
+  background:#07456b; color:white; text-align:center; padding:5px; font-size:22px;
+}
 
 
 /*

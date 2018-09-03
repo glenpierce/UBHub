@@ -11,9 +11,71 @@ var config = require('../config.js');
 app.use(session({
     cookieName: 'session',
     secret: config.secret,
-    duration: 30 * 60 * 1000,
-    activeDuration: 5 * 60 * 1000
+    cookie: {
+        maxAge: new Date(Date.now() + (config.expires))
+    }
 }));
+
+router.get('/editor', function(req, res, next) {
+    res.render('programEditor', {username: req.session.user});
+});
+
+router.post('/editor', function(req, res, next) {
+    let someName = "some program name";
+    makeDbCallAsPromise("CALL createProgram('" + someName + "', '" + req.session.user + "')").then(function(result){
+        const programId = result[0][0].id;
+        console.log(req.body);
+        console.log(JSON.stringify(req.body, null, 4));
+        let newProgram = req.body.newProgram;
+        let currentCategoryId;
+        let currentGroupId;
+        createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId);
+    });
+});
+
+function createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId){
+    for(let i = 0; i < newProgram.length; i++){
+        if(newProgram[i].isProcessed){
+            continue;
+        }
+        switch (newProgram[i].type){
+            case "Category":
+                newProgram[i].isProcessed = true;
+                makeDbCallAsPromise("CALL createCategory('" + "newProgram[i].name" + "', '" + i + "', '" + programId + "')").then(function (rows) {
+                    console.log(rows[0][0].id);
+                    currentCategoryId = rows[0][0].id;
+                    createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId);
+                });
+                break;
+            case "CheckBoxGroup":
+                makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram[i].name + "', '" + i + "', '" + currentCategoryId + "')").then(function (rows) {
+                    createChildrenRecursively(rows[0][0].id, newProgram[i].architype, newProgram[i].children);
+                });
+                break;
+            case "RadioButtonGroup":
+                makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram[i].name + "', '" + i + "', '" + currentCategoryId + "')").then(function (rows) {
+                    createChildrenRecursively(rows[0][0].id, newProgram[i].architype, newProgram[i].children);
+                });
+                break;
+            default:
+                break;
+        }
+        return;
+    }
+}
+
+function createChildrenRecursively(parentId, parentArchitype, children){
+    for(let i = 0; i < children.length; i++) {
+        if (children[i].isProcessed) {
+            continue;
+        }
+        children[i].isProcessed = true;
+        makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram[i].name + "', '" + i + "', '" + currentCategoryId + "')").then(function (rows) {
+            createChildrenRecursively(parentId, parentArchitype, children);
+        });
+        return;
+    }
+}
 
 router.get('/', function(req, res, next) {
     var indicators = "";
@@ -112,6 +174,32 @@ makeDbCall = function(queryString, callback){
         }
     });
     connection.end();
+};
+
+makeDbCallAsPromise = function(queryString){
+    return new Promise((resolve, reject) => {
+        connection = mysql.createConnection({
+            host: config.rdsHost,
+            user: config.rdsUser,
+            password: config.rdsPassword,
+            database: config.rdsDatabase
+        });
+
+        connection.connect();
+        query = queryString;
+        console.log(query);
+        connection.query(query, function (err, rows, fields) {
+            if (!err) {
+                resolve(rows);
+            } else {
+                console.log('Error while performing Query.');
+                console.log(err.code);
+                console.log(err.message);
+                reject(err);
+            }
+        });
+        connection.end();
+    })
 };
 
 module.exports = router;

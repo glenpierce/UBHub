@@ -37,31 +37,30 @@ $red5: #f69056;
 $red6: #fab279;
 */
 
-@media only screen and (min-width:700px){
-    .hideWhenNarrow{
-        /*display: block;*/
-    }
+/*@media only screen and (min-width:700px){*/
+    /*.hideWhenNarrow{*/
+        /*!*display: block;*!*/
+    /*}*/
 
-    .showWhenNarrow{
-        display: none;
-    }
+    /*.showWhenNarrow{*/
+        /*display: none;*/
+    /*}*/
 
-}
+/*}*/
 
-@media only screen and (max-width:701px){
-    .hideWhenNarrow{
-        display: none;
-    }
+/*@media only screen and (max-width:701px){*/
+    /*.hideWhenNarrow{*/
+        /*display: none;*/
+    /*}*/
 
-    .showWhenNarrow{
-        /*display: block;*/
-    }
-}
+    /*.showWhenNarrow{*/
+        /*!*display: block;*!*/
+    /*}*/
+/*}*/
 
 body{
-    background-color: white;
-    font-family: helvetica;
-    font-size:14px;
+    margin: 0px;
+    font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 .border{

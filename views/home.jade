@@ -32,14 +32,34 @@ body
                             div(class="homePageWhiteBox") Indicator Tracker to Manage Your Projects
             img(style="align-self:flex-end; height:70%;" src="/images/owl.svg")
 
+    div(style="display:flex; flex-direction:column; width:100%; margin-bottom:40px; margin-top:40px;")
+        div(style="color:#326f90; font-size:20px; margin:auto; margin-bottom:10px; margin-top:10px;") <b>What kind of species live in cities?</b>
+        div(style="color:#326f90; font-size:20px; margin:auto; margin-bottom:10px; text-align:center;") Cities harbour a surprisingly high proportion of Earth's species biodiversity. Many of them are native or even endemic to their region (Convention on Biological Diversity 2012).
+        img(style="height:400px; margin:auto;" src="images/UBHub_species_sep_2018.png")
+
+    div(style="background:url('/images/blue_monkeys_horiz.png') darkblue; background-size: cover; width:100%; display:flex; align-items:center; height:400px;")
+        div(style="padding:50px;")
+            div(style="color:white; font-weight:700; font-size:36px; text-align:center; margin:auto; padding-bottom:10px;") <i>“Great platform for practitioners, students and researchers interested in knowing what cities are doing to improve local biodiversity and have a global impact."</i>
+            div(style="color:white; font-size:20px; text-align:center; margin:auto;") -Jose A. Puppim de Oliveira (FGV, Brazil)
+
+    div(style="display:flex; flex-direction:column; width:100%; margin-bottom:40px;")
+        div(style="color:#326f90; font-size:20px; margin:auto; margin-bottom:10px; margin-top:10px;") <b>What is included in Urban Biodiversity?</b>
+        div(style="color:#326f90; font-size:20px; margin:auto; margin-bottom:10px;") At UBHub, we take an inclusive approach to urban biodiversity.
+        img(style="height:300px; margin:auto;" src="images/UBHub_urbanbio_def_sep_2018.png")
+
+    div(style="background:url('/images/blue_monkeys_horiz.png') darkblue; background-size: cover; width:100%; display:flex; align-items:center; height:400px;")
+        div(style="padding:50px;")
+            div(style="color:white; font-weight:700; font-size:36px; text-align:center; margin:auto; padding-bottom:10px;") <i>“When I first saw UHUB, I quickly understood its wide ranging functionality and usefulness. As a practitioner, it provides me with a portal to understand what is possible in urban biodiversity and instantly increases our capacity to solve problems. For me, it represents the next generation in biodiversity  information systems."</i>
+            div(style="color:white; font-size:20px; text-align:center; margin:auto;") -Grant Pearsell, City of Edmonton
+
     div(style="background:white; display:flex;")
         img(style="height:475px;" src="/images/lizard_green_long.svg")
         div
             div(style="display:flex; align-items:center;")
                 div(style="margin:auto; text-align:center; padding-top: 20px; padding-left:60px; padding-right: 60px;")
                     div(style="color:#326f90; font-size:20px; margin-top:10px; margin-bottom:10px;") <b>mapHub</b>
-                    div(style="color:#326f90; font-size:20px;") mapHub includes thousands of actions in over <span style="color:#f69056; font-weight:700; font-size:30px;">800</span> locations around the globe, including more than <span style="color:#f69056; font-weight:700; font-size:30px;">600</span> municipal governments, over <span style="color:#f69056; font-weight:700; font-size:30px;">250</span> biodiversity plans and reports, and including participation in <span style="color:#f69056; font-weight:700; font-size:30px;">14</span> different international urban biodiversity networks and indicator programs.
-                div(style="color:white; background:#f69056; border-radius:5px; padding:10px; margin-right:50px; margin-top:50px; text-align:center;") Explore the database
+                    div(style="color:#326f90; font-size:20px;") mapHub includes thousands of actions in over <span style="color:#f69056; font-weight:700; font-size:30px;">1200</span> locations around the globe, including more than <span style="color:#f69056; font-weight:700; font-size:30px;">700</span> municipal governments, over <span style="color:#f69056; font-weight:700; font-size:30px;">250</span> biodiversity plans and reports, and including participation in <span style="color:#f69056; font-weight:700; font-size:30px;">25</span> different international urban biodiversity networks and indicator programs.
+                div(style="color:white; background:#f69056; border-radius:5px; padding:10px; margin-right:50px; margin-top:50px; text-align:center; cursor:pointer;" onclick="window.location='/map'") Explore the database
             div(style="margin:auto; display:flex; align-items:center; flex-direction:column; margin-top:20px;")
                 div(style="display:flex; padding-right:80px;")
                     div(style="color:#326f90; font-weight:700;") Example locations:
@@ -119,7 +139,7 @@ body
         div(style="max-width:800px; margin:auto; padding-left: 5%; padding-right:5%;")
             div(style="color:#4490ba; font-size:20px; text-align:center; margin-top:10px; margin-bottom:10px;") <b>guideHub</b>
             div(style="color:#4490ba; font-size:20px; text-align:center;") guideHub includes <span style="color:#5ebd93; font-weight:700; font-size:30px;">100</span> resources, including a comparison of these <span style="color:#5ebd93; font-weight:700; font-size:30px;">6</span> guidelines for urban biodiversity planning to help you choose which is right for you.
-        div(style="max-width:120px; text-align:center; margin:20px; border-radius:10px; padding:10px; background:#5ebd93; color:white;") Explore our Resources
+        div(style="max-width:120px; text-align:center; margin:20px; border-radius:10px; padding:10px; background:#5ebd93; color:white; cursor:pointer;" onclick="window.location='/resources'") Explore our Resources
         img(style="width:320px;" src="/images/Possum2.svg")
 
     div(style="display:flex; max-width:1000px; margin:auto; min-width:600px; justify-content:space-around; padding:20px;")
@@ -154,7 +174,7 @@ body
 
     div(style="display:flex; margin:auto; justify-content:space-around; align-items:center; margin:10px;")
         div(class="largeBlueText" style="max-width:400px; text-align:center;font-size:20px; padding: 20px 0px 20px 25%;") myHub <b>Forum</b><br> Get answers to your urban biodiversity questions from experts and discuss common challenges with fellow practitioners on our forum.
-        div(style="border-radius:10px; background-color:#fab279; color:white; text-align:center; width:80px; padding:10px; display:flex; align-items:center;") Learn more about membership
+        div(style="border-radius:10px; background-color:#fab279; color:white; text-align:center; width:80px; padding:10px; display:flex; align-items:center; cursor:pointer;" onclick="window.location='/createUser'") Create an account
 
     div(style="background:url('/images/blue_overlook_nightcity_horiz.png') darkblue; display:flex; background-size: cover;")
         div(style="flex-grow:1;")

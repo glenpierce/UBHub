@@ -12,8 +12,9 @@ var config = require('../config.js');
 app.use(session({
     cookieName: 'session',
     secret: config.secret,
-    duration: 30 * 60 * 1000,
-    activeDuration: 5 * 60 * 1000
+    cookie: {
+        maxAge: new Date(Date.now() + (config.expires))
+    }
 }));
 
 router.get('/', function(req, res, next) {
@@ -36,15 +37,18 @@ router.post('/', function(req, res){
     connection.query('CALL login("' + req.body.username + '")', function(err, rows, fields){
         if (!err && rows[0][0] != undefined) {
             console.log(rows);
-            bcrypt.compare(req.body.password, rows[0][0].hashedPassword, function(err, response) {  //todo: bcrypt.compare(req.body.password + "salty salt", rows[0][0].hashedPassword, function(err, response) {
+            bcrypt.compare(req.body.password, rows[0][0].hashedPassword, function(err, response) {
                 console.log(response);
                 if(response){
                     req.session.user = req.body.username;
                     return res.send('/map');
+                } else {
+                    return res.send('/login');
                 }
             });
         } else {
             console.log('Error while performing Query.');
+            return res.send('/login');
         }
     });
 

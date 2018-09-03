@@ -1,18 +1,19 @@
-var express = require('express');
-var router = express.Router();
-var mysql = require('mysql');
-var session = require('client-sessions');
-var path = require("path");
+const express = require('express');
+const router = express.Router();
+const mysql = require('mysql');
+const session = require('client-sessions');
+const path = require("path");
 
-var app = express();
+const app = express();
 
-var config = require('../config.js');
+const config = require('../config.js');
 
 app.use(session({
     cookieName: 'session',
     secret: config.secret,
-    duration: 30 * 60 * 1000,
-    activeDuration: 5 * 60 * 1000
+    cookie: {
+        maxAge: new Date(Date.now() + (config.expires))
+    }
 }));
 
 /********/
@@ -21,20 +22,20 @@ app.use(session({
 
 router.get('/', function(req, res, next) {
 
-    var page = req.query.page;
+    let page = req.query.page;
     if(!page) {
       page = 1;
     }
 
-    var sort = req.query.sort;
+    let sort = req.query.sort;
     if(!sort) {
       sort = "date";
     }
 
-    var perPage = 5;
+    const perPage = 5;
 
     if (req.session && req.session.user) {
-        getPostsAsList(renderPosts, res, perPage, page, sort, "");
+        getPostsAsList(renderPosts, req, res, perPage, page, sort, "");
     } else {
         req.session.reset();
         res.redirect('/');
@@ -43,26 +44,26 @@ router.get('/', function(req, res, next) {
 
 router.get('/search', function(req, res, next) {
 
-    var page = req.query.page;
+    let page = req.query.page;
     if(!page) {
       page = 1;
     }
 
-    var sort = req.query.sort;
+    let sort = req.query.sort;
     if(!sort) {
       sort = "date";
     }
 
-    var search = req.query.s;
+    const search = req.query.s;
     if(!search) {
       res.redirect('/');
     }
 
-    var perPage = 5;
+    const perPage = 5;
 
     //TODO: better backend search
     if (req.session && req.session.user) {
-        getPostsAsList(renderPosts, res, perPage, page, sort, search);
+        getPostsAsList(renderPosts, req, res, perPage, page, sort, search);
     } else {
         req.session.reset();
         res.redirect('/');
@@ -72,7 +73,7 @@ router.get('/search', function(req, res, next) {
 router.get('/ask', function(req, res, next) {
   if (req.session && req.session.user) {
       console.log("logged in as " + req.session.user);
-      res.render('ask');
+      res.render('ask', {username: req.session.user});
   } else {
       console.log("not logged in");
       req.session.reset();
@@ -82,8 +83,8 @@ router.get('/ask', function(req, res, next) {
 
 router.get('/post', function(req, res, next) {
   if (req.session && req.session.user) {
-    var postId = req.query.id;
-    var pageId;
+    const postId = req.query.id;
+    let pageId;
 
 
     getFirstAncestor(postId)
@@ -92,7 +93,7 @@ router.get('/post', function(req, res, next) {
 
       pageId = anc.id;
       getPostsAsTree(pageId, res, req.session.user, (posts) => {
-        renderPostTree(pageId, posts, res, postId);
+        renderPostTree(pageId, posts, req.session.user, res, postId);
       });
 
     })
@@ -112,31 +113,36 @@ router.post("/submit", function (req, res) {
   //Does the post have the required fields? (subject, body, parentPost) DONE
   //Does the post pass spam filters TODO (if necessary)
 
-  var body = req.body.questionBody.trim();
-  var title = req.body.questionTitle.trim();
-  var parent = req.body.parentPost;
-  var date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+  const body = req.body.questionBody.trim();
+  const title = req.body.questionTitle.trim();
+  const parent = req.body.parentPost;
+  const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-  if (req.session
-      && req.session.user
-      && body != ""
-      && title != ""
-      && parent != undefined) {
-      var connection = mysql.createConnection({
+  if (req.session && req.session.user && body != "" && title != "" && parent != undefined) {
+      let tags = "";
+      if(req.body.tags)
+          tags = req.body.tags;
+      const connection = mysql.createConnection({
           host: config.rdsHost,
           user: config.rdsUser,
           password: config.rdsPassword,
           database: config.rdsDatabase
       });
 
-      var path="";
+      let path = "";
       connection.connect();
-      query = `CALL AddForumPost('${req.session.user}', '${parent}', '${title}', '${body}', '${date}')`;
+      const escapedUser = connection.escape(req.session.user);
+      const escapedParent = connection.escape(parent);
+      const escapedTitle = connection.escape(title);
+      const escapedBody = connection.escape(body);
+      const escapedDate = connection.escape(date);
+      let escapedTags = connection.escape(tags);
+      const query = `CALL AddForumPost(${escapedUser}, ${escapedParent}, ${escapedTitle}, ${escapedBody}, ${escapedDate}, ${escapedTags})`;
       connection.query(query, function(err, rows, fields) {
           if (!err) {
               //If successful, redirect to the post page
-              var row = rows[0][0];
-              var pageId;
+              const row = rows[0][0];
+              let pageId;
 
               if(row.parent === -1){
                 pageId = row.id;
@@ -164,14 +170,14 @@ router.post("/vote", function(req, res) {
   //Does user have vote privileges? TODO
   //Has user ever voted for this post before? DONE
 
-  var voteDelta = req.body.vote;
-  var user = req.session.user;
-  var postId = req.body.postId;
+  const voteDelta = req.body.vote;
+  const user = req.session.user;
+  const postId = req.body.postId;
 
   console.log("Hit vote");
 
   if (req.session && req.session.user) {
-    var connection = mysql.createConnection({
+    const connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
         password: config.rdsPassword,
@@ -213,30 +219,30 @@ router.post("/unvote", function(req, res) {
   //Does user have vote privileges? TODO
 
   if (req.session && req.session.user) {
-    var connection = mysql.createConnection({
+    const connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
         password: config.rdsPassword,
         database: config.rdsDatabase
     });
 
-    var voteDelta = req.body.voteDelta;
-    var user = req.session.user;
-    var postId = req.body.postId;
+    const voteDelta = req.body.voteDelta;
+    const user = req.session.user;
+    const postId = req.body.postId;
 
-    var query = `CALL unvoteForPost(${postId}, "${user}");`
+    const query = `CALL unvoteForPost(${postId}, "${user}");`;
 
     connection.query(query, function(err, rows, fields) {
       if(err)
         console.log(err);
     })
   }
-})
+});
 
 router.post("/accept", function(req, res){
 
   if (req.session && req.session.user) {
-    var connection = mysql.createConnection({
+    const connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
         password: config.rdsPassword,
@@ -245,14 +251,14 @@ router.post("/accept", function(req, res){
 
     connection.connect();
 
-    var postId = req.body.postId;
-    var answerId = req.body.answerId;
+    const postId = req.body.postId;
+    const answerId = req.body.answerId;
 
     getPostData(postId, connection)
     .then((parentPost)=>{
       if(parentPost.author === req.session.user){
 
-        var query = `CALL acceptPost(${answerId}, ${postId})`;
+        const query = `CALL acceptPost(${answerId}, ${postId})`;
 
         connection.query(query, function(err, rows, fields) {
           if(err){
@@ -261,11 +267,11 @@ router.post("/accept", function(req, res){
           connection.end();
         })
       } else {
-        console.log
+        console.log("parentPost.author !== req.session.user");
       }
     });
   }
-})
+});
 
 
 /***********/
@@ -273,7 +279,7 @@ router.post("/accept", function(req, res){
 /***********/
 
 
-var renderPosts = (posts, res, perPage, page, sort, search) => {
+const renderPosts = (posts, req, res, perPage, page, sort, search) => {
   //TODO: filter search results out earlier. This is just for alpha
   //TODO: Probably not have the pagination and sorting run here, but this will
   //work for prototype amounts of data.
@@ -310,10 +316,10 @@ var renderPosts = (posts, res, perPage, page, sort, search) => {
   //PAGINATION
   page = parseInt(page);
   perPage = parseInt(perPage);
-  var finalPage = Math.ceil(posts.length/perPage);
-  var postsToRender = posts.slice((page - 1)*perPage, page*perPage);
-  var lastPage = page === 1 ? false: page - 1;
-  var nextPage = page === finalPage ? false: page + 1;
+  const finalPage = Math.ceil(posts.length/perPage);
+  const postsToRender = posts.slice((page - 1)*perPage, page*perPage);
+  const lastPage = page === 1 ? false: page - 1;
+  const nextPage = page === finalPage ? false: page + 1;
 
   res.render('forum', {
     posts: postsToRender,
@@ -321,30 +327,35 @@ var renderPosts = (posts, res, perPage, page, sort, search) => {
     nextPage,
     page,
     finalPage,
-    lastPage
+    lastPage,
+    username: req.session.user
   });
-}
+};
 
-var renderPostTree = (pageId, postHierarchy, res, postId) => {
-  var scroll = "postTop";
+const renderPostTree = (pageId, postHierarchy, userId, res, postId) => {
+  let scroll = "postTop";
   if (pageId != postId){
     scroll = "post" + postId;
   }
 
+  console.log("postHierarchy:");
+  console.log(postHierarchy);
+
   res.render('post', {postTree: postHierarchy,
-                      scrollPost: scroll
+                      scrollPost: scroll,
+                      username: userId
                     });
-}
+};
 
 
 /********/
 /*DATA***/
 /********/
 
-var getPostsAsList = (callback, res, perPage, page, sort, search) => {
+const getPostsAsList = (callback, req, res, perPage, page, sort, search) => {
   //TODO: implement pagination
 
-  var connection = mysql.createConnection({
+  const connection = mysql.createConnection({
       host: config.rdsHost,
       user: config.rdsUser,
       password: config.rdsPassword,
@@ -355,11 +366,11 @@ var getPostsAsList = (callback, res, perPage, page, sort, search) => {
   //TODO: currently hardcoded for homepage, parentless posts. Make this dynamic,
   //to be used with search, tag view, etc.
 
-  query = `CALL getPostsByParent(-1)`;
+  const query = `CALL getPostsByParent(-1)`;
 
   fetchPosts(connection, query)
   .then((rows) => {
-    var posts = rows[0].map(row => forumPostFromRow(row));
+    const posts = rows[0].map(row => forumPostFromRow(row));
     return posts;
   })
   .then((posts) =>{
@@ -369,18 +380,18 @@ var getPostsAsList = (callback, res, perPage, page, sort, search) => {
     return getAnswersData(posts, connection);
   })
   .then((posts) =>{
-    callback(posts, res, perPage, page, sort, search);
+    callback(posts, req, res, perPage, page, sort, search);
     connection.end();
   })
   .catch((err) => {
     console.log(err);
     connection.end();
   })
-}
+};
 
-var getPostsAsTree = function(postId, res, userId, callback) {
+const getPostsAsTree = function(postId, res, userId, callback) {
 
-  var connection = mysql.createConnection({
+  const connection = mysql.createConnection({
       host: config.rdsHost,
       user: config.rdsUser,
       password: config.rdsPassword,
@@ -388,11 +399,11 @@ var getPostsAsTree = function(postId, res, userId, callback) {
   });
   connection.connect();
 
-  query = `CALL getPostAndAllSubs(${postId})`;
+  const query = `CALL getPostAndAllSubs(${postId})`;
 
   fetchPosts(connection, query)
   .then((rows) => {
-    var posts = rows[0].map(row => forumPostFromRow(row));
+    const posts = rows[0].map(row => forumPostFromRow(row));
     return posts;
   })
   .then((posts) => {
@@ -406,17 +417,18 @@ var getPostsAsTree = function(postId, res, userId, callback) {
     return createHierarchy(postId, votedPosts, userId);
   })
   .then((postTree) =>{
-    callback(postTree, postId, res);
+    console.log(userId);
+    callback(postTree, postId, userId, res, userId);
     connection.end();
   })
   .catch((err) =>{
     console.log(err);
     connection.end();
   })
-}
+};
 
 
-var fetchPosts = function (connection, query) {
+const fetchPosts = function (connection, query) {
   return new Promise((resolve, reject) => {
     connection.query(query, function(err, rows, fields) {
         if (!err) {
@@ -426,7 +438,7 @@ var fetchPosts = function (connection, query) {
         }
       })
     });
-}
+};
 
 function attachVotes(posts, connection) {
   return Promise.all(posts.map(function (post) {
@@ -436,9 +448,9 @@ function attachVotes(posts, connection) {
 
 function attachPostVotes(post, connection){
   return new Promise((resolve, reject) => {
-    var newPost = post;
-    var q1 = `CALL getUpvotesTotal(${post.id})`;
-    var q2 = `CALL getDownvotesTotal(${post.id})`;
+    let newPost = post;
+    const q1 = `CALL getUpvotesTotal(${post.id})`;
+    const q2 = `CALL getDownvotesTotal(${post.id})`;
 
     connection.query(q1, function(err, rows, fields){
       if(!err){
@@ -494,8 +506,8 @@ function attachVoteStatuses(posts, authorId, connection) {
 
 function attachPostVoteStatus(post, authorId, connection){
   return new Promise((resolve, reject) =>{
-    var newPost = post;
-    var query = `CALL getAuthorVoteForPost(${post.id}, "${authorId}")`;
+    let newPost = post;
+    const query = `CALL getAuthorVoteForPost(${post.id}, "${authorId}")`;
     connection.query(query, function(err, rows, fields){
       if(!err){
         if(rows[0].length <= 0) {
@@ -512,7 +524,7 @@ function attachPostVoteStatus(post, authorId, connection){
 }
 
 function addViews(posts) {
-  var connection = mysql.createConnection({
+  const connection = mysql.createConnection({
       host: config.rdsHost,
       user: config.rdsUser,
       password: config.rdsPassword,
@@ -526,7 +538,7 @@ function addViews(posts) {
 }
 
 function addView(post, connection){
-    var query = `CALL addView(${post.id})`;
+    const query = `CALL addView(${post.id})`;
     connection.query(query, function(err, rows, fields){
       if(!err) {
         //return post;
@@ -540,7 +552,7 @@ function addView(post, connection){
 function getUserVoteForPost(id, user, connection){
   return new Promise((resolve, reject) => {
 
-    var query = `CALL getAuthorVoteForPost(${id}, "${user}")`;
+    const query = `CALL getAuthorVoteForPost(${id}, "${user}")`;
 
     connection.query(query, function(err, rows, fields){
       if(!err){
@@ -561,7 +573,7 @@ function getUserVoteForPost(id, user, connection){
 
 function getPostData(id, connection){
   return new Promise((resolve, reject) => {
-    var query = `CALL getPostById(${id})`;
+    const query = `CALL getPostById(${id})`;
     connection.query(query, function(err, rows, fields){
       if(!err){
         resolve(rows[0][0]);
@@ -579,7 +591,7 @@ function getPostData(id, connection){
 //child nodes with parent of stem node. Each child node will have one layer of
 //children of their own.
 //TODO: make this less of a mess
-var createHierarchy = (topId, posts, currentUserId) => {
+const createHierarchy = (topId, posts, currentUserId) => {
 
   return new Promise((resolve, reject) => {
 
@@ -593,9 +605,9 @@ var createHierarchy = (topId, posts, currentUserId) => {
       } else {
         console.error("Same id detected! Something has gone wrong.")
       }
-    })
+    });
 
-    var postTree;
+    let postTree;
 
     if(posts[0].parent === -1){
       postTree = posts.shift();
@@ -603,8 +615,8 @@ var createHierarchy = (topId, posts, currentUserId) => {
       console.error("No first-level post found. Something has gone wrong!")
     }
 
-    var entriesCount = posts.length;
-    var acceptedId = postTree.acceptedAnswerId;
+    let entriesCount = posts.length;
+    let acceptedId = postTree.acceptedAnswerId;
 
     postTree = insertIntoTree(posts, postTree, currentUserId, acceptedId);
     console.log(JSON.stringify(postTree, undefined, 2));
@@ -624,7 +636,7 @@ var createHierarchy = (topId, posts, currentUserId) => {
 
     resolve(postTree);
   });
-}
+};
 
 function insertIntoTree(lop, t, u, a){
   if(lop.length <= 0){
@@ -644,8 +656,8 @@ function insertIntoTree(lop, t, u, a){
       t.children.push(p);
       return insertIntoTree(lop, t, u, a);
   } else {
-    var notFound = true;
-    var i = 0;
+    let notFound = true;
+    let i = 0;
     while(notFound && i < t.children.length) {
       if(t.children[i].id === p.parent){
         p.parentAuthor = t.children[i].author;
@@ -667,7 +679,7 @@ function insertIntoTree(lop, t, u, a){
 //Returns ancestor post with parent of -1.
 function getFirstAncestor(postId){
 
-  var connection = mysql.createConnection({
+  const connection = mysql.createConnection({
       host: config.rdsHost,
       user: config.rdsUser,
       password: config.rdsPassword,
@@ -766,12 +778,9 @@ function forumPostFromRow(row){
 
 function canAccept(post, parentAcceptedId, currentUserId){
 
-  if(post.parent > -1 &&
-    post.author != currentUserId &&
-    post.parentAuthor == currentUserId &&
-    parentAcceptedId == null){
-    post.canAccept = true;
-    return post;
+  if(post.parent > -1 && post.parentAuthor == currentUserId && parentAcceptedId == null){
+        post.canAccept = true;
+        return post;
   }
   post.canAccept = false;
   return post;

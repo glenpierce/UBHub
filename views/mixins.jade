@@ -23,10 +23,10 @@ mixin site(siteName, siteDescription)
         div #{siteDescription}
 
 mixin header(displayLoginInfo)
-    //the header should behave like this one: rubygarage.org
-    div(class="showWhenNarrow")
-        div Hi, I'm the special thing that only shows up when the screen is narrow :)
-    div(class="hideWhenNarrow")
+    //div(class="showWhenNarrow")
+    //    div Hi, I'm the special thing that only shows up when the screen is narrow :)
+    //div(class="hideWhenNarrow")
+    div
         div(style="width:100%; position:fixed; display:flex; flex-grow:1; z-index: 2;")
             div(style="height:100px; background:white; flex-grow:1;")
             div(style="max-width:1200px; display:flex; justify-content:space-between; height: 40px; width:100%; flex-grow:5;")
@@ -38,24 +38,29 @@ mixin header(displayLoginInfo)
                 div(style="width:100%;")
                     div
                         div(style="display:flex; justify-content:space-between;")
-                            -if(displayLoginInfo){
-                                div(style="padding:0px 100px 0px 50px; display:flex; justify-content:space-around; flex-grow:1;")
-                                    div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/dashboard'") myHub
-                                    div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/indicators'") Indicators
-                                    div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/forum'") Forum
-                                    div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;") Account
+                            if(displayLoginInfo)
+                                if(username)
+                                    div(style="padding:0px 100px 0px 50px; display:flex; justify-content:space-around; flex-grow:1;")
+                                        div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/dashboard'") myHub
+                                        div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/indicators'") Indicators
+                                        div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/forum'") Forum
+                                        div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/account'") Account
+                                else
+                                    div(style="padding:0px 100px 0px 50px; display:flex; justify-content:flex-end; flex-grow:1;")
+                                        div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/createUser'") Sign up
                                 div(style="padding:4px 5px 2px 2px;")
-                                    div(style="background-color:#d3e9d5; color:#316b59; padding:5px 30px 5px 30px; border-radius:20px; font-weight:700;") #{username} User Name
-                                //div(style="text-decoration:underline; cursor:pointer; color:#4490ba;" onclick="logOut()") Log out
-                            -}else{
+                                  if(username)
+                                    div(style="background-color:#d3e9d5; color:#316b59; padding:5px 30px 5px 30px; border-radius:20px; font-weight:700;") #{username}
+                                  else
+                                    div(style="background-color:#d3e9d5; color:#316b59; padding:5px 30px 5px 30px; border-radius:20px; font-weight:700; cursor:pointer;" onclick="window.location='/login'") Log in
+                            else
                                 div(style="color:#fab279; font-weight:700;") Signup / Log in
-                            -}
                     div(style="display:flex; justify-content:space-between;")
                         div(style="display:flex; justify-content:space-around; flex-grow:1;")
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/home'") Home
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/map'") mapHub
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/resources'") guideHub
-                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/aboutUs'") About US
+                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/aboutUs'") About Us
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;") Get Involved
                         div(style="padding:2px 5px 2px 2px;")
                             div(style="background-color:#d3e9d5; cursor:pointer; color:#316b59; padding:5px 45px 5px 45px; border-radius:20px; font-weight:700;") Search
@@ -70,11 +75,11 @@ mixin indexPostLinks(posts)
 
 mixin singlePostLink(post)
   div.singlePostLink(id="post#{post.id}")
-    +postVotes(post)
-    div.postLinkContent
-      p.forumAsker #{post.author} asks:
-      h3(class="forumTitle" onclick="goToPost(#{post.id})" style="cursor:pointer;") #{post.subject}
-      +postLinkMeta(post)
+        +postVotes(post)
+        div.postLinkContent
+          p.forumAsker #{post.author} asks:
+          h3(class="forumTitle" onclick="goToPost(#{post.id})" style="cursor:pointer;") #{post.subject}
+          +postLinkMeta(post)
 
 mixin responsePosts(posts)
   div.indexPostLinks
@@ -82,9 +87,16 @@ mixin responsePosts(posts)
       +singleResponsePost(post)
 
 mixin singleResponsePost(post)
-  div.singlePostLink(id="post#{post.id}" class=post.acceptedAnswer ? "accepted" : "")
+  if(post.acceptedAnswer)
+    div.singlePostLink(id="post#{post.id}" class="accepted")
+      +singleResponsePostBody(post)
+  else
+    div.singlePostLink(id="post#{post.id}")
+        +singleResponsePostBody(post)
+
+mixin singleResponsePostBody(post)
     if post.acceptedAnswer
-      p.acceptedBadge Accepted Answer:
+        p.acceptedBadge Accepted Answer:
     p.forumAsker #{post.author} says:
     h3.forumTitle #{post.subject}
     p.postBody #{post.body}
@@ -118,11 +130,19 @@ mixin postMeta(post)
       span.number(id="upvotes-#{post.id}") #{post.upvotes}
     span.downvotes(onClick="vote(#{post.userVoteStatus}, -1, #{post.id})") -
       span.number(id="downvotes-#{post.id}")  #{post.downvotes}
-    span.views v
+    span.views views:
       span.number #{post.views}
-    span.tag Tag1
-    span.tag Tag2
-    button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Reply
+    -tags = {};
+    if(post.tags && post.tags.length > 0)
+        -tags = post.tags.split(',');
+
+    if(tags)
+      each tag in tags
+        span.tag #{tag}
+    if(post.parent == -1)
+      button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Answer
+    else
+      button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Comment
     if post.canAccept
       button(class="replyButton" onClick="accept(#{post.id}, #{post.parent})") Accept
 
@@ -187,27 +207,27 @@ mixin footer()
             div(class="smallText") Contact us
             div(class="smallText") ubhub.org@gmail.com
             div(class="smallText") Copyright info
-            a(class="twitter-follow-button" href="https://twitter.com/ubhub_org") Follow @ubhub_org
-
-
-script.
-    window.twttr = (function(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0],
-    t = window.twttr || {};
-        if (d.getElementById(id))
-        return t;
-    js = d.createElement(s);
-        js.id = id;
-        js.src = "https://platform.twitter.com/widgets.js";
-        fjs.parentNode.insertBefore(js, fjs);
-
-        t._e = [];
-        t.ready = function(f) {
-            t._e.push(f);
-    };
-
-    return t;
-    }(document, "script", "twitter-wjs"));
+//            a(class="twitter-follow-button" href="https://twitter.com/ubhub_org") Follow @ubhub_org
+//
+//
+//script.
+//    window.twttr = (function(d, s, id) {
+//        var js, fjs = d.getElementsByTagName(s)[0],
+//    t = window.twttr || {};
+//        if (d.getElementById(id))
+//        return t;
+//    js = d.createElement(s);
+//        js.id = id;
+//        js.src = "https://platform.twitter.com/widgets.js";
+//        fjs.parentNode.insertBefore(js, fjs);
+//
+//        t._e = [];
+//        t.ready = function(f) {
+//            t._e.push(f);
+//    };
+//
+//    return t;
+//    }(document, "script", "twitter-wjs"));
 
 script.
     function httpPost(theUrl, callback, data) {

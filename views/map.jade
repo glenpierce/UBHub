@@ -3,6 +3,15 @@ include mixins
 include mapMixins
 html
     +mapHead
+    script.
+        function searchMap(){
+            filterBySearch(document.getElementById("searchBox").value);
+        }
+        function triggerSearch(event) {
+            if(event.keyCode == 13){
+                searchMap();
+            }
+        }
 body
     +header(true)
 
@@ -13,7 +22,16 @@ body
             //p You may view your data or submit more data on
               //a.genericLink(onclick="window.location='/yourUploads'")  your uploads manager.
 
-        h2.mapLabel mapHub
+        div(style="display:flex; justify-content:space-between;")
+            h2.mapLabel mapHub
+            div(style="display:flex; align-items:center; justify-content:flex-end;")
+                input(type="text" id="searchBox" style="width: 150px; align-self:center; margin-right:5px; padding: 5px 5px 5px 10px; font-weight: 400; border-style:solid; border-radius: 30px; outline: 0; border-color:#eaeaea; background:#eaeaea;" onkeydown="triggerSearch(event)")
+                div(style="cursor:pointer; color: #4490ba; font-weight: bold; font-size: 14px;" onclick="searchMap()") search
+        div(style="display:flex; justify-content:space-between;")
+            div Is something missing? Log in to our <a href="/forum">forum</a> to suggest additions.
+            div(style="display:flex; align-items:center; justify-content:flex-end;")
+                div(style="color: #4490ba; font-weight: bold; font-size: 14px;") Show biodiversity hotspots
+                input(type="checkbox" oninput="toggleKmlLayers()" checked=false style="width:20px; height:20px;")
 
         div#map
 
@@ -21,7 +39,7 @@ body
         +mapInfoSummary(mapSummary)
 
         +mapInfoTab("Highlight Results", "highlightSettings", "#f69056", true)
-        +mapInfoHighlights
+        +mapInfoHighlights(mapButtons)
 
         +mapInfoTab("Filter Results", "filterSettings", "#6da4c7", true)
         +mapInfoFilters(mapFilterParameters)
