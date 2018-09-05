@@ -125,20 +125,28 @@ mixin discussionResponseBox(post)
 
 
 mixin postMeta(post)
+  -var totalVotes = post.upvotes - post.downvotes;
   div.forumPostMeta
-    span.upvotes(onClick="vote(#{post.userVoteStatus}, 1, #{post.id})") +
-      span.number(id="upvotes-#{post.id}") #{post.upvotes}
-    span.downvotes(onClick="vote(#{post.userVoteStatus}, -1, #{post.id})") -
-      span.number(id="downvotes-#{post.id}")  #{post.downvotes}
+    div(style="margin-bottom:10px; display:flex; flex-direction:column; align-items:flex-start;")
+      div(onClick="vote(#{post.userVoteStatus}, 1, #{post.id})" style="cursor:pointer;")
+        div.upvotes(style="font-size:10px; background-color:#d3e9d5; border-radius:10px;") upvote
+        img(src="/images/arrow-up.svg" style="height:10px; transform: rotate(-90deg);")
+      div(style="font-size:20px; background-color:#d3e9d5; width:20px; height:20px; border-radius:100%; padding:10px; text-align:center;") #{totalVotes}
+      //span.number(id="upvotes-#{post.id}") #{post.upvotes}
+      div(onClick="vote(#{post.userVoteStatus}, -1, #{post.id})" style="cursor:pointer;")
+          img(src="/images/arrow-up.svg" style="height:10px; transform: rotate(90deg);")
+          div.downvotes(style="font-size:10px; background-color:#d3e9d5; border-radius:10px;") downvote
+      //span.number(id="downvotes-#{post.id}")  #{post.downvotes}
+
     span.views views:
       span.number #{post.views}
     -tags = {};
     if(post.tags && post.tags.length > 0)
         -tags = post.tags.split(',');
 
-    if(tags)
-      each tag in tags
-        span.tag #{tag}
+        if(tags)
+          each tag in tags
+            span.tag #{tag}
     if(post.parent == -1)
       button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Answer
     else
