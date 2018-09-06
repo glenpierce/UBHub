@@ -17,6 +17,7 @@
     "morgan": "^1.9.0",
     "mysql": "^2.5.4",
     "request": "^2.88.0",
-    "serve-favicon": "^2.5.0"
+    "serve-favicon": "^2.5.0",
+    "simplemde": "^1.11.2"
   }
 }

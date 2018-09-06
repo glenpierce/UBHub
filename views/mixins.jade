@@ -99,7 +99,17 @@ mixin singleResponsePostBody(post)
         p.acceptedBadge Accepted Answer:
     p.forumAsker #{post.author} says:
     h3.forumTitle #{post.subject}
-    p.postBody #{post.body}
+    textarea(id="post#{post.id}_body") #{post.body}
+    script.
+            var myPostId = "post" + !{JSON.stringify(post.id)} + "_body";
+            var myPostBody = !{JSON.stringify(post.body)};
+            var simplemde = new SimpleMDE({
+                element: document.getElementById(myPostId),
+                status: false,
+                toolbar: false
+            });
+            simplemde.value(myPostBody);
+            simplemde.togglePreview();
     +postMeta(post)
     +responseComments(post.children)
     +discussionResponseBox(post)

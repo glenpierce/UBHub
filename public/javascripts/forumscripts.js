@@ -8,6 +8,7 @@ const submitQuestion = (formId, refresh) => {
   for (let i = 0; i < formElements.length; i++)
       if (formElements[i].type != "button")
           postData[formElements[i].name] = formElements[i].value;
+  postData.questionBody = simplemde.value();
   if(postData.questionTitle != "" && postData.questionBody != "") {
     console.log(postData);
     postQuestion("/forum/submit", postData, messageCallback);

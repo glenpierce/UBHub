@@ -207,6 +207,12 @@ p.postBody {
   line-height: 1.4;
 }
 
+.CodeMirror, .CodeMirror-scroll {
+  height: 100%;
+  max-height: 300px;
+  min-height: 100px;
+}
+
 .forumPostVotes {
   display: inline-block;
   width: 36px;
