@@ -56,13 +56,13 @@ function makeIconArray(colorLevels) {
 
 
 function getIconByIndex(index) {
-  var activeIcons = [
+  const activeIcons = [
     orangeImage,
     lightOrangeImage,
     yellowImage,
     greenImage,
     blueImage
-  ]
+  ];
   return activeIcons[index];
 }
 
@@ -707,7 +707,7 @@ function highlightValues(filterBy, colorBy, colorLevels){
                   map: map,
                   animation: google.maps.Animation.DROP,
                   title: element.name,
-                  icon: greyImage
+                  icon: greyImage //getIconByIndex(Math.floor(Math.random()*5)) todo: this makes the map go to random color mode when we need it for collateral
               });
               marker.element = element;
 

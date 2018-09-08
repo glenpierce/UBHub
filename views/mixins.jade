@@ -42,7 +42,7 @@ mixin header(displayLoginInfo)
                                 if(username)
                                     div(style="padding:0px 100px 0px 50px; display:flex; justify-content:space-around; flex-grow:1;")
                                         div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/dashboard'") myHub
-                                        div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/indicators'") Indicators
+                                        div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/indicators'") myIndicators
                                         div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/forum'") Forum
                                         div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/account'") Account
                                 else
@@ -58,8 +58,8 @@ mixin header(displayLoginInfo)
                     div(style="display:flex; justify-content:space-between;")
                         div(style="display:flex; justify-content:space-around; flex-grow:1;")
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/home'") Home
-                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/map'") mapHub
-                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/resources'") guideHub
+                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/map'") Map
+                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/resources'") Guide
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/aboutUs'") About Us
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;") Get Involved
                         div(style="padding:2px 5px 2px 2px;")
@@ -131,7 +131,7 @@ mixin discussionResponseBox(post)
       input(type="hidden" name="questionTitle" value="Re: #{post.subject}")
       textarea(name="questionBody")
       input(type="hidden" name="parentPost" value="#{post.id}")
-      input(type="button" onClick="submitQuestion('responseForm#{post.id}', true)" value="Submit Comment")
+      input(type="button" onClick="submitComment('responseForm#{post.id}', true)" value="Submit Comment")
 
 
 mixin postMeta(post)
@@ -216,7 +216,7 @@ mixin footer()
         div
             div(class="smallText") Home
             div(class="smallText") myHub
-            div(class="smallText") GuideHub
+            div(class="smallText") Guide
             div(class="smallText") About Us
             div(class="smallText") Forum
             div(class="smallText") Account

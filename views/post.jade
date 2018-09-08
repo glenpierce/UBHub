@@ -47,8 +47,8 @@ body
 
 script.
   var myPostTree = !{JSON.stringify(postTree)};
-  var simplemde = new SimpleMDE({ element: document.getElementById("postBody"), status: false, toolbar: false });
-  simplemde.value(myPostTree.body);
-  simplemde.togglePreview();
+  var simplemdePost = new SimpleMDE({ element: document.getElementById("postBody"), status: false, toolbar: false });
+  simplemdePost.value(myPostTree.body);
+  simplemdePost.togglePreview();
 
-  var questionSimplemde = new SimpleMDE({ element: document.getElementById("questionBody"), hideIcons: ["guide", "heading", "fullscreen", "side-by-side", "image", "preview"], status: false });
+  var simplemdeQuestion = new SimpleMDE({ element: document.getElementById("questionBody"), hideIcons: ["guide", "heading", "fullscreen", "side-by-side", "image", "preview"], status: false });
