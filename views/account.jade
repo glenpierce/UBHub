@@ -63,8 +63,10 @@ body
     +header(true)
 
     div(style="display:flex; flex-direction:column; height:200px; margin:auto; width:100%; align-items:center;")
-        div(style="margin: 50px 0px 50px 0px;") #{userName} has earned #{userRep} reputation on the forum.
+        div(style="margin: 50px 0px 50px 0px;") #{username} has earned #{userRep} reputation on the forum.
         div(style="width:60%;")
+            div(style="margin-bottom:10px;") <b>Account details</b>
+            div
             div(style="margin-bottom:10px;") <b>Change password</b>
             div Current password
             input(type="password" id="oldPassword" style="border-radius:5px; border-style:solid; border-width:1px;")

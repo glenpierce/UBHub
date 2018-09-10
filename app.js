@@ -62,7 +62,8 @@ app.use(session({
     }
 }));
 
-app.use('/', index);
+app.use('/', home);
+app.use('/getInvolved', index);
 app.use('/login', login);
 app.use('/users', users);
 app.use('/createUser', createUser);

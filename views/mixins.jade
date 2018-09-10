@@ -61,7 +61,7 @@ mixin header(displayLoginInfo)
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/map'") Map
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/resources'") Guide
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/aboutUs'") About Us
-                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;") Get Involved
+                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/getInvolved'") Get Involved
                         div(style="padding:2px 5px 2px 2px;")
                             div(style="background-color:#d3e9d5; cursor:pointer; color:#316b59; padding:5px 45px 5px 45px; border-radius:20px; font-weight:700;") Search
             div(style="height:75px; background:white; flex-grow:1;")
@@ -214,13 +214,13 @@ mixin footer()
             img(src="/images/UBHub_logo_horizwebsite.svg" style="height:60px; margin-bottom:10px;")
         div(style="width:200px;" class="smallText") The Urban Biodiversity Hub (UBHub) helps cities around the world to choose a biodiversity strategy, then measure and improve their Biodiversity Strategy and Action Plans (BSAPs).
         div
-            div(class="smallText") Home
-            div(class="smallText") myHub
-            div(class="smallText") Guide
-            div(class="smallText") About Us
-            div(class="smallText") Forum
-            div(class="smallText") Account
-            div(class="smallText") Sitemap
+            div(class="smallText" style="cursor:pointer;" onclick="window.location='/home'") Home
+            div(class="smallText" style="cursor:pointer;" onclick="window.location='/dashboard'") myHub
+            div(class="smallText" style="cursor:pointer;" onclick="window.location='/resources'") Guide
+            div(class="smallText" style="cursor:pointer;" onclick="window.location='/aboutUs'") About Us
+            div(class="smallText" style="cursor:pointer;" onclick="window.location='/forum'") Forum
+            div(class="smallText" style="cursor:pointer;" onclick="window.location='/account'") Account
+            //div(class="smallText" style="cursor:pointer;" ) Sitemap
         div
             div(class="smallText") Contact us
             div(class="smallText") ubhub.org@gmail.com

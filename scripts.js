@@ -60,7 +60,7 @@ function getLatLongSimple(address) {
     getLatLong(address, null);
 }
 
-function getLatLong(address, id){
+function getLatLong(address, id) {
     console.log("getLatLong");
     if(address){
         let addressQueryString = address.replace(/\s+/g, "+");
@@ -138,7 +138,7 @@ function updateLocation(id, lat, lng){
     connection.end();
 }
 
-update = function(){
+update = function() {
 
     config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
     // config.rdsHost="127.0.0.1"; //this should be your Docker container's IP address
