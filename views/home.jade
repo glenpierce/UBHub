@@ -3,7 +3,6 @@ include mixins
 html
     head
         title UBHub
-        script(async, defer, src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&callback=initMap")
         link(rel='stylesheet', href='/stylesheets/style.css')
 
 body
@@ -155,7 +154,7 @@ body
     div(style="width=100%; background:#4490ba; color:white; text-align:center; padding:10px; font-size:30px;") Explore Urban Biodiversity Actions
 
     div(style="position:relative;")
-        div(id="map" style="height:550px; width:100%; max-width:1600px; margin:auto; z-index:-1;")
+        div(id="map" style="height:550px; width:100%; max-width:1600px; margin:auto; z-index:-1; background-image:url('/images/mapsep2018color.png'); background-repeat:no-repeat; background-size:cover;")
         div(style="position: absolute; top: 50%; left: 50%;")
             div(style="position: relative; margin-top: -25%; left: -50%; background:white; border-radius:10px; color:#4490ba; text-align:center; width: 140px; font-size:20px; padding:20px; z-index:1; cursor:pointer;" onclick="window.location='/map'") Go to<br>Interactive<br>Map
 
@@ -190,152 +189,3 @@ body
         //img(src="/images/Capture.PNG" style="margin:20px;")
 
     +footer()
-
-script.
-    function getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    var markers = [];
-    var greyImage;
-    var blueImage;
-    var greenImage;
-    var yellowImage;
-    var lightOrangeImage;
-    var orangeImage;
-    var mapData = !{mapData};
-    console.log(mapData);
-    function initMap() {
-      greyImage = {
-          url: '/images/marker_0_grey_39x59.png',
-          scaledSize: new google.maps.Size(20, 30)
-          //origin: new google.maps.Point(0, 0),
-          //anchor: new google.maps.Point(11, 35)
-      };
-      blueImage = {
-          url: '/images/marker_1_blue_39x59.png',
-          scaledSize: new google.maps.Size(20, 30)
-          //origin: new google.maps.Point(0, 0),
-          //anchor: new google.maps.Point(11, 35)
-      };
-      greenImage = {
-          url: '/images/marker_2_green_39x59.png',
-          scaledSize: new google.maps.Size(20, 30)
-          //origin: new google.maps.Point(0, 0),
-          //anchor: new google.maps.Point(11, 35)
-      };
-      yellowImage = {
-          url: '/images/marker_3_yellow_39x59.png',
-          scaledSize: new google.maps.Size(20, 30)
-            //origin: new google.maps.Point(0, 0),
-            //anchor: new google.maps.Point(11, 35)
-      };
-      lightOrangeImage = {
-          url: '/images/marker_4_ltorange_39x59.png',
-          scaledSize: new google.maps.Size(20, 30)
-            //origin: new google.maps.Point(0, 0),
-            //anchor: new google.maps.Point(12, 46)
-      };
-      orangeImage = {
-          url: '/images/marker_5_orange_39x59.png',
-          scaledSize: new google.maps.Size(20, 30)
-            //origin: new google.maps.Point(0, 0),
-            //anchor: new google.maps.Point(11, 35)
-      };
-    var markerImages = [greyImage, blueImage, greenImage, yellowImage, lightOrangeImage, orangeImage];
-        center = {lat: 25, lng: 15};
-        var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 3,
-            center: center,
-            disableDefaultUI: true,
-            styles: [{"elementType": "geometry","stylers": [{"color": "#b6d5e3"}]}, 
-            {"elementType": "labels.text.fill","stylers": [{"color": "#6da4c7"}]},
-            {"elementType": "labels.text.stroke","stylers": [ { "color": "#b6d5e3" } ]},
-            {"featureType": "administrative","stylers": [{"visibility": "simplified"}]},
-            {"featureType": "administrative","elementType": "geometry","stylers": [{"color": "#f2f2f2"}]},
-            {"featureType": "administrative", "elementType": "geometry.stroke", "stylers": [ { "color": "#ffffff" }, { "visibility": "on" } ] }, 
-            { "featureType": "administrative", "elementType": "labels.text", "stylers": [ { "color": "#939393" } ] }, 
-            { "featureType": "landscape", "stylers": [ { "color": "#cccccc" } ] }, 
-            { "featureType": "landscape.man_made", "elementType": "geometry.stroke", "stylers": [ { "color": "#334e87" } ] }, 
-            { "featureType": "landscape.natural", "stylers": [ { "color": "#d3e9d5" } ] }, 
-            { "featureType": "poi", "stylers": [ { "visibility": "off" } ] }, 
-            { "featureType": "poi", "elementType": "geometry", "stylers": [ { "color": "#283d6a" } ] }, 
-            { "featureType": "poi", "elementType": "labels.text.fill", "stylers": [ { "color": "#6f9ba5" } ] }, 
-            { "featureType": "poi", "elementType": "labels.text.stroke", "stylers": [ { "color": "#1d2c4d" } ] }, 
-            { "featureType": "poi.park", "stylers": [ { "color": "#b8ddc3" }, { "visibility": "simplified" } ] }, 
-            { "featureType": "poi.park", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, 
-            { "featureType": "poi.park", "elementType": "labels.icon", "stylers": [ { "visibility": "off" } ] }, 
-            { "featureType": "road", "elementType": "geometry", "stylers": [ { "color": "#f2f2f2" } ] }, 
-            { "featureType": "road", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, 
-            { "featureType": "road", "elementType": "labels.text.fill", "stylers": [ { "color": "#4e6d70" } ] }, 
-            { "featureType": "road", "elementType": "labels.text.stroke", "stylers": [ { "color": "#f2f2f2" } ] }, 
-            { "featureType": "road.arterial", "stylers": [ { "visibility": "simplified" } ] }, 
-            { "featureType": "road.arterial", "elementType": "geometry", "stylers": [ { "visibility": "simplified" } ] }, 
-            { "featureType": "road.arterial", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, 
-            { "featureType": "road.highway", "stylers": [ { "visibility": "simplified" } ] }, 
-            { "featureType": "road.highway", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, 
-            { "featureType": "road.highway", "elementType": "labels.text.fill", "stylers": [ { "color": "#4e6d70" } ] }, 
-            { "featureType": "road.highway", "elementType": "labels.text.stroke", "stylers": [ { "color": "#f2f2f2" } ] }, 
-            { "featureType": "transit", "stylers": [ { "color": "#b2b2b2" } ] }, 
-            { "featureType": "transit", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, 
-            { "featureType": "transit", "elementType": "labels.text.fill", "stylers": [ { "color": "#98d2b2" } ] }, 
-            { "featureType": "transit", "elementType": "labels.text.stroke", "stylers": [ { "color": "#F2F2F2" } ] }, 
-            { "featureType": "water", "stylers": [ { "color": "#b6d5e3" } ] }, 
-            { "featureType": "water", "elementType": "labels.text.fill", "stylers": [ { "color": "#4e6d70" } ] } ]});
-        mapData.forEach(function (element) {
-            if(element.lat){
-                var contentString =
-                    '<div id="content">' +
-                    '<div id="siteNotice">' +
-                    '</div>' +
-                    '<div style="font-weight:bold; font-size:20px;">' + element.title + '</div>' +
-                    '<div id="bodyContent">' +
-                    (element.scale  !== null ?  '<div">' + element.scale + '</div>' : "") +
-
-                    (element.biodiversity_url  !== null ?  '<div><a href="' + element.biodiversity_url + 'rel="noopener noreferrer" target="_blank"">Main link</a></div>' : "") +
-
-                    (element.intplan_title  !== null ?  '<p>' + (element.intplan_year !== null ? element.intplan_year : "") + ' ' + element.intplan_title + " " : "") +
-                    (element.intplan_url  !== null ?  '<a href="' + element.intplan_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
-
-                    (element.plan1_title !== null ? '<p>' + (element.plan1_year !== null ? element.plan1_year : "") + ' ' + element.plan1_title + " " : "") +
-                    (element.plan1_url !== null ? '<a href="' + element.plan1_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
-
-                    (element.plan2_title !== null ? '<p>' + (element.plan2_year !== null ? element.plan2_year : "") + ' ' + element.plan2_title + " " : "") +
-                    (element.plan2_url !== null ? '<a href="' + element.plan2_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
-
-                    (element.report_title !== null ? '<p>' + (element.report_year !== null ? element.report_year : "") + ' ' + element.report_title + " " : "") +
-                    (element.report_url !== null ? '<a href="' + element.report_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
-
-                    (element.extra1_title !== null ? '<p>' + element.extra1_title + ' ' : "") +
-                    (element.extra1_url !== null ? '<a href="' + element.extra1_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
-
-                    (element.extra2_title !== null ? '<p>' + element.extra2_title + ' ': "") +
-                    (element.extra2_url !== null && typeof extra2_url !== "undefined" ? '<a href="' + element.extra2_url + 'rel="noopener noreferrer" target="_blank"">link</a></p>' : "</p>") +
-
-                    (element.EF_data_ghapercap !== null ? '<p>' + (element.EF_year !== null ? element.EF_year : "") + ' Ecological Footprint ' + element.EF_data_ghapercap + "gha/cap " : "") +
-                    (element.EF_link !== null ? '<a href="' + element.EF_link + 'rel="noopener noreferrer" target="_blank"">source</a></p>' : "</p>") +
-
-
-                    '</div>' +
-                    '</div>';
-
-                var infowindow = new google.maps.InfoWindow({
-                    content: contentString
-                });
-
-                var position = {lat:element.lat, lng:element.lng};
-                var marker = new google.maps.Marker({
-                    position: position,
-                    map: map,
-                    animation: google.maps.Animation.DROP,
-                    title: element.name,
-                    icon: markerImages[getRandomInt(0, 5)]
-                });
-                marker.element = element;
-
-                marker.addListener('click', function () {
-                    infowindow.open(map, marker);
-                });
-                markers.push(marker);
-            }
-        });
-    }
