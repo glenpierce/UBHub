@@ -8,7 +8,9 @@ mixin mapHead
           initMap(mapData);
           tablePage(0);
         }
-      script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&callback=initMapOnPage")
+      script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs")
+      script.
+          window.onload = function (ev) { initMapOnPage(); };
       link(rel='stylesheet', href='/stylesheets/style.css')
 
 mixin filterMixin(title, filterBy, attributeList, filterType)

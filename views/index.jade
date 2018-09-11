@@ -1,4 +1,5 @@
 doctype html
+include mixins
 html(xmlns="http://www.w3.org/1999/xhtml" xmlns:fb="http://ogp.me/ns/fb#")
 html
     head
@@ -11,7 +12,7 @@ html
         meta(property="og:url" content="http://ubhub.org")
         meta(property="og:type" content="website")
 
-body(style="font-family:helvetica; background-color:#d3e9d5;")
+body
     block content
 
     script.
@@ -36,6 +37,8 @@ body(style="font-family:helvetica; background-color:#d3e9d5;")
           window.location = res;
         }
 
+    +header(true)
+
     h1(style="text-align:center;") Welcome to the Urban Biodiversity Hub
 
     //embed(src="https://drive.google.com/viewerng/viewer?embedded=true&url=/pdfs/A4BetaTesterHandout.pdf" width="500" height="375") //for browsers without native pdf viewing capabilities
@@ -50,7 +53,7 @@ body(style="font-family:helvetica; background-color:#d3e9d5;")
       div
         div(style="display:flex; margin-left:20px; margin-right:20px;")
             div(style="max-width:300px;") <b>About Us</b><p>The Urban Biodiversity Hub (UBHub) increases the capacity of local governments to implement effective biodiversity planning, management, measurement, and collaboration. UBHub serves two primary purposes: to be a public repository for urban biodiversity activities and resources and to aid local governments in planning and managing their approach to biodiversity conservation.<p>Find out more on our intro flyer at right.
-            a(href="/pdfs/A5-handout-UBHub.pdf" style="margin:20px;")
+            a(href="/pdfs/11x8 handout UBHub_Sep2018.pdf" style="margin:20px;")
                 img(src="/images/handout-UBHub-thumbnail.png" height="150")
         div(style="display:flex; margin:20px;")
             div(style="max-width:300px;") <b>Beta Testing Programme</b><p>UBHub is seeking participants for our Beta Testing Programme who will test the myHub web tool during its early access phase. The myHub web tool supports local governments to develop, measure, and assess their biodiversity strategy.<p>Find out more on our Beta Tester handout at right.
@@ -114,3 +117,4 @@ body(style="font-family:helvetica; background-color:#d3e9d5;")
                     window.alert("Sorry, but it seems that something is missing. Please verify that the \"Email\" and \"Verify Email\" fields have a valid email address and match each other.")
         }
       
+    +footer
