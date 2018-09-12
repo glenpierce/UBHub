@@ -9,7 +9,36 @@ router.get('/', function(req, res, next){
 });
 
 router.post('/', function(req, res){
+    isUserNameUnique(req, res);
+});
 
+function isUserNameUnique(req, res){
+    var connection = mysql.createConnection({
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
+    });
+
+    connection.connect();
+    query = "select * from users where email = '" + req.body.alias + "';";
+    console.log(query);
+    connection.query(query, function(err, rows, fields){
+        if (!err) {
+            if(rows.size)
+                createUser(req, res);
+            else
+                res.render('createUser');
+        } else {
+            console.log('Error while performing Query.');
+            res.render('createUser');
+        }
+    });
+
+    connection.end();
+}
+
+function createUser(req, res) {
     console.log("creating user");
 
     var connection = mysql.createConnection({
@@ -36,6 +65,6 @@ router.post('/', function(req, res){
     connection.end();
 
     res.redirect('login');
-});
+}
 
 module.exports = router;

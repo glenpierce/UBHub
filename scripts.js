@@ -309,6 +309,13 @@ update = function() {
         "END";
     query.push(createGetPostQuery);
 
+    //todo: can cast
+    //npm package sanitize
+    //mysqlrealescapestring - cannot use parameters without an orm
+    //also strip_tags has a js sanitizer
+    //helmet npm package for security
+    //pa11y tool for accesiblity cli like curl
+    //knex or seqlize
     let createGetPostAndAllSubsQuery =
         "CREATE PROCEDURE getPostAndAllSubs(IN postId int)\n"+
         "SELECT * FROM posts WHERE `id` = postId \n"+
