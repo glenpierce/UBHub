@@ -550,7 +550,7 @@ var mapIndices = [
         name: "European Green Capital Award"
     },
     {
-        name: "Footprint"
+        name: "Ecological Footprint"
     },
     {
         name: "Green and Blue Space Adaptation for Urban Areas and Eco Towns (GRaBS)"
@@ -564,13 +564,13 @@ var mapIndices = [
         image: "LabProgrammeLogo.jpg"
     },
     {
-        name: "Mayor's Monarch Pledge"
+        name: "Mayors Monarch Pledge"
     },
     {
         name: "One Planet Living"
     },
     {
-        name: "Pioneer Programme" //todo: rename Lab Pioneer Programme
+        name: "LAB Pioneer Programme"
     },
     {
         name: "Singapore Index"
