@@ -65,3 +65,20 @@ body
         input(type="submit" value="Create User" style="background-color:#4490ba; border-radius:5px; border:none; padding:5px; color: white; cursor:pointer; margin:auto;")
 
     +footer()
+
+    script.
+        function submitForm() {
+            var formElements = document.getElementById("emailForm").elements;
+            var postData = {};
+            for (var i = 0; i < formElements.length; i++)
+                if (formElements[i].type != "submit")
+                    postData[formElements[i].name] = formElements[i].value;
+        }
+
+    script.
+        window.onload = function (ev) {
+            var errorFromServer = !{errorFromServer};
+            if(errorFromServer){
+                window.alert("There was a problem creating that user, the name is probably in use. Please try again.");
+            }
+        }

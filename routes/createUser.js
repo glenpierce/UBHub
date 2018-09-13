@@ -5,7 +5,7 @@ var bcrypt = require('bcryptjs');
 var config = require('../config.js');
 
 router.get('/', function(req, res, next){
-    res.render('createUser');
+    res.render('createUser', {errorFromServer:false});
 });
 
 router.post('/', function(req, res){
@@ -25,13 +25,13 @@ function isUserNameUnique(req, res){
     console.log(query);
     connection.query(query, function(err, rows, fields){
         if (!err) {
-            if(rows.size)
+            if(rows.size) {
+                    res.render('createUser', {errorFromServer: true});
+            } else
                 createUser(req, res);
-            else
-                res.render('createUser');
         } else {
             console.log('Error while performing Query.');
-            res.render('createUser');
+            res.render('createUser', {errorFromServer: true});
         }
     });
 
@@ -56,15 +56,14 @@ function createUser(req, res) {
     connection.query('CALL createUser("' + req.body.username + '", "' + hash + '", "' + req.body.alias + '", "' + req.body.userAddress + '")', function(err, rows, fields){
         if (!err) {
             console.log('The user db has created a user: ', JSON.stringify(rows));
-
+            res.redirect('login');
         } else {
             console.log('Error while performing Query.');
+            res.render('createUser', {errorFromServer: true});
         }
     });
 
     connection.end();
-
-    res.redirect('login');
 }
 
 module.exports = router;
