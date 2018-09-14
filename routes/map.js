@@ -592,6 +592,18 @@ var mapIndices = [
     },
     {
         name: "WILD Cities"
+    },
+    {
+        name: "City Nature Challenge"
+    },
+    {
+        name: "Treepedia"
+    },
+    {
+        name: "Cities With Nature"
+    },
+    {
+        name: "UNA Rivers for Life"
     }
 ];
 
