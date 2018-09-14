@@ -559,6 +559,9 @@ var mapIndices = [
         name: "INTERACT-Bio"
     },
     {
+        name: "LAB Pioneer Programme"
+    },
+    {
         name: "LAB Wetlands",
         id: "LAB Wetlands",
         image: "LabProgrammeLogo.jpg"
@@ -568,9 +571,6 @@ var mapIndices = [
     },
     {
         name: "One Planet Living"
-    },
-    {
-        name: "LAB Pioneer Programme"
     },
     {
         name: "Singapore Index"
@@ -650,13 +650,13 @@ var mapFilterParameters = [
   {
       name: "Biodiversity Hotspot",
       id: "hotspot",
-      options: ['all', 'Japan', 'Mediterranean Basin', 'Maputaland-Pondoland-Albany', 'Mesoamerica', 'New Zealand', 'Sundaland', 'Indo-Burma', 'Caribbean Islands', 'Cape Floristic Region', 'California Floristic Province', 'Atlantic Forest', 'Tropical Andes', 'Coastal Forests of Eastern Africa', 'Guinean Forests of West Africa', 'Western Ghats and Sri Lanka', 'Philippines', 'North American Coastal Plain', 'Southwest Australia', 'Eastern Afromontane', 'Forests of East Australia', 'Madagascar and the Indian Ocean Islands', 'Polynesia-Micronesia', 'Chilean Winter Rainfall and Valdivian Forests', 'Irano-Anatolian', 'Cerrado', 'Caucasus', 'Mountains of Southwest China', 'Himalaya'],
+      options: ['all', 'Atlantic Forest', 'California Floristic Province', 'Cape Floristic Region', 'Caribbean Islands', 'Chilean Winter Rainfall and Valdivian Forests', 'Coastal Forests of Eastern Africa', 'Caucasus', 'Cerrado', 'Eastern Afromontane', 'Forests of East Australia', 'Guinean Forests of West Africa', 'Indo-Burma', 'Irano-Anatolian', 'Himalaya', 'Japan', 'Madagascar and the Indian Ocean Islands', 'Maputaland-Pondoland-Albany', 'Mediterranean Basin', 'Mesoamerica', 'Mountains of Southwest China', 'New Zealand', 'North American Coastal Plain', 'Philippines', 'Polynesia-Micronesia', 'Southwest Australia', 'Sundaland', 'Tropical Andes', 'Western Ghats and Sri Lanka'],
       type: "select"
   },
   {
       name: "Biome (WWF)",
       id: "wwf_biome",
-      options: ['Temperate Broadleaf & Mixed Forests', 'Deserts & Xeric Shrublands', 'Mediterranean Forests, Woodlands & Scrub', 'Montane Grasslands & Shrublands', 'Tropical & Subtropical Moist Broadleaf Forests', 'Temperate Grasslands, Savannas & Shrublands', 'Mangroves', 'Tropical & Subtropical Grasslands, Savannas & Shrublands', 'Tropical & Subtropical Dry Broadleaf Forests', 'Boreal Forests/Taiga', 'Temperate Conifer Forests', 'Flooded Grasslands & Savannas', 'Tundra'],
+      options: ['Boreal Forests/Taiga', 'Deserts & Xeric Shrublands', 'Flooded Grasslands & Savannas', 'Mangroves', 'Mediterranean Forests, Woodlands & Scrub', 'Montane Grasslands & Shrublands', 'Temperate Broadleaf & Mixed Forests', 'Temperate Conifer Forests', 'Temperate Grasslands, Savannas & Shrublands', 'Tropical & Subtropical Grasslands, Savannas & Shrublands', 'Tropical & Subtropical Dry Broadleaf Forests', 'Tropical & Subtropical Moist Broadleaf Forests', 'Tundra'],
       type: "select"
   },
   {
