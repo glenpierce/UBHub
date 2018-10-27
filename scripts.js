@@ -594,7 +594,8 @@ update = function() {
         "`button_text` VARCHAR(255) CHARACTER SET utf8," +
         "`image` VARCHAR(512) CHARACTER SET utf8," +
         "`marker_colors_by` VARCHAR(255) CHARACTER SET utf8," +
-        "`marker_colors` VARCHAR(255) CHARACTER SET utf8" +
+        "`marker_colors` VARCHAR(255) CHARACTER SET utf8," +
+        "`button_link` VARCHAR(255) CHARACTER SET utf8" +
       ");";
     query.push(createMapButtonsTableQuery);
 

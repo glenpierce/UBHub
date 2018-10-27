@@ -163,6 +163,7 @@ function filterValues(value, filterBy){
 }
 
 function filterBySearch(searchTerm){
+    resetFilter();
     markers.forEach(function (marker) {
         let found = marker.element.inst_address.toLowerCase().includes(searchTerm.toLowerCase());
         if(!found){
