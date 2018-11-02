@@ -105,6 +105,22 @@ router.get('/post', function(req, res, next) {
   }
 });
 
+router.get("/tag", function (req, res){
+    const tag = req.query.tag;
+    const perPage = 5;
+
+    let page = req.query.page;
+    if(!page) {
+        page = 1;
+    }
+
+    let sort = req.query.sort;
+    if(!sort) {
+        sort = "date";
+    }
+
+    getPostsAsListByTag(renderPosts, req, res, perPage, page, sort, null, tag);
+});
 
 router.post("/submit", function (req, res) {
   //TODO: make sure the post is legal etc.
@@ -351,6 +367,43 @@ const renderPostTree = (pageId, postHierarchy, userId, res, postId) => {
 /********/
 /*DATA***/
 /********/
+
+const getPostsAsListByTag = (callback, req, res, perPage, page, sort, search, tag) => {
+    //TODO: implement pagination
+
+    const connection = mysql.createConnection({
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
+    });
+    connection.connect();
+
+    //TODO: currently hardcoded for homepage, parentless posts. Make this dynamic,
+    //to be used with search, tag view, etc.
+
+    const query = `select * from posts where tags like '%` + tag + `%'`;
+
+    fetchPosts(connection, query)
+        .then((rows) => {
+            const posts = rows.map(row => forumPostFromRow(row));
+            return posts;
+        })
+        .then((posts) =>{
+            return attachVotes(posts, connection);
+        })
+        .then((posts) =>{
+            return getAnswersData(posts, connection);
+        })
+        .then((posts) =>{
+            callback(posts, req, res, perPage, page, sort, search);
+            connection.end();
+        })
+        .catch((err) => {
+            console.log(err);
+            connection.end();
+        })
+};
 
 const getPostsAsList = (callback, req, res, perPage, page, sort, search) => {
   //TODO: implement pagination
