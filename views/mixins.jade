@@ -161,7 +161,8 @@ mixin postMeta(post)
 
         if(tags)
           each tag in tags
-            span.tag #{tag}
+            -var stringTag = "window.location='/forum/tag?tag=" + JSON.stringify(tag).substr(1,JSON.stringify(tag).length-2) + "'";
+            span(onClick=stringTag).tag #{tag}
     if(post.parent == -1)
       button(class="replyButton" onClick="replyTo(#{post.id}, #{post.parent})") Answer
     else
