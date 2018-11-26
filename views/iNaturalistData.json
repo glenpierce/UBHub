@@ -1,0 +1,30 @@
+{
+  "species": [{"cat": {"type":"mammal", "url":""}}, {"dog": {"type":"mammal"}}, {"bear": {"type":"mammal"}}, {"seal": {"type":"mammal"}}, {"flower": {"type":"plant"}}, {"tree": {"type":"plant"}}, {"grass": {"type":"plant"}}, {"goldfish": {"type":"fish"}}, {"swordfish": {"type":"fish"}}, {"seaweed": {"type":"plant"}}],
+  "habitats" : ["city", "ocean", "forest"],
+  "sites": [
+    {
+      "name":"Vancouver",
+      "url" : "",
+      "habitats":[
+        {"city":["cat", "dog", "grass", "goldfish"]},
+        {"forest":["tree", "flower", "dog"]},
+        {"ocean":["seaweed", "seal", "swordfish"]}
+      ]
+    },
+    {
+      "name":"Chicago",
+      "url" : "",
+      "habitats":[
+        {"city":["cat", "dog"]}
+      ]
+    },
+    {
+      "name":"Oasis",
+      "url" : "",
+      "habitats":[
+        {"forest":["flower", "tree"]},
+        {"ocean":["seaweed", "seal", "swordfish"]}
+      ]
+    }
+  ]
+}
