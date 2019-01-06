@@ -3,9 +3,10 @@ head
         .bar-chart {
             background-color: #C7D9D9;
         }
-    script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs")
+    script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&libraries=drawing")
     script.
-        console.log(!{data});
+        var data = !{data};
+        console.log(data);
         window.onload = function (ev) {
             initMapOnPage();
         };
@@ -89,6 +90,37 @@ head
                     {"featureType": "water", "stylers": [{"color": "#b6d5e3"}]},
                     {"featureType": "water", "elementType": "labels.text.fill", "stylers": [{"color": "#4e6d70"}]}]
             });
+            var drawingManager = new google.maps.drawing.DrawingManager({
+                drawingMode: google.maps.drawing.OverlayType.MARKER,
+                drawingControl: true,
+                drawingControlOptions: {
+                    position: google.maps.ControlPosition.TOP_CENTER,
+                    drawingModes: ['marker', 'circle', 'polygon', 'polyline', 'rectangle']
+                },
+                markerOptions: {icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png'},
+                circleOptions: {
+                    fillColor: '#ffff00',
+                    fillOpacity: 1,
+                    strokeWeight: 5,
+                    clickable: false,
+                    editable: true,
+                    zIndex: 1
+                }
+            });
+            drawingManager.setMap(map);
+            google.maps.event.addListener(drawingManager, 'overlaycomplete', function (event) {
+                if (event.type == 'circle') {
+                    var radius = event.overlay.getRadius();
+                }
+                if (event.type == 'polygon') {
+                    // var polygon = event.overlay;
+                    var polygon = event.overlay.getPath().getArray();
+                    for(var i = 0; i < polygon.length; i++) {
+                        console.log(polygon[i].lat() + ", " + polygon[i].lng());
+                    }
+                    // console.log(polygon);
+                }
+            });
         }
     script(src="https://d3js.org/d3.v5.min.js")
     script.
@@ -113,6 +145,8 @@ head
                 getPlace(element.value);
             }
         }
+        //taxon, location, date
+        //instead of observations, we get surveys
         function loadData(data) {
             data = JSON.parse(data);
             console.log(data);
@@ -172,7 +206,7 @@ head
 body
     input(type="text" id="searchBox" style="width: 150px; align-self:center; margin-right:5px; padding: 5px 5px 5px 10px; font-weight: 400; border-style:solid; border-radius: 30px; outline: 0; border-color:#eaeaea; background:#eaeaea;" onkeydown="search(this)")
     svg
-    div#map
+    div#map(style="height:400px; width:600px;")
 
 footer
     script.
@@ -182,3 +216,20 @@ footer
             .attr("width", svgWidth)
             .attr("height", svgHeight)
             .attr("class", "bar-chart");
+
+        var manipulatedData = {};
+
+        (function displayPrototypeData() {
+            for(specie in data.species) {
+
+            }
+            for(site in data.sites){
+                console.log(data.sites[site].name);
+                for(habitat in data.sites[site].habitats) {
+                    for(point in data.sites[site].habitats[habitat])
+                        console.log(point);
+                        console.log(data.sites[site].habitats[habitat][point]);
+                    // data.sites[site].habitats[habitat]
+                }
+            }
+        })()

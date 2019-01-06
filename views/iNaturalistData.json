@@ -1,6 +1,7 @@
 {
-  "species": [{"cat": {"type":"mammal", "url":""}}, {"dog": {"type":"mammal"}}, {"bear": {"type":"mammal"}}, {"seal": {"type":"mammal"}}, {"flower": {"type":"plant"}}, {"tree": {"type":"plant"}}, {"grass": {"type":"plant"}}, {"goldfish": {"type":"fish"}}, {"swordfish": {"type":"fish"}}, {"seaweed": {"type":"plant"}}],
+  "species": [{"cat": {"type":"mammal", "url":"", "habitat":["city"]}}, {"dog": {"type":"mammal", "habitat":["city"]}}, {"bear": {"type":"mammal", "habitat":["forest"]}}, {"seal": {"type":"mammal", "habitat":["ocean"]}}, {"flower": {"type":"plant", "habitat":["city", "forest"]}}, {"tree": {"type":"plant", "habitat":["city", "forest"]}}, {"grass": {"type":"plant", "habitat":["city", "forest"]}}, {"goldfish": {"type":"fish", "habitat":["ocean", "city"]}}, {"swordfish": {"type":"fish", "habitat":["ocean"]}}, {"seaweed": {"type":"plant", "habitat":["ocean"]}}],
   "habitats" : ["city", "ocean", "forest"],
+  "type":["mammal", "plant", "fish"],
   "sites": [
     {
       "name":"Vancouver",
