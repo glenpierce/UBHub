@@ -3,10 +3,12 @@ head
         .bar-chart {
             background-color: #C7D9D9;
         }
-    script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&libraries=drawing")
+    script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&libraries=drawing,geometry")
     script.
         var data = !{data};
         console.log(data);
+        var sites = [];
+        var polygon;
         window.onload = function (ev) {
             initMapOnPage();
         };
@@ -113,12 +115,30 @@ head
                     var radius = event.overlay.getRadius();
                 }
                 if (event.type == 'polygon') {
-                    // var polygon = event.overlay;
-                    var polygon = event.overlay.getPath().getArray();
+                    polygon = event.overlay.getPath().getArray();
+                    var site = {taxa:[{mammal:["dog", "cat", "beaver"]},{dinosaur:["trex", "raptor"]}], coordinates:[]};
                     for(var i = 0; i < polygon.length; i++) {
                         console.log(polygon[i].lat() + ", " + polygon[i].lng());
+                        site.coordinates.push({lat: polygon[i].lat(), lng: polygon[i].lng()})
                     }
-                    // console.log(polygon);
+                    sites.push(site)
+                    console.log(sites);
+                }
+                if(event.type == 'marker') {
+                    var observations = {
+                        observations: [
+                            {lat:50.53145664214434, lng:13.59375, speciesId:1001, species:"dog", taxa:"canine", present:true, date:"01-01-2018"},
+                            {lat:0.0, lng:0.0, speciesId:1002, species:"cat", taxa:"feline", present:false, date: "01-01-2018"}
+                        ]
+                    }
+                    console.log(polygon);
+
+                    for(observation in observations.observations) {
+                        var latLng = new google.maps.LatLng(observation.lat, observation.lng);
+                        if(google.maps.geometry.poly.containsLocation(latLng, new google.maps.Polygon({paths: polygon}))) {
+                            console.log(observation.species);
+                        }
+                    }
                 }
             });
         }
