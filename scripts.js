@@ -634,6 +634,7 @@ update = function() {
 
     let createUserDataTableQuery =
         "CREATE TABLE userData(" +
+        "`userEmail` VARCHAR(255)" +
         "`site` INT," +
         "`program` INT, " +
         "`year` INT, " +

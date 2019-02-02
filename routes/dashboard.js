@@ -230,6 +230,7 @@ router.get('/', function (req, res, next) {
 // });
 
 makeDbCall = function (queryString, callback) {
+    console.log("making connection?");
     connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
