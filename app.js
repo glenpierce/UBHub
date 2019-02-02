@@ -27,6 +27,7 @@ var home = require('./routes/home');
 var account = require('./routes/account');
 var iNaturalist = require('./routes/iNaturalist');
 var programs = require('./routes/programs');
+var newProgramRoute = require('./routes/newprogram');
 
 var config = require('./config.js');
 
@@ -86,6 +87,7 @@ app.use('/home', home);
 app.use('/account', account);
 app.use('/iNaturalist', iNaturalist);
 app.use('/programs', programs);
+app.use('/newprogram', newProgramRoute);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

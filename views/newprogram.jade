@@ -1,0 +1,17 @@
+doctype html
+include mixins
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+body
+    +header(true)
+
+    div(style="padding-top:40px;")
+
+    if queryId
+        if queryId == 1
+            div This is where you setup your new UBIF program :)
+
+
+    +footer()

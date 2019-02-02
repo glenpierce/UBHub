@@ -17,16 +17,7 @@ app.use(session({
 }));
 
 router.get('/', function (req, res, next) {
-    getUserDataForProgram(req.query.id, req).then(function (rows) {
-        console.log(rows);
-        res.render('programs', {username: req.session.user, rows, query: req.query.id});
-    });
+    res.render('newprogram', {username: req.session.user, queryId: req.query.id});
 });
-
-function getUserDataForProgram(programId, req) {
-    return new Promise(function (resolve, reject) {
-        makeDbCall("select * from userData where program = " + programId + " and userEmail = '" + req.session.user + "';", resolve);
-    });
-}
 
 module.exports = router;
