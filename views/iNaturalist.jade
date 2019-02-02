@@ -149,6 +149,8 @@ head
     script(src="https://d3js.org/d3.v5.min.js")
     script.
         var dataset = [];
+        var polygons = [1,2,3,4,5,6,7,8,9];
+
         function getPlace(id) {
             // "https://www.inaturalist.org/places.json?taxon=Calochortus+tiburonensis&place_type=open+space"
             // let url = "https://www.inaturalist.org/projects.json?id=" + id;
@@ -176,14 +178,28 @@ head
             console.log(data);
             let x = 0;
             for(i = 0; i < data.length; i++) {
+                data[i].polygon = getRandomPolygon();
+
                 if(data[i].taxon != null) {
                     data[i].x = x;
                     x += 100;
-                    dataset.push(data[i])
+
                 }
+            }
+            for(var polygon in polygons) {
+                dataPoint = {};
+                for(i = 0; i < data.length; i++) {
+
+                }
+                dataset.push(dataPoint);
             }
             displayData();
         }
+
+        function getRandomPolygon() {
+
+        }
+
         function displayData() {
             var barPadding = 5;
             var barWidth = (svgWidth / dataset.length);

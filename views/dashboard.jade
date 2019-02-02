@@ -7,17 +7,26 @@ html
             function goToDashboard() {
                 console.log("clicked");
             }
-            rows = !{JSON.stringify(rows)}
 
 
 body
     +header(true)
-    script console.log(rows);
 
     div(style="max-width:1000px; margin:auto; margin-top:100px; margin-bottom:50px; background-color:#fff1b6; display:flex; flex-direction:column; align-items:center;")
-        div(style="font-size:20px; padding:10px; font-weight:bold; color:#E3965C;") This page is under construction; here is a preview of what we're building.
-    div(style="max-width:800px; margin:auto;")
+        div(style="font-size:20px; padding:10px; font-weight:bold; color:#E3965C; display:none;") This page is under construction; here is a preview of what we're building.
+    div(style="max-width:800px; margin:auto; display:none;")
         img(src="/images/myHubPreview.png" style="max-width:800px;")
+
+    div(style="max-width:800px; margin:auto;")
+        div(style="display:flex; margin:auto;")
+             for program in basicProgramData
+                 if program.iconFileName
+                     div(style="display:flex; flex-direction:column; cursor:pointer;" onclick="window.location='/programs/?id=#{program.id}'")
+                        image(src="/images/#{program.iconFileName}")
+                        div(style="text-align:center;") #{program.programName}
+                 else
+                     div(style="display:flex; flex-direction:column;")
+                        div #{program.programName}
 
     div(style="display:none;")
         div(style="padding:40px;")

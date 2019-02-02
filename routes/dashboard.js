@@ -181,13 +181,21 @@ router.get('/', function (req, res, next) {
             });
         }
 
+        function getBasicProgramData() {
+            return new Promise( function (resolve, reject) {
+                makeDbCall("select id, programName, description, iconFileName from programs where private = 0;", resolve);
+            });
+        }
+
         getSelectedSite().then(function (values) {
             console.log(values[0][0].siteName);
             getUserData(values[0][0].id);
             res.render('dashboard', {username: req.session.user});
         }).catch(function (error) {
                 console.log(error);
-                res.render('dashboard', {username: req.session.user});
+                getBasicProgramData().then(function (basicProgramData) {
+                    res.render('dashboard', {username: req.session.user, basicProgramData: basicProgramData});
+                });
             }
         );
 
