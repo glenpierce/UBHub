@@ -171,11 +171,12 @@ body
 
     if queryId
         if queryId == 1
-            div#map(style="height:400px; width:600px;")
-            div(style="display:flex;")
-                div iNaturalist url
-                input
-            div This is where you setup your new UBIF program :)
+            div(style="margin:auto; min-width:800px; display:flex; flex-direction:column; align-items:center;")
+                div#map(style="height:400px; width:800px;")
+                div(style="display:flex;")
+                    div iNaturalist url
+                    input
+                div This is where you setup your new UBIF program :)
 
 
     +footer()
