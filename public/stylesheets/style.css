@@ -57,6 +57,18 @@ button:hover {
   color:#4490ba; font-size:30px;
 }
 
+.titleText {
+  color:white; font-weight:700; font-size:20px;
+}
+
+.dividingLine {
+  background:white; height:1px; width:50%; margin:auto; margin-top:10px; margin-bottom:10px;
+}
+
+.subTitleText {
+  color:white; padding-right:100px; padding-left:100px; padding-bottom:20px;
+}
+
 .item{
   border:solid; border-width:1px; border-color:grey; display:table-cell; padding: 5px;
 }

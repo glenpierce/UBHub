@@ -3,6 +3,166 @@ include mixins
 html
     head
         link(rel='stylesheet', href='/stylesheets/style.css')
+        script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&libraries=drawing,geometry")
+        script.
+            var sites = [];
+            var polygon;
+            window.onload = function (ev) {
+                initMapOnPage();
+            };
+
+            function initMapOnPage() {
+                center = {lat: 20, lng: 15};
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 2, streetViewControl: false,
+                    center: center,
+                    styles: [{"elementType": "geometry", "stylers": [{"color": "#b6d5e3"}]},
+                        {"elementType": "labels.text.fill", "stylers": [{"color": "#6da4c7"}]},
+                        {"elementType": "labels.text.stroke", "stylers": [{"color": "#b6d5e3"}]},
+                        {"featureType": "administrative", "stylers": [{"visibility": "simplified"}]},
+                        {"featureType": "administrative", "elementType": "geometry", "stylers": [{"color": "#f2f2f2"}]},
+                        //country borders color is next line
+                        {
+                            "featureType": "administrative",
+                            "elementType": "geometry.stroke",
+                            "stylers": [{"color": "#ffffff"}, {"visibility": "on"}]
+                        },
+                        //main labels color is the next line
+                        {
+                            "featureType": "administrative",
+                            "elementType": "labels.text",
+                            "stylers": [{"color": "#939393"}]
+                        },
+                        //urban land color is next line
+                        {"featureType": "landscape", "stylers": [{"color": "#cccccc"}]},
+                        {
+                            "featureType": "landscape.man_made",
+                            "elementType": "geometry.stroke",
+                            "stylers": [{"color": "#334e87"}]
+                        },
+                        //main land color is the next line
+                        {"featureType": "landscape.natural", "stylers": [{"color": "#d3e9d5"}]},
+                        {"featureType": "poi", "stylers": [{"visibility": "off"}]},
+                        {"featureType": "poi", "elementType": "geometry", "stylers": [{"color": "#283d6a"}]},
+                        {"featureType": "poi", "elementType": "labels.text.fill", "stylers": [{"color": "#6f9ba5"}]},
+                        {"featureType": "poi", "elementType": "labels.text.stroke", "stylers": [{"color": "#1d2c4d"}]},
+                        //park areas color is next line
+                        {"featureType": "poi.park", "stylers": [{"color": "#b8ddc3"}, {"visibility": "simplified"}]},
+                        {"featureType": "poi.park", "elementType": "labels", "stylers": [{"visibility": "off"}]},
+                        {"featureType": "poi.park", "elementType": "labels.icon", "stylers": [{"visibility": "off"}]},
+                        //road color is the next line
+                        {"featureType": "road", "elementType": "geometry", "stylers": [{"color": "#f2f2f2"}]},
+                        {"featureType": "road", "elementType": "labels", "stylers": [{"visibility": "off"}]},
+                        {"featureType": "road", "elementType": "labels.text.fill", "stylers": [{"color": "#4e6d70"}]},
+                        {"featureType": "road", "elementType": "labels.text.stroke", "stylers": [{"color": "#f2f2f2"}]},
+                        {"featureType": "road.arterial", "stylers": [{"visibility": "simplified"}]},
+                        {
+                            "featureType": "road.arterial",
+                            "elementType": "geometry",
+                            "stylers": [{"visibility": "simplified"}]
+                        },
+                        {"featureType": "road.arterial", "elementType": "labels", "stylers": [{"visibility": "off"}]},
+                        {"featureType": "road.highway", "stylers": [{"visibility": "simplified"}]},
+                        {"featureType": "road.highway", "elementType": "labels", "stylers": [{"visibility": "off"}]},
+                        {
+                            "featureType": "road.highway",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{"color": "#4e6d70"}]
+                        },
+                        {
+                            "featureType": "road.highway",
+                            "elementType": "labels.text.stroke",
+                            "stylers": [{"color": "#f2f2f2"}]
+                        },
+                        //transit lines and land area polygons are the next line
+                        {"featureType": "transit", "stylers": [{"color": "#b2b2b2"}]},
+                        {"featureType": "transit", "elementType": "labels", "stylers": [{"visibility": "off"}]},
+                        {
+                            "featureType": "transit",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{"color": "#98d2b2"}]
+                        },
+                        {
+                            "featureType": "transit",
+                            "elementType": "labels.text.stroke",
+                            "stylers": [{"color": "#F2F2F2"}]
+                        },
+                        {"featureType": "water", "stylers": [{"color": "#b6d5e3"}]},
+                        {"featureType": "water", "elementType": "labels.text.fill", "stylers": [{"color": "#4e6d70"}]}]
+                });
+                var drawingManager = new google.maps.drawing.DrawingManager({
+                    drawingMode: google.maps.drawing.OverlayType.MARKER,
+                    drawingControl: true,
+                    drawingControlOptions: {
+                        position: google.maps.ControlPosition.TOP_CENTER,
+                        drawingModes: ['marker', 'circle', 'polygon', 'polyline', 'rectangle']
+                    },
+                    markerOptions: {icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png'},
+                    circleOptions: {
+                        fillColor: '#ffff00',
+                        fillOpacity: 1,
+                        strokeWeight: 5,
+                        clickable: false,
+                        editable: true,
+                        zIndex: 1
+                    }
+                });
+                drawingManager.setMap(map);
+                google.maps.event.addListener(drawingManager, 'overlaycomplete', function (event) {
+                    if (event.type == 'circle') {
+                        var radius = event.overlay.getRadius();
+                    }
+                    if (event.type == 'polygon') {
+                        polygon = event.overlay.getPath().getArray();
+                        var site = {
+                            taxa: [{mammal: ["dog", "cat", "beaver"]}, {dinosaur: ["trex", "raptor"]}],
+                            coordinates: []
+                        };
+                        for (var i = 0; i < polygon.length; i++) {
+                            console.log(polygon[i].lat() + ", " + polygon[i].lng());
+                            site.coordinates.push({lat: polygon[i].lat(), lng: polygon[i].lng()})
+                        }
+                        sites.push(site)
+                        console.log(sites);
+                    }
+                    if (event.type == 'marker') {
+                        var observations = {
+                            observations: [
+                                {
+                                    lat: 50.53145664214434,
+                                    lng: 13.59375,
+                                    speciesId: 1001,
+                                    species: "dog",
+                                    taxa: "canine",
+                                    present: true,
+                                    date: "01-01-2018"
+                                },
+                                {
+                                    lat: 0.0,
+                                    lng: 0.0,
+                                    speciesId: 1002,
+                                    species: "cat",
+                                    taxa: "feline",
+                                    present: false,
+                                    date: "01-01-2018"
+                                }
+                            ]
+                        }
+                        console.log(polygon);
+
+                        for (var i = 0; i < observations.observations.length; i++) {
+                            var latLng = new google.maps.LatLng(observations.observations[i].lat, observations.observations[i].lng);
+                            if (google.maps.geometry.poly.containsLocation(latLng, new google.maps.Polygon({paths: polygon}))) {
+                                console.log("yes");
+                                console.log(observations.observations[i]);
+                            } else {
+                                console.log("no");
+                                console.log(observations.observations[i]);
+                            }
+                        }
+                    }
+                });
+            }
 
 body
     +header(true)
@@ -11,6 +171,10 @@ body
 
     if queryId
         if queryId == 1
+            div#map(style="height:400px; width:600px;")
+            div(style="display:flex;")
+                div iNaturalist url
+                input
             div This is where you setup your new UBIF program :)
 
 
