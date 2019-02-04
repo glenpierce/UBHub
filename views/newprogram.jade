@@ -177,6 +177,7 @@ body
                     div iNaturalist url
                     input
                 div This is where you setup your new UBIF program :)
+                button(onclick="someFunction()") show data
 
 
     +footer()
@@ -190,12 +191,11 @@ footer
             };
             var observations = !{jsonToSend};
             for (observation in observations) {
-                console.log(observations[observation].latitude);
                 var position = {lat: parseFloat(observations[observation].latitude), lng: parseFloat(observations[observation].longitude)};
                 var marker = new google.maps.Marker({
                     position: position,
                     map: map,
-                    icon: greyImage //getIconByIndex(Math.floor(Math.random()*5)) todo: this makes the map go to random color mode when we need it for collateral
+                    icon: greyImage
                 });
             }
         }
