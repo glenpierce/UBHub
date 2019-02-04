@@ -180,3 +180,22 @@ body
 
 
     +footer()
+
+footer
+    script.
+        someFunction = function() {
+            greyImage = {
+                url: '/images/marker_0_grey_39x59.png',
+                scaledSize: new google.maps.Size(20, 30)
+            };
+            var observations = !{jsonToSend};
+            for (observation in observations) {
+                console.log(observations[observation].latitude);
+                var position = {lat: parseFloat(observations[observation].latitude), lng: parseFloat(observations[observation].longitude)};
+                var marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    icon: greyImage //getIconByIndex(Math.floor(Math.random()*5)) todo: this makes the map go to random color mode when we need it for collateral
+                });
+            }
+        }
