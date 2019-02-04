@@ -66,7 +66,7 @@ button:hover {
 }
 
 .subTitleText {
-  color:white; padding-right:100px; padding-left:100px; padding-bottom:20px;
+  color:white; padding-right:100px; padding-left:100px; padding-bottom:20px; text-align:center;
 }
 
 .item{
