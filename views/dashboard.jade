@@ -7,14 +7,21 @@ html
             function goToDashboard() {
                 console.log("clicked");
             }
-
+            var lastId;
+            function onHover(id) {
+                if(lastId) {
+                    document.getElementById(lastId).style.backgroundColor = "transparent";
+                }
+                document.getElementById(id).style.backgroundColor = "white";
+                lastId = id;
+            }
 
 body
     +header(true)
 
     div(style="max-width:1000px; margin:auto; margin-top:100px; margin-bottom:50px; background-color:#fff1b6; display:flex; flex-direction:column; align-items:center;")
         div(style="font-size:20px; padding:10px; font-weight:bold; color:#E3965C; display:none;") This page is under construction; here is a preview of what we're building.
-    div(style="max-width:800px; margin:auto; display:none;")
+    div(style="max-width:800px; margin:auto;")
         img(src="/images/myHubPreview.png" style="max-width:800px;")
 
     div(style="max-width:800px; margin:auto; background:url('/images/blue-background.png'); display:flex; flex-direction:column; justify-content:center;")
@@ -22,24 +29,26 @@ body
         div.dividingLine
         div.subTitleText Welcome to the myHub dashboard where you can initiate and review biodiversity indices by location.
 
-        div(style="background:white; margin:20px; padding:10px; border-radius:0px 0px 20px 20px;")
+        div(style="background:white; margin:20px; padding:10px 10px 15px 10px; border-radius:0px 0px 20px 20px;")
             div(style="background:grey; color:white; font-size:10px; padding:5px; margin: -10px -10px 0px -10px;") Progress Snapshot
             div(style="display:flex;")
-                div(style="flex-basis:0; flex-grow:1; border-right:solid grey; margin-top:15px;")
+                div(style="flex-basis:0; flex-grow:1; border-right:solid grey; margin-top:15px; margin-left:5px;")
                     div(style="display:flex; flex-direction:column;")
                         div(style="display:flex; width:100%; justify-content:space-between;")
-                            div(style="font-weight:700;") Vancouver
-                            div(style="align-self:flex-end; font-size:12px; color:blue; text-decoration:underline; cursor:pointer;") Change location-->
-                        div Please choose the program you would like to work with:
+                            div(style="font-weight:1000; font-size:22px; margin-top:-8px;") Vancouver
+                            div(style="align-self:flex-start; font-size:10px; color:#326f90; margin-right:2px; text-decoration:underline; cursor:pointer;") Change location-->
+                        div(style="font-size:12px; margin-bottom:5px;") CANADA
+                        div(style="font-size:10px; margin-bottom:5px;") Please select the program you would like to work with:
 
                     div(style="display:flex; margin:auto;")
-                        div(style="display:flex; margin:auto; background-color:#f2f2f2f2;")
+                        div(style="display:flex; margin:auto; background-color:#f2f2f2f2; padding:5px;")
                              for program in basicProgramData
                                  if program.iconFileName
-                                     div(style="display:flex; flex-direction:column; cursor:pointer; margin:15px; align-items:center; justify-content:space-between;" onclick="window.location='/programs/?id=#{program.id}'")
-                                        div(style="font-weight:700; margin-bottom:10px; text-align:center; font-size:20px; color:#808080") BEGIN<br>NEW
-                                        image(src="/images/#{program.iconFileName}" style="width:150px;")
-                                        div(style="font-weight:700; margin:10px 0px 10px 0px; text-align:center; max-width:150px;") #{program.programName}
+                                     div(id="#{program.id}" style="display:flex; flex-direction:column; cursor:pointer; margin:5px; padding:10px; align-items:center; justify-content:space-between;" onclick="window.location='/programs/?id=#{program.id}'" onmouseover="onHover(#{program.id});")
+                                        div(style="font-weight:700; margin-bottom:10px; text-align:center; font-size:15px; color:#808080") BEGIN<br>NEW
+                                        div(style="height:90px;")
+                                            image(src="/images/#{program.iconFileName}" style="max-width:150px; max-height:90px; height:auto; width:auto;")
+                                        div(style="font-weight:700; margin:10px 0px 10px 0px; text-align:center; max-width:150px; height:32px; vertical-align:middle;") #{program.programName}
                                  else
                                      div(style="display:flex; flex-direction:column;")
                                         div #{program.programName}
