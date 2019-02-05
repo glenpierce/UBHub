@@ -184,6 +184,7 @@ body
 
 footer
     script.
+        var markers = [];
         someFunction = function() {
             greyImage = {
                 url: '/images/marker_0_grey_39x59.png',
@@ -191,11 +192,47 @@ footer
             };
             var observations = !{jsonToSend};
             for (observation in observations) {
-                var position = {lat: parseFloat(observations[observation].latitude), lng: parseFloat(observations[observation].longitude)};
+                var position = {
+                    lat: parseFloat(observations[observation].latitude),
+                    lng: parseFloat(observations[observation].longitude)
+                };
                 var marker = new google.maps.Marker({
                     position: position,
                     map: map,
                     icon: greyImage
                 });
+                markers.push(marker);
             }
+            someOtherFunction();
+        }
+        someOtherFunction = function () {
+            var minLat, maxLat, minLng, maxLng;
+            for(i = 0; i < markers.length; i++) {
+                if(minLat == null || markers[i].getPosition().lat() < minLat)
+                    minLat = markers[i].getPosition().lat();
+                if (maxLat == null || markers[i].getPosition().lat() > maxLat)
+                    maxLat = markers[i].getPosition().lat();
+                if (minLng == null || markers[i].getPosition().lng() < minLng)
+                    minLng = markers[i].getPosition().lng();
+                if (maxLng == null || markers[i].getPosition().lng() > maxLng)
+                    maxLng = markers[i].getPosition().lng();
+            }
+
+            var rectangle = new google.maps.Rectangle({
+                strokeColor: '#FF0000',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: '#FF0000',
+                fillOpacity: 0.35,
+                map: map,
+                bounds: {
+                    north: maxLat,
+                    south: minLat,
+                    east: maxLng,
+                    west: minLng
+                }
+            });
+
+            map.setCenter({lat: ((maxLat - minLat) / 2 + minLat), lng: ((maxLng - minLng) / 2 + minLng)});
+            map.setZoom(4);
         }
