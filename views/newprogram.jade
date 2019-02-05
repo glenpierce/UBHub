@@ -175,9 +175,8 @@ body
                 div#map(style="height:400px; width:800px;")
                 div(style="display:flex;")
                     div iNaturalist url
-                    input
-                div This is where you setup your new UBIF program :)
-                button(onclick="someFunction()") show data
+                    input(id="input" value="dragonfly-creek-riparian-ubif")
+                button(onclick="processRequest()") import iNaturalist data
 
 
     +footer()
@@ -185,12 +184,39 @@ body
 footer
     script.
         var markers = [];
-        someFunction = function() {
+        var returnedJson;
+        processRequest = function() {
+            getINaturalistData().then(function (value) { placeMarkers(); });
+        }
+        getINaturalistData = function() {
+            return new Promise(function(resolve) {
+                iNaturalistProjectId = document.getElementById("input").value;
+                document.getElementById("input").value = "";
+
+                var xhr = new XMLHttpRequest();
+
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 3) {
+
+                    } else if (xhr.readyState == 4 && xhr.status == 200) {
+                        returnedJson = JSON.parse(xhr.responseText);
+                        console.log(returnedJson);
+                        resolve();
+                    }
+                };
+
+                xhr.open("GET", "https://inaturalist.org/observations/project/" + iNaturalistProjectId + ".json", true);
+                xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                xhr.send();
+            });
+        }
+        placeMarkers = function() {
+            console.log("placeMarkers");
             greyImage = {
                 url: '/images/marker_0_grey_39x59.png',
                 scaledSize: new google.maps.Size(20, 30)
             };
-            var observations = !{jsonToSend};
+            var observations = returnedJson;
             for (observation in observations) {
                 var position = {
                     lat: parseFloat(observations[observation].latitude),
@@ -203,9 +229,9 @@ footer
                 });
                 markers.push(marker);
             }
-            someOtherFunction();
+            updateMap();
         }
-        someOtherFunction = function () {
+        updateMap = function () {
             var minLat, maxLat, minLng, maxLng;
             for(i = 0; i < markers.length; i++) {
                 if(minLat == null || markers[i].getPosition().lat() < minLat)
@@ -233,6 +259,8 @@ footer
                 }
             });
 
-            map.setCenter({lat: ((maxLat - minLat) / 2 + minLat), lng: ((maxLng - minLng) / 2 + minLng)});
-            map.setZoom(4);
+            map.fitBounds(rectangle.getBounds());
+
+            // map.setCenter({lat: ((maxLat - minLat) / 2 + minLat), lng: ((maxLng - minLng) / 2 + minLng)});
+            // map.setZoom(17);
         }
