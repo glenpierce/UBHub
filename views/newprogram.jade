@@ -173,6 +173,7 @@ body
         if queryId == 1
             div(style="margin:auto; min-width:800px; display:flex; flex-direction:column; align-items:center;")
                 div#map(style="height:400px; width:800px;")
+                div(id="chart")
                 div(style="display:flex;")
                     div iNaturalist url
                     input(id="input" value="dragonfly-creek-riparian-ubif")
@@ -183,11 +184,19 @@ body
 
 footer
     script.
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
         var markers = [];
         var returnedJson;
+
         processRequest = function() {
             getINaturalistData().then(function (value) { placeMarkers(); });
         }
+
         getINaturalistData = function() {
             return new Promise(function(resolve) {
                 iNaturalistProjectId = document.getElementById("input").value;
@@ -210,6 +219,7 @@ footer
                 xhr.send();
             });
         }
+
         placeMarkers = function() {
             console.log("placeMarkers");
             greyImage = {
@@ -227,10 +237,14 @@ footer
                     map: map,
                     icon: greyImage
                 });
+                marker.taxon = observation.iconic_taxon_name;
+                marker.species = observation.species_guess;
+                marker.presence = Math.random() >= 0.5;
                 markers.push(marker);
             }
             updateMap();
         }
+
         updateMap = function () {
             var minLat, maxLat, minLng, maxLng;
             for(i = 0; i < markers.length; i++) {
@@ -244,9 +258,59 @@ footer
                     maxLng = markers[i].getPosition().lng();
             }
 
+            var polygons = [{polygon: {}, markers: []}, {polygon: {}, markers: []}, {polygon: {}, markers: []}, {polygon: {}, markers: []}];
+
+            for(i = 0; i < 4; i++) {
+
+                switch (i) {
+                    case 0:
+                        westBound = minLng;
+                        eastBound = minLng + (maxLng - minLng) / 4;
+                        break;
+                    case 1:
+                        westBound = minLng + (maxLng - minLng) / 4;
+                        eastBound = minLng + ((maxLng - minLng) / 4) * 2;
+                        break;
+                    case 2:
+                        westBound = minLng + ((maxLng - minLng) / 4) * 2;
+                        eastBound = minLng + ((maxLng - minLng) / 4) * 3;
+                        break;
+                    case 3:
+                        westBound = minLng + ((maxLng - minLng) / 4) * 3;
+                        eastBound = maxLng;
+                        break;
+                }
+
+                polygons[i].polygon = new google.maps.Rectangle({
+                    strokeColor: '#000000',
+                    strokeOpacity: 1.0,
+                    strokeWeight: 1,
+                    fillColor: '#FFFFFF',
+                    fillOpacity: 0.0,
+                    map: map,
+                    bounds: {
+                        north: maxLat,
+                        south: minLat,
+                        east: eastBound,
+                        west: westBound
+                    }
+                });
+            }
+
+            for(i = 0; i < markers.length; i++) {
+                for(k = 0; k < polygons.length; k++) {
+                    if(polygons[k].polygon.getBounds().contains(markers[i].getPosition())) {
+                        polygons[k].markers.push(markers[i]);
+                        break;
+                    }
+                }
+            }
+
+            console.log(polygons);
+
             var rectangle = new google.maps.Rectangle({
-                strokeColor: '#FF0000',
-                strokeOpacity: 0.8,
+                strokeColor: '#FFFFFF',
+                strokeOpacity: 0.0,
                 strokeWeight: 2,
                 fillColor: '#FF0000',
                 fillOpacity: 0.35,
