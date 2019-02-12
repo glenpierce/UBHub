@@ -366,6 +366,9 @@ footer
                     d.presence = presence;
                     return presence;
                 })
+                .style("stroke", "white")
+                .style("fill", "grey")
+                .style("stroke-width", 5)
                 .attr("y", function (d) {return svgHeight - d.presence;})
                 .attr("width", svgWidth / polygons.length)
                 .attr("transform", function (d, i) {
