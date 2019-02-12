@@ -1,3 +1,7 @@
+:root {
+  --blue1: #07456b;
+}
+
 @media only screen and (min-width:700px){
   .hideWhenNarrow{
     /*display: block;*/
@@ -687,7 +691,7 @@ div.mapValuesControl span.disabled {
 }
 
 .aboutUsHeader {
-  background:#07456b; color:white; text-align:center; padding:5px; font-size:22px;
+  background:var(--blue1, #07456b); color:white; text-align:center; padding:5px; font-size:22px;
 }
 
 

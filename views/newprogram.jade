@@ -221,7 +221,6 @@ footer
         }
 
         placeMarkers = function() {
-            console.log("placeMarkers");
             greyImage = {
                 url: '/images/marker_0_grey_39x59.png',
                 scaledSize: new google.maps.Size(20, 30)
@@ -237,8 +236,8 @@ footer
                     map: map,
                     icon: greyImage
                 });
-                marker.taxon = observation.iconic_taxon_name;
-                marker.species = observation.species_guess;
+                marker.taxon = observations[observation].iconic_taxon_name;
+                marker.species = observations[observation].species_guess;
                 marker.presence = Math.random() >= 0.5;
                 markers.push(marker);
             }
@@ -306,7 +305,12 @@ footer
                 }
             }
 
-            console.log(polygons);
+            for(polygon in polygons) {
+                for(marker in polygons[polygon].markers) {
+                    console.log(polygons[polygon].markers[marker].species);
+                    console.log(polygons[polygon].markers[marker].taxon);
+                }
+            }
 
             var rectangle = new google.maps.Rectangle({
                 strokeColor: '#FFFFFF',
