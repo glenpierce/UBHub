@@ -2,7 +2,12 @@ doctype html
 include mixins
 html
     head
+        style.
+            .bar-chart {
+                border: solid;
+            }
         link(rel='stylesheet', href='/stylesheets/style.css')
+        script(src="https://d3js.org/d3.v5.min.js")
         script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&libraries=drawing,geometry")
         script.
             var sites = [];
@@ -179,6 +184,8 @@ body
                     input(id="input" value="dragonfly-creek-riparian-ubif")
                 button(onclick="processRequest()") import iNaturalist data
 
+                svg
+
 
     +footer()
 
@@ -305,12 +312,15 @@ footer
                 }
             }
 
-            for(polygon in polygons) {
-                for(marker in polygons[polygon].markers) {
-                    console.log(polygons[polygon].markers[marker].species);
-                    console.log(polygons[polygon].markers[marker].taxon);
-                }
-            }
+            // for(polygon in polygons) {
+            //     for(marker in polygons[polygon].markers) {
+            //         console.log(polygons[polygon].markers[marker].species);
+            //         console.log(polygons[polygon].markers[marker].taxon);
+            //         console.log(polygons[polygon].markers[marker].presence);
+            //     }
+            // }
+
+            chart(polygons);
 
             var rectangle = new google.maps.Rectangle({
                 strokeColor: '#FFFFFF',
@@ -331,4 +341,35 @@ footer
 
             // map.setCenter({lat: ((maxLat - minLat) / 2 + minLat), lng: ((maxLng - minLng) / 2 + minLng)});
             // map.setZoom(17);
+        }
+
+        chart = function(polygons) {
+            var svgWidth = 500;
+            var svgHeight = 300;
+            var svg = d3.select('svg')
+                .attr("width", svgWidth)
+                .attr("height", svgHeight)
+                .attr("class", "bar-chart");
+
+            svg.selectAll("rect")
+                .data(polygons)
+                .enter()
+                .append("rect")
+                .attr("height", function (d) {
+                    // console.log(d);
+                    var presence = 0;
+                    for(marker in d.markers) {
+                        if(d.markers[marker].presence)
+                            presence += 1;
+                    }
+                    presence = svgHeight * (presence / d.markers.length);
+                    d.presence = presence;
+                    return presence;
+                })
+                .attr("y", function (d) {return svgHeight - d.presence;})
+                .attr("width", svgWidth / polygons.length)
+                .attr("transform", function (d, i) {
+                    var translate = [i * svgWidth / polygons.length, 0];
+                    return "translate(" + translate + ")";
+                });
         }
