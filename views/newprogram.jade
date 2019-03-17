@@ -6,6 +6,10 @@ html
             .bar-chart {
                 border: solid;
             }
+            .newSite {
+                padding: 10px;
+                border: solid;
+            }
         link(rel='stylesheet', href='/stylesheets/style.css')
         script(src="https://d3js.org/d3.v5.min.js")
         script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&libraries=drawing,geometry")
@@ -120,13 +124,14 @@ html
                     if (event.type == 'polygon') {
                         polygon = event.overlay.getPath().getArray();
                         var site = {
-                            taxa: [{mammal: ["dog", "cat", "beaver"]}, {dinosaur: ["trex", "raptor"]}],
+                            taxa: [],
                             coordinates: []
                         };
                         for (var i = 0; i < polygon.length; i++) {
                             console.log(polygon[i].lat() + ", " + polygon[i].lng());
                             site.coordinates.push({lat: polygon[i].lat(), lng: polygon[i].lng()})
                         }
+                        addSiteToUi(site);
                         sites.push(site)
                         console.log(sites);
                     }
@@ -168,6 +173,23 @@ html
                     }
                 });
             }
+            function addSiteToUi(site) {
+                let siteElement = document.createElement("DIV");
+                siteElement.className = "newSite";
+                let siteSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                let sitePolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+
+                let points = "";
+                console.log(site);
+                for(let i = 0; i < site.coordinates.length; i++) {
+                    points += site.coordinates[i].lat + "," + site.coordinates[i].lng;
+                }
+                sitePolygon.setAttribute('points', points);
+
+                siteSvg.appendChild(sitePolygon);
+                siteElement.appendChild(siteSvg);
+                document.getElementById("chart").appendChild(siteElement);
+            }
 
 body
     +header(true)
@@ -179,10 +201,10 @@ body
             div(style="margin:auto; min-width:800px; display:flex; flex-direction:column; align-items:center;")
                 div#map(style="height:400px; width:800px;")
                 div(id="chart")
-                div(style="display:flex;")
-                    div iNaturalist url
-                    input(id="input" value="dragonfly-creek-riparian-ubif")
-                button(onclick="processRequest()") import iNaturalist data
+                //div(style="display:flex;")
+                //    div iNaturalist url
+                //    input(id="input" value="dragonfly-creek-riparian-ubif")
+                //button(onclick="processRequest()") import iNaturalist data
 
                 svg
 
