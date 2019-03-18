@@ -177,12 +177,16 @@ html
                 let siteElement = document.createElement("DIV");
                 siteElement.className = "newSite";
                 let siteSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                siteSvg.setAttribute("height", "180px");
+                siteSvg.setAttribute("width", "360px");
                 let sitePolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
 
                 let points = "";
-                console.log(site);
                 for(let i = 0; i < site.coordinates.length; i++) {
-                    points += site.coordinates[i].lat + "," + site.coordinates[i].lng;
+                    points += (Math.round(site.coordinates[i].lng * 100) / 100 + 180) + "," + (Math.round(site.coordinates[i].lat * 100) / -100 + 90);
+                    if(i < site.coordinates.length - 1) {
+                        points += ",";
+                    }
                 }
                 sitePolygon.setAttribute('points', points);
 
