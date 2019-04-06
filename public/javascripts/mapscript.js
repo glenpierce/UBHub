@@ -612,6 +612,7 @@ function highlightValues(filterBy, colorBy, colorLevels){
 
   function initMap (mapData) {
     console.log(mapData);
+    var infowindow = new google.maps.InfoWindow();
     greyImage = {
         url: '/images/marker_0_grey_39x59.png',
         scaledSize: new google.maps.Size(20, 30),
@@ -698,10 +699,6 @@ function highlightValues(filterBy, colorBy, colorLevels){
           if(element.lat){
               var contentString = getMapPopupContent(element);
 
-              var infowindow = new google.maps.InfoWindow({
-                  content: contentString
-              });
-
               var position = {lat:element.lat, lng:element.lng};
               var marker = new google.maps.Marker({
                   position: position,
@@ -713,6 +710,7 @@ function highlightValues(filterBy, colorBy, colorLevels){
               marker.element = element;
 
               marker.addListener('click', function () {
+                  infowindow.setContent(contentString);
                   infowindow.open(map, marker);
               });
               markers.push(marker);
