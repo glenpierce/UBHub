@@ -614,6 +614,7 @@ function highlightValues(filterBy, colorBy, colorLevels){
 
   function initMap (mapData) {
     console.log(mapData);
+
     var infowindow = new google.maps.InfoWindow();
     greyImage = {
         url: '/images/marker_0_grey_39x59.png',
@@ -738,6 +739,13 @@ function highlightValues(filterBy, colorBy, colorLevels){
           map: null,
           preserveViewport: true
       });
+
+      // let legend = document.createElement("DIV");
+      // let legendInfo = document.createElement("DIV");
+      // legend.append(legendInfo);
+      // map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
+      // legendInfo.setAttribute("style", "border:solid; height:100px; width:20px;");
+
 
   }
 
