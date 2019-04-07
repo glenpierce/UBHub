@@ -47,7 +47,7 @@ function makeIconArray(colorLevels) {
     var entry = {
       level: levels[i],
       icon: icon
-    }
+    };
     iconArray.push(entry);
   }
   return iconArray;
@@ -361,6 +361,8 @@ function highlightValues(filterBy, colorBy, colorLevels){
 
     markers.forEach(function (marker) {
       var found = false;
+      let programLevel = -1;
+      let icon = blueImage;
 
       programs.forEach(function (program) {
         if(marker.element.id == program.inst_id) {
@@ -368,9 +370,9 @@ function highlightValues(filterBy, colorBy, colorLevels){
           switch (colorBy) {
 
             case "part_level":
-              var icon = blueImage;
               for (i = 0; i < iconArray.length; i++) {
-                if (iconArray[i].level == program.part_level) {
+                if (iconArray[i].level == program.part_level && i > programLevel) {
+                  programLevel = i;
                   icon = iconArray[i].icon;
                 }
               }
