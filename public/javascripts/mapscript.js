@@ -345,7 +345,7 @@ function onFilterUpdate(){
 
 //TODO: filters need to remember all active filtering, not just latest
 
-function selectHighlight(filterBy, colorBy, colorLevels, buttonNode){
+function selectHighlight(filterBy, colorBy, colorLevels, buttonNode) {
   highlightValues(filterBy, colorBy, colorLevels);
   if(currentActiveHighlightingButton != null){
     currentActiveHighlightingButton.classList.remove("activeButton");
@@ -355,7 +355,7 @@ function selectHighlight(filterBy, colorBy, colorLevels, buttonNode){
 }
 
 
-function highlightValues(filterBy, colorBy, colorLevels){
+function highlightValues(filterBy, colorBy, colorLevels) {
   var callback = (markers, programs) => {
     var iconArray = makeIconArray(colorLevels);
 
@@ -740,11 +740,11 @@ function highlightValues(filterBy, colorBy, colorLevels){
           preserveViewport: true
       });
 
-      // let legend = document.createElement("DIV");
-      // let legendInfo = document.createElement("DIV");
-      // legend.append(legendInfo);
-      // map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
-      // legendInfo.setAttribute("style", "border:solid; height:100px; width:20px;");
+      let legend = document.createElement("DIV");
+      let legendInfo = document.createElement("DIV");
+      legend.append(legendInfo);
+      map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
+      legendInfo.setAttribute("style", "border:solid; height:100px; width:20px;");
 
 
   }
