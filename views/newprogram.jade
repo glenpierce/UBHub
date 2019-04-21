@@ -217,35 +217,46 @@ body
                     div(style="font-weight:700;") UBIF Track 2 Project Setup
                     div In the Urban Biodiversity Inventory Framework (UBIF), Track 2 system, cities indicate surrogate species they would like to track for each habitat type in their city.  Here you will set up the parameters of your project.
 
-                    div(style="font-weight:700;") Step 1. Name your project
-                    div Choose a name to encompass the entire UBIF Track 2 initiative for your city through time as long as it maintains the same overall structure (such as taxon). Only small changes to the project can be accommodated without starting a new project.
-                    div(style="font-weight:700;") Enter Project Name
-                    input
+                    div(style="margin-bottom:20px;") <b>Step 1. Name your project</b>
+                        div Choose a name to encompass the entire UBIF Track 2 initiative for your city through time as long as it maintains the same overall structure (such as taxon). Only small changes to the project can be accommodated without starting a new project.
+                        div(style="font-weight:700;") Enter Project Name
+                        input
 
-                    div(style="font-weight:700;") Step 2. Indicate Taxon
-                    div Surrogate species must be indicated in at least five different taxonomic groups. The first three of these groups are birds, plants, and invertebrate pollinators. The remaining two are customizable by city. Indicate those here.
-                    div(style="font-weight:700;") Taxons
-                    div(style="display:flex; flex-direction:column;")
-                        input(id="taxonNameId")
-                        button(onclick="addTaxon()") add taxon
+                    div(style="margin-bottom:20px;") <b>Step 2. Indicate Taxon</b>
+                        div Surrogate species must be indicated in at least five different taxonomic groups. The first three of these groups are birds, plants, and invertebrate pollinators. The remaining two are customizable by city. Indicate those here.
+                        div(style="font-weight:700;") Taxons
+                        div(style="display:flex; flex-direction:column;")
+                            input(id="taxonNameId")
+                            button(onclick="addTaxon()") add taxon
 
-                    div(style="font-weight:700;") Step 3. Indicate your habitats of interest.
-                    div Indicate the various habitats that you will be tracking in this project. The type and number of habitats of interest should be based on known native habitats found currently or historically within the city and is completely up to the individual city’s discretion. Note that the surrogate species will be the same across each habitat. Some examples include: prairie, wetland, freshwater, douglas fir forest, brownfields.
-                    div(style="display:flex; flex-direction:column; font-weight:700;") Habitats
-                        input(id="habitatNameId")
-                        button(onclick="addHabitat()") add habitat
+                    div(style="margin-bottom:20px;") <b>Step 3. Indicate your habitats of interest.</b>
+                        div Indicate the various habitats that you will be tracking in this project. The type and number of habitats of interest should be based on known native habitats found currently or historically within the city and is completely up to the individual city’s discretion. Note that the surrogate species will be the same across each habitat. Some examples include: prairie, wetland, freshwater, douglas fir forest, brownfields.
+                        div(style="display:flex; flex-direction:column; font-weight:700;") Habitats
+                            input(id="habitatNameId")
+                            button(onclick="addHabitat()") add habitat
 
-                    div(style="font-weight:700;") Step 4. Indicate places of interest.
-                    div Draw a polygon on the map below for each place (such as a park) of interest. Name each place accordingly. Note that each place can only have one habitat type, so it may be appropriate to divide certain parks into multiple places if they cover more than one habitat type. The polygon shapes will be used to pull data from species observations databases in a later step. For each habitat type, you may indicate one place to serve as a reference monitoring site. Reference sites represent desirable conditions for other places of the same habitat type and provide a yardstick to measure the other places of the same habitat against.
+                    div(style="margin-bottom:20px;") <b>Step 4. Indicate places of interest.</b>
+                     div Draw a polygon on the map below for each place (such as a park) of interest. Name each place accordingly. Note that each place can only have one habitat type, so it may be appropriate to divide certain parks into multiple places if they cover more than one habitat type. The polygon shapes will be used to pull data from species observations databases in a later step. For each habitat type, you may indicate one place to serve as a reference monitoring site. Reference sites represent desirable conditions for other places of the same habitat type and provide a yardstick to measure the other places of the same habitat against.
                 div#map(style="height:400px; width:800px;")
 
                 div(style="max-width:400px; margin-bottom:20px;")
-                    div(style="font-weight:700;") Step 5. Draw data from pre-existing species observations.
-                    div Indicate the sources from which you would like to pull species observations into the polygons. This step is optional, and you can override this information as you see fit.
-                div(style="display:flex;")
-                    div iNaturalist url
-                    input(id="input" value="dragonfly-creek-riparian-ubif")
-                button(onclick="processRequest()") import iNaturalist data
+                    div <b>Step 5. Draw data from pre-existing species observations.</b>
+                        div(style="margin-bottom:20px;") Indicate the sources from which you would like to pull species observations into the polygons. This step is optional, and you can override this information as you see fit.
+                        div(style="display:flex; flex-direction:column; align-items:center;")
+                            div(style="display:flex;")
+                                div iNaturalist url
+                                input(id="input" value="dragonfly-creek-riparian-ubif")
+                            button(onclick="processRequest()") import
+                        div(style="display:flex; flex-direction:column; align-items:center;")
+                            div(style="display:flex;")
+                                div eBird url
+                                input
+                            button import
+                        div(style="display:flex; flex-direction:column; align-items:center;")
+                            div(style="display:flex;")
+                                div GBIF url
+                                input
+                            button import
 
                 div(style="max-width:400px;")
                     div(style="font-weight:700;") Step 6. Indicate surrogate species.
