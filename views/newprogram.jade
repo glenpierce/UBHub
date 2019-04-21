@@ -24,19 +24,7 @@ html
             window.onload = function (ev) {
                 initMapOnPage();
 
-                var tableData = [
-                    {id: 1, name: "Billy Bob", age: "12", gender: "male", height: 1, col: "red", dob: "", cheese: 1},
-                    {
-                        id: 2,
-                        name: "Mary May",
-                        age: "1",
-                        gender: "female",
-                        height: 2,
-                        col: "blue",
-                        dob: "14/05/1982",
-                        cheese: true
-                    },
-                ]
+                var tableData = [];
 
                 columns = [
                     {title: "Species", field: "species", editor: "input"},
@@ -224,16 +212,17 @@ body
 
                     div(style="margin-bottom:20px;") <b>Step 2. Indicate Taxon</b>
                         div Surrogate species must be indicated in at least five different taxonomic groups. The first three of these groups are birds, plants, and invertebrate pollinators. The remaining two are customizable by city. Indicate those here.
-                        div(style="font-weight:700;") Taxons
-                        div(style="display:flex; flex-direction:column;")
+                        div(style="display:flex; flex-direction:column; font-weight:700;") Taxons
                             input(id="taxonNameId")
                             button(onclick="addTaxon()") add taxon
+                            div(class="taxon")
 
                     div(style="margin-bottom:20px;") <b>Step 3. Indicate your habitats of interest.</b>
                         div Indicate the various habitats that you will be tracking in this project. The type and number of habitats of interest should be based on known native habitats found currently or historically within the city and is completely up to the individual city’s discretion. Note that the surrogate species will be the same across each habitat. Some examples include: prairie, wetland, freshwater, douglas fir forest, brownfields.
                         div(style="display:flex; flex-direction:column; font-weight:700;") Habitats
                             input(id="habitatNameId")
                             button(onclick="addHabitat()") add habitat
+                            div(class="habitat")
 
                     div(style="margin-bottom:20px;") <b>Step 4. Indicate places of interest.</b>
                      div Draw a polygon on the map below for each place (such as a park) of interest. Name each place accordingly. Note that each place can only have one habitat type, so it may be appropriate to divide certain parks into multiple places if they cover more than one habitat type. The polygon shapes will be used to pull data from species observations databases in a later step. For each habitat type, you may indicate one place to serve as a reference monitoring site. Reference sites represent desirable conditions for other places of the same habitat type and provide a yardstick to measure the other places of the same habitat against.
@@ -269,7 +258,7 @@ body
                 div(id="chart")
 
                 svg
-                div Save
+                button(onclick="save()") Save
 
                 div
                     div(style="font-weight:700;") Next Steps
@@ -285,19 +274,28 @@ footer
             let newHabitat = {title: habitatNameElement.value, field: habitatNameElement.value, width:90,  align:"center", formatter:"tickCross", sorter:"boolean", editor:true}
             columns.push(newHabitat);
             table.setColumns(columns);
+            newHabitatLabel = document.createElement("DIV");
+            newHabitatLabel.textContent = habitatNameElement.value
+            document.getElementsByClassName("habitat")[0].appendChild(newHabitatLabel);
             habitatNameElement.value = "";
         }
 
         function addTaxon() {
             taxonNameElement = document.getElementById("taxonNameId");
-            console.log(columns[1]);
             columns[1].editorParams[taxonNameElement.value] = taxonNameElement.value;
             table.setColumns(columns);
+            newTaxonLabel = document.createElement("DIV");
+            newTaxonLabel.textContent = taxonNameElement.value
+            document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
             taxonNameElement.value = "";
         }
 
         function addSpecies() {
             table.addRow();
+        }
+
+        function save() {
+            console.log(table.getData());
         }
 
         function getRandomInt(min, max) {
