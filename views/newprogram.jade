@@ -21,6 +21,7 @@ html
             var polygon;
             var table;
             var columns;
+            let habitats = [];
             window.onload = function (ev) {
                 initMapOnPage();
 
@@ -153,11 +154,27 @@ html
                         polygon = event.overlay.getPath().getArray();
                         var site = {
                             taxa: [],
-                            coordinates: []
-                        };
+                            coordinates: [],
+                            minX: 1000,
+                            minY: 1000,
+                            maxX: -1000,
+                            maxY: -1000
+                        }
                         for (var i = 0; i < polygon.length; i++) {
                             console.log(polygon[i].lat() + ", " + polygon[i].lng());
                             site.coordinates.push({lat: polygon[i].lat(), lng: polygon[i].lng()})
+                            if(polygon[i].lat() * -1 + 90 < site.minY) {
+                                site.minY = polygon[i].lat() * -1 + 90;
+                            }
+                            if(polygon[i].lat() * -1 + 90 > site.maxY) {
+                                site.maxY = polygon[i].lat() * -1 + 90;
+                            }
+                            if (polygon[i].lng() + 180 < site.minX) {
+                                site.minX = polygon[i].lng() + 180;
+                            }
+                            if (polygon[i].lng() + 180 > site.maxX) {
+                                site.maxX = polygon[i].lng() + 180;
+                            }
                         }
                         addSiteToUi(site);
                         sites.push(site)
@@ -171,6 +188,9 @@ html
                 let siteSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                 siteSvg.setAttribute("height", "180px");
                 siteSvg.setAttribute("width", "360px");
+                let viewBox = site.minX + " " + site.minY + " " + (site.maxX - site.minX) + " " + (site.maxY - site.minY);
+                console.log(viewBox);
+                siteSvg.setAttribute("viewBox", viewBox);
                 let sitePolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
 
                 let points = "";
@@ -186,7 +206,27 @@ html
                 siteElement.appendChild(siteSvg);
 
                 let siteData = document.createElement("DIV");
-                siteData.innerText = "Site name\nHabitatSelect";
+                siteData.setAttribute("style", "display: flex; flex-direction:column;")
+                let siteName = document.createElement("DIV");
+                siteData.appendChild(siteName);
+                siteName.innerText = "Site Name";
+                let siteInput = document.createElement("INPUT");
+                siteData.appendChild(siteInput);
+                let siteHabitat = document.createElement("DIV");
+                siteData.appendChild(siteHabitat);
+                siteHabitat.innerText = "Habitat Select";
+                let siteHabitatSelector = document.createElement("SELECT")
+                for(let i = 0; i < habitats.length ; i++) {
+                    let option = document.createElement("OPTION")
+                    option.appendChild(document.createTextNode(habitats[i]));
+                    siteHabitatSelector.appendChild(option);
+                }
+
+                siteData.appendChild(siteHabitatSelector);
+
+                siteHabitatSelector.onchange = function (selection) {
+                    console.log(selection);
+                };
 
                 siteElement.appendChild(siteData);
 
@@ -216,6 +256,9 @@ body
                             input(id="taxonNameId")
                             button(onclick="addTaxon()") add taxon
                             div(class="taxon")
+                                div Bird
+                                div Plant
+                                div Invertebrate Pollinator
 
                     div(style="margin-bottom:20px;") <b>Step 3. Indicate your habitats of interest.</b>
                         div Indicate the various habitats that you will be tracking in this project. The type and number of habitats of interest should be based on known native habitats found currently or historically within the city and is completely up to the individual city’s discretion. Note that the surrogate species will be the same across each habitat. Some examples include: prairie, wetland, freshwater, douglas fir forest, brownfields.
@@ -272,6 +315,7 @@ footer
         function addHabitat() {
             habitatNameElement = document.getElementById("habitatNameId");
             let newHabitat = {title: habitatNameElement.value, field: habitatNameElement.value, width:90,  align:"center", formatter:"tickCross", sorter:"boolean", editor:true}
+            habitats.push(habitatNameElement.value);
             columns.push(newHabitat);
             table.setColumns(columns);
             newHabitatLabel = document.createElement("DIV");
