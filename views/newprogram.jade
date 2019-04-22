@@ -154,6 +154,7 @@ html
                         polygon = event.overlay.getPath().getArray();
                         var site = {
                             taxa: [],
+                            polygon: polygon,
                             coordinates: [],
                             minX: 1000,
                             minY: 1000,
@@ -189,7 +190,6 @@ html
                 siteSvg.setAttribute("height", "180px");
                 siteSvg.setAttribute("width", "360px");
                 let viewBox = site.minX + " " + site.minY + " " + (site.maxX - site.minX) + " " + (site.maxY - site.minY);
-                console.log(viewBox);
                 siteSvg.setAttribute("viewBox", viewBox);
                 let sitePolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
 
@@ -243,16 +243,18 @@ body
             div(style="margin:auto; min-width:800px; display:flex; flex-direction:column; align-items:center;")
                 div(style="max-width:400px;")
                     div(style="font-weight:700;") UBIF Track 2 Project Setup
-                    div In the Urban Biodiversity Inventory Framework (UBIF), Track 2 system, cities indicate surrogate species they would like to track for each habitat type in their city.  Here you will set up the parameters of your project.
+                    div(style="display:flex; margin-bottom:20px;") In the Urban Biodiversity Inventory Framework (UBIF), Track 2 system, cities indicate surrogate species they would like to track for each habitat type in their city.  Here you will set up the parameters of your project.
+                        img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton0()")
 
                     div(style="margin-bottom:20px;") <b>Step 1. Name your project</b>
                         div Choose a name to encompass the entire UBIF Track 2 initiative for your city through time as long as it maintains the same overall structure (such as taxon). Only small changes to the project can be accommodated without starting a new project.
                         div(style="font-weight:700;") Enter Project Name
                         input
 
-                    div(style="margin-bottom:20px;") <b>Step 2. Indicate Taxon</b>
-                        div Surrogate species must be indicated in at least five different taxonomic groups. The first three of these groups are birds, plants, and invertebrate pollinators. The remaining two are customizable by city. Indicate those here.
-                        div(style="display:flex; flex-direction:column; font-weight:700;") Taxons
+                    div(style="margin-bottom:20px;") <b>Step 2. Indicate Taxonomic Groups</b>
+                        div(style="display:flex;") Surrogate species must be indicated in at least five different taxonomic groups. The first three of these groups are birds, plants, and invertebrate pollinators. The remaining two are customizable by city. Indicate those here.
+                            img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton2()")
+                        div(style="display:flex; flex-direction:column; font-weight:700;") Taxa
                             input(id="taxonNameId")
                             button(onclick="addTaxon()") add taxon
                             div(class="taxon")
@@ -268,16 +270,27 @@ body
                             div(class="habitat")
 
                     div(style="margin-bottom:20px;") <b>Step 4. Indicate places of interest.</b>
-                     div Draw a polygon on the map below for each place (such as a park) of interest. Name each place accordingly. Note that each place can only have one habitat type, so it may be appropriate to divide certain parks into multiple places if they cover more than one habitat type. The polygon shapes will be used to pull data from species observations databases in a later step. For each habitat type, you may indicate one place to serve as a reference monitoring site. Reference sites represent desirable conditions for other places of the same habitat type and provide a yardstick to measure the other places of the same habitat against.
-                div#map(style="height:400px; width:800px;")
+                     div(style="display:flex;") Draw a polygon on the map below for each place (such as a park) of interest. Name each place accordingly. Note that each place can only have one habitat type, so it may be appropriate to divide certain parks into multiple places if they cover more than one habitat type. The polygon shapes will be used to pull data from species observations databases in a later step. For each habitat type, you may indicate one place to serve as a reference monitoring site. Reference sites represent desirable conditions for other places of the same habitat type and provide a yardstick to measure the other places of the same habitat against.
+                         img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton4()")
+
+                 button Upload KML
+                    input(type="file")
+
+                div#map(style="height:400px; width:800px; margin-bottom:20px;")
+
+                div(id="chart" style="margin-bottom:20px;")
 
                 div(style="max-width:400px; margin-bottom:20px;")
                     div <b>Step 5. Draw data from pre-existing species observations.</b>
                         div(style="margin-bottom:20px;") Indicate the sources from which you would like to pull species observations into the polygons. This step is optional, and you can override this information as you see fit.
                         div(style="display:flex; flex-direction:column; align-items:center;")
                             div(style="display:flex;")
-                                div iNaturalist url
+                                div iNaturalist Project url
                                 input(id="input" value="dragonfly-creek-riparian-ubif")
+                            button(onclick="processRequest()") import
+                            div(style="display:flex;")
+                                div iNaturalist Trips url
+                                input
                             button(onclick="processRequest()") import
                         div(style="display:flex; flex-direction:column; align-items:center;")
                             div(style="display:flex;")
@@ -292,18 +305,18 @@ body
 
                 div(style="max-width:400px;")
                     div(style="font-weight:700;") Step 6. Indicate surrogate species.
-                    div For each habitat type, choose the surrogate species you would like to track. If you have indicated a source of observations from above, species will auto-populate below and you will simply need to verify which ones you would like to include. Alternately, you can manually enter each surrogate species. Indicate the taxon of each species and then check the boxes to indicate which habitat you would like to consider for each surrogate species.
+                    div(style="display:flex;") For each habitat type, choose the surrogate species you would like to track. If you have indicated a source of observations from above, species will auto-populate below and you will simply need to verify which ones you would like to include. Alternately, you can manually enter each surrogate species. Indicate the taxon of each species and then check the boxes to indicate which habitat you would like to consider for each surrogate species.
+                        img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton6()")
                 div(style="display:flex; flex-direction:column;")
                     button(onclick="addSpecies()") add species
 
                 div(id="example-table")
 
-                div(id="chart")
-
                 svg
+                button(onclick="updateMap()") Update Map
                 button(onclick="save()") Save
 
-                div
+                div(style="max-width:400px;")
                     div(style="font-weight:700;") Next Steps
                     div You have now set up your project. Next, you will be able to input the presence/absence data, see the status of observations in each place, set targets for each, and generate reports that indicate your progress towards those targets over time.
 
@@ -396,10 +409,10 @@ footer
                 marker.presence = Math.random() >= 0.5;
                 markers.push(marker);
             }
-            updateMap();
+            // updateMap();
         }
 
-        updateMap = function () {
+        updateMap = function() {
             var minLat, maxLat, minLng, maxLng;
             for(i = 0; i < markers.length; i++) {
                 if(minLat == null || markers[i].getPosition().lat() < minLat)
@@ -412,49 +425,49 @@ footer
                     maxLng = markers[i].getPosition().lng();
             }
 
-            var polygons = [{polygon: {}, markers: []}, {polygon: {}, markers: []}, {polygon: {}, markers: []}, {polygon: {}, markers: []}];
+            // var polygons = [{polygon: {}, markers: []}, {polygon: {}, markers: []}, {polygon: {}, markers: []}, {polygon: {}, markers: []}];
 
-            for(i = 0; i < 4; i++) {
+            // for(i = 0; i < 4; i++) {
+            //
+            //     switch (i) {
+            //         case 0:
+            //             westBound = minLng;
+            //             eastBound = minLng + (maxLng - minLng) / 4;
+            //             break;
+            //         case 1:
+            //             westBound = minLng + (maxLng - minLng) / 4;
+            //             eastBound = minLng + ((maxLng - minLng) / 4) * 2;
+            //             break;
+            //         case 2:
+            //             westBound = minLng + ((maxLng - minLng) / 4) * 2;
+            //             eastBound = minLng + ((maxLng - minLng) / 4) * 3;
+            //             break;
+            //         case 3:
+            //             westBound = minLng + ((maxLng - minLng) / 4) * 3;
+            //             eastBound = maxLng;
+            //             break;
+            //     }
 
-                switch (i) {
-                    case 0:
-                        westBound = minLng;
-                        eastBound = minLng + (maxLng - minLng) / 4;
-                        break;
-                    case 1:
-                        westBound = minLng + (maxLng - minLng) / 4;
-                        eastBound = minLng + ((maxLng - minLng) / 4) * 2;
-                        break;
-                    case 2:
-                        westBound = minLng + ((maxLng - minLng) / 4) * 2;
-                        eastBound = minLng + ((maxLng - minLng) / 4) * 3;
-                        break;
-                    case 3:
-                        westBound = minLng + ((maxLng - minLng) / 4) * 3;
-                        eastBound = maxLng;
-                        break;
-                }
-
-                polygons[i].polygon = new google.maps.Rectangle({
-                    strokeColor: '#000000',
-                    strokeOpacity: 1.0,
-                    strokeWeight: 1,
-                    fillColor: '#FFFFFF',
-                    fillOpacity: 0.0,
-                    map: map,
-                    bounds: {
-                        north: maxLat,
-                        south: minLat,
-                        east: eastBound,
-                        west: westBound
-                    }
-                });
-            }
+            //     polygons[i].polygon = new google.maps.Rectangle({
+            //         strokeColor: '#000000',
+            //         strokeOpacity: 1.0,
+            //         strokeWeight: 1,
+            //         fillColor: '#FFFFFF',
+            //         fillOpacity: 0.0,
+            //         map: map,
+            //         bounds: {
+            //             north: maxLat,
+            //             south: minLat,
+            //             east: eastBound,
+            //             west: westBound
+            //         }
+            //     });
+            // }
 
             for(i = 0; i < markers.length; i++) {
-                for(k = 0; k < polygons.length; k++) {
-                    if(polygons[k].polygon.getBounds().contains(markers[i].getPosition())) {
-                        polygons[k].markers.push(markers[i]);
+                for(k = 0; k < sites.length; k++) {
+                    if(sites[k].polygon.getBounds().contains(markers[i].getPosition())) {
+                        sites[k].markers.push(markers[i]);
                         break;
                     }
                 }
@@ -468,7 +481,7 @@ footer
             //     }
             // }
 
-            chart(polygons);
+            chart(sites);
 
             var rectangle = new google.maps.Rectangle({
                 strokeColor: '#FFFFFF',
@@ -523,4 +536,20 @@ footer
                     var translate = [i * svgWidth / polygons.length, 0];
                     return "translate(" + translate + ")";
                 });
+        }
+
+        function displayInfoButton0() {
+
+        }
+
+        function displayInfoButton2() {
+
+        }
+
+        function displayInfoButton4() {
+
+        }
+
+        function displayInfoButton6() {
+
         }
