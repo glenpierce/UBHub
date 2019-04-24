@@ -195,9 +195,9 @@ html
 
                 let points = "";
                 for(let i = 0; i < site.coordinates.length; i++) {
-                    points += (site.coordinates[i].lng + 180) + "," + (site.coordinates[i].lat * -1 + 90);
+                    points += (site.coordinates[i].lng + 180) + " " + (site.coordinates[i].lat * -1 + 90);
                     if(i < site.coordinates.length - 1) {
-                        points += ",";
+                        points += " ";
                     }
                 }
                 sitePolygon.setAttribute('points', points);

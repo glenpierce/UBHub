@@ -1,0 +1,32 @@
+doctype html
+include mixins
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+body
+    +header(true)
+    div(style="padding-top:40px;")
+    div(style="max-width:800px; margin:auto;")
+        div(style="display:flex; margin:auto;")
+        div(class="bold") Data Entry.
+        div(class="bold") This page displays after the setup page.
+        div(class="bold spaceBelow") Text for the section in-between the program set-up and the report generation:
+
+        div(class="underline") Step 1. Import or enter data:
+        div(class="spaceBelow") (paste here the same import boxes, but consider adding a time frame filter and a user filter option) These import buttons should recall data from iNat (and in the future, GBIF, eBird) but only the species indicated and within the polygons, not all the data.
+
+        div(class="spaceBelow") Optionally, the user may choose to skip this step and manually enter presence/absence data rather than import. This can be done in step 3.
+
+        div(class="underline") Step 2. Indicate time frame:
+        div(class="spaceBelow") User chooses whether the data will be analyzed by year or month. Then they will enter the year(s) or month(s) of interest. For example, they choose “Year” and then say years 2010 and 2015 are of interest. Or, they choose “Month” and then say Nov-Dec 2017 and March-April 2018 are of interest. Maximum of 5 time frames.
+
+        div(class="underline") Step 3. Verify data:
+        div(class="spaceBelow") Display the map of polygons and a table of the species for each polygon (select one at a time). User goes through one place/polygon at a time, and can click buttons in the species table for the user to verify presence/absence. Data is to be verified separately for each time frame.
+
+        div(class="underline") Step 4. Set Targets:
+        div(class="spaceBelow") Displays current presence data for each habitat by taxa. For each habitat and each taxa, the user will enter the target presence.
+
+        button(onclick="window.location='/statusReport'") Status Report
+
++footer()

@@ -28,6 +28,8 @@ var account = require('./routes/account');
 var iNaturalist = require('./routes/iNaturalist');
 var programs = require('./routes/programs');
 var newProgramRoute = require('./routes/newprogram');
+var dataEntry = require('./routes/dataEntry');
+var statusReport = require('./routes/statusReport');
 
 var config = require('./config.js');
 
@@ -88,6 +90,8 @@ app.use('/account', account);
 app.use('/iNaturalist', iNaturalist);
 app.use('/programs', programs);
 app.use('/newprogram', newProgramRoute);
+app.use('/dataEntry', dataEntry);
+app.use('/statusReport', statusReport);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

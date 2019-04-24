@@ -1,0 +1,48 @@
+doctype html
+include mixins
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+body
+    +header(true)
+    div(style="padding-top:40px;")
+    div(style="max-width:800px; margin:auto;")
+        div(style="display:flex; margin:auto;")
+        div Status Report
+        div Text and images for the UBIF Track 2 Status Report section:
+
+        div Front matter:
+
+        div [UBIF LOGO]
+        div UBIF Track 2 Status Report
+        div [CITY]
+        div [REPORT DATE]
+
+        div [UBHub LOGO]
+        div This report has been automatically generated from data entered into the indicator tracker on www.ubhub.com. This data has been managed by [USER] on behalf of [ORGANIZATION].
+
+        div The Urban Biodiversity Inventory Framework (UBIF) is a standardized system for local governments to measure the status of biodiversity in an urban environment. It was first developed in 2017 in a partnership effort under the Urban Sustainability Directors Network (USDN). In the UBIF system, adherents choose surrogate species which will serve as proxy indicators for biodiversity status. They will also indicate particular places within which to track these species. Data is then tracked by taxonomic group and habitat type over time to measure progress.
+
+        div Adherents to UBIF can select from three different methods, or “tracks”.  Track 2, used here, calls for species observations to include both presence and absence data for each habitat type. Adherents to UBIF Track 2 set goals for the presence of surrogate species in each habitat and taxon and track their progress over time.
+
+        div Section 1: Overview of Surrogate Species
+        div Data has been tracked for [CITY] beginning in [YEAR]. Current data aggregates observations made from [DATE] to [DATE].
+
+        div Trends over time for each taxon (a summary chart, then 5-6 charts, TBD).
+
+
+        div GLEN: Put in a menu for users to select the time interval (year, month, biannual) and the time frame from [DATE] to [DATE] (it doesn’t have to function yet).
+        div Time Interval: [Dropdown: year, month]
+        div Time frame: from [CALENDAR] to [CALENDAR]
+
+        div Section 2: Overview of Species by Habitat Type
+
+        div Section 3: Status of Surrogate Species in [RIPARIAN] Habitat
+        div Overview chart, then up to 6 charts (one for each taxon) showing data from each place
+        div GLEN: Put in a menu for users to select the habitat they would like to view (for now we only have riparian so it doesn’t have to work yet).
+
+        div Appendix: Tables of Species Presence Data
+        div Table for each habitat type listing the species names and indicating presence/absence/unknown status for each according to place and time frame.
+
++footer()

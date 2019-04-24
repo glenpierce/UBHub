@@ -49,6 +49,18 @@ button:hover {
   background-color: #e9f6f9;
 }
 
+.bold {
+  font-weight: bold;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.spaceBelow {
+  margin-bottom: 20px;
+}
+
 .border{
   border:solid; border-radius:5px; border-width:1px;
 }
