@@ -50,15 +50,19 @@ button:hover {
 }
 
 .bold {
-  font-weight: bold;
+  font-weight:bold;
 }
 
 .underline {
-  text-decoration: underline;
+  text-decoration:underline;
 }
 
 .spaceBelow {
-  margin-bottom: 20px;
+  margin-bottom:20px;
+}
+
+.flex {
+    display:flex;
 }
 
 .border{
@@ -265,7 +269,6 @@ p.postBody {
 
 .postLinkContent {
   display: inline-block;
-
 }
 
 .postLinkStatus {
@@ -401,7 +404,6 @@ p.postBody {
 
 .forumPager {
   text-align: center;
-
 }
 
 .forumPager .pager {
@@ -481,21 +483,18 @@ p.postBody {
   height: auto;
   opacity: 1;
   height: auto;
-
 }
 
 .mapInfoContent.hide {
   opacity: 0;
   height: 0;
   overflow: hidden;
-
 }
 
 .mapInfoContent .formItem {
   display: inline-block;
   width: calc(33% - 36px);
   padding: 6px 18px
-
 }
 
 .mapInfoContent label {
@@ -536,7 +535,6 @@ p.postBody {
   right: 8px;
   content: "";
   z-index: 98;
-
 }
 
 .selectBox select {
@@ -634,7 +632,6 @@ table.mapValuesTable tr td{
   padding: 12px;
   height: 30px;
   vertical-align: top;
-
 }
 
 table.mapValuesTable tr:nth-child(odd) {
@@ -690,7 +687,6 @@ div.mapValuesControl span {
   color: #4490ba;
   cursor: pointer;
   margin: 12px;
-
 }
 
 div.mapValuesControl span.disabled {
