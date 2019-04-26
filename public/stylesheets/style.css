@@ -77,6 +77,10 @@ button:hover {
   flex-direction: column;
 }
 
+.centerContents {
+  margin: auto;
+}
+
 .hidden {
   display: none;
 }
