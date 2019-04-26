@@ -262,8 +262,9 @@ body
                                 div As cities consider surrogate species selections, the first criteria is to select species from diverse taxa groups that are typically found in or are obligate to a given habitat type of good quality and are neither very rare nor overly common.  The plant, bird and invertebrate pollinator taxa groups are universal throughout cities utilizing the UBIF. However, additional taxa groups are chosen at the discretion of the cities, with at least two additional taxa groups recommended.
 
                         div(style="display:flex; flex-direction:column; font-weight:700;") Taxa
-                            input(id="taxonNameId")
-                            button(onclick="addTaxon()") add taxon
+                            div(class="flex")
+                                input(id="taxonNameId")
+                                button(onclick="addTaxon()") add taxon
                             div(class="taxon")
                                 div Bird
                                 div Plant
@@ -272,8 +273,9 @@ body
                     div(style="margin-bottom:20px;") <b>Step 3. Indicate your habitats of interest.</b>
                         div Indicate the various habitats that you will be tracking in this project. The type and number of habitats of interest should be based on known native habitats found currently or historically within the city and is completely up to the individual city’s discretion. Note that the surrogate species will be the same across each habitat. Some examples include: prairie, wetland, freshwater, douglas fir forest, brownfields.
                         div(style="display:flex; flex-direction:column; font-weight:700;") Habitats
-                            input(id="habitatNameId")
-                            button(onclick="addHabitat()") add habitat
+                            div(class="flex")
+                                input(id="habitatNameId")
+                                button(onclick="addHabitat()") add habitat
                             div(class="habitat")
 
                     div(style="margin-bottom:20px;") <b>Step 4. Indicate places of interest.</b>
