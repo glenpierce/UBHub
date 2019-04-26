@@ -61,8 +61,20 @@ button:hover {
   margin-bottom:20px;
 }
 
+.spaceAbove {
+  margin-top:20px;
+}
+
+.smallSpaceAbove {
+  margin-top: 10px;
+}
+
 .flex {
     display:flex;
+}
+
+.column {
+  flex-direction: column;
 }
 
 .hidden {
@@ -86,12 +98,20 @@ button:hover {
   border:solid; border-radius:5px; border-width:1px; border-color:#4490ba;
 }
 
+.blue {
+  color:#4490ba;
+}
+
 .redBorder {
   border:solid; border-radius:5px; border-width:1px; border-color:red;
 }
 
 .mediumPadding {
   padding: 8px;
+}
+
+.fullWidth {
+  width: 100%;
 }
 
 .thickBorder {
@@ -104,6 +124,14 @@ button:hover {
 
 .titleText {
   color:white; font-weight:700; font-size:20px;
+}
+
+.boxedChildren * {
+  border: solid;
+  border-color: lightgrey;
+  border-width: 1px;
+  background: lightgrey;
+  padding-left: 3px;
 }
 
 .dividingLine {
