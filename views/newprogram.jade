@@ -297,25 +297,27 @@ body
                 div(style="max-width:400px; margin-bottom:20px;")
                     div <b>Step 5. Draw data from pre-existing species observations.</b>
                         div(style="margin-bottom:20px;") Indicate the sources from which you would like to pull species observations into the polygons. This step is optional, and you can override this information as you see fit.
-                        div(style="display:flex; flex-direction:column; align-items:center;")
-                            div(style="display:flex;")
-                                div iNaturalist Project url
+                        div
+                            div iNaturalist Project url
+                            div(class="flex spaceBelow")
+                                div http://www.inaturalist.org/
                                 input(id="input" value="dragonfly-creek-riparian-ubif")
-                            button(onclick="processRequest()") import
-                            div(style="display:flex;")
-                                div iNaturalist Trips url
+                                button(onclick="processRequest()") import
+
+                            div iNaturalist Trips url
+                            div(class="flex spaceBelow")
                                 input
-                            button(onclick="processRequest()") import
-                        div(style="display:flex; flex-direction:column; align-items:center;")
-                            div(style="display:flex;")
+                                button(onclick="processRequest()") import
+                        div(class="thickBorder redBorder mediumPadding")
                                 div eBird url
-                                input
-                            button import
-                        div(style="display:flex; flex-direction:column; align-items:center;")
+                                div(style="display:flex;")
+                                    input
+                                    button import
+                        div(class="thickBorder redBorder mediumPadding")
+                            div GBIF url
                             div(style="display:flex;")
-                                div GBIF url
                                 input
-                            button import
+                                button import
 
                 div(style="max-width:400px;")
                     div(style="font-weight:700;") Step 6. Indicate surrogate species.

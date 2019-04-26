@@ -71,7 +71,8 @@ button:hover {
 
 .popup {
   position: absolute;
-  background: white;
+  background: lightgrey;
+  padding: 4px;
   border: solid;
   border-radius: 4px;
   z-index: 4;
