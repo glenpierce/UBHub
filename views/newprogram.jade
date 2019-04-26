@@ -187,8 +187,8 @@ html
                 let siteElement = document.createElement("DIV");
                 siteElement.className = "newSite";
                 let siteSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                siteSvg.setAttribute("height", "180px");
-                siteSvg.setAttribute("width", "360px");
+                siteSvg.setAttribute("height", "30px");
+                siteSvg.setAttribute("width", "60px");
                 let viewBox = site.minX + " " + site.minY + " " + (site.maxX - site.minX) + " " + (site.maxY - site.minY);
                 siteSvg.setAttribute("viewBox", viewBox);
                 let sitePolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
@@ -242,9 +242,13 @@ body
         if queryId == 1
             div(style="margin:auto; min-width:800px; display:flex; flex-direction:column; align-items:center;")
                 div(style="max-width:400px;")
+                    img(src="/images/ubif-logo.png")
                     div(style="font-weight:700;") UBIF Track 2 Project Setup
                     div(style="display:flex; margin-bottom:20px;") In the Urban Biodiversity Inventory Framework (UBIF), Track 2 system, cities indicate surrogate species they would like to track for each habitat type in their city.  Here you will set up the parameters of your project.
                         img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton0()")
+                        div(id="infoButton0" class="hidden popup" onclick="hide(document.getElementById('infoButton0'))")
+                            div Purposefully collecting data to assess urban biodiversity provides cities the ability to generate summary statistics and track changes over time in a more measurable way than is provided by conducting Track 1 data collection only. Track 2 employs presence/absence monitoring of species as a way to track and assess urban biodiversity. Recording the presence of species in Track 1 is valuable information, but knowing where species are not is also essential to assist in decision making for restoration action or other management decisions that can be applied to improve habitat quality and/or quantity.
+                            div Two major decisions must be made before presence/absence monitoring can begin: Which species will be surveyed for, and what locations will be surveyed. With unlimited resources, a city could attempt to exhaustively record all species of all taxa at every possible location. However, given normal limitations, this is an unattainable goal. In order to best use limited resources, a surrogate species approach (Caro 2010) and recommendations for selecting reference sites within as well as outside of the city, are employed for Track 2 and Track 3.
 
                     div(style="margin-bottom:20px;") <b>Step 1. Name your project</b>
                         div Choose a name to encompass the entire UBIF Track 2 initiative for your city through time as long as it maintains the same overall structure (such as taxon). Only small changes to the project can be accommodated without starting a new project.
@@ -254,6 +258,9 @@ body
                     div(style="margin-bottom:20px;") <b>Step 2. Indicate Taxonomic Groups</b>
                         div(style="display:flex;") Surrogate species must be indicated in at least five different taxonomic groups. The first three of these groups are birds, plants, and invertebrate pollinators. The remaining two are customizable by city. Indicate those here.
                             img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton2()")
+                            div(id="infoButton2" class="hidden popup" onclick="hide(document.getElementById('infoButton2'))")
+                                div As cities consider surrogate species selections, the first criteria is to select species from diverse taxa groups that are typically found in or are obligate to a given habitat type of good quality and are neither very rare nor overly common.  The plant, bird and invertebrate pollinator taxa groups are universal throughout cities utilizing the UBIF. However, additional taxa groups are chosen at the discretion of the cities, with at least two additional taxa groups recommended.
+
                         div(style="display:flex; flex-direction:column; font-weight:700;") Taxa
                             input(id="taxonNameId")
                             button(onclick="addTaxon()") add taxon
@@ -272,9 +279,14 @@ body
                     div(style="margin-bottom:20px;") <b>Step 4. Indicate places of interest.</b>
                      div(style="display:flex;") Draw a polygon on the map below for each place (such as a park) of interest. Name each place accordingly. Note that each place can only have one habitat type, so it may be appropriate to divide certain parks into multiple places if they cover more than one habitat type. The polygon shapes will be used to pull data from species observations databases in a later step. For each habitat type, you may indicate one place to serve as a reference monitoring site. Reference sites represent desirable conditions for other places of the same habitat type and provide a yardstick to measure the other places of the same habitat against.
                          img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton4()")
+                         div(id="infoButton4" class="hidden popup" onclick="hide(document.getElementById('infoButton4'))")
+                                div(class="spaceBelow") From large protected natural areas to small vegetated parking strips, habitat quality and quantity within cities varies greatly. The best utilization of the UBIF, as a means to attain a comprehensive analysis of biodiversity in the city, requires that a diversity of sites be selected. In this way, care should be taken to select sites with a range of perceived quality and avoid the temptation to only select the “best” or “favorite” sites within the city.
+                                div(class="spaceBelow") Collecting biodiversity data exclusively within the city allows for documentation of the often surprising diversity that can be found in and around urban centers. However, it can be difficult to detect larger scale trends (such as climate change) that may influence species presence. Therefore reference sites should be selected to complement city monitoring sites. A reference site should be of the best quality and/or an ideal example of a given habitat of interest, located as near to the city as possible. For example, biodiversity monitoring in wetland habitats within the city could be compared to highly functional wetland sites in undeveloped areas outside the city.
+                                div Utilization of a reference site does not mean that the goal is for city sites to meet exactly the same parameter values as are found in a reference site. The conditions within urban and urbanizing areas are such that it is not necessarily possible to have equal values as those found within a reference site. Rather, reference sites provide the city with a yardstick to measure against and allow for tracking of larger scale change that may influence results. For example, if a particular surrogate species is experiencing a range shift due to climate change, it may gradually become undetectable in the region. By simultaneously collecting data in reference and city sites it may be possible to avoid erroneous assumptions that the change in species detection is strictly correlated to city activities or management actions.
 
-                 button Upload KML
-                    input(type="file")
+                div(class="thickBorder redBorder mediumPadding")
+                    button Upload KML
+                        input(type="file")
 
                 div#map(style="height:400px; width:800px; margin-bottom:20px;")
 
@@ -307,6 +319,19 @@ body
                     div(style="font-weight:700;") Step 6. Indicate surrogate species.
                     div(style="display:flex;") For each habitat type, choose the surrogate species you would like to track. If you have indicated a source of observations from above, species will auto-populate below and you will simply need to verify which ones you would like to include. Alternately, you can manually enter each surrogate species. Indicate the taxon of each species and then check the boxes to indicate which habitat you would like to consider for each surrogate species.
                         img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton6()")
+                        div(id="infoButton6" class="hidden popup" onclick="hide(document.getElementById('infoButton6'))")
+                            div(class="spaceBelow") Surrogate species are defined by the United States Fish and Wildlife Service (USFWS) as “a commonly-used scientific term for system-based conservation planning that uses a species as an indicator of landscape habitat and system conditions” (USFWS 2014a). The goal of a surrogate species approach is to use a few species to best represent the needs of the larger community (Weins et al. 2008). Depending on the objective of a given project, the characteristics used to select species differ (USFWS 2014b). The Urban Biodiversity Inventory Framework project’s primary goal is to generate a standardized approach -- a “roadmap” -- that can be used by cities to document and track urban biodiversity changes over time. With this project goal in mind, species selections should follow a set of conditions geared toward urban biodiversity representation.
+
+                            div(class="spaceBelow") Final species selections should highlight a range of species needs but focus primarily on species that have some level of tolerance of the urban environment. The surrogate species group should provide a representation of use of the different native regional habitats and of the different classes of native species. By using this surrogate species approach, our goal is to select species that also represent the needs of similar species or species groups and sensitive species whenever possible.
+
+                            div Final Surrogate species selections, both individually and as a group, should meet the following conditions:
+                            div 1. Close association/reliance on a given functional habitat type of good quality
+                            div 2. Species that are neither very rare nor overly common
+                            div 3. Species selected should represent the needs of additional species found in the given habitat type
+                            div 4. Species selected should also represent the needs of sensitive species whenever possible
+                            div 5. The group of species selected to represent a given habitat type should highlight a range of species needs provided by functional habitat but will primarily focus on species with some tolerance of the urban environment
+                            div 6. The entire suite of selected species (across taxa and habitat types) should provide a representation of the different native regional habitats and of different classes of native species
+
                 div(style="display:flex; flex-direction:column;")
                     button(onclick="addSpecies()") add species
 
@@ -540,18 +565,22 @@ footer
                 });
         }
 
-        function displayInfoButton0() {
+        function hide(element) {
+            element.classList.add("hidden");
+        }
 
+        function displayInfoButton0() {
+            document.getElementById("infoButton0").classList.remove("hidden");
         }
 
         function displayInfoButton2() {
-
+            document.getElementById("infoButton2").classList.remove("hidden");
         }
 
         function displayInfoButton4() {
-
+            document.getElementById("infoButton4").classList.remove("hidden");
         }
 
         function displayInfoButton6() {
-
+            document.getElementById("infoButton6").classList.remove("hidden");
         }

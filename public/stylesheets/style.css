@@ -65,12 +65,36 @@ button:hover {
     display:flex;
 }
 
+.hidden {
+  display: none;
+}
+
+.popup {
+  position: absolute;
+  background: white;
+  border: solid;
+  border-radius: 4px;
+  z-index: 4;
+}
+
 .border{
   border:solid; border-radius:5px; border-width:1px;
 }
 
 .blueBorder{
   border:solid; border-radius:5px; border-width:1px; border-color:#4490ba;
+}
+
+.redBorder {
+  border:solid; border-radius:5px; border-width:1px; border-color:red;
+}
+
+.mediumPadding {
+  padding: 8px;
+}
+
+.thickBorder {
+  border-width:4px;
 }
 
 .largeBlueText{
