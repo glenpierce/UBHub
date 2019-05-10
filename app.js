@@ -89,7 +89,6 @@ app.use('/account', account);
 app.use('/iNaturalist', iNaturalist);
 app.use('/programs', programs);
 app.use('/newprogram', newProgramRoute);
-app.use('/dataEntry', dataEntry);
 app.use('/statusReport', statusReport);
 
 // catch 404 and forward to error handler
