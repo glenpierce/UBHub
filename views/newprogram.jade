@@ -293,9 +293,37 @@ body
                                 div(class="spaceBelow") Collecting biodiversity data exclusively within the city allows for documentation of the often surprising diversity that can be found in and around urban centers. However, it can be difficult to detect larger scale trends (such as climate change) that may influence species presence. Therefore reference sites should be selected to complement city monitoring sites. A reference site should be of the best quality and/or an ideal example of a given habitat of interest, located as near to the city as possible. For example, biodiversity monitoring in wetland habitats within the city could be compared to highly functional wetland sites in undeveloped areas outside the city.
                                 div Utilization of a reference site does not mean that the goal is for city sites to meet exactly the same parameter values as are found in a reference site. The conditions within urban and urbanizing areas are such that it is not necessarily possible to have equal values as those found within a reference site. Rather, reference sites provide the city with a yardstick to measure against and allow for tracking of larger scale change that may influence results. For example, if a particular surrogate species is experiencing a range shift due to climate change, it may gradually become undetectable in the region. By simultaneously collecting data in reference and city sites it may be possible to avoid erroneous assumptions that the change in species detection is strictly correlated to city activities or management actions.
 
-                div(class="thickBorder redBorder mediumPadding")
-                    button Upload KML
-                        input(type="file")
+                div(style="display:flex; margin:auto;")
+                div(style="max-width:400px; margin-bottom:20px;")
+                    h1(class="bold spaceAbove spaceBelow") Data Entry.
+                    div
+                        div(class="bold") Step 1. Draw data from pre-existing species observations.
+                        div(style="margin-bottom:20px;") Indicate the sources from which you would like to pull in observations into the project. This step is optional, and you can override this information as you see fit.
+                        div
+                            div(class="bold blue") iNaturalist Project
+                            div Complete the url for your iNaturalist Project below.
+                            div(class="flex spaceBelow")
+                                div https://www.inaturalist.org/
+                                input(id="input" value="dragonfly-creek-riparian-ubif")
+                                button(onclick="processRequest()") import
+
+                            div(class="bold blue") iNaturalist Trips
+                            div Complete the url for your iNaturalist Trips below. Import each trip individually.
+                            div(class="flex spaceBelow")
+                                div https://www.inaturalist.org/trips/
+                                input
+                                button(onclick="processRequest()") import
+
+                    div(class="spaceBelow") Optionally, the user may choose to skip this step and manually enter presence/absence data rather than import. This can be done in step 3.
+
+                    div(class="bold") Step 2. Indicate time frame:
+                    div(class="spaceBelow") User chooses whether the data will be analyzed by year or month. Then they will enter the year(s) or month(s) of interest. For example, they choose “Year” and then say years 2010 and 2015 are of interest. Or, they choose “Month” and then say Nov-Dec 2017 and March-April 2018 are of interest. Maximum of 5 time frames.
+
+                    div(class="bold") Step 3. Verify data:
+                    div(class="spaceBelow") Display the map of polygons and a table of the species for each polygon (select one at a time). User goes through one place/polygon at a time, and can click buttons in the species table for the user to verify presence/absence. Data is to be verified separately for each time frame.
+
+                    div(class="bold") Step 4. Set Targets:
+                    div(class="spaceBelow") Displays current presence data for each habitat by taxa. For each habitat and each taxa, the user will enter the target presence.
 
                 div#map(style="height:400px; width:800px; margin-bottom:20px;")
 
@@ -335,7 +363,7 @@ body
                     div(style="font-weight:700;") Next Steps
                     div You have now set up your project. Next, you will be able to input the presence/absence data, see the status of observations in each place, set targets for each, and generate reports that indicate your progress towards those targets over time.
 
-                button(onclick="window.location='/dataEntry'" class="spaceAbove spaceBelow") Next: Data Entry
+                button(onclick="window.location='/statusReport'" class="spaceAbove spaceBelow") Next: Status Report
 
 
     +footer()
@@ -426,7 +454,7 @@ footer
                 marker.presence = Math.random() >= 0.5;
                 markers.push(marker);
             }
-            // updateMap();
+            updateMap();
         }
 
         updateMap = function() {
@@ -442,7 +470,7 @@ footer
                     maxLng = markers[i].getPosition().lng();
             }
 
-            // var polygons = [{polygon: {}, markers: []}, {polygon: {}, markers: []}, {polygon: {}, markers: []}, {polygon: {}, markers: []}];
+            var polygons = [];
 
             // for(i = 0; i < 4; i++) {
             //
@@ -517,8 +545,8 @@ footer
 
             map.fitBounds(rectangle.getBounds());
 
-            // map.setCenter({lat: ((maxLat - minLat) / 2 + minLat), lng: ((maxLng - minLng) / 2 + minLng)});
-            // map.setZoom(17);
+            map.setCenter({lat: ((maxLat - minLat) / 2 + minLat), lng: ((maxLng - minLng) / 2 + minLng)});
+            map.setZoom(17);
         }
 
         chart = function(polygons) {

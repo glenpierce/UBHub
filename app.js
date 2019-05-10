@@ -28,7 +28,6 @@ var account = require('./routes/account');
 var iNaturalist = require('./routes/iNaturalist');
 var programs = require('./routes/programs');
 var newProgramRoute = require('./routes/newprogram');
-var dataEntry = require('./routes/dataEntry');
 var statusReport = require('./routes/statusReport');
 
 var config = require('./config.js');
