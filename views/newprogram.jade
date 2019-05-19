@@ -131,6 +131,61 @@ html
                         {"featureType": "water", "stylers": [{"color": "#b6d5e3"}]},
                         {"featureType": "water", "elementType": "labels.text.fill", "stylers": [{"color": "#4e6d70"}]}]
                 });
+                google.maps.Polygon.prototype.Contains = function (point) {
+                    var crossings = 0,
+                        path = this.getPath();
+
+                    // for each edge
+                    for (var i = 0; i < path.getLength(); i++) {
+                        var a = path.getAt(i),
+                            j = i + 1;
+                        if (j >= path.getLength()) {
+                            j = 0;
+                        }
+                        var b = path.getAt(j);
+                        if (rayCrossesSegment(point, a, b)) {
+                            crossings++;
+                        }
+                    }
+
+                    // odd number of crossings?
+                    return (crossings % 2 == 1);
+
+                    function rayCrossesSegment(point, a, b) {
+                        var px = point.lng(),
+                            py = point.lat(),
+                            ax = a.lng(),
+                            ay = a.lat(),
+                            bx = b.lng(),
+                            by = b.lat();
+                        if (ay > by) {
+                            ax = b.lng();
+                            ay = b.lat();
+                            bx = a.lng();
+                            by = a.lat();
+                        }
+                        // alter longitude to cater for 180 degree crossings
+                        if (px < 0) {
+                            px += 360;
+                        }
+                        if (ax < 0) {
+                            ax += 360;
+                        }
+                        if (bx < 0) {
+                            bx += 360;
+                        }
+
+                        if (py == ay || py == by) py += 0.00000001;
+                        if ((py > by || py < ay) || (px > Math.max(ax, bx))) return false;
+                        if (px < Math.min(ax, bx)) return true;
+
+                        var red = (ax != bx) ? ((by - ay) / (bx - ax)) : Infinity;
+                        var blue = (ax != px) ? ((py - ay) / (px - ax)) : Infinity;
+                        return (blue >= red);
+
+                    }
+
+                };
                 var drawingManager = new google.maps.drawing.DrawingManager({
                     drawingMode: google.maps.drawing.OverlayType.POLYGON,
                     drawingControl: true,
@@ -149,16 +204,18 @@ html
                     }
                 });
                 drawingManager.setMap(map);
-                google.maps.event.addListener(drawingManager, 'overlaycomplete', function (event) {
-                    if (event.type == 'circle') {
-                        var radius = event.overlay.getRadius();
-                    }
-                    if (event.type == 'polygon') {
-                        polygon = event.overlay.getPath().getArray();
+                google.maps.event.addListener(drawingManager, 'polygoncomplete', function (polygon) {
+                    // if (event.type == 'circle') {
+                    //     var radius = event.overlay.getRadius();
+                    // }
+                    // if (event.type == 'polygon') {
+                    //     polygon = event.overlay.getPath().getArray();
                         var site = {
                             taxa: [],
-                            polygon: polygon,
+                            polygon: polygon.getPath().getArray(),
+                            Polygon: polygon,
                             coordinates: [],
+                            markers: [],
                             minX: 1000,
                             minY: 1000,
                             maxX: -1000,
@@ -183,7 +240,7 @@ html
                         addSiteToUi(site);
                         sites.push(site)
                         console.log(sites);
-                    }
+                    // }
                 });
             }
             function addSiteToUi(site) {
@@ -470,61 +527,17 @@ footer
                     maxLng = markers[i].getPosition().lng();
             }
 
-            var polygons = [];
-
-            // for(i = 0; i < 4; i++) {
-            //
-            //     switch (i) {
-            //         case 0:
-            //             westBound = minLng;
-            //             eastBound = minLng + (maxLng - minLng) / 4;
-            //             break;
-            //         case 1:
-            //             westBound = minLng + (maxLng - minLng) / 4;
-            //             eastBound = minLng + ((maxLng - minLng) / 4) * 2;
-            //             break;
-            //         case 2:
-            //             westBound = minLng + ((maxLng - minLng) / 4) * 2;
-            //             eastBound = minLng + ((maxLng - minLng) / 4) * 3;
-            //             break;
-            //         case 3:
-            //             westBound = minLng + ((maxLng - minLng) / 4) * 3;
-            //             eastBound = maxLng;
-            //             break;
-            //     }
-
-            //     polygons[i].polygon = new google.maps.Rectangle({
-            //         strokeColor: '#000000',
-            //         strokeOpacity: 1.0,
-            //         strokeWeight: 1,
-            //         fillColor: '#FFFFFF',
-            //         fillOpacity: 0.0,
-            //         map: map,
-            //         bounds: {
-            //             north: maxLat,
-            //             south: minLat,
-            //             east: eastBound,
-            //             west: westBound
-            //         }
-            //     });
-            // }
-
             for(i = 0; i < markers.length; i++) {
                 for(k = 0; k < sites.length; k++) {
-                    if(sites[k].polygon.getBounds().contains(markers[i].getPosition())) {
+                    if(sites[k].Polygon.Contains(markers[i].getPosition())) {
                         sites[k].markers.push(markers[i]);
                         break;
                     }
                 }
             }
 
-            // for(polygon in polygons) {
-            //     for(marker in polygons[polygon].markers) {
-            //         console.log(polygons[polygon].markers[marker].species);
-            //         console.log(polygons[polygon].markers[marker].taxon);
-            //         console.log(polygons[polygon].markers[marker].presence);
-            //     }
-            // }
+            console.log("sites:");
+            console.log(sites);
 
             chart(sites);
 

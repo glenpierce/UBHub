@@ -740,11 +740,11 @@ function highlightValues(filterBy, colorBy, colorLevels) {
           preserveViewport: true
       });
 
-      let legend = document.createElement("DIV");
-      let legendInfo = document.createElement("DIV");
-      legend.append(legendInfo);
-      map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
-      legendInfo.setAttribute("style", "border:solid; height:100px; width:20px;");
+      // let legend = document.createElement("DIV");
+      // let legendInfo = document.createElement("DIV");
+      // legend.append(legendInfo);
+      // map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
+      // legendInfo.setAttribute("style", "border:solid; height:100px; width:20px;");
 
 
   }
