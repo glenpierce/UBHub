@@ -412,7 +412,7 @@ body
 
                 div(id="example-table")
 
-                svg(class="hidden")
+                svg(class="chart")
                 button(onclick="updateMap()" class="hidden") Update Map
                 button(onclick="save()" class="spaceAbove") Save
 
@@ -565,7 +565,7 @@ footer
         chart = function(polygons) {
             var svgWidth = 500;
             var svgHeight = 300;
-            var svg = d3.select('svg')
+            var svg = d3.select('.chart') //there's now multiple svgs in the dom, so it's selecting the first one it finds in dom order...
                 .attr("width", svgWidth)
                 .attr("height", svgHeight)
                 .attr("class", "bar-chart");
