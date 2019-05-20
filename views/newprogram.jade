@@ -384,6 +384,9 @@ body
 
                 div#map(style="height:400px; width:800px; margin-bottom:20px;")
 
+                div(class="spaceAbove")
+                    button(onclick="chartSites()") Chart Sites
+
                 div(id="chart" style="margin-bottom:20px;")
 
                 div(style="max-width:400px;")
@@ -527,26 +530,12 @@ footer
                     maxLng = markers[i].getPosition().lng();
             }
 
-            for(i = 0; i < markers.length; i++) {
-                for(k = 0; k < sites.length; k++) {
-                    if(sites[k].Polygon.Contains(markers[i].getPosition())) {
-                        sites[k].markers.push(markers[i]);
-                        break;
-                    }
-                }
-            }
-
-            console.log("sites:");
-            console.log(sites);
-
-            chart(sites);
-
             var rectangle = new google.maps.Rectangle({
                 strokeColor: '#FFFFFF',
                 strokeOpacity: 0.0,
                 strokeWeight: 2,
-                fillColor: '#FF0000',
-                fillOpacity: 0.35,
+                fillColor: '#FFFFFF',
+                fillOpacity: 0.0,
                 map: map,
                 bounds: {
                     north: maxLat,
@@ -560,6 +549,22 @@ footer
 
             map.setCenter({lat: ((maxLat - minLat) / 2 + minLat), lng: ((maxLng - minLng) / 2 + minLng)});
             map.setZoom(17);
+        }
+
+        chartSites = function() {
+            for (i = 0; i < markers.length; i++) {
+                for (k = 0; k < sites.length; k++) {
+                    if (sites[k].Polygon.Contains(markers[i].getPosition())) {
+                        sites[k].markers.push(markers[i]);
+                        break;
+                    }
+                }
+            }
+
+            console.log("sites:");
+            console.log(sites);
+
+            chart(sites);
         }
 
         chart = function(polygons) {
