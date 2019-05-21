@@ -271,6 +271,7 @@ html
                 siteData.appendChild(siteName);
                 siteName.innerText = "Site Name";
                 let siteInput = document.createElement("INPUT");
+                siteInput.className = "siteName";
                 siteData.appendChild(siteInput);
                 let siteHabitat = document.createElement("DIV");
                 siteData.appendChild(siteHabitat);
@@ -554,8 +555,10 @@ footer
 
         mapHabitatsToSites = function() {
             let habitatSelectors = document.getElementsByClassName("siteHabitatSelector");
+            let siteNames = document.getElementsByClassName("siteName");
             for (let i = 0; i < habitatSelectors.length; i++) {
-                console.log(habitatSelectors[i].options[habitatSelectors[i].selectedIndex].value);
+                sites[i].habitat = habitatSelectors[i].options[habitatSelectors[i].selectedIndex].value;
+                sites[i].name = siteNames[i].value;
             }
         }
 
