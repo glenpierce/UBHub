@@ -351,6 +351,9 @@ body
                                 div(class="spaceBelow") Collecting biodiversity data exclusively within the city allows for documentation of the often surprising diversity that can be found in and around urban centers. However, it can be difficult to detect larger scale trends (such as climate change) that may influence species presence. Therefore reference sites should be selected to complement city monitoring sites. A reference site should be of the best quality and/or an ideal example of a given habitat of interest, located as near to the city as possible. For example, biodiversity monitoring in wetland habitats within the city could be compared to highly functional wetland sites in undeveloped areas outside the city.
                                 div Utilization of a reference site does not mean that the goal is for city sites to meet exactly the same parameter values as are found in a reference site. The conditions within urban and urbanizing areas are such that it is not necessarily possible to have equal values as those found within a reference site. Rather, reference sites provide the city with a yardstick to measure against and allow for tracking of larger scale change that may influence results. For example, if a particular surrogate species is experiencing a range shift due to climate change, it may gradually become undetectable in the region. By simultaneously collecting data in reference and city sites it may be possible to avoid erroneous assumptions that the change in species detection is strictly correlated to city activities or management actions.
 
+                div#map(style="height:400px; width:800px; margin-bottom:20px;")
+                div(id="chart" style="margin-bottom:20px;")
+
                 div(style="display:flex; margin:auto;")
                 div(style="max-width:400px; margin-bottom:20px;")
                     h1(class="bold spaceAbove spaceBelow") Data Entry.
@@ -383,12 +386,8 @@ body
                     div(class="bold") Step 4. Set Targets:
                     div(class="spaceBelow") Displays current presence data for each habitat by taxa. For each habitat and each taxa, the user will enter the target presence.
 
-                div#map(style="height:400px; width:800px; margin-bottom:20px;")
-
-                div(class="spaceAbove")
+                div(class="spaceBelow")
                     button(onclick="chartSites()") Chart Sites
-
-                div(id="chart" style="margin-bottom:20px;")
 
                 div(style="max-width:400px;")
                     div(style="font-weight:700;") Step 5. Indicate surrogate species.
@@ -554,12 +553,9 @@ footer
         }
 
         mapHabitatsToSites = function() {
-            console.log("mapHabitatsToSites");
             let habitatSelectors = document.getElementsByClassName("siteHabitatSelector");
-            for (habitatSelector in habitatSelectors) {
-                console.log(
-                    habitatSelectors[habitatSelector].options[habitatSelectors[habitatSelector].selectedIndex].value
-                );
+            for (let i = 0; i < habitatSelectors.length; i++) {
+                console.log(habitatSelectors[i].options[habitatSelectors[i].selectedIndex].value);
             }
         }
 
