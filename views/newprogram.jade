@@ -290,10 +290,11 @@ html
                 siteData.appendChild(siteHabitatSelector);
 
                 siteHabitatSelector.onchange = function (selection) {
-                    // console.log(selection);
+                        site.habitat = selection;
                 };
 
                 siteElement.appendChild(siteData);
+                site.siteHatbitatSelector = siteHabitatSelector;
 
                 document.getElementById("chart").appendChild(siteElement);
             }
@@ -443,6 +444,11 @@ footer
             newHabitatLabel = document.createElement("DIV");
             newHabitatLabel.textContent = habitatNameElement.value
             document.getElementsByClassName("habitat")[0].appendChild(newHabitatLabel);
+            for (let site in sites) {
+                let option = document.createElement("OPTION");
+                option.appendChild(document.createTextNode(habitatNameElement.value));
+                sites[site].siteHatbitatSelector.appendChild(option);
+            }
             habitatNameElement.value = "";
         }
 
@@ -560,7 +566,7 @@ footer
             let habitatSelectors = document.getElementsByClassName("siteHabitatSelector");
             let siteNames = document.getElementsByClassName("siteName");
             for (let i = 0; i < habitatSelectors.length; i++) {
-                sites[i].habitat = habitatSelectors[i].options[habitatSelectors[i].selectedIndex].value;
+                sites[i].habitat = habitatSelectors[i].options[habitatSelectors[i].selectedIndex].value; //.habitat.name ?
                 sites[i].name = siteNames[i].value;
             }
         }
@@ -598,7 +604,7 @@ footer
                     // console.log(d);
                     var presence = 0;
                     for(marker in d.markers) {
-                        if(d.markers[marker].presence)
+                        if(d.markers[marker].presence) // && d.habitat.contains(d.markers[marker].species)
                             presence += 1;
                     }
                     presence = svgHeight * (presence / d.markers.length);
