@@ -299,6 +299,224 @@ html
                 document.getElementById("chart").appendChild(siteElement);
             }
 
+            function addHabitat() {
+                habitatNameElement = document.getElementById("habitatNameId");
+                let newHabitat = {
+                    title: habitatNameElement.value,
+                    field: habitatNameElement.value,
+                    width: 90,
+                    align: "center",
+                    formatter: "tickCross",
+                    sorter: "boolean",
+                    editor: true
+                }
+                habitats.push(habitatNameElement.value);
+                columns.push(newHabitat);
+                table.setColumns(columns);
+                newHabitatLabel = document.createElement("DIV");
+                newHabitatLabel.textContent = habitatNameElement.value
+                document.getElementsByClassName("habitat")[0].appendChild(newHabitatLabel);
+                for (let site in sites) {
+                    let option = document.createElement("OPTION");
+                    option.appendChild(document.createTextNode(habitatNameElement.value));
+                    sites[site].siteHatbitatSelector.appendChild(option);
+                }
+                habitatNameElement.value = "";
+            }
+
+            function addTaxon() {
+                taxonNameElement = document.getElementById("taxonNameId");
+                columns[1].editorParams[taxonNameElement.value] = taxonNameElement.value;
+                table.setColumns(columns);
+                newTaxonLabel = document.createElement("DIV");
+                newTaxonLabel.textContent = taxonNameElement.value
+                document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
+                taxonNameElement.value = "";
+            }
+
+            function addSpecies() {
+                table.addRow();
+            }
+
+            function save() {
+                console.log(table.getData());
+            }
+
+            function getRandomInt(min, max) {
+                min = Math.ceil(min);
+                max = Math.floor(max);
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            var markers = [];
+
+            processRequest = function () {
+                getINaturalistData().then(placeMarkers);
+            }
+
+            getINaturalistData = function () {
+                return new Promise(function (resolve) {
+                    iNaturalistProjectId = document.getElementById("input").value;
+                    iNaturalistProjectId = encodeURIComponent(iNaturalistProjectId);
+                    document.getElementById("input").value = "";
+
+                    var xhr = new XMLHttpRequest();
+
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState == 3) {
+
+                        } else if (xhr.readyState == 4 && xhr.status == 200) {
+                            resolve(JSON.parse(xhr.responseText));
+                        }
+                    };
+
+                    xhr.open("GET", "https://inaturalist.org/observations/project/" + iNaturalistProjectId + ".json", true);
+                    xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                    xhr.send();
+                });
+            }
+
+            placeMarkers = function (observations) {
+                greyImage = {
+                    url: '/images/marker_0_grey_39x59.png',
+                    scaledSize: new google.maps.Size(20, 30)
+                };
+                for (observation in observations) {
+                    var position = {
+                        lat: parseFloat(observations[observation].latitude),
+                        lng: parseFloat(observations[observation].longitude)
+                    };
+                    var marker = new google.maps.Marker({
+                        position: position,
+                        map: map,
+                        icon: greyImage
+                    });
+                    marker.taxon = observations[observation].iconic_taxon_name;
+                    marker.species = observations[observation].species_guess;
+                    marker.presence = Math.random() >= 0.5;
+                    table.addRow({species: marker.species});
+                    markers.push(marker);
+                }
+                updateMap();
+            }
+
+            updateMap = function () {
+                var minLat, maxLat, minLng, maxLng;
+                for (i = 0; i < markers.length; i++) {
+                    if (minLat == null || markers[i].getPosition().lat() < minLat)
+                        minLat = markers[i].getPosition().lat();
+                    if (maxLat == null || markers[i].getPosition().lat() > maxLat)
+                        maxLat = markers[i].getPosition().lat();
+                    if (minLng == null || markers[i].getPosition().lng() < minLng)
+                        minLng = markers[i].getPosition().lng();
+                    if (maxLng == null || markers[i].getPosition().lng() > maxLng)
+                        maxLng = markers[i].getPosition().lng();
+                }
+
+                var rectangle = new google.maps.Rectangle({
+                    strokeColor: '#FFFFFF',
+                    strokeOpacity: 0.0,
+                    strokeWeight: 2,
+                    fillColor: '#FFFFFF',
+                    fillOpacity: 0.0,
+                    map: map,
+                    bounds: {
+                        north: maxLat,
+                        south: minLat,
+                        east: maxLng,
+                        west: minLng
+                    }
+                });
+
+                map.fitBounds(rectangle.getBounds());
+
+                map.setCenter({lat: ((maxLat - minLat) / 2 + minLat), lng: ((maxLng - minLng) / 2 + minLng)});
+                map.setZoom(17);
+            }
+
+            mapHabitatsToSites = function () {
+                let habitatSelectors = document.getElementsByClassName("siteHabitatSelector");
+                let siteNames = document.getElementsByClassName("siteName");
+                for (let i = 0; i < habitatSelectors.length; i++) {
+                    sites[i].habitat = habitatSelectors[i].options[habitatSelectors[i].selectedIndex].value; //.habitat.name ?
+                    sites[i].name = siteNames[i].value;
+                }
+            }
+
+            chartSites = function () {
+                mapHabitatsToSites();
+                for (i = 0; i < markers.length; i++) {
+                    for (k = 0; k < sites.length; k++) {
+                        if (sites[k].Polygon.Contains(markers[i].getPosition())) {
+                            sites[k].markers.push(markers[i]);
+                            break;
+                        }
+                    }
+                }
+
+                console.log("sites:");
+                console.log(sites);
+
+                chart(sites);
+            }
+
+            chart = function (polygons) {
+                var svgWidth = 500;
+                var svgHeight = 300;
+                var svg = d3.select('.chart') //there's now multiple svgs in the dom, so it's selecting the first one it finds in dom order...
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .attr("class", "bar-chart");
+
+                svg.selectAll("rect")
+                    .data(polygons)
+                    .enter()
+                    .append("rect")
+                    .attr("height", function (d) {
+                        // console.log(d);
+                        var presence = 0;
+                        for (marker in d.markers) {
+                            if (d.markers[marker].presence) // && d.habitat.contains(d.markers[marker].species)
+                                presence += 1;
+                        }
+                        presence = svgHeight * (presence / d.markers.length);
+                        d.presence = presence;
+                        return presence;
+                    })
+                    .style("stroke", "white")
+                    .style("fill", "grey")
+                    .style("stroke-width", 5)
+                    .attr("y", function (d) {
+                        return svgHeight - d.presence;
+                    })
+                    .attr("width", svgWidth / polygons.length)
+                    .attr("transform", function (d, i) {
+                        var translate = [i * svgWidth / polygons.length, 0];
+                        return "translate(" + translate + ")";
+                    });
+            }
+
+            function hide(element) {
+                element.classList.add("hidden");
+            }
+
+            function displayInfoButton0() {
+                document.getElementById("infoButton0").classList.remove("hidden");
+            }
+
+            function displayInfoButton2() {
+                document.getElementById("infoButton2").classList.remove("hidden");
+            }
+
+            function displayInfoButton4() {
+                document.getElementById("infoButton4").classList.remove("hidden");
+            }
+
+            function displayInfoButton6() {
+                document.getElementById("infoButton6").classList.remove("hidden");
+            }
+
+
 body
     +header(true)
 
@@ -432,212 +650,3 @@ body
 
 
     +footer()
-
-footer
-    script.
-        function addHabitat() {
-            habitatNameElement = document.getElementById("habitatNameId");
-            let newHabitat = {title: habitatNameElement.value, field: habitatNameElement.value, width:90,  align:"center", formatter:"tickCross", sorter:"boolean", editor:true}
-            habitats.push(habitatNameElement.value);
-            columns.push(newHabitat);
-            table.setColumns(columns);
-            newHabitatLabel = document.createElement("DIV");
-            newHabitatLabel.textContent = habitatNameElement.value
-            document.getElementsByClassName("habitat")[0].appendChild(newHabitatLabel);
-            for (let site in sites) {
-                let option = document.createElement("OPTION");
-                option.appendChild(document.createTextNode(habitatNameElement.value));
-                sites[site].siteHatbitatSelector.appendChild(option);
-            }
-            habitatNameElement.value = "";
-        }
-
-        function addTaxon() {
-            taxonNameElement = document.getElementById("taxonNameId");
-            columns[1].editorParams[taxonNameElement.value] = taxonNameElement.value;
-            table.setColumns(columns);
-            newTaxonLabel = document.createElement("DIV");
-            newTaxonLabel.textContent = taxonNameElement.value
-            document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
-            taxonNameElement.value = "";
-        }
-
-        function addSpecies() {
-            table.addRow();
-        }
-
-        function save() {
-            console.log(table.getData());
-        }
-
-        function getRandomInt(min, max) {
-            min = Math.ceil(min);
-            max = Math.floor(max);
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-
-        var markers = [];
-
-        processRequest = function() {
-            getINaturalistData().then(placeMarkers);
-        }
-
-        getINaturalistData = function() {
-            return new Promise(function(resolve) {
-                iNaturalistProjectId = document.getElementById("input").value;
-                iNaturalistProjectId = encodeURIComponent(iNaturalistProjectId);
-                document.getElementById("input").value = "";
-
-                var xhr = new XMLHttpRequest();
-
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState == 3) {
-
-                    } else if (xhr.readyState == 4 && xhr.status == 200) {
-                        resolve(JSON.parse(xhr.responseText));
-                    }
-                };
-
-                xhr.open("GET", "https://inaturalist.org/observations/project/" + iNaturalistProjectId + ".json", true);
-                xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-                xhr.send();
-            });
-        }
-
-        placeMarkers = function(observations) {
-            greyImage = {
-                url: '/images/marker_0_grey_39x59.png',
-                scaledSize: new google.maps.Size(20, 30)
-            };
-            for (observation in observations) {
-                var position = {
-                    lat: parseFloat(observations[observation].latitude),
-                    lng: parseFloat(observations[observation].longitude)
-                };
-                var marker = new google.maps.Marker({
-                    position: position,
-                    map: map,
-                    icon: greyImage
-                });
-                marker.taxon = observations[observation].iconic_taxon_name;
-                marker.species = observations[observation].species_guess;
-                marker.presence = Math.random() >= 0.5;
-                table.addRow({species: marker.species});
-                markers.push(marker);
-            }
-            updateMap();
-        }
-
-        updateMap = function() {
-            var minLat, maxLat, minLng, maxLng;
-            for(i = 0; i < markers.length; i++) {
-                if(minLat == null || markers[i].getPosition().lat() < minLat)
-                    minLat = markers[i].getPosition().lat();
-                if (maxLat == null || markers[i].getPosition().lat() > maxLat)
-                    maxLat = markers[i].getPosition().lat();
-                if (minLng == null || markers[i].getPosition().lng() < minLng)
-                    minLng = markers[i].getPosition().lng();
-                if (maxLng == null || markers[i].getPosition().lng() > maxLng)
-                    maxLng = markers[i].getPosition().lng();
-            }
-
-            var rectangle = new google.maps.Rectangle({
-                strokeColor: '#FFFFFF',
-                strokeOpacity: 0.0,
-                strokeWeight: 2,
-                fillColor: '#FFFFFF',
-                fillOpacity: 0.0,
-                map: map,
-                bounds: {
-                    north: maxLat,
-                    south: minLat,
-                    east: maxLng,
-                    west: minLng
-                }
-            });
-
-            map.fitBounds(rectangle.getBounds());
-
-            map.setCenter({lat: ((maxLat - minLat) / 2 + minLat), lng: ((maxLng - minLng) / 2 + minLng)});
-            map.setZoom(17);
-        }
-
-        mapHabitatsToSites = function() {
-            let habitatSelectors = document.getElementsByClassName("siteHabitatSelector");
-            let siteNames = document.getElementsByClassName("siteName");
-            for (let i = 0; i < habitatSelectors.length; i++) {
-                sites[i].habitat = habitatSelectors[i].options[habitatSelectors[i].selectedIndex].value; //.habitat.name ?
-                sites[i].name = siteNames[i].value;
-            }
-        }
-
-        chartSites = function() {
-            mapHabitatsToSites();
-            for (i = 0; i < markers.length; i++) {
-                for (k = 0; k < sites.length; k++) {
-                    if (sites[k].Polygon.Contains(markers[i].getPosition())) {
-                        sites[k].markers.push(markers[i]);
-                        break;
-                    }
-                }
-            }
-
-            console.log("sites:");
-            console.log(sites);
-
-            chart(sites);
-        }
-
-        chart = function(polygons) {
-            var svgWidth = 500;
-            var svgHeight = 300;
-            var svg = d3.select('.chart') //there's now multiple svgs in the dom, so it's selecting the first one it finds in dom order...
-                .attr("width", svgWidth)
-                .attr("height", svgHeight)
-                .attr("class", "bar-chart");
-
-            svg.selectAll("rect")
-                .data(polygons)
-                .enter()
-                .append("rect")
-                .attr("height", function (d) {
-                    // console.log(d);
-                    var presence = 0;
-                    for(marker in d.markers) {
-                        if(d.markers[marker].presence) // && d.habitat.contains(d.markers[marker].species)
-                            presence += 1;
-                    }
-                    presence = svgHeight * (presence / d.markers.length);
-                    d.presence = presence;
-                    return presence;
-                })
-                .style("stroke", "white")
-                .style("fill", "grey")
-                .style("stroke-width", 5)
-                .attr("y", function (d) {return svgHeight - d.presence;})
-                .attr("width", svgWidth / polygons.length)
-                .attr("transform", function (d, i) {
-                    var translate = [i * svgWidth / polygons.length, 0];
-                    return "translate(" + translate + ")";
-                });
-        }
-
-        function hide(element) {
-            element.classList.add("hidden");
-        }
-
-        function displayInfoButton0() {
-            document.getElementById("infoButton0").classList.remove("hidden");
-        }
-
-        function displayInfoButton2() {
-            document.getElementById("infoButton2").classList.remove("hidden");
-        }
-
-        function displayInfoButton4() {
-            document.getElementById("infoButton4").classList.remove("hidden");
-        }
-
-        function displayInfoButton6() {
-            document.getElementById("infoButton6").classList.remove("hidden");
-        }
