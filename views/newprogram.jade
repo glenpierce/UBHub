@@ -24,10 +24,11 @@ html
         script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&libraries=drawing,geometry")
         script.
             var sites = [];
+            var markers = [];
             var polygon;
             var table;
             var columns;
-            let habitats = [];
+            let habitats = [""];
             let speciesSet = new Set();
             window.onload = function (ev) {
                 initMapOnPage();
@@ -40,20 +41,41 @@ html
                     }];
 
                 table = new Tabulator("#example-table", {
-                    data: tableData,           //load row data from array
-                    layout: "fitColumns",      //fit columns to width of table
-                    responsiveLayout: "hide",  //hide columns that dont fit on the table
-                    tooltips: true,            //show tool tips on cells
-                    addRowPos: "bottom",          //when adding a new row, add it to the top of the table
-                    history: true,             //allow undo and redo actions on the table
-                    // pagination: "local",       //paginate the data
-                    // paginationSize: 7,         //allow 7 rows per page of data
-                    movableColumns: true,      //allow column order to be changed
-                    resizableRows: true,       //allow row order to be changed
-                    initialSort: [             //set the initial sort order of the data
-                        {column: "name", dir: "asc"},
-                    ],
-                    columns: columns});
+                        data: tableData,           //load row data from array
+                        layout: "fitColumns",      //fit columns to width of table
+                        responsiveLayout: "hide",  //hide columns that dont fit on the table
+                        tooltips: true,            //show tool tips on cells
+                        addRowPos: "bottom",          //when adding a new row, add it to the top of the table
+                        history: true,             //allow undo and redo actions on the table
+                        // pagination: "local",       //paginate the data
+                        // paginationSize: 7,         //allow 7 rows per page of data
+                        movableColumns: true,      //allow column order to be changed
+                        resizableRows: true,       //allow row order to be changed
+                        initialSort: [             //set the initial sort order of the data
+                            {column: "name", dir: "asc"},
+                        ],
+                        columns: columns,
+                        cellEdited: function (cell) {
+                            console.log("cell:");
+                            console.log(cell);
+                            let habitatIndex = -1;
+                            for (let site in sites) {
+                                console.log("sites[site]");
+                                console.log(sites[site]);
+                                if (cell._cell.column != null && cell._cell.column.field != null && sites[site].habitat.name == cell._cell.column.field) {
+                                    habitatIndex = site;
+                                    break;
+                                }
+                            }
+                            console.log(habitatIndex);
+                            if (habitatIndex > -1 && cell._cell.value) {
+                                sites[habitatIndex].species.add(cell._cell.row.data.species);
+                            } else if(habitatIndex > -1) {
+                                sites[habitatIndex].species.remove(cell._cell.row.data.species);
+                            }
+                        }
+                    }
+                );
             };
 
             function initMapOnPage() {
@@ -220,6 +242,8 @@ html
                             Polygon: polygon,
                             coordinates: [],
                             markers: [],
+                            habitat: {},
+                            species: new Set(), //probably should be taxa
                             minX: 1000,
                             minY: 1000,
                             maxX: -1000,
@@ -290,8 +314,8 @@ html
 
                 siteData.appendChild(siteHabitatSelector);
 
-                siteHabitatSelector.onchange = function (selection) {
-                        site.habitat = selection;
+                siteHabitatSelector.onchange = function () {
+                    site.habitat.name = this.value;
                 };
 
                 siteElement.appendChild(siteData);
@@ -342,14 +366,6 @@ html
             function save() {
                 console.log(table.getData());
             }
-
-            function getRandomInt(min, max) {
-                min = Math.ceil(min);
-                max = Math.floor(max);
-                return Math.floor(Math.random() * (max - min + 1)) + min;
-            }
-
-            var markers = [];
 
             processRequest = function () {
                 getINaturalistData().then(placeMarkers);
@@ -442,7 +458,7 @@ html
                 let habitatSelectors = document.getElementsByClassName("siteHabitatSelector");
                 let siteNames = document.getElementsByClassName("siteName");
                 for (let i = 0; i < habitatSelectors.length; i++) {
-                    sites[i].habitat = habitatSelectors[i].options[habitatSelectors[i].selectedIndex].value; //.habitat.name ?
+                    sites[i].habitat.name = habitatSelectors[i].options[habitatSelectors[i].selectedIndex].value;
                     sites[i].name = siteNames[i].value;
                 }
             }
@@ -478,12 +494,15 @@ html
                     .append("rect")
                     .attr("height", function (d) {
                         // console.log(d);
+                        let speciesInPolygon = new Set();
                         var presence = 0;
                         for (marker in d.markers) {
-                            if (d.markers[marker].presence) // && d.habitat.contains(d.markers[marker].species)
+                            if (!speciesInPolygon.has(d.markers[marker].species) && d.habitat.species.contains(d.markers[marker].species)) {
                                 presence += 1;
+                            }
+                            speciesInPolygon.add(d.markers[marker].species);
                         }
-                        presence = svgHeight * (presence / d.markers.length);
+                        presence = svgHeight * (presence / d.habitat.species.size);
                         d.presence = presence;
                         return presence;
                     })
