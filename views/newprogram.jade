@@ -28,6 +28,7 @@ html
             var table;
             var columns;
             let habitats = [];
+            let speciesSet = new Set();
             window.onload = function (ev) {
                 initMapOnPage();
 
@@ -225,7 +226,7 @@ html
                             maxY: -1000
                         }
                         for (var i = 0; i < polygon.length; i++) {
-                            console.log(polygon[i].lat() + ", " + polygon[i].lng());
+                            // console.log(polygon[i].lat() + ", " + polygon[i].lng());
                             site.coordinates.push({lat: polygon[i].lat(), lng: polygon[i].lng()})
                             if(polygon[i].lat() * -1 + 90 < site.minY) {
                                 site.minY = polygon[i].lat() * -1 + 90;
@@ -242,7 +243,7 @@ html
                         }
                         addSiteToUi(site);
                         sites.push(site)
-                        console.log(sites);
+                        // console.log(sites);
                     // }
                 });
             }
@@ -393,8 +394,11 @@ html
                     });
                     marker.taxon = observations[observation].iconic_taxon_name;
                     marker.species = observations[observation].species_guess;
-                    marker.presence = Math.random() >= 0.5;
-                    table.addRow({species: marker.species});
+                    marker.presence = 1;
+                    if (!speciesSet.has(marker.species) && marker.species != null && marker.species.length != 0) {
+                        table.addRow({species: marker.species});
+                    }
+                    speciesSet.add(marker.species);
                     markers.push(marker);
                 }
                 updateMap();
