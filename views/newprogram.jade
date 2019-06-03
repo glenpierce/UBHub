@@ -56,22 +56,17 @@ html
                         ],
                         columns: columns,
                         cellEdited: function (cell) {
-                            console.log("cell:");
-                            console.log(cell);
                             let habitatIndex = -1;
                             for (let site in sites) {
-                                console.log("sites[site]");
-                                console.log(sites[site]);
                                 if (cell._cell.column != null && cell._cell.column.field != null && sites[site].habitat.name == cell._cell.column.field) {
                                     habitatIndex = site;
                                     break;
                                 }
                             }
-                            console.log(habitatIndex);
                             if (habitatIndex > -1 && cell._cell.value) {
                                 sites[habitatIndex].species.add(cell._cell.row.data.species);
                             } else if(habitatIndex > -1) {
-                                sites[habitatIndex].species.remove(cell._cell.row.data.species);
+                                sites[habitatIndex].species.delete(cell._cell.row.data.species);
                             }
                         }
                     }
@@ -497,12 +492,12 @@ html
                         let speciesInPolygon = new Set();
                         var presence = 0;
                         for (marker in d.markers) {
-                            if (!speciesInPolygon.has(d.markers[marker].species) && d.habitat.species.contains(d.markers[marker].species)) {
+                            if (!speciesInPolygon.has(d.markers[marker].species) && d.species.has(d.markers[marker].species)) {
                                 presence += 1;
                             }
                             speciesInPolygon.add(d.markers[marker].species);
                         }
-                        presence = svgHeight * (presence / d.habitat.species.size);
+                        presence = svgHeight * (presence / d.species.size);
                         d.presence = presence;
                         return presence;
                     })
