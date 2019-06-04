@@ -7,4 +7,10 @@ assignees: ''
 
 ---
 
+**Image file showing what we want this to look like:**
 
+**Image resources, if any:**
+
+**Link to wikipage of the associated Story:**
+
+**Description:**
