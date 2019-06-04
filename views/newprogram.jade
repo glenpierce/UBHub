@@ -481,10 +481,12 @@ html
             chart = function (sites) {
                 clearPriorChartIfAny();
 
-                let svgWidth = 500;
-                let svgHeight = 300;
-                let strokeWidth = 5;
+                const svgWidth = 500;
+                const svgHeight = 300;
+                const strokeWidth = 5;
                 const leftAxisMargin = 20;
+                const leftAxisExtraMargin = leftAxisMargin + 24;
+                const barZoneWidth = svgWidth - leftAxisExtraMargin;
                 let svg = d3.select('.chart') //there's now multiple svgs in the dom, so it's selecting the first one it finds in dom order...
                     .attr("width", svgWidth)
                     .attr("height", svgHeight)
@@ -510,15 +512,15 @@ html
                         d.presence = presence;
                         return presence;
                     })
-                    .style("stroke", "#00000000")
+                    .style("stroke", "white")
                     .style("fill", "grey")
                     .style("stroke-width", strokeWidth)
                     .attr("y", function (d) {
                         return svgHeight - d.presence;
                     })
-                    .attr("width", svgWidth / sites.length)
+                    .attr("width", barZoneWidth / sites.length)
                     .attr("transform", function (d, i) {
-                        var translate = [i * svgWidth / sites.length, 0];
+                        var translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin, 0];
                         return "translate(" + translate + ")";
                     });
 
@@ -531,7 +533,7 @@ html
                     .attr("fill", "black")
                     .attr("width", svgWidth / sites.length)
                     .attr("transform", function (d, i) {
-                        var translate = [i * (svgWidth / sites.length) + (svgWidth / sites.length - strokeWidth) / 2, svgHeight - 10];
+                        var translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight - 10];
                         return "translate(" + translate + ")";
                     })
                     .text(function (d) {
