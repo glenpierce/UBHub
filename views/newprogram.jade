@@ -481,26 +481,14 @@ html
             chart = function (sites) {
                 clearPriorChartIfAny();
 
-                var svgWidth = 500;
-                var svgHeight = 300;
-                var svg = d3.select('.chart') //there's now multiple svgs in the dom, so it's selecting the first one it finds in dom order...
+                let svgWidth = 500;
+                let svgHeight = 300;
+                let strokeWidth = 5;
+                const leftAxisMargin = 20;
+                let svg = d3.select('.chart') //there's now multiple svgs in the dom, so it's selecting the first one it finds in dom order...
                     .attr("width", svgWidth)
                     .attr("height", svgHeight)
                     .attr("class", "bar-chart");
-
-                svg.selectAll("text")
-                    .data(sites)
-                    .enter()
-                    .append("text")
-                    .attr("class", "chartLabel")
-                    .attr("width", svgWidth / sites.length)
-                    .attr("transform", function (d, i) {
-                        var translate = [i * svgWidth / sites.length, 0];
-                        return "translate(" + translate + ")";
-                    })
-                    .text(function (d) {
-                        return d.habitat.name;
-                    });
 
                 svg.selectAll("rect")
                     .data(sites)
@@ -516,13 +504,15 @@ html
                             }
                             speciesInPolygon.add(d.markers[marker].species);
                         }
-                        presence = svgHeight * (presence / d.species.size);
+                        if (d.species.size != 0) {
+                            presence = svgHeight * (presence / d.species.size);
+                        }
                         d.presence = presence;
                         return presence;
                     })
-                    .style("stroke", "white")
+                    .style("stroke", "#00000000")
                     .style("fill", "grey")
-                    .style("stroke-width", 5)
+                    .style("stroke-width", strokeWidth)
                     .attr("y", function (d) {
                         return svgHeight - d.presence;
                     })
@@ -531,6 +521,37 @@ html
                         var translate = [i * svgWidth / sites.length, 0];
                         return "translate(" + translate + ")";
                     });
+
+                svg.selectAll("text")
+                    .data(sites)
+                    .enter()
+                    .append("text")
+                    .attr("class", "chartLabel")
+                    .style("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .attr("width", svgWidth / sites.length)
+                    .attr("transform", function (d, i) {
+                        var translate = [i * (svgWidth / sites.length) + (svgWidth / sites.length - strokeWidth) / 2, svgHeight - 10];
+                        return "translate(" + translate + ")";
+                    })
+                    .text(function (d) {
+                        return d.habitat.name;
+                    });
+
+                let yScale = d3.scaleLinear()
+                    .domain([1, 0])
+                    .range([0, svgHeight]);
+
+                const formatPercent = d3.format(".0%");
+
+                let yAxis = d3.axisLeft()
+                    .scale(yScale)
+                    .tickFormat(formatPercent)
+                    .tickSize(svgWidth - leftAxisMargin, 0, 0);
+
+                svg.append("g")
+                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", 10)")
+                    .call(yAxis);
             }
 
             function clearPriorChartIfAny() {
