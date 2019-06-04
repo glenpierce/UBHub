@@ -65,8 +65,10 @@ html
                             }
                             if (habitatIndex > -1 && cell._cell.value) {
                                 sites[habitatIndex].species.add(cell._cell.row.data.species);
+                                sites[habitatIndex].taxa.add(cell._cell.row.data.taxa);
                             } else if(habitatIndex > -1) {
                                 sites[habitatIndex].species.delete(cell._cell.row.data.species);
+                                sites[habitatIndex].taxa.delete(cell._cell.row.data.taxa);
                             }
                         }
                     }
@@ -238,7 +240,8 @@ html
                             coordinates: [],
                             markers: [],
                             habitat: {},
-                            species: new Set(), //probably should be taxa
+                            species: new Set(),
+                            taxa: new Set(),
                             minX: 1000,
                             minY: 1000,
                             maxX: -1000,
@@ -475,7 +478,9 @@ html
                 chart(sites);
             }
 
-            chart = function (polygons) {
+            chart = function (sites) {
+                clearPriorChartIfAny();
+
                 var svgWidth = 500;
                 var svgHeight = 300;
                 var svg = d3.select('.chart') //there's now multiple svgs in the dom, so it's selecting the first one it finds in dom order...
@@ -483,8 +488,22 @@ html
                     .attr("height", svgHeight)
                     .attr("class", "bar-chart");
 
+                svg.selectAll("text")
+                    .data(sites)
+                    .enter()
+                    .append("text")
+                    .attr("class", "chartLabel")
+                    .attr("width", svgWidth / sites.length)
+                    .attr("transform", function (d, i) {
+                        var translate = [i * svgWidth / sites.length, 0];
+                        return "translate(" + translate + ")";
+                    })
+                    .text(function (d) {
+                        return d.habitat.name;
+                    });
+
                 svg.selectAll("rect")
-                    .data(polygons)
+                    .data(sites)
                     .enter()
                     .append("rect")
                     .attr("height", function (d) {
@@ -507,11 +526,22 @@ html
                     .attr("y", function (d) {
                         return svgHeight - d.presence;
                     })
-                    .attr("width", svgWidth / polygons.length)
+                    .attr("width", svgWidth / sites.length)
                     .attr("transform", function (d, i) {
-                        var translate = [i * svgWidth / polygons.length, 0];
+                        var translate = [i * svgWidth / sites.length, 0];
                         return "translate(" + translate + ")";
                     });
+            }
+
+            function clearPriorChartIfAny() {
+                let oldChart = document.getElementsByClassName("bar-chart")[0];
+                if (oldChart != null) {
+                    while (oldChart.firstChild) {
+                        oldChart.removeChild(oldChart.firstChild);
+                    }
+                    oldChart.setAttribute("class", "chart");
+                }
+                console.log(oldChart);
             }
 
             function hide(element) {
