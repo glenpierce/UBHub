@@ -234,7 +234,6 @@ html
                     // if (event.type == 'polygon') {
                     //     polygon = event.overlay.getPath().getArray();
                         var site = {
-                            taxa: [],
                             polygon: polygon.getPath().getArray(),
                             Polygon: polygon,
                             coordinates: [],
@@ -358,7 +357,7 @@ html
             }
 
             function addSpecies() {
-                table.addRow();
+                table.addRow(); //it is annoying AF to add every taxa to these, set the default to "sought"
             }
 
             function save() {
@@ -467,7 +466,8 @@ html
                     for (k = 0; k < sites.length; k++) {
                         if (sites[k].Polygon.Contains(markers[i].getPosition())) {
                             sites[k].markers.push(markers[i]);
-                            break;
+                            //todo: see UBIF-0015
+                            // break;
                         }
                     }
                 }
@@ -484,9 +484,14 @@ html
                 const svgWidth = 500;
                 const svgHeight = 300;
                 const strokeWidth = 5;
+                const barWidth = 20;
+                const footerHeight = 10;
+                const headerHeight = 5; //we need this so that 100% at the top isn't cut off to look like iuu,o
                 const leftAxisMargin = 20;
                 const leftAxisExtraMargin = leftAxisMargin + 24;
                 const barZoneWidth = svgWidth - leftAxisExtraMargin;
+                const barPadding = barZoneWidth / sites.length / 2;
+
                 let svg = d3.select('.chart') //there's now multiple svgs in the dom, so it's selecting the first one it finds in dom order...
                     .attr("width", svgWidth)
                     .attr("height", svgHeight)
@@ -497,7 +502,6 @@ html
                     .enter()
                     .append("rect")
                     .attr("height", function (d) {
-                        // console.log(d);
                         let speciesInPolygon = new Set();
                         var presence = 0;
                         for (marker in d.markers) {
@@ -515,12 +519,12 @@ html
                     .style("stroke", "white")
                     .style("fill", "grey")
                     .style("stroke-width", strokeWidth)
-                    .attr("y", function (d) {
-                        return svgHeight - d.presence;
-                    })
-                    .attr("width", barZoneWidth / sites.length)
+                    // .attr("y", function (d) {
+                    //     return svgHeight - d.presence;
+                    // })
+                    .attr("width", barWidth)
                     .attr("transform", function (d, i) {
-                        var translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin, 0];
+                        var translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding, 0];
                         return "translate(" + translate + ")";
                     });
 
@@ -542,7 +546,7 @@ html
 
                 let yScale = d3.scaleLinear()
                     .domain([1, 0])
-                    .range([0, svgHeight]);
+                    .range([footerHeight, svgHeight - footerHeight - headerHeight]);
 
                 const formatPercent = d3.format(".0%");
 
@@ -552,7 +556,7 @@ html
                     .tickSize(svgWidth - leftAxisMargin, 0, 0);
 
                 svg.append("g")
-                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", 10)")
+                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + footerHeight + ")")
                     .call(yAxis);
             }
 
