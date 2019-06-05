@@ -30,19 +30,6 @@ html
             let speciesSet = new Set();
             window.onload = function (ev) {
 
-                //Sticky headers
-                let header = document.getElementById("myHeader");
-                let sticky = header.offsetTop;
-                console.log(header);
-                window.onscroll = function () {
-                    console.log(window.pageYOffset);
-                    if (window.pageYOffset > sticky) {
-                        header.classList.add("sticky");
-                    } else {
-                        header.classList.remove("sticky");
-                    }
-                }
-
                 initMapOnPage();
 
                 var tableData = [{"species": "", "taxa": ""}];
@@ -623,7 +610,7 @@ body
     if queryId
         if queryId == 1
             div(style="margin:auto; display:flex; flex-direction:column; align-items:center;")
-                +stickyInfoTab("UBIF Track 2 Project Setup", "infant1", "#07456b", false)
+                +stickyInfoTab("UBIF Track 2 Project Setup", "infant1", "#07456b", false, "sticky110")
                 div(id="infant1" class="mapInfoContent hide")
                     div(style="margin:auto; max-width:400px; display:flex; flex-direction:column; align-items:center;")
                         div
@@ -705,7 +692,7 @@ body
 
                         button(class="spaceAbove") Save Program Instance
 
-                +mapInfoTab("UBIF Track 2 Data Entry", "infant2", "#07456b", false)
+                +stickyInfoTab("UBIF Track 2 Data Entry", "infant2", "#07456b", false, "sticky130")
                 div(id="infant2" class="mapInfoContent hide" style="display:flex flex-direction:column; margin:auto;")
                         div(style="max-width:400px; margin-bottom:20px; margin:auto;")
                             //h1(class="bold spaceAbove spaceBelow") Data Entry.
