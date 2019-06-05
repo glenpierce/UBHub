@@ -652,6 +652,32 @@ body
                 div#map(style="height:400px; width:800px; margin-bottom:20px;")
                 div(id="chart" style="margin-bottom:20px;")
 
+                div(style="max-width:400px;")
+                    div(style="font-weight:700;") Step 5. Indicate surrogate species.
+                    div(style="display:flex;") For each habitat type, choose the surrogate species you would like to track. If you have indicated a source of observations from above, species will auto-populate below and you will simply need to verify which ones you would like to include. Alternately, you can manually enter each surrogate species. Indicate the taxon of each species and then check the boxes to indicate which habitat you would like to consider for each surrogate species.
+                        img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton6()")
+                        div(id="infoButton6" class="hidden popup" onclick="hide(document.getElementById('infoButton6'))")
+                            div(class="spaceBelow") Surrogate species are defined by the United States Fish and Wildlife Service (USFWS) as “a commonly-used scientific term for system-based conservation planning that uses a species as an indicator of landscape habitat and system conditions” (USFWS 2014a). The goal of a surrogate species approach is to use a few species to best represent the needs of the larger community (Weins et al. 2008). Depending on the objective of a given project, the characteristics used to select species differ (USFWS 2014b). The Urban Biodiversity Inventory Framework project’s primary goal is to generate a standardized approach -- a “roadmap” -- that can be used by cities to document and track urban biodiversity changes over time. With this project goal in mind, species selections should follow a set of conditions geared toward urban biodiversity representation.
+
+                            div(class="spaceBelow") Final species selections should highlight a range of species needs but focus primarily on species that have some level of tolerance of the urban environment. The surrogate species group should provide a representation of use of the different native regional habitats and of the different classes of native species. By using this surrogate species approach, our goal is to select species that also represent the needs of similar species or species groups and sensitive species whenever possible.
+
+                            div Final Surrogate species selections, both individually and as a group, should meet the following conditions:
+                            div 1. Close association/reliance on a given functional habitat type of good quality
+                            div 2. Species that are neither very rare nor overly common
+                            div 3. Species selected should represent the needs of additional species found in the given habitat type
+                            div 4. Species selected should also represent the needs of sensitive species whenever possible
+                            div 5. The group of species selected to represent a given habitat type should highlight a range of species needs provided by functional habitat but will primarily focus on species with some tolerance of the urban environment
+                            div 6. The entire suite of selected species (across taxa and habitat types) should provide a representation of the different native regional habitats and of different classes of native species
+
+                div(class="spaceAbove")
+                    div(class="bold blue") Upload CSV
+                    input(type="file")
+
+                div(style="display:flex; flex-direction:column;")
+                    button(onclick="addSpecies()" class="spaceBelow spaceAbove") add species
+
+                div(id="example-table")
+
                 div(style="display:flex; margin:auto;")
                 div(style="max-width:400px; margin-bottom:20px;")
                     h1(class="bold spaceAbove spaceBelow") Data Entry.
@@ -686,32 +712,6 @@ body
 
                 div(class="spaceBelow")
                     button(onclick="chartSites()") Chart Sites
-
-                div(style="max-width:400px;")
-                    div(style="font-weight:700;") Step 5. Indicate surrogate species.
-                    div(style="display:flex;") For each habitat type, choose the surrogate species you would like to track. If you have indicated a source of observations from above, species will auto-populate below and you will simply need to verify which ones you would like to include. Alternately, you can manually enter each surrogate species. Indicate the taxon of each species and then check the boxes to indicate which habitat you would like to consider for each surrogate species.
-                        img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton6()")
-                        div(id="infoButton6" class="hidden popup" onclick="hide(document.getElementById('infoButton6'))")
-                            div(class="spaceBelow") Surrogate species are defined by the United States Fish and Wildlife Service (USFWS) as “a commonly-used scientific term for system-based conservation planning that uses a species as an indicator of landscape habitat and system conditions” (USFWS 2014a). The goal of a surrogate species approach is to use a few species to best represent the needs of the larger community (Weins et al. 2008). Depending on the objective of a given project, the characteristics used to select species differ (USFWS 2014b). The Urban Biodiversity Inventory Framework project’s primary goal is to generate a standardized approach -- a “roadmap” -- that can be used by cities to document and track urban biodiversity changes over time. With this project goal in mind, species selections should follow a set of conditions geared toward urban biodiversity representation.
-
-                            div(class="spaceBelow") Final species selections should highlight a range of species needs but focus primarily on species that have some level of tolerance of the urban environment. The surrogate species group should provide a representation of use of the different native regional habitats and of the different classes of native species. By using this surrogate species approach, our goal is to select species that also represent the needs of similar species or species groups and sensitive species whenever possible.
-
-                            div Final Surrogate species selections, both individually and as a group, should meet the following conditions:
-                            div 1. Close association/reliance on a given functional habitat type of good quality
-                            div 2. Species that are neither very rare nor overly common
-                            div 3. Species selected should represent the needs of additional species found in the given habitat type
-                            div 4. Species selected should also represent the needs of sensitive species whenever possible
-                            div 5. The group of species selected to represent a given habitat type should highlight a range of species needs provided by functional habitat but will primarily focus on species with some tolerance of the urban environment
-                            div 6. The entire suite of selected species (across taxa and habitat types) should provide a representation of the different native regional habitats and of different classes of native species
-
-                div(class="spaceAbove")
-                    div(class="bold blue") Upload CSV
-                    input(type="file")
-
-                div(style="display:flex; flex-direction:column;")
-                    button(onclick="addSpecies()" class="spaceBelow spaceAbove") add species
-
-                div(id="example-table")
 
                 svg(class="chart")
                 button(onclick="updateMap()" class="hidden") Update Map
