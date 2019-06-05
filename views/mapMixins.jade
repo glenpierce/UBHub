@@ -51,6 +51,9 @@ mixin mapInfoTab(label, contentId, color, reset)
             div.resetButton(onclick="event.stopPropagation(); resetFilter();") reset
           img(class="tabArrow" src="/images/arrow-right3.svg" style="")
 
+mixin stickyInfoTab(label, contentId, color, reset)
+    div(class="header" id="myHeader")
+        +mapInfoTab(label, contentId, color, reset)
 
 mixin mapInfoFilters(mapFilterParameters)
   div.mapInfoContent(class="hide" id="filterSettings" style="background-color: #e9f6f9")
