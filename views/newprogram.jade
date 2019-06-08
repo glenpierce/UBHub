@@ -25,6 +25,7 @@ html
             var markers = [];
             var polygon;
             var table;
+            let verificationTable;
             var columns;
             let habitats = [""];
             let speciesSet = new Set();
@@ -84,7 +85,22 @@ html
                         }
                     }
                 );
+
+                verificationTable = new Tabulator("#verification-table", {});
             };
+
+            function verifyTable(button) {
+                verificationTable.element.classList.remove("hidden");
+                let columns = [];
+                let data = [];
+                for(let site in sites) {
+                    if(sites[site].habitat.name == button.innerHTML) {
+                        columns.push({title:sites[site].name});
+                    }
+                }
+                verificationTable.setColumns(columns);
+                verificationTable.setData(data);
+            }
 
             function initMapOnPage() {
                 center = {lat: 20, lng: 15};
@@ -308,6 +324,9 @@ html
                 siteName.innerText = "Site Name";
                 let siteInput = document.createElement("INPUT");
                 siteInput.className = "siteName";
+                siteInput.addEventListener("input", function () {
+                    site.name = this.value;
+                });
                 siteData.appendChild(siteInput);
                 let siteHabitat = document.createElement("DIV");
                 siteData.appendChild(siteHabitat);
@@ -354,6 +373,12 @@ html
                     option.appendChild(document.createTextNode(habitatNameElement.value));
                     sites[site].siteHatbitatSelector.appendChild(option);
                 }
+                let button = document.createElement("button");
+                button.innerHTML = habitatNameElement.value;
+                button.addEventListener("click", function () {
+                    verifyTable(this);
+                });
+                document.getElementById("verifyButtons").appendChild(button);
                 habitatNameElement.value = "";
             }
 
@@ -662,7 +687,7 @@ body
                                         div Invertebrate Pollinator
 
                             div(style="margin-bottom:20px;") <b>Step 3. Indicate your habitats of interest.</b>
-                                div Indicate the various habitats that you will be tracking in this project. The type and number of habitats of interest should be based on known native habitats found currently or historically within the city and is completely up to the individual city’s discretion. Note that the surrogate species will be the same across each habitat. Some examples include: prairie, wetland, freshwater, douglas fir forest, brownfields.
+                                div Indicate the various habitats that you will be tracking in this project. The type and number of habitats of interest should be based on known native habitats found currently or historically within the city and is completely up to the individual city’s discretion. Note that the surrogate species will be the same across each habitat (each habitat will often have multiple sites known as “place”). Some examples include: prairie, wetland, freshwater, douglas fir forest, brownfields.
                                 div(class="flex column smallSpaceAbove")
                                     div(class="bold blue") Enter Habitats
                                     div(class="flex")
@@ -734,9 +759,9 @@ body
                             div(class="spaceBelow") Optionally, the user may choose to skip this step and manually enter presence/absence data rather than import. This can be done in step 3.
 
                             div(class="bold") Step 2. Indicate time frame:
-                            div(class="spaceBelow") User chooses whether the data will be analyzed by year or month. Then they will enter the year(s) or month(s) of interest. For example, they choose “Year” and then say years 2010 and 2015 are of interest. Or, they choose “Month” and then say Nov-Dec 2017 and March-April 2018 are of interest. Maximum of 5 time frames.
+                            div(class="spaceBelow") Choose whether the data will be analyzed by year or month. Then enter the time frame of interest. We recommend no more than 5 time units to br compared (i.e. 5 months or 5 years).
                             div(class="flex")
-                                div Time Interval:
+                                div Time Interval: make me a radio button group
                                 select(onchange="timeFrameSelected(this)")
                                     option(value = "")
                                     option(value = "month") Month
@@ -749,6 +774,10 @@ body
 
                             div(class="bold spaceAbove") Step 3. Verify data:
                             div(class="spaceBelow") Display the map of polygons and a table of the species for each polygon (select one at a time). User goes through one place/polygon at a time, and can click buttons in the species table for the user to verify presence/absence. Data is to be verified separately for each time frame.
+                            div(class="spaceBelow centerContentsViaFlex" id="verifyButtons")
+
+
+                            div(id="verification-table" class="hidden spaceBelow")
 
                             div(class="bold") Step 4. Set Targets:
                             div(class="spaceBelow") Displays current presence data for each habitat by taxa. For each habitat and each taxa, the user will enter the target presence.

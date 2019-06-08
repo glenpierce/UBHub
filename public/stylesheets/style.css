@@ -28,8 +28,8 @@
   width: 100%;
 }
 
-.sticky > * {
-  max-width: 100% !important;
+.sticky > .mapInfoTab {
+  max-width: 800px !important;
 }
 
 .stickyFirst {
