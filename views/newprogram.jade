@@ -718,8 +718,19 @@ body
 
                             div(class="bold") Step 2. Indicate time frame:
                             div(class="spaceBelow") User chooses whether the data will be analyzed by year or month. Then they will enter the year(s) or month(s) of interest. For example, they choose “Year” and then say years 2010 and 2015 are of interest. Or, they choose “Month” and then say Nov-Dec 2017 and March-April 2018 are of interest. Maximum of 5 time frames.
+                            div(class="flex")
+                                div Time Interval:
+                                select
+                                    option
+                                    option Month
+                                    option Year
+                            div(class="flex")
+                                div Time frame: from
+                                input(type="date")
+                                div(style="margin:8px;") to
+                                input(type="date")
 
-                            div(class="bold") Step 3. Verify data:
+                            div(class="bold spaceAbove") Step 3. Verify data:
                             div(class="spaceBelow") Display the map of polygons and a table of the species for each polygon (select one at a time). User goes through one place/polygon at a time, and can click buttons in the species table for the user to verify presence/absence. Data is to be verified separately for each time frame.
 
                             div(class="bold") Step 4. Set Targets:
