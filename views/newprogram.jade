@@ -610,7 +610,7 @@ body
     if queryId
         if queryId == 1
             div(style="margin:auto; display:flex; flex-direction:column; align-items:center;")
-                +stickyInfoTab("UBIF Track 2 Project Setup", "infant1", "#07456b", false, "sticky110")
+                +stickyInfoTab("UBIF Track 2 Project Setup", "infant1", "#07456b", false, "stickyFirst")
                 div(id="infant1" class="mapInfoContent hide")
                     div(style="margin:auto; max-width:400px; display:flex; flex-direction:column; align-items:center;")
                         div
@@ -692,12 +692,12 @@ body
 
                         button(class="spaceAbove") Save Program Instance
 
-                +stickyInfoTab("UBIF Track 2 Data Entry", "infant2", "#07456b", false, "sticky130")
+                +stickyInfoTab("UBIF Track 2 Data Entry", "infant2", "#07456b", false, "stickySecond")
                 div(id="infant2" class="mapInfoContent hide" style="display:flex flex-direction:column; margin:auto;")
                         div(style="max-width:400px; margin-bottom:20px; margin:auto;")
                             //h1(class="bold spaceAbove spaceBelow") Data Entry.
                             div
-                                div(class="bold") Step 1. Draw data from pre-existing species observations.
+                                div(class="bold") Step 1. Import data from pre-existing species observations.
                                 div(style="margin-bottom:20px;") Indicate the sources from which you would like to pull in observations into the project. This step is optional, and you can override this information as you see fit.
                                 div
                                     div(class="bold blue") iNaturalist Project

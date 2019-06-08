@@ -23,14 +23,21 @@
   }
 }
 
-.sticky110 {
-    position: sticky;
-    top: 110px;
+.sticky {
+  position: sticky;
+  width: 100%;
 }
 
-.sticky130 {
-    position: sticky;
-    top: 130px;
+.sticky > * {
+  max-width: 100% !important;
+}
+
+.stickyFirst {
+  top: 65px;
+}
+
+.stickySecond {
+  top: 85px;
 }
 
 body {
