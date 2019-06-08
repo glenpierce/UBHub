@@ -28,6 +28,18 @@ html
             var columns;
             let habitats = [""];
             let speciesSet = new Set();
+            let startDate;
+            function dateStartChanged(input) {
+                startDate = new Date(input.value);
+            }
+            let endDate = Date.now();
+            function dateEndChanged() {
+                endDate = new Date(input.value);
+            }
+            let timeFrame = "";
+            function timeFrameSelected(selectObject) {
+                timeFrame = selectObject.value;
+            }
             window.onload = function (ev) {
 
                 initMapOnPage();
@@ -404,6 +416,8 @@ html
                         map: map,
                         icon: greyImage
                     });
+                    marker.observation = observations[observation];
+                    marker.observedOn = new Date(observations[observation].observed_on);
                     marker.taxon = observations[observation].iconic_taxon_name;
                     marker.species = observations[observation].species_guess;
                     marker.presence = 1;
@@ -479,6 +493,9 @@ html
 
             chart = function (sites) {
                 clearPriorChartIfAny();
+                if(startDate == null) {
+                    startDate = new Date("1900-01-01");
+                }
 
                 const svgWidth = 500;
                 const svgHeight = 300;
@@ -504,7 +521,7 @@ html
                         let speciesInPolygon = new Set();
                         var presence = 0;
                         for (marker in d.markers) {
-                            if (!speciesInPolygon.has(d.markers[marker].species) && d.species.has(d.markers[marker].species)) {
+                            if (!speciesInPolygon.has(d.markers[marker].species) && d.species.has(d.markers[marker].species) && d.markers[marker].observedOn < endDate && d.markers[marker].observedOn > startDate) { //please make me a function
                                 presence += 1;
                             }
                             speciesInPolygon.add(d.markers[marker].species);
@@ -720,15 +737,15 @@ body
                             div(class="spaceBelow") User chooses whether the data will be analyzed by year or month. Then they will enter the year(s) or month(s) of interest. For example, they choose “Year” and then say years 2010 and 2015 are of interest. Or, they choose “Month” and then say Nov-Dec 2017 and March-April 2018 are of interest. Maximum of 5 time frames.
                             div(class="flex")
                                 div Time Interval:
-                                select
-                                    option
-                                    option Month
-                                    option Year
+                                select(onchange="timeFrameSelected(this)")
+                                    option(value = "")
+                                    option(value = "month") Month
+                                    option(value = "year") Year
                             div(class="flex")
                                 div Time frame: from
-                                input(type="date")
+                                input(type="date" onchange="dateStartChanged(this)")
                                 div(style="margin:8px;") to
-                                input(type="date")
+                                input(type="date" onchange="dateEndChanged(this)")
 
                             div(class="bold spaceAbove") Step 3. Verify data:
                             div(class="spaceBelow") Display the map of polygons and a table of the species for each polygon (select one at a time). User goes through one place/polygon at a time, and can click buttons in the species table for the user to verify presence/absence. Data is to be verified separately for each time frame.
