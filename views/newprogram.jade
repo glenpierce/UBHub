@@ -571,13 +571,13 @@ html
                         let speciesInPolygon = new Set();
                         var presence = 0;
                         for (marker in d.markers) {
-                            if (!speciesInPolygon.has(d.markers[marker].species) && d.species.has(d.markers[marker].species) && d.markers[marker].observedOn < endDate && d.markers[marker].observedOn > startDate) { //please make me a function
+                            if (!speciesInPolygon.has(d.markers[marker].species) && d.siteSpecies.has(d.markers[marker].species) && d.markers[marker].observedOn < endDate && d.markers[marker].observedOn > startDate) { //please make me a function
                                 presence += 1;
                             }
                             speciesInPolygon.add(d.markers[marker].species);
                         }
-                        if (d.species.size != 0) {
-                            presence = svgHeight * (presence / d.species.size);
+                        if (d.siteSpecies.size != 0) {
+                            presence = svgHeight * (presence / d.siteSpecies.size);
                         }
                         d.presence = presence;
                         return presence;
