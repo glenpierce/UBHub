@@ -91,13 +91,53 @@ html
 
             function verifyTable(button) {
                 verificationTable.element.classList.remove("hidden");
-                let columns = [];
+                let columns = [{title: "Species", field: "species"}];
+                let speciesRows = [];
+                let speciesRowCounter = new Set();
                 let data = [];
                 for(let site in sites) {
-                    if(sites[site].habitat.name == button.innerHTML) {
-                        columns.push({title:sites[site].name});
+                    if(sites[site].habitat.name === button.innerHTML) {
+                        columns.push({title:sites[site].name, field: sites[site].name, formatter: "tickCross"});
+                        sites[site].species.forEach(function (species) {
+                            let containsSpecies = false;
+                            for(marker in markers) {
+                                if (sites[site].Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
+                                    containsSpecies = true;
+                                    break;
+                                }
+                            }
+                            speciesRows.push({siteName: sites[site].name, species: species, containsSpecies:containsSpecies});
+                            speciesRowCounter.add(species);
+                        });
                     }
                 }
+
+                speciesRowCounter.forEach(function (uniqueSpecies) {
+                    let newRow = {};
+                    newRow.species = uniqueSpecies;
+                    // let i = 1;
+                    columns.forEach(function (column) {
+                        // newRow[i] = false;
+                        newRow[column.title] = false;
+                        speciesRows.forEach(function (speciesRow) {
+                            if(newRow.species == speciesRow.species && speciesRow.siteName == column.title && speciesRow.containsSpecies) {
+                                console.log("entry.siteName " + speciesRow.siteName + " column.title " + column.title + " entry.containsSpecies " + speciesRow.containsSpecies);
+                                // newRow[i] = true;
+                                newRow[column.title] = true;
+                            }
+                        });
+                    });
+                    // i++;
+                    data.push(newRow);
+                })
+                console.log("columns");
+                console.log(columns);
+                console.log("data");
+                console.log(data);
+                console.log("sites");
+                console.log(sites);
+                console.log("speciesRows");
+                console.log(speciesRows);
                 verificationTable.setColumns(columns);
                 verificationTable.setData(data);
             }
@@ -746,7 +786,8 @@ body
                                     div Complete the url for your iNaturalist Project below.
                                     div(class="flex spaceBelow")
                                         div https://www.inaturalist.org/
-                                        input(id="input" value="dragonfly-creek-riparian-ubif")
+                                        input(id="input" value="test-project-for-glen")
+                                        //dragonfly-creek-riparian-ubif
                                         button(onclick="processRequest()") import
 
                                     //div(class="bold blue") iNaturalist Trips
