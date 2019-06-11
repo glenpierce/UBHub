@@ -68,19 +68,20 @@ html
                         ],
                         columns: columns,
                         cellEdited: function (cell) {
-                            let habitatIndex = -1;
+                            let habitatIndex = [];
                             for (let site in sites) {
                                 if (cell._cell.column != null && cell._cell.column.field != null && sites[site].habitat.name == cell._cell.column.field) {
-                                    habitatIndex = site;
-                                    break;
+                                    habitatIndex.push(site);
                                 }
                             }
-                            if (habitatIndex > -1 && cell._cell.value) {
-                                sites[habitatIndex].species.add(cell._cell.row.data.species);
-                                sites[habitatIndex].taxa.add(cell._cell.row.data.taxa);
-                            } else if(habitatIndex > -1) {
-                                sites[habitatIndex].species.delete(cell._cell.row.data.species);
-                                sites[habitatIndex].taxa.delete(cell._cell.row.data.taxa);
+                            for(let index in habitatIndex) {
+                                if (cell._cell.value) {
+                                    sites[habitatIndex[index]].siteSpecies.add(cell._cell.row.data.species);
+                                    sites[habitatIndex[index]].taxa.add(cell._cell.row.data.taxa);
+                                } else {
+                                    sites[habitatIndex[index]].siteSpecies.delete(cell._cell.row.data.species);
+                                    sites[habitatIndex[index]].taxa.delete(cell._cell.row.data.taxa);
+                                }
                             }
                         }
                     }
@@ -98,7 +99,7 @@ html
                 for(let site in sites) {
                     if(sites[site].habitat.name === button.innerHTML) {
                         columns.push({title:sites[site].name, field: sites[site].name, formatter: "tickCross"});
-                        sites[site].species.forEach(function (species) {
+                        sites[site].siteSpecies.forEach(function (species) {
                             let containsSpecies = false;
                             for(marker in markers) {
                                 if (sites[site].Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
@@ -115,29 +116,16 @@ html
                 speciesRowCounter.forEach(function (uniqueSpecies) {
                     let newRow = {};
                     newRow.species = uniqueSpecies;
-                    // let i = 1;
                     columns.forEach(function (column) {
-                        // newRow[i] = false;
                         newRow[column.title] = false;
                         speciesRows.forEach(function (speciesRow) {
                             if(newRow.species == speciesRow.species && speciesRow.siteName == column.title && speciesRow.containsSpecies) {
-                                console.log("entry.siteName " + speciesRow.siteName + " column.title " + column.title + " entry.containsSpecies " + speciesRow.containsSpecies);
-                                // newRow[i] = true;
                                 newRow[column.title] = true;
                             }
                         });
                     });
-                    // i++;
                     data.push(newRow);
                 })
-                console.log("columns");
-                console.log(columns);
-                console.log("data");
-                console.log(data);
-                console.log("sites");
-                console.log(sites);
-                console.log("speciesRows");
-                console.log(speciesRows);
                 verificationTable.setColumns(columns);
                 verificationTable.setData(data);
             }
@@ -306,7 +294,7 @@ html
                             coordinates: [],
                             markers: [],
                             habitat: {},
-                            species: new Set(),
+                            siteSpecies: new Set(),
                             taxa: new Set(),
                             minX: 1000,
                             minY: 1000,
@@ -550,9 +538,6 @@ html
                     }
                 }
 
-                console.log("sites:");
-                console.log(sites);
-
                 chart(sites);
             }
 
@@ -649,7 +634,6 @@ html
                     }
                     oldChart.setAttribute("class", "chart");
                 }
-                console.log(oldChart);
             }
 
             function hide(element) {
