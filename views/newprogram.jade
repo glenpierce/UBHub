@@ -26,6 +26,7 @@ html
             var polygon;
             var table;
             let verificationTable;
+            let speciesPresenceTable;
             var columns;
             let habitats = [""];
             let speciesSet = new Set();
@@ -88,6 +89,7 @@ html
                 );
 
                 verificationTable = new Tabulator("#verification-table", {});
+                speciesPresenceTable = new Tabulator("#speciesPresenceTable", {});
             };
 
             function verifyTable(button) {
@@ -296,25 +298,25 @@ html
                             habitat: {},
                             siteSpecies: new Set(),
                             taxa: new Set(),
-                            minX: 1000,
-                            minY: 1000,
-                            maxX: -1000,
-                            maxY: -1000
+                            minX: polygon.getPath().getArray()[0].lng() + 180,
+                            minY: polygon.getPath().getArray()[0].lat() * -1 + 90,
+                            maxX: polygon.getPath().getArray()[0].lng() + 180,
+                            maxY: polygon.getPath().getArray()[0].lat() * -1 + 90
                         }
-                        for (var i = 0; i < polygon.length; i++) {
-                            // console.log(polygon[i].lat() + ", " + polygon[i].lng());
-                            site.coordinates.push({lat: polygon[i].lat(), lng: polygon[i].lng()})
-                            if(polygon[i].lat() * -1 + 90 < site.minY) {
-                                site.minY = polygon[i].lat() * -1 + 90;
+                        for (var i = 0; i < site.polygon.length; i++) {
+                            // console.log(site.polygon[i].lat() + ", " + site.polygon[i].lng());
+                            site.coordinates.push({lat: site.polygon[i].lat(), lng: site.polygon[i].lng()})
+                            if(site.polygon[i].lat() * -1 + 90 < site.minY) {
+                                site.minY = site.polygon[i].lat() * -1 + 90;
                             }
-                            if(polygon[i].lat() * -1 + 90 > site.maxY) {
-                                site.maxY = polygon[i].lat() * -1 + 90;
+                            if(site.polygon[i].lat() * -1 + 90 > site.maxY) {
+                                site.maxY = site.polygon[i].lat() * -1 + 90;
                             }
-                            if (polygon[i].lng() + 180 < site.minX) {
-                                site.minX = polygon[i].lng() + 180;
+                            if (site.polygon[i].lng() + 180 < site.minX) {
+                                site.minX = site.polygon[i].lng() + 180;
                             }
-                            if (polygon[i].lng() + 180 > site.maxX) {
-                                site.maxX = polygon[i].lng() + 180;
+                            if (site.polygon[i].lng() + 180 > site.maxX) {
+                                site.maxX = site.polygon[i].lng() + 180;
                             }
                         }
                         addSiteToUi(site);
@@ -514,7 +516,7 @@ html
                 map.fitBounds(rectangle.getBounds());
 
                 map.setCenter({lat: ((maxLat - minLat) / 2 + minLat), lng: ((maxLng - minLng) / 2 + minLng)});
-                map.setZoom(17);
+                map.setZoom(17); //todo: set this by bounds
             }
 
             mapHabitatsToSites = function () {
@@ -807,20 +809,25 @@ body
                             div(class="bold") Step 4. Set Targets:
                             div(class="spaceBelow") Displays current presence data for each habitat by taxa. For each habitat and each taxa, the user will enter the target presence.
 
-                            div(class="spaceBelow centerContentsViaFlex")
-                                button(onclick="chartSites()") Chart Sites
-
-                        div(style="border:solid;")
-                            svg(class="chart")
-                        div(class="spaceBelow centerContentsViaFlex")
-                            button(onclick="updateMap()" class="") Update Map
                             button(onclick="save()" class="spaceAbove") Save
 
                         div(style="max-width:400px;")
                             div(style="font-weight:700;") Next Steps
                             div You have now set up your project. Next, you will be able to input the presence/absence data, see the status of observations in each place, set targets for each, and generate reports that indicate your progress towards those targets over time.
 
-                    button(onclick="window.location='/statusReport'" class="spaceAbove spaceBelow") Next: Status Report
+                    //button(onclick="window.location='/statusReport'" class="spaceAbove spaceBelow") Next: Status Report
+
+                +stickyInfoTab("UBIF Track 2 Reports", "infant3", "#07456b", false, "stickyThird")
+                div(id="infant3" class="mapInfoContent hide" style="display:flex flex-direction:column; margin:auto;")
+                    div(style="max-width:800px; margin-bottom:20px; margin:auto;")
+
+                        div(id="speciesPresenceTable" class="spaceAbove spaceBelow")
+
+                        div(class="spaceBelow centerContentsViaFlex")
+                            button(onclick="chartSites()") Chart Sites
+
+                        div(style="border:solid;")
+                            svg(class="chart")
 
 
     +footer()

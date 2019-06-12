@@ -40,6 +40,10 @@
   top: 85px;
 }
 
+.stickyThird {
+  top: 105px;
+}
+
 body {
   margin: 0px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
