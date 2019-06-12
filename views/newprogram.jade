@@ -92,24 +92,27 @@ html
                 speciesPresenceTable = new Tabulator("#speciesPresenceTable", {});
             };
 
-            function verifyTable(button) {
-                verificationTable.element.classList.remove("hidden");
+            function generateTableData(button) {
                 let columns = [{title: "Species", field: "species"}];
                 let speciesRows = [];
                 let speciesRowCounter = new Set();
                 let data = [];
-                for(let site in sites) {
-                    if(sites[site].habitat.name === button.innerHTML) {
-                        columns.push({title:sites[site].name, field: sites[site].name, formatter: "tickCross"});
+                for (let site in sites) {
+                    if (sites[site].habitat.name === button.innerHTML) {
+                        columns.push({title: sites[site].name, field: sites[site].name, formatter: "tickCross"});
                         sites[site].siteSpecies.forEach(function (species) {
                             let containsSpecies = false;
-                            for(marker in markers) {
+                            for (marker in markers) {
                                 if (sites[site].Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
                                     containsSpecies = true;
                                     break;
                                 }
                             }
-                            speciesRows.push({siteName: sites[site].name, species: species, containsSpecies:containsSpecies});
+                            speciesRows.push({
+                                siteName: sites[site].name,
+                                species: species,
+                                containsSpecies: containsSpecies
+                            });
                             speciesRowCounter.add(species);
                         });
                     }
@@ -121,15 +124,27 @@ html
                     columns.forEach(function (column) {
                         newRow[column.title] = false;
                         speciesRows.forEach(function (speciesRow) {
-                            if(newRow.species == speciesRow.species && speciesRow.siteName == column.title && speciesRow.containsSpecies) {
+                            if (newRow.species == speciesRow.species && speciesRow.siteName == column.title && speciesRow.containsSpecies) {
                                 newRow[column.title] = true;
                             }
                         });
                     });
                     data.push(newRow);
-                })
+                });
+                return {columns, data};
+            }
+
+            function verifyTable(button) {
+                verificationTable.element.classList.remove("hidden");
+                let {columns, data} = generateTableData(button);
                 verificationTable.setColumns(columns);
                 verificationTable.setData(data);
+            }
+
+            function surrogateSpeciesByHabitatTable(button) {
+                let {columns, data} = generateTableData(button);
+                speciesPresenceTable.setColumns(columns);
+                speciesPresenceTable.setData(data);
             }
 
             function initMapOnPage() {
@@ -403,12 +418,21 @@ html
                     option.appendChild(document.createTextNode(habitatNameElement.value));
                     sites[site].siteHatbitatSelector.appendChild(option);
                 }
+
                 let button = document.createElement("button");
                 button.innerHTML = habitatNameElement.value;
                 button.addEventListener("click", function () {
                     verifyTable(this);
                 });
                 document.getElementById("verifyButtons").appendChild(button);
+
+                let surrogateSpeciesByHabitatButton = document.createElement("button");
+                surrogateSpeciesByHabitatButton.innerHTML = habitatNameElement.value;
+                surrogateSpeciesByHabitatButton.addEventListener("click", function () {
+                    surrogateSpeciesByHabitatTable(this);
+                });
+                document.getElementById("surrogateSpeciesByHabitatButtons").appendChild(surrogateSpeciesByHabitatButton);
+
                 habitatNameElement.value = "";
             }
 
@@ -809,7 +833,8 @@ body
                             div(class="bold") Step 4. Set Targets:
                             div(class="spaceBelow") Displays current presence data for each habitat by taxa. For each habitat and each taxa, the user will enter the target presence.
 
-                            button(onclick="save()" class="spaceAbove") Save
+                            div(class="centerContentsViaFlex")
+                                button(onclick="save()" class="spaceAbove") Save
 
                         div(style="max-width:400px;")
                             div(style="font-weight:700;") Next Steps
@@ -820,8 +845,9 @@ body
                 +stickyInfoTab("UBIF Track 2 Reports", "infant3", "#07456b", false, "stickyThird")
                 div(id="infant3" class="mapInfoContent hide" style="display:flex flex-direction:column; margin:auto;")
                     div(style="max-width:800px; margin-bottom:20px; margin:auto;")
+                        div(class="spaceAbove spaceBelow centerContentsViaFlex" id="surrogateSpeciesByHabitatButtons")
 
-                        div(id="speciesPresenceTable" class="spaceAbove spaceBelow")
+                        div(id="speciesPresenceTable" class="spaceBelow")
 
                         div(class="spaceBelow centerContentsViaFlex")
                             button(onclick="chartSites()") Chart Sites
