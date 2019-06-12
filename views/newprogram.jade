@@ -54,8 +54,9 @@ html
                     }];
 
                 table = new Tabulator("#example-table", {
+                        layoutColumnsOnNewData: true,
                         data: tableData,           //load row data from array
-                        layout: "fitColumns",      //fit columns to width of table
+                        layout:"fitData",
                         responsiveLayout: "hide",  //hide columns that dont fit on the table
                         tooltips: true,            //show tool tips on cells
                         addRowPos: "bottom",          //when adding a new row, add it to the top of the table
@@ -88,8 +89,12 @@ html
                     }
                 );
 
-                verificationTable = new Tabulator("#verification-table", {});
-                speciesPresenceTable = new Tabulator("#speciesPresenceTable", {});
+                verificationTable = new Tabulator("#verification-table", {
+                    layoutColumnsOnNewData: true
+                });
+                speciesPresenceTable = new Tabulator("#speciesPresenceTable", {
+                    layoutColumnsOnNewData: true
+                });
             };
 
             function generateTableData(button) {
@@ -139,12 +144,14 @@ html
                 let {columns, data} = generateTableData(button);
                 verificationTable.setColumns(columns);
                 verificationTable.setData(data);
+                verificationTable.redraw(true);
             }
 
             function surrogateSpeciesByHabitatTable(button) {
                 let {columns, data} = generateTableData(button);
                 speciesPresenceTable.setColumns(columns);
                 speciesPresenceTable.setData(data);
+                speciesPresenceTable.redraw(true);
             }
 
             function initMapOnPage() {
@@ -410,6 +417,7 @@ html
                 habitats.push(habitatNameElement.value);
                 columns.push(newHabitat);
                 table.setColumns(columns);
+                table.redraw(true);
                 newHabitatLabel = document.createElement("DIV");
                 newHabitatLabel.textContent = habitatNameElement.value
                 document.getElementsByClassName("habitat")[0].appendChild(newHabitatLabel);
@@ -440,6 +448,7 @@ html
                 taxonNameElement = document.getElementById("taxonNameId");
                 columns[1].editorParams[taxonNameElement.value] = taxonNameElement.value;
                 table.setColumns(columns);
+                table.redraw(true);
                 newTaxonLabel = document.createElement("DIV");
                 newTaxonLabel.textContent = taxonNameElement.value
                 document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
@@ -503,6 +512,7 @@ html
                     if (!speciesSet.has(marker.species) && marker.species != null && marker.species.length != 0) {
                         table.addRow({species: marker.species});
                     }
+                    table.redraw(true);
                     speciesSet.add(marker.species);
                     markers.push(marker);
                 }
