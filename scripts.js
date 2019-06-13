@@ -419,7 +419,8 @@ update = function() {
         "`programType` INT, " + //0 = index
         "`private` BIT, " +
         "`author` VARCHAR(255), " +
-        "`creationDate` DATE" +
+        "`creationDate` DATE, " +
+        "`iconFileName` VARCHAR(255), " +
         ");";
     query.push(createProgramsTableQuery);
 
@@ -644,7 +645,8 @@ update = function() {
         "`numericalValue` FLOAT(10, 2), " +
         "`textValue` VARCHAR(2048), " +
         "`name` VARCHAR(2048), " +
-        "`notes` VARCHAR(2048)" +
+        "`notes` VARCHAR(2048), " +
+        "`userEmail` VARCHAR(255)" +
         ");";
     query.push(createUserDataTableQuery);
 

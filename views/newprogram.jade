@@ -460,7 +460,21 @@ html
             }
 
             function save() {
-                console.log(table.getData());
+                let tableData = table.getData();
+                let saveData = {
+                    name,
+                    sites, //This should contain all of the markers, observations, polygons, and habitats
+                    markers, //All observations
+                    //todo: we'll probably want to store the iNaturalist urls at some point
+                    tableData, //This contains the columns and the rows which the user should have also overridden if needed.
+                    startDate,
+                    endDate,
+                    timeFrame
+                }
+                //Then we package this up, and post it.
+                //This page will also need a Load() function.
+                console.log(saveData);
+                httpPost("/createUserDataFromJSON", console.log, saveData);
             }
 
             processRequest = function () {
