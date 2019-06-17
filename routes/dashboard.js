@@ -41,7 +41,7 @@ router.get('/', function (req, res, next) {
                     console.log(query);
                     connection.query(query, function (err, rows, fields) {
                         if (!err) {
-                            // console.log(rows);
+                            console.log(rows);
                             resolve(rows);
                         } else {
                             console.log('Error while performing Query.');
@@ -188,14 +188,17 @@ router.get('/', function (req, res, next) {
         }
 
         getSelectedSite().then(function (values) {
-            console.log(values[0][0].siteName);
-            getUserData(values[0][0].id);
-            res.render('dashboard', {username: req.session.user});
+            if(values[0].length < 1) {
+                // getUserData(values[0][0].id);
+                res.render('dashboard', {username: req.session.user, basicProgramData: [], site:{siteName:null}});
+            } else {
+                let site = values[0][0];
+                getBasicProgramData().then(function (basicProgramData) {
+                    res.render('dashboard', {username: req.session.user, basicProgramData: basicProgramData, site:site});
+                });
+            }
         }).catch(function (error) {
                 console.log(error);
-                getBasicProgramData().then(function (basicProgramData) {
-                    res.render('dashboard', {username: req.session.user, basicProgramData: basicProgramData});
-                });
             }
         );
 

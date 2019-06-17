@@ -21,6 +21,7 @@ html
         script(src="https://d3js.org/d3.v5.min.js")
         script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&libraries=drawing,geometry")
         script.
+            // let dataFromServer = !{site};
             var sites = [];
             var markers = [];
             var polygon;
@@ -293,11 +294,11 @@ html
                     drawingControl: true,
                     drawingControlOptions: {
                         position: google.maps.ControlPosition.TOP_CENTER,
-                        drawingModes: ['polygon']
+                        drawingModes: ["polygon"]
                     },
-                    markerOptions: {icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png'},
+                    markerOptions: {icon: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"},
                     circleOptions: {
-                        fillColor: '#ffff00',
+                        fillColor: "#ffff00",
                         fillOpacity: 1,
                         strokeWeight: 5,
                         clickable: false,
@@ -306,7 +307,7 @@ html
                     }
                 });
                 drawingManager.setMap(map);
-                google.maps.event.addListener(drawingManager, 'polygoncomplete', function (polygon) {
+                google.maps.event.addListener(drawingManager, "polygoncomplete", function (polygon) {
                     // if (event.type == 'circle') {
                     //     var radius = event.overlay.getRadius();
                     // }
@@ -355,7 +356,7 @@ html
                 siteSvg.setAttribute("width", "60px");
                 let viewBox = site.minX + " " + site.minY + " " + (site.maxX - site.minX) + " " + (site.maxY - site.minY);
                 siteSvg.setAttribute("viewBox", viewBox);
-                let sitePolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                let sitePolygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
 
                 let points = "";
                 for(let i = 0; i < site.coordinates.length; i++) {
@@ -364,7 +365,7 @@ html
                         points += " ";
                     }
                 }
-                sitePolygon.setAttribute('points', points);
+                sitePolygon.setAttribute("points", points);
 
                 siteSvg.appendChild(sitePolygon);
                 siteElement.appendChild(siteSvg);
@@ -474,6 +475,7 @@ html
                 //Then we package this up, and post it.
                 //This page will also need a Load() function.
                 console.log(saveData);
+
                 httpPost("/createUserDataFromJSON", console.log, saveData);
             }
 
@@ -505,7 +507,7 @@ html
 
             placeMarkers = function (observations) {
                 greyImage = {
-                    url: '/images/marker_0_grey_39x59.png',
+                    url: "/images/marker_0_grey_39x59.png",
                     scaledSize: new google.maps.Size(20, 30)
                 };
                 for (observation in observations) {
@@ -547,10 +549,10 @@ html
                 }
 
                 var rectangle = new google.maps.Rectangle({
-                    strokeColor: '#FFFFFF',
+                    strokeColor: "#FFFFFF",
                     strokeOpacity: 0.0,
                     strokeWeight: 2,
-                    fillColor: '#FFFFFF',
+                    fillColor: "#FFFFFF",
                     fillOpacity: 0.0,
                     map: map,
                     bounds: {
@@ -723,8 +725,6 @@ body
 
     div(style="padding-top:40px;")
 
-    if queryId
-        if queryId == 1
             div(style="margin:auto; display:flex; flex-direction:column; align-items:center;")
                 +stickyInfoTab("UBIF Track 2 Project Setup", "infant1", "#07456b", false, "stickyFirst")
                 div(id="infant1" class="mapInfoContent hide")

@@ -19,7 +19,7 @@ app.use(session({
 router.get('/', function (req, res, next) {
     getUserDataForProgram(req.query.id, req).then(function (rows) {
         console.log(rows);
-        res.render('programs', {username: req.session.user, rows, query: req.query.id});
+        res.render('programs', {username: req.session.user, rows: JSON.stringify(rows), query: req.query.id});
     });
 });
 
