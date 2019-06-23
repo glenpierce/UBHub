@@ -25,9 +25,8 @@ let aboutUs = require('./routes/aboutUs');
 let resources = require('./routes/resources');
 let home = require('./routes/home');
 let account = require('./routes/account');
-let iNaturalist = require('./routes/iNaturalist');
 let programs = require('./routes/programs');
-let newProgramRoute = require('./routes/newprogram');
+let newProgramRoute = require('./routes/program');
 let statusReport = require('./routes/statusReport');
 let createUserDataFromJSON = require('./routes/createUserDataFromJSON');
 
@@ -89,9 +88,8 @@ app.use('/aboutUs', aboutUs);
 app.use('/resources', resources);
 app.use('/home', home);
 app.use('/account', account);
-app.use('/iNaturalist', iNaturalist);
 app.use('/programs', programs);
-app.use('/newprogram', newProgramRoute);
+app.use('/program', newProgramRoute);
 app.use('/statusReport', statusReport);
 app.use('/createUserDataFromJSON', createUserDataFromJSON);
 

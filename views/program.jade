@@ -21,7 +21,8 @@ html
         script(src="https://d3js.org/d3.v5.min.js")
         script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&libraries=drawing,geometry")
         script.
-            // let dataFromServer = !{site};
+            let dataFromServer = !{dataFromServer};
+            console.log(dataFromServer);
             var sites = [];
             var markers = [];
             var polygon;

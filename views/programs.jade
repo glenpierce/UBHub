@@ -9,9 +9,9 @@ body
     div(style="padding-top:40px;")
     div(style="max-width:800px; margin:auto;")
         div(style="display:flex; margin:auto;")
-            div.activityButton(onclick="window.location='/newprogram/?id=#{query}'") Create new
+            div.activityButton(onclick="window.location='/program/?newId=#{query}'") Create new
             if rows.names.length > 0
                 -for (let i = 0; i < rows.names.length; i++)
-                    div.activityButton(onclick="window.location='/newprogram/?id=#{rows.ids[i]}'") !{rows.names[i]}
+                    div.activityButton(onclick="window.location='/program/?id=#{rows.ids[i]}'") !{rows.names[i]}
 
     +footer()
