@@ -11,7 +11,7 @@ body
         div(style="display:flex; margin:auto;")
             div.activityButton(onclick="window.location='/newprogram/?id=#{query}'") Create new
             if rows.names.length > 0
-                for name in rows.names
-                    div.activityButton !{name}
+                -for (let i = 0; i < rows.names.length; i++)
+                    div.activityButton(onclick="window.location='/newprogram/?id=#{rows.ids[i]}'") !{rows.names[i]}
 
     +footer()
