@@ -17,15 +17,23 @@ app.use(session({
 }));
 
 router.get('/', function (req, res, next) {
-    getUserDataForProgram(req.query.id, req).then(function (rows) {
-        console.log(rows);
-        res.render('programs', {username: req.session.user, rows: JSON.stringify(rows), query: req.query.id});
+    getUserDataForProgram(req.query.id, req).then(function (result) {
+        let jsonData = {names:[]};
+        Object.keys(result).forEach(function(key) {
+            let row = result[key];
+            row = JSON.parse(JSON.stringify(row));
+            let rowData = JSON.parse(row.jsonData);
+            jsonData.names.push(rowData.endDate);
+        });
+        res.render('programs', {username: req.session.user, rows: jsonData, query: req.query.id});
     });
 });
 
 function getUserDataForProgram(programId, req) {
     return new Promise(function (resolve, reject) {
-        makeDbCall("select * from userData where program = " + programId + " and userEmail = '" + req.session.user + "';", resolve);
+        let queryString = "select * from userData where program = " + programId + " and userEmail = '" + req.session.user + "';";
+        queryString = "select * from userData;";
+        makeDbCall(queryString, resolve);
     });
 }
 

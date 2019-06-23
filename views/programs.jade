@@ -4,17 +4,14 @@ html
     head
         link(rel='stylesheet', href='/stylesheets/style.css')
 
-    script.
-        console.log(!{rows});
-
 body
     +header(true)
     div(style="padding-top:40px;")
     div(style="max-width:800px; margin:auto;")
         div(style="display:flex; margin:auto;")
             div.activityButton(onclick="window.location='/newprogram/?id=#{query}'") Create new
-            if rows
-                for row in rows
-                    div #{row}
+            if rows.names.length > 0
+                for name in rows.names
+                    div.activityButton !{name}
 
     +footer()
