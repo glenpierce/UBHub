@@ -1,12 +1,12 @@
-var express = require('express');
-var router = express.Router();
-var mysql = require('mysql');
-var session = require('client-sessions');
-var path = require("path");
+let express = require('express');
+let router = express.Router();
+let mysql = require('mysql');
+let session = require('client-sessions');
+let path = require("path");
 
-var app = express();
+let app = express();
 
-var config = require('../config.js');
+let config = require('../config.js');
 
 app.use(session({
     cookieName: 'session',
@@ -19,11 +19,16 @@ app.use(session({
 router.post('/', function(req, res){
     makeDbCallAsPromise("CALL getSelectedSiteByUserQuery('" + req.session.user + "');").then(
         (selectedSite) => {
-            // console.log(req.body);
-            data = JSON.stringify(req.body).replace(/'/g, '\\\'');
+            let id = req.body.id;
+            let data = JSON.stringify(req.body).replace(/'/g, '\\\'');
             data = data.replace(/https?\:\/\//gi, "");
-            const queryString = "INSERT INTO userData (site, program, jsonData) VALUES ('" + selectedSite[0][0].id + "', '" + 1 + "', '" + data + "');";
-            console.log(queryString);
+            let queryString;
+            if(id == null) {
+                id = new Date();
+                queryString = "INSERT INTO userData (site, program, jsonData, id) VALUES ('" + selectedSite[0][0].id + "', '" + 1 + "', '" + data + "', " + id + ");";
+            } else {
+                queryString = "update userData set jsonData = '" + data + "' where id = " + id + ");";
+            }
             makeDbCallAsPromise(queryString);
         }
     );

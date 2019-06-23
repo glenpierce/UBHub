@@ -23,8 +23,18 @@ html
         script.
             let dataFromServer = !{dataFromServer};
             console.log(dataFromServer);
+            let id;
+            if(dataFromServer) {
+                id = !{id};
+            }
             var sites = [];
+            if(dataFromServer.sites) {
+                sites = dataFromServer.sites;
+            }
             var markers = [];
+            if(dataFromServer.markers) {
+                markers = dataFromServer.markers;
+            }
             var polygon;
             var table;
             let verificationTable;
@@ -462,9 +472,13 @@ html
             }
 
             function save() {
-                let tableData = table.getData();
+                let tableData = "";
+                if(table != null)
+                    tableData = table.getData();
+                let name = document.getElementById("projectName").valueOf();
                 let saveData = {
-                    name,
+                    "id": id,
+                    "name":name,
                     sites, //This should contain all of the markers, observations, polygons, and habitats
                     markers, //All observations
                     //todo: we'll probably want to store the iNaturalist urls at some point
@@ -741,7 +755,7 @@ body
                             div(style="margin-bottom:20px;") <b>Step 1. Name your project</b>
                                 div Choose a name to encompass the entire UBIF Track 2 initiative for your city through time as long as it maintains the same overall structure (such as taxon). Only small changes to the project can be accommodated without starting a new project.
                                 div(class="bold blue smallSpaceAbove") Enter Project Name
-                                input
+                                input(id="projectName")
                                 div(class="bold blue smallSpaceAbove") Enter Project Description
                                 textarea(rows="3" class="fullWidth")
 

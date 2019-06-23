@@ -21,7 +21,7 @@ router.get('/', function (req, res, next) {
     if(req.query.newId) {
         switch (res.query.newId) {
             case 1:
-                res.render('program', {username: req.session.user, queryId: req.query.newId});
+                res.render('program', {username: req.session.user, id: req.query.newId});
                 return;
             default:
                 return;
@@ -32,7 +32,7 @@ router.get('/', function (req, res, next) {
             .then(rows => {
                 let jsonToSend = rows[0].jsonData;
                 if(req.session.user == rows[0].userEmail) {
-                    res.render('program', {username: req.session.user, queryId: req.query.id, dataFromServer:jsonToSend});
+                    res.render('program', {username: req.session.user, id: req.query.id, dataFromServer:jsonToSend});
                 } else {
                     console.log("user mismatch in program.js: " + req.session.user + " " + rows[0]);
                 }
