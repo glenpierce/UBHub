@@ -23,7 +23,7 @@ router.get('/', function (req, res, next) {
             let row = result[key];
             row = JSON.parse(JSON.stringify(row));
             let rowData = JSON.parse(row.jsonData);
-            jsonData.names.push(rowData.endDate);
+            jsonData.names.push(rowData.name);
             jsonData.ids.push(row.id);
         });
         res.render('programs', {username: req.session.user, rows: jsonData, query: req.query.id});

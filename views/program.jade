@@ -56,6 +56,11 @@ html
             }
             window.onload = function (ev) {
 
+                if (dataFromServer.id) {
+                    id = !{id};
+                    document.getElementById("projectName").value = dataFromServer.name;
+                }
+
                 initMapOnPage();
 
                 var tableData = [{"species": "", "taxa": ""}];
@@ -475,7 +480,15 @@ html
                 let tableData = "";
                 if(table != null)
                     tableData = table.getData();
-                let name = document.getElementById("projectName").valueOf();
+                if(startDate == null)
+                    startDate = "";
+                if(endDate == null) {
+                    endDate = "";
+                }
+                if(timeFrame == null) {
+                    timeFrame = "";
+                }
+                let name = document.getElementById("projectName").value;
                 let saveData = {
                     "id": id,
                     "name":name,

@@ -635,7 +635,8 @@ update = function() {
 
     let createUserDataTableQuery =
         "CREATE TABLE userData(" +
-        "`userEmail` VARCHAR(255)" +
+        "`id` NUMERIC(14, 0)," +
+        "`userEmail` VARCHAR(255)," +
         "`site` INT," +
         "`program` INT, " +
         "`year` INT, " +
@@ -646,7 +647,7 @@ update = function() {
         "`textValue` VARCHAR(2048), " +
         "`name` VARCHAR(2048), " +
         "`notes` VARCHAR(2048), " +
-        "`userEmail` VARCHAR(255)" +
+        "`jsonData` json" +
         ");";
     query.push(createUserDataTableQuery);
 
