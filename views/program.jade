@@ -27,6 +27,7 @@ html
             if(dataFromServer.id) {
                 id = !{id};
             }
+            let description;
             var sites = [];
             if(dataFromServer.sites) {
                 sites = dataFromServer.sites;
@@ -59,6 +60,11 @@ html
                 if (dataFromServer.id) {
                     id = !{id};
                     document.getElementById("projectName").value = dataFromServer.name;
+                }
+
+                if(dataFromServer.description) {
+                    description = dataFromServer.description;
+                    document.getElementById("projectDescription").value = dataFromServer.description;
                 }
 
                 initMapOnPage();
@@ -488,10 +494,10 @@ html
                 if(timeFrame == null) {
                     timeFrame = "";
                 }
-                let name = document.getElementById("projectName").value;
                 let saveData = {
                     "id": id,
-                    "name":name,
+                    "name": document.getElementById("projectName").value,
+                    "description": document.getElementById("projectDescription").value,
                     sites, //This should contain all of the markers, observations, polygons, and habitats
                     markers, //All observations
                     //todo: we'll probably want to store the iNaturalist urls at some point
@@ -502,7 +508,6 @@ html
                 }
                 //Then we package this up, and post it.
                 //This page will also need a Load() function.
-                console.log(saveData);
 
                 httpPost("/createUserDataFromJSON", setId, saveData);
             }
@@ -774,7 +779,7 @@ body
                                 div(class="bold blue smallSpaceAbove") Enter Project Name
                                 input(id="projectName")
                                 div(class="bold blue smallSpaceAbove") Enter Project Description
-                                textarea(rows="3" class="fullWidth")
+                                textarea(id="projectDescription" rows="3" class="fullWidth")
 
                             div(style="margin-bottom:20px;") <b>Step 2. Indicate Taxonomic Groups</b>
                                 div(style="display:flex;") Surrogate species must be indicated in at least five different taxonomic groups. The first three of these groups are birds, plants, and invertebrate pollinators. The remaining two are customizable by city. Indicate those here.
