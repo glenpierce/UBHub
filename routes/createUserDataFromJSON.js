@@ -24,12 +24,17 @@ router.post('/', function(req, res){
             data = data.replace(/https?\:\/\//gi, "");
             let queryString;
             if(id == null) {
-                id = new Date();
+                id = Date.now();
                 queryString = "INSERT INTO userData (site, program, jsonData, id) VALUES ('" + selectedSite[0][0].id + "', '" + 1 + "', '" + data + "', " + id + ");";
             } else {
                 queryString = "update userData set jsonData = '" + data + "' where id = " + id + ");";
             }
-            makeDbCallAsPromise(queryString);
+            makeDbCallAsPromise(queryString).then(() => {
+                let response = id.toString();
+                res.writeHead(200, {'Content-Type': 'text/html'});
+                res.write(response);
+                res.end();
+            });
         }
     );
 });

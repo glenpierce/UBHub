@@ -24,7 +24,7 @@ html
             let dataFromServer = !{dataFromServer};
             console.log(dataFromServer);
             let id;
-            if(dataFromServer) {
+            if(dataFromServer.id) {
                 id = !{id};
             }
             var sites = [];
@@ -491,7 +491,11 @@ html
                 //This page will also need a Load() function.
                 console.log(saveData);
 
-                httpPost("/createUserDataFromJSON", console.log, saveData);
+                httpPost("/createUserDataFromJSON", setId, saveData);
+            }
+
+            function setId(response) {
+                id = response;
             }
 
             processRequest = function () {

@@ -19,11 +19,14 @@ app.use(session({
 
 router.get('/', function (req, res, next) {
     if(req.query.newId) {
-        switch (res.query.newId) {
-            case 1:
-                res.render('program', {username: req.session.user, id: req.query.newId});
+        switch (req.query.newId) {
+            case "1":
+                let emptyObject = JSON.stringify({data:""});
+                res.render('program', {username: req.session.user, id: req.query.newId, dataFromServer:emptyObject});
                 return;
             default:
+                console.log("incorrect newId query");
+                console.log(req.query.newId);
                 return;
         }
     } else {
