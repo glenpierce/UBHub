@@ -47,7 +47,7 @@ body
                                  for program in basicProgramData
                                      if program.iconFileName
                                          div(id="#{program.id}" style="display:flex; flex-direction:column; cursor:pointer; margin:5px; padding:10px; align-items:center; justify-content:space-between;" onclick="window.location='/programs/?id=#{program.id}'" onmouseover="onHover(#{program.id});")
-                                            div(style="font-weight:700; margin-bottom:10px; text-align:center; font-size:15px; color:#808080") BEGIN<br>NEW
+                                            div(style="font-weight:700; margin-bottom:10px; text-align:center; font-size:15px; color:#808080") SELECT
                                             div(style="height:90px;")
                                                 image(src="/images/#{program.iconFileName}" style="max-width:150px; max-height:90px; height:auto; width:auto;")
                                             div(style="font-weight:700; margin:10px 0px 10px 0px; text-align:center; max-width:150px; height:32px; vertical-align:middle;") #{program.programName}

@@ -29,6 +29,14 @@ html
             }
             let description;
             let taxa = [];
+            if(dataFromServer.taxa) {
+                taxa = dataFromServer.taxa;
+            }
+            let habitats = [""];
+            let habitatData = [];
+            if(dataFromServer.habitatData) {
+                habitatData = dataFromServer.habitatData;
+            }
             let sites = [];
             if(dataFromServer.sites) {
                 sites = dataFromServer.sites;
@@ -41,7 +49,6 @@ html
             let verificationTable;
             let speciesPresenceTable;
             let columns;
-            let habitats = [""];
             let speciesSet = new Set();
             let startDate;
             function dateStartChanged(input) {
@@ -118,6 +125,20 @@ html
                 speciesPresenceTable = new Tabulator("#speciesPresenceTable", {
                     layoutColumnsOnNewData: true
                 });
+
+                for (let i = 0; i < taxa.length; i++) {
+                    columns[1].editorParams[taxa[i]] = taxa[i];
+                    table.setColumns(columns);
+                    table.redraw(true);
+                    newTaxonLabel = document.createElement("DIV");
+                    newTaxonLabel.textContent = taxa[i];
+                    document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
+                }
+
+                for (let i = 0; i < habitatData.length; i++) {
+                    addHabitatData(habitatData[i].title);
+                }
+
             };
 
             function generateTableData(button) {
@@ -419,44 +440,51 @@ html
             }
 
             function addHabitat() {
-                habitatNameElement = document.getElementById("habitatNameId");
+                let habitatNameElement = document.getElementById("habitatNameId");
+                let habitatName = habitatNameElement.value;
                 let newHabitat = {
-                    title: habitatNameElement.value,
-                    field: habitatNameElement.value,
+                    title: habitatName,
+                    field: habitatName,
                     width: 90,
                     align: "center",
                     formatter: "tickCross",
                     sorter: "boolean",
                     editor: true
                 }
-                habitats.push(habitatNameElement.value);
+                habitatData.push(newHabitat);
                 columns.push(newHabitat);
                 table.setColumns(columns);
                 table.redraw(true);
-                newHabitatLabel = document.createElement("DIV");
-                newHabitatLabel.textContent = habitatNameElement.value
+
+                addHabitatData(habitatName);
+
+                habitatNameElement.value = "";
+            }
+
+            function addHabitatData(habitatName) {
+                habitats.push(habitatName);
+                let newHabitatLabel = document.createElement("DIV");
+                newHabitatLabel.textContent = habitatName
                 document.getElementsByClassName("habitat")[0].appendChild(newHabitatLabel);
                 for (let site in sites) {
                     let option = document.createElement("OPTION");
-                    option.appendChild(document.createTextNode(habitatNameElement.value));
+                    option.appendChild(document.createTextNode(habitatName));
                     sites[site].siteHatbitatSelector.appendChild(option);
                 }
 
                 let button = document.createElement("button");
-                button.innerHTML = habitatNameElement.value;
+                button.innerHTML = habitatName;
                 button.addEventListener("click", function () {
                     verifyTable(this);
                 });
                 document.getElementById("verifyButtons").appendChild(button);
 
                 let surrogateSpeciesByHabitatButton = document.createElement("button");
-                surrogateSpeciesByHabitatButton.innerHTML = habitatNameElement.value;
+                surrogateSpeciesByHabitatButton.innerHTML = habitatName;
                 surrogateSpeciesByHabitatButton.addEventListener("click", function () {
                     surrogateSpeciesByHabitatTable(this);
                 });
                 document.getElementById("surrogateSpeciesByHabitatButtons").appendChild(surrogateSpeciesByHabitatButton);
-
-                habitatNameElement.value = "";
             }
 
             function addTaxon() {
@@ -491,7 +519,8 @@ html
                     "id": id,
                     "name": document.getElementById("projectName").value,
                     "description": document.getElementById("projectDescription").value,
-                    "taxa":taxa,
+                    "taxa": taxa,
+                    "habitatData": habitatData,
                     sites, //This should contain all of the markers, observations, polygons, and habitats
                     markers, //All observations
                     //todo: we'll probably want to store the iNaturalist urls at some point
