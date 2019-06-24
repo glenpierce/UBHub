@@ -137,7 +137,11 @@ html
 
                 for (let i = 0; i < habitatData.length; i++) {
                     addHabitatData(habitatData[i].title);
+                    columns.push(habitatData[i]);
                 }
+
+                table.setColumns(columns);
+                table.redraw(true);
 
             };
 
