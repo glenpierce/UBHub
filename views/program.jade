@@ -28,19 +28,19 @@ html
                 id = !{id};
             }
             let description;
-            var sites = [];
+            let taxa = [];
+            let sites = [];
             if(dataFromServer.sites) {
                 sites = dataFromServer.sites;
             }
-            var markers = [];
+            let markers = [];
             if(dataFromServer.markers) {
                 markers = dataFromServer.markers;
             }
-            var polygon;
-            var table;
+            let table;
             let verificationTable;
             let speciesPresenceTable;
-            var columns;
+            let columns;
             let habitats = [""];
             let speciesSet = new Set();
             let startDate;
@@ -69,7 +69,7 @@ html
 
                 initMapOnPage();
 
-                var tableData = [{"species": "", "taxa": ""}];
+                let tableData = [{"species": "", "taxa": ""}];
 
                 columns = [
                     {title: "Species", field: "species", editor: "input"},
@@ -178,7 +178,7 @@ html
             }
 
             function initMapOnPage() {
-                center = {lat: 20, lng: 15};
+                let center = {lat: 20, lng: 15};
                 map = new google.maps.Map(document.getElementById('map'), {
                     zoom: 2, streetViewControl: false,
                     center: center,
@@ -330,12 +330,7 @@ html
                 });
                 drawingManager.setMap(map);
                 google.maps.event.addListener(drawingManager, "polygoncomplete", function (polygon) {
-                    // if (event.type == 'circle') {
-                    //     var radius = event.overlay.getRadius();
-                    // }
-                    // if (event.type == 'polygon') {
-                    //     polygon = event.overlay.getPath().getArray();
-                        var site = {
+                        let site = {
                             polygon: polygon.getPath().getArray(),
                             Polygon: polygon,
                             coordinates: [],
@@ -348,8 +343,7 @@ html
                             maxX: polygon.getPath().getArray()[0].lng() + 180,
                             maxY: polygon.getPath().getArray()[0].lat() * -1 + 90
                         }
-                        for (var i = 0; i < site.polygon.length; i++) {
-                            // console.log(site.polygon[i].lat() + ", " + site.polygon[i].lng());
+                        for (let i = 0; i < site.polygon.length; i++) {
                             site.coordinates.push({lat: site.polygon[i].lat(), lng: site.polygon[i].lng()})
                             if(site.polygon[i].lat() * -1 + 90 < site.minY) {
                                 site.minY = site.polygon[i].lat() * -1 + 90;
@@ -366,8 +360,6 @@ html
                         }
                         addSiteToUi(site);
                         sites.push(site)
-                        // console.log(sites);
-                    // }
                 });
             }
             function addSiteToUi(site) {
@@ -469,6 +461,7 @@ html
 
             function addTaxon() {
                 taxonNameElement = document.getElementById("taxonNameId");
+                taxa.push(taxonNameElement.value);
                 columns[1].editorParams[taxonNameElement.value] = taxonNameElement.value;
                 table.setColumns(columns);
                 table.redraw(true);
@@ -498,6 +491,7 @@ html
                     "id": id,
                     "name": document.getElementById("projectName").value,
                     "description": document.getElementById("projectDescription").value,
+                    "taxa":taxa,
                     sites, //This should contain all of the markers, observations, polygons, and habitats
                     markers, //All observations
                     //todo: we'll probably want to store the iNaturalist urls at some point
@@ -506,8 +500,6 @@ html
                     endDate,
                     timeFrame
                 }
-                //Then we package this up, and post it.
-                //This page will also need a Load() function.
 
                 httpPost("/createUserDataFromJSON", setId, saveData);
             }
@@ -526,7 +518,7 @@ html
                     iNaturalistProjectId = encodeURIComponent(iNaturalistProjectId);
                     document.getElementById("input").value = "";
 
-                    var xhr = new XMLHttpRequest();
+                    let xhr = new XMLHttpRequest();
 
                     xhr.onreadystatechange = function () {
                         if (xhr.readyState == 3) {
@@ -548,11 +540,11 @@ html
                     scaledSize: new google.maps.Size(20, 30)
                 };
                 for (observation in observations) {
-                    var position = {
+                    let position = {
                         lat: parseFloat(observations[observation].latitude),
                         lng: parseFloat(observations[observation].longitude)
                     };
-                    var marker = new google.maps.Marker({
+                    let marker = new google.maps.Marker({
                         position: position,
                         map: map,
                         icon: greyImage
@@ -573,7 +565,7 @@ html
             }
 
             updateMap = function () {
-                var minLat, maxLat, minLng, maxLng;
+                let minLat, maxLat, minLng, maxLng;
                 for (i = 0; i < markers.length; i++) {
                     if (minLat == null || markers[i].getPosition().lat() < minLat)
                         minLat = markers[i].getPosition().lat();
@@ -585,7 +577,7 @@ html
                         maxLng = markers[i].getPosition().lng();
                 }
 
-                var rectangle = new google.maps.Rectangle({
+                let rectangle = new google.maps.Rectangle({
                     strokeColor: "#FFFFFF",
                     strokeOpacity: 0.0,
                     strokeWeight: 2,
@@ -617,8 +609,8 @@ html
 
             chartSites = function () {
                 mapHabitatsToSites();
-                for (i = 0; i < markers.length; i++) {
-                    for (k = 0; k < sites.length; k++) {
+                for (let i = 0; i < markers.length; i++) {
+                    for (let k = 0; k < sites.length; k++) {
                         if (sites[k].Polygon.Contains(markers[i].getPosition())) {
                             sites[k].markers.push(markers[i]);
                             //todo: see UBIF-0015
@@ -658,7 +650,7 @@ html
                     .append("rect")
                     .attr("height", function (d) {
                         let speciesInPolygon = new Set();
-                        var presence = 0;
+                        let presence = 0;
                         for (marker in d.markers) {
                             if (!speciesInPolygon.has(d.markers[marker].species) && d.siteSpecies.has(d.markers[marker].species) && d.markers[marker].observedOn < endDate && d.markers[marker].observedOn > startDate) { //please make me a function
                                 presence += 1;
@@ -679,7 +671,7 @@ html
                     // })
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
-                        var translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding, 0];
+                        let translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding, 0];
                         return "translate(" + translate + ")";
                     });
 
