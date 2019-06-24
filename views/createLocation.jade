@@ -26,8 +26,13 @@ html
 body
     +header(true)
 
-    div(style="padding:40px;")
-        input(id="siteName" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
-        button(onclick='httpGetAsync("/createLocation", redirect)') Create Location here :)
+    div(style="padding:40px; margin:auto; max-width:800px;")
+        h1 Create Location
+        div Enter a unique name for the new location here.
+        div(class="flex spaceAbove" style="align-items:baseline;")
+            div(style="padding-right:5px;") Location name:
+            input(id="siteName" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+        button(class="spaceAbove" style="cursor:pointer;" onclick='httpGetAsync("/createLocation", redirect)') enter
+        button(class="spaceAbove" style="cursor:pointer; display:block;" onclick='window.location="/changeLocation"') go back
 
     +footer()

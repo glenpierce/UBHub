@@ -18,8 +18,9 @@ mixin indicator(indicatorName, indicatorDescription, descriptionOfCalculation, i
         div(style="border:solid; align-self:center;") Add
 
 mixin site(siteName, siteDescription)
-    div(style="border:solid;" onclick="selectSite(#{siteName})")
+    button(class="flex spaceAbove" onclick="selectSite(#{siteName})" style="cursor:pointer;")
         div #{siteName}
+        div(style="padding-left:10px;")
         div #{siteDescription}
 
 mixin header(displayLoginInfo)

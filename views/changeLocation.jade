@@ -13,21 +13,13 @@ html
 body
     +header(true)
 
-    div(style="padding:40px;")
+    div(style="padding:40px; margin:auto; max-width:800px;")
         - var sitesJSON = JSON.parse(sites);
-        div(onclick="window.location='/createLocation'") create new location
-        //div #{sites}
-        //div #{sitesJSON}
+        h1 myHub Locations
+        div Please select the location you would like to be active.
         - for (var i = 0; i < sitesJSON.length; i++)
             +site(sitesJSON[i].id, sitesJSON[i].siteName)
-        //script.
-        //    var sites = !{sites};
-        //    console.log(sites);
-        //    console.log(sites.length);
-        //    for (var i = 0; i < sites.length; i++) {
-        //        console.log(sites[i]);
-        //        console.log(sites[i].indicatorName);
-        //        document.write("<div> indicator " + sites[i].id +" </div>");
-        //    }
+
+        button(class="spaceAbove" style="cursor:pointer;" onclick="window.location='/createLocation'") create new
 
     +footer()

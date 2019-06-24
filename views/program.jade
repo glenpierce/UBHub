@@ -135,6 +135,10 @@ html
                     document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
                 }
 
+                for (let i = 0; i < sites.length; i++) {
+                    addSiteToUi(sites[i]);
+                }
+
                 for (let i = 0; i < habitatData.length; i++) {
                     addHabitatData(habitatData[i].title);
                     columns.push(habitatData[i]);
@@ -525,7 +529,7 @@ html
                     "description": document.getElementById("projectDescription").value,
                     "taxa": taxa,
                     "habitatData": habitatData,
-                    sites, //This should contain all of the markers, observations, polygons, and habitats
+                    "sites": sites, //This should contain all of the markers, observations, polygons, and habitats
                     markers, //All observations
                     //todo: we'll probably want to store the iNaturalist urls at some point
                     tableData, //This contains the columns and the rows which the user should have also overridden if needed.
