@@ -732,9 +732,6 @@ html
             }
 
             observationsPerSiteByTaxon = function(taxa) {
-                console.log(taxa);
-                console.log(sites);
-                console.log(speciesTaxaMap);
                 clearPriorChartIfAny("observationsPerSiteByTaxon");
 
                 if (startDate == null) {
@@ -752,6 +749,10 @@ html
                 const barZoneWidth = svgWidth - leftAxisExtraMargin;
                 const barPadding = barZoneWidth / taxa.length / 2;
 
+                let heightFactor = svgHeight - footerHeight - headerHeight;
+
+                let heights = [];
+
                 let svg = d3.select('#observationsPerSiteByTaxon')
                     .attr("width", svgWidth)
                     .attr("height", svgHeight)
@@ -762,9 +763,10 @@ html
                     .enter()
                     .append("rect")
                     .attr("height", function (d) {
-                        let numerator = 0;
-                        let denominator = 0;
+                        let incrimentalResults = [];
                         for (let i = 0; i < sites.length; i++) {
+                            let numerator = 0;
+                            let denominator = 0;
                             for (let k = 0; k < sites[i].markers.length; k++) {
                                 if(d == speciesTaxaMap.get(sites[i].markers[k].species)) {
                                     numerator++;
@@ -775,17 +777,18 @@ html
                                 if (d == speciesTaxaMap.get(species))
                                     denominator++;
                             });
+                            if(denominator !== 0) {
+                                incrimentalResults.push(numerator / denominator);
+                            }
                         }
-                        console.log(numerator);
-                        console.log(denominator);
                         let height;
-                        if(denominator === 0)
+                        if(incrimentalResults.length === 0)
                             height = 0;
                         else
-                            height = numerator / denominator;
+                            height = incrimentalResults.reduce(function(a,b){return a+b;}) / incrimentalResults.length;
 
-                        let heightFactor = svgHeight - footerHeight - headerHeight;
                         height = height * heightFactor;
+                        heights.push(height);
                         return height;
                     })
                     .style("stroke", "white")
@@ -793,7 +796,7 @@ html
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
-                        let translate = [i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding, footerHeight];
+                        let translate = [i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding, footerHeight + heightFactor - heights[i]];
                         return "translate(" + translate + ")";
                     });
 
