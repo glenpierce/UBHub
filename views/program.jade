@@ -15,10 +15,13 @@ html
             .tabulator-tableHolder {
                 max-height: 400px !important;
             }
-        link(href="https://unpkg.com/tabulator-tables@4.2.3/dist/css/tabulator.min.css" rel="stylesheet")
-        script(type="text/javascript" src="https://unpkg.com/tabulator-tables@4.2.3/dist/js/tabulator.min.js")
+        //link(href="https://unpkg.com/tabulator-tables@4.2.3/dist/css/tabulator.min.css" rel="stylesheet")
+        //script(type="text/javascript" src="https://unpkg.com/tabulator-tables@4.2.3/dist/js/tabulator.min.js")
+        link(href="/stylesheets/tabulator.min.css" rel="stylesheet")
+        script(type="text/javascript" src="/javascripts/tabulator.min.js")
         link(rel='stylesheet', href='/stylesheets/style.css')
-        script(src="https://d3js.org/d3.v5.min.js")
+        //script(src="https://d3js.org/d3.v5.min.js")
+        script(type="text/javascript" src="/javascripts/d3.min.js")
         script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&libraries=drawing,geometry")
         script.
             let dataFromServer = !{dataFromServer};
@@ -74,7 +77,7 @@ html
                     document.getElementById("projectDescription").value = dataFromServer.description;
                 }
 
-                initMapOnPage();
+                // initMapOnPage();
 
                 let tableData = [{"species": "", "taxa": ""}];
 
@@ -502,8 +505,16 @@ html
                 table.setColumns(columns);
                 table.redraw(true);
                 newTaxonLabel = document.createElement("DIV");
-                newTaxonLabel.textContent = taxonNameElement.value
+                newTaxonLabel.textContent = taxonNameElement.value;
                 document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
+
+                // let taxonButton = document.createElement("button");
+                // taxonButton.innerHTML = taxonNameElement.value;
+                // taxonButton.addEventListener("click", function () {
+                //     console.log(taxonNameElement.value);
+                // });
+                // document.getElementById("taxaButtons").appendChild(taxonButton);
+
                 taxonNameElement.value = "";
             }
 
@@ -935,15 +946,55 @@ body
                 +stickyInfoTab("UBIF Track 2 Reports", "infant3", "#07456b", false, "stickyThird")
                 div(id="infant3" class="mapInfoContent hide" style="display:flex flex-direction:column; margin:auto;")
                     div(style="max-width:800px; margin-bottom:20px; margin:auto;")
-                        div(class="spaceAbove spaceBelow centerContentsViaFlex" id="surrogateSpeciesByHabitatButtons")
 
-                        div(id="speciesPresenceTable" class="spaceBelow")
-
-                        div(class="spaceBelow centerContentsViaFlex")
+                        div(class="spaceAbove spaceBelow centerContentsViaFlex")
                             button(onclick="chartSites()") Chart Sites
 
-                        div(style="border:solid;")
+                        h1(class="spaceAbove") Status Report
+
+                        img(src="/images/UBHub_logo_mainwebsite.png")
+
+                        div(class="spaceAbove") This report has been automatically generated from data entered into the indicator tracker on www.ubhub.com.
+                        div(class="spaceAbove") The Urban Biodiversity Inventory Framework (UBIF) is a standardized system for local governments to measure the status of biodiversity in an urban environment. It was first developed in 2017 in a partnership effort under the Urban Sustainability Directors Network (USDN). In the UBIF system, adherents choose surrogate species which will serve as proxy indicators for biodiversity status. They will also indicate particular places within which to track these species. Data is then tracked by taxonomic group and habitat type over time to measure progress.
+                        div(class="spaceAbove") Adherents to UBIF can select from three different methods, or “tracks”. Track 2, used here, calls for species observations to include both presence and absence data for each habitat type. Adherents to UBIF Track 2 set goals for the presence of surrogate species in each habitat and taxon and track their progress over time.
+
+                        h2(class="spaceAbove") Section 1: Overview of Surrogate Species
+
+                        h2(class="spaceAbove centerText") Observations of Surrogate Species in All Habitats of Interest
+
+                        div(style="border:solid; width:500px; height:300px; margin:auto;")
                             svg(class="chart")
+
+                        h2 Observations of Surrogate Species in All Habitats of Interest Over Time
+
+                        div(style="border:solid; width:500px; height:300px; margin:auto;")
+                            svg(class="chart")
+
+                        h2 Section 2: Overview of Species by Habitat Type
+
+                        h2 Surrogate Species in selected Habitat
+                        div(class="spaceAbove spaceBelow centerContentsViaFlex" id="surrogateSpeciesByHabitatButtons")
+
+                        div(style="border:solid; width:500px; height:300px; margin:auto;")
+                            svg(class="chart")
+
+                        h2 Presence/Absence of Surrogate Species Within ____ Taxa by Habitat
+
+                        div(class="spaceAbove spaceBelow centerContentsViaFlex" id="taxaButtons")
+                            button Birds
+                            button Invertebrates
+                            button Plants
+
+                        div(style="border:solid; width:500px; height:300px; margin:auto;")
+                            svg(class="chart")
+
+                        h2 Section 3: Status of Surrogate Species in ____ Habitat
+                        div Overview chart, then up to 6 charts (one for each taxon) showing data from each place
+
+                        div(style="border:solid; width:500px; height:300px; margin:auto;")
+                            svg(class="chart")
+
+                        div(id="speciesPresenceTable" class="spaceBelow")
 
 
     +footer()

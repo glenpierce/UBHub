@@ -103,6 +103,10 @@ button:hover {
   margin: auto;
 }
 
+.centerText {
+  text-align: center;
+}
+
 .centerContentsViaFlex {
   display:flex; flex-direction:column; align-items:center;
 }
