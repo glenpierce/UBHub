@@ -31,7 +31,8 @@ html
                 id = !{id};
             }
             let description;
-            let taxa = [];
+            let taxa = ["Plants", "Birds", "Invertebrate Pollinators"];
+            //green, red, yellow, brown, blue
             if(dataFromServer.taxa) {
                 taxa = dataFromServer.taxa;
             }
@@ -53,6 +54,7 @@ html
             let speciesPresenceTable;
             let columns;
             let speciesSet = new Set();
+            let speciesTaxaMap = new Map();
             let startDate;
             function dateStartChanged(input) {
                 startDate = new Date(input.value);
@@ -77,14 +79,14 @@ html
                     document.getElementById("projectDescription").value = dataFromServer.description;
                 }
 
-                // initMapOnPage();
+                initMapOnPage();
 
                 let tableData = [{"species": "", "taxa": ""}];
 
                 columns = [
                     {title: "Species", field: "species", editor: "input"},
-                    {title: "Taxa", field: "taxa", editor: "select", editorParams: {"Plant": "Plant", "Bird": "Bird", "Invert Pollinator": "Invert Pollinator"}
-                    }];
+                    {title: "Taxa", field: "taxa", editor: "select", editorParams: {}}
+                    ];
 
                 table = new Tabulator("#example-table", {
                         layoutColumnsOnNewData: true,
@@ -117,6 +119,9 @@ html
                                     sites[habitatIndex[index]].siteSpecies.delete(cell._cell.row.data.species);
                                     sites[habitatIndex[index]].taxa.delete(cell._cell.row.data.taxa);
                                 }
+                            }
+                            if (cell._cell.column != null && cell._cell.column.field == "taxa") {
+                                speciesTaxaMap.set(cell._cell.row.data.species, cell._cell.row.data.taxa);
                             }
                         }
                     }
@@ -657,21 +662,175 @@ html
 
             chartSites = function () {
                 mapHabitatsToSites();
-                for (let i = 0; i < markers.length; i++) {
-                    for (let k = 0; k < sites.length; k++) {
-                        if (sites[k].Polygon.Contains(markers[i].getPosition())) {
-                            sites[k].markers.push(markers[i]);
-                            //todo: see UBIF-0015
-                            // break;
+                // if(true) {
+                    for (let i = 0; i < markers.length; i++) {
+                        for (let k = 0; k < sites.length; k++) {
+                            if (sites[k].Polygon.Contains(markers[i].getPosition())) {
+                                sites[k].markers.push(markers[i]);
+                                //todo: see UBIF-0015
+                                // break;
+                            }
                         }
                     }
+                // } else {
+                //     let mySiteSpecies = new Set();
+                //     mySiteSpecies.add("Grass");
+                //     mySiteSpecies.add("Tree");
+                //     sites = [
+                //         {
+                //             name: "site 1",
+                //             markers:[
+                //                 {
+                //                     species:"Grass",
+                //                     observedOn: new Date("2019-01-01")
+                //                 },
+                //                 {
+                //                     species: "Tree",
+                //                     observedOn: new Date("2019-02-02")
+                //                 }
+                //                 ],
+                //             habitat: "a",
+                //             taxa: "Plants",
+                //             siteSpecies: mySiteSpecies
+                //         },
+                //         {
+                //             name: "site 2",
+                //             markers: [
+                //                 {
+                //                     species: "Grass",
+                //                     observedOn: new Date("2019-01-01")
+                //                 },
+                //                 {
+                //                     species: "Tree",
+                //                     observedOn: new Date("2019-02-02")
+                //                 }
+                //             ],
+                //             habitat: "a",
+                //             taxa: "Plants",
+                //             siteSpecies: mySiteSpecies
+                //         },
+                //         {
+                //             name: "site 3",
+                //             markers: [
+                //                 {
+                //                     species: "Grass",
+                //                     observedOn: new Date("2019-01-01")
+                //                 },
+                //                 {
+                //                     species: "Tree",
+                //                     observedOn: new Date("2019-02-02")
+                //                 }
+                //             ],
+                //             habitat: "a",
+                //             taxa: "Plants",
+                //             siteSpecies: mySiteSpecies
+                //         }
+                //     ]
+                // }
+
+                observationsPerSiteByTaxon(taxa);
+            }
+
+            observationsPerSiteByTaxon = function(taxa) {
+                console.log(taxa);
+                console.log(sites);
+                console.log(speciesTaxaMap);
+                clearPriorChartIfAny("observationsPerSiteByTaxon");
+
+                if (startDate == null) {
+                    startDate = new Date("1900-01-01");
                 }
 
-                chart(sites);
+                const svgWidth = 500;
+                const svgHeight = 300;
+                const strokeWidth = 0;
+                const barWidth = 20;
+                const headerHeight = 20;
+                const footerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
+                const leftAxisMargin = 20;
+                const leftAxisExtraMargin = leftAxisMargin + 24;
+                const barZoneWidth = svgWidth - leftAxisExtraMargin;
+                const barPadding = barZoneWidth / taxa.length / 2;
+
+                let svg = d3.select('#observationsPerSiteByTaxon')
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .attr("class", "bar-chart");
+
+                svg.selectAll("rect")
+                    .data(taxa)
+                    .enter()
+                    .append("rect")
+                    .attr("height", function (d) {
+                        let numerator = 0;
+                        let denominator = 0;
+                        for (let i = 0; i < sites.length; i++) {
+                            for (let k = 0; k < sites[i].markers.length; k++) {
+                                if(d == speciesTaxaMap.get(sites[i].markers[k].species)) {
+                                    numerator++;
+                                    break;
+                                }
+                            }
+                            sites[i].siteSpecies.forEach(function (species) {
+                                if (d == speciesTaxaMap.get(species))
+                                    denominator++;
+                            });
+                        }
+                        console.log(numerator);
+                        console.log(denominator);
+                        let height;
+                        if(denominator === 0)
+                            height = 0;
+                        else
+                            height = numerator / denominator;
+
+                        let heightFactor = svgHeight - footerHeight - headerHeight;
+                        height = height * heightFactor;
+                        return height;
+                    })
+                    .style("stroke", "white")
+                    .style("fill", "grey")
+                    .style("stroke-width", strokeWidth)
+                    .attr("width", barWidth)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding, footerHeight];
+                        return "translate(" + translate + ")";
+                    });
+
+                svg.selectAll("text")
+                    .data(taxa)
+                    .enter()
+                    .append("text")
+                    .attr("class", "chartLabel")
+                    .style("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .attr("width", svgWidth / taxa.length)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight];
+                        return "translate(" + translate + ")";
+                    })
+                    .text(function (d) {
+                        return d;
+                    });
+
+                let yScale = d3.scaleLinear()
+                    .domain([1, 0])
+                    .range([footerHeight, svgHeight - headerHeight]);
+
+                const formatPercent = d3.format(".0%");
+
+                let yAxis = d3.axisLeft()
+                    .scale(yScale)
+                    .tickFormat(formatPercent)
+                    .tickSize(svgWidth - leftAxisMargin, 0, 0);
+
+                svg.append("g")
+                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + 0 + ")")
+                    .call(yAxis);
             }
 
             chart = function (sites) {
-                clearPriorChartIfAny();
+                // clearPriorChartIfAny();
                 if(startDate == null) {
                     startDate = new Date("1900-01-01");
                 }
@@ -732,7 +891,7 @@ html
                     .attr("fill", "black")
                     .attr("width", svgWidth / sites.length)
                     .attr("transform", function (d, i) {
-                        var translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight - 10];
+                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight - 10];
                         return "translate(" + translate + ")";
                     })
                     .text(function (d) {
@@ -755,8 +914,8 @@ html
                     .call(yAxis);
             }
 
-            function clearPriorChartIfAny() {
-                let oldChart = document.getElementsByClassName("bar-chart")[0];
+            function clearPriorChartIfAny(oldChartId) {
+                let oldChart = document.getElementById(oldChartId);
                 if (oldChart != null) {
                     while (oldChart.firstChild) {
                         oldChart.removeChild(oldChart.firstChild);
@@ -833,9 +992,6 @@ body
                                         input(id="taxonNameId")
                                         button(onclick="addTaxon()") add taxon
                                     div(class="taxon boxedChildren smallSpaceAbove")
-                                        div Bird
-                                        div Plant
-                                        div Invertebrate Pollinator
 
                             div(style="margin-bottom:20px;") <b>Step 3. Indicate your habitats of interest.</b>
                                 div Indicate the various habitats that you will be tracking in this project. The type and number of habitats of interest should be based on known native habitats found currently or historically within the city and is completely up to the individual city’s discretion. Note that the surrogate species will be the same across each habitat (each habitat will often have multiple sites known as “place”). Some examples include: prairie, wetland, freshwater, douglas fir forest, brownfields.
@@ -874,23 +1030,8 @@ body
                                     div 5. The group of species selected to represent a given habitat type should highlight a range of species needs provided by functional habitat but will primarily focus on species with some tolerance of the urban environment
                                     div 6. The entire suite of selected species (across taxa and habitat types) should provide a representation of the different native regional habitats and of different classes of native species
 
-                        div(class="spaceAbove")
-                            div(class="bold blue") Upload CSV
-                            input(type="file")
-
-                        div(style="display:flex; flex-direction:column;")
-                            button(onclick="addSpecies()" class="spaceBelow spaceAbove") add species
-
-                        div(id="example-table")
-
-                        button(onclick="save()" class="spaceAbove") Save Program Instance
-
-                +stickyInfoTab("UBIF Track 2 Data Entry", "infant2", "#07456b", false, "stickySecond")
-                div(id="infant2" class="mapInfoContent hide" style="display:flex flex-direction:column; margin:auto;")
-                        div(style="max-width:400px; margin-bottom:20px; margin:auto;")
-                            //h1(class="bold spaceAbove spaceBelow") Data Entry.
-                            div
-                                div(class="bold") Step 1. Import data from pre-existing species observations.
+                            div(class="spaceAbove")
+                                div(class="bold") Import data from pre-existing species observations.
                                 div(style="margin-bottom:20px;") Indicate the sources from which you would like to pull in observations into the project. This step is optional, and you can override this information as you see fit.
                                 div
                                     div(class="bold blue") iNaturalist Project
@@ -908,9 +1049,25 @@ body
                                     //    input
                                     //    button(onclick="processRequest()") import
 
-                            div(class="spaceBelow") Optionally, the user may choose to skip this step and manually enter presence/absence data rather than import. This can be done in step 3.
+                            div(class="spaceBelow") Optionally, the user may choose to skip this step and manually enter presence/absence data rather than import.
 
-                            div(class="bold") Step 2. Indicate time frame:
+                        //div(class="spaceAbove")
+                        //    div(class="bold blue") Upload CSV
+                        //    input(type="file")
+
+                        div(style="display:flex; flex-direction:column;")
+                            button(onclick="addSpecies()" class="spaceBelow spaceAbove") add species
+
+                        div(id="example-table")
+
+                        button(onclick="save()" class="spaceAbove") Save Program Instance
+
+                +stickyInfoTab("UBIF Track 2 Data Entry", "infant2", "#07456b", false, "stickySecond")
+                div(id="infant2" class="mapInfoContent hide" style="display:flex flex-direction:column; margin:auto;")
+                        div(style="max-width:400px; margin-bottom:20px; margin:auto;")
+                            //h1(class="bold spaceAbove spaceBelow") Data Entry.
+
+                            div(class="bold") Step 1. Indicate time frame:
                             div(class="spaceBelow") Choose whether the data will be analyzed by year or month. Then enter the time frame of interest. We recommend no more than 5 time units to br compared (i.e. 5 months or 5 years).
                             div(class="flex")
                                 div Time Interval: make me a radio button group
@@ -924,14 +1081,14 @@ body
                                 div(style="margin:8px;") to
                                 input(type="date" onchange="dateEndChanged(this)")
 
-                            div(class="bold spaceAbove") Step 3. Verify data:
+                            div(class="bold spaceAbove") Step 2. Verify data:
                             div(class="spaceBelow") Display the map of polygons and a table of the species for each polygon (select one at a time). User goes through one place/polygon at a time, and can click buttons in the species table for the user to verify presence/absence. Data is to be verified separately for each time frame.
                             div(class="spaceBelow centerContentsViaFlex" id="verifyButtons")
 
 
                             div(id="verification-table" class="hidden spaceBelow")
 
-                            div(class="bold") Step 4. Set Targets:
+                            div(class="bold") Step 3. Set Targets:
                             div(class="spaceBelow") Displays current presence data for each habitat by taxa. For each habitat and each taxa, the user will enter the target presence.
 
                             div(class="centerContentsViaFlex")
@@ -963,7 +1120,7 @@ body
                         h2(class="spaceAbove centerText") Observations of Surrogate Species in All Habitats of Interest
 
                         div(style="border:solid; width:500px; height:300px; margin:auto;")
-                            svg(class="chart")
+                            svg(id="observationsPerSiteByTaxon" class="chart")
 
                         h2 Observations of Surrogate Species in All Habitats of Interest Over Time
 
