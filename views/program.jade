@@ -157,6 +157,8 @@ html
                     newTaxonLabel = document.createElement("DIV");
                     newTaxonLabel.textContent = taxa[i];
                     document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
+
+                    addTaxonButton(taxa[i]);
                 }
 
                 for (let i = 0; i < sites.length; i++) {
@@ -537,14 +539,18 @@ html
                 newTaxonLabel.textContent = taxonNameElement.value;
                 document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
 
-                // let taxonButton = document.createElement("button");
-                // taxonButton.innerHTML = taxonNameElement.value;
-                // taxonButton.addEventListener("click", function () {
-                //     console.log(taxonNameElement.value);
-                // });
-                // document.getElementById("taxaButtons").appendChild(taxonButton);
+                addTaxonButton(taxonNameElement.value);
 
                 taxonNameElement.value = "";
+            }
+
+            function addTaxonButton(taxonName) {
+                let taxonButton = document.createElement("button");
+                taxonButton.innerHTML = taxonName;
+                taxonButton.addEventListener("click", function () {
+                    selectedTaxaByHabitatChart(taxonName);
+                });
+                document.getElementById("taxaButtons").appendChild(taxonButton);
             }
 
             function addSpecies() {
@@ -1092,7 +1098,7 @@ html
                     .call(yAxis);
             }
 
-            selectedTaxaByHabitatChart = function (taxaButton) {
+            selectedTaxaByHabitatChart = function (taxaButtonText) {
                 clearPriorChartIfAny("selectedTaxaByHabitatChart");
 
                 const svgWidth = 500;
@@ -1120,24 +1126,24 @@ html
                     .enter()
                     .append("rect")
                     .attr("height", function (d) {
-                        let height;
+                        let height = 0;
                         let numerator = 0;
                         let denominator = 0;
                         for (let i = 0; i < d.markers.length; i++) {
-                            if (speciesTaxaMap.get(d.markers[i].species) == taxaButton.innerHTML) {
+                            if (speciesTaxaMap.get(d.markers[i].species) == taxaButtonText) {
                                 numerator++;
                             }
                         }
 
                         d.siteSpecies.forEach(function (species) {
-                            if (taxaButton.innerHTML == speciesTaxaMap.get(species))
+                            if (taxaButtonText == speciesTaxaMap.get(species))
                                 denominator++;
                         });
                         if (denominator == 0) {
                             return 0;
                         }
 
-                        height = height * heightFactor;
+                        height = numerator / denominator * heightFactor;
                         heights.push(height);
                         return height;
                     })
@@ -1491,12 +1497,9 @@ body
                         h2 Presence/Absence of Surrogate Species Within ____ Taxa by Habitat
 
                         div(class="spaceAbove spaceBelow centerContentsViaFlex" id="taxaButtons")
-                            button Birds
-                            button Invertebrates
-                            button Plants
 
                         div(style="border:solid; width:500px; height:300px; margin:auto;")
-                            svg(class="chart")
+                            svg(id="selectedTaxaByHabitatChart" class="chart")
 
                         h2 Section 3: Status of Surrogate Species in ____ Habitat
                         div Overview chart, then up to 6 charts (one for each taxon) showing data from each place
