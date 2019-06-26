@@ -64,6 +64,19 @@ html
                 endDate = new Date(input.value);
             }
             let timeFrame = "";
+            const monthNames = [];
+            monthNames[0] = "Jan";
+            monthNames[1] = "Feb";
+            monthNames[2] = "Mar";
+            monthNames[3] = "Apr";
+            monthNames[4] = "May";
+            monthNames[5] = "Jun";
+            monthNames[6] = "Jul";
+            monthNames[7] = "Aug";
+            monthNames[8] = "Sep";
+            monthNames[9] = "Oct";
+            monthNames[10] = "Nov";
+            monthNames[11] = "Dec";
             function timeFrameSelected(selectObject) {
                 timeFrame = selectObject.value;
             }
@@ -730,30 +743,23 @@ html
             }
 
             function getTimeSlices(start, end, frame) {
-                console.log(start);
-                console.log(end);
-                console.log(frame);
                 let result = [];
                 if(start == null) {
-                    console.log("start == null");
                     return result;
                 }
                 let nextDate = new Date(start);
                 if(frame == "month") {
-                    console.log("frame == \"month\"");
-                    while(nextDate < end) {
+                    while(nextDate <= end) {
                         result.push(new Date(nextDate));
                         nextDate = new Date(nextDate.setMonth(nextDate.getMonth() + 1));
                     }
                 } else {
-                    console.log("frame != \"month\"");
-                    while (nextDate < end) {
+                    while (nextDate <= end) {
                         result.push(nextDate);
                         nextDate = new Date(nextDate.setFullYear(nextDate.getFullYear() + 1));
                     }
                 }
 
-                console.log(result);
                 return result;
             }
 
@@ -764,8 +770,8 @@ html
                 const svgHeight = 300;
                 const strokeWidth = 0;
                 const barWidth = 20;
-                const headerHeight = 20;
-                const footerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
+                const headerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
+                const footerHeight = 20;
                 const leftAxisMargin = 20;
                 const leftAxisExtraMargin = leftAxisMargin + 24;
                 const barZoneWidth = svgWidth - leftAxisExtraMargin;
@@ -861,12 +867,14 @@ html
                 const svgHeight = 300;
                 const strokeWidth = 0;
                 const barWidth = 20;
-                const headerHeight = 20;
-                const footerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
+                const headerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
+                const footerHeight = 20;
                 const leftAxisMargin = 20;
                 const leftAxisExtraMargin = leftAxisMargin + 24;
                 const barZoneWidth = svgWidth - leftAxisExtraMargin;
-                const barPadding = barZoneWidth / taxa.length / 2;
+                const barPadding = 10;
+                const textPadding = barPadding + 4;
+                const timeSliceTextVerticalSpace = 10;
 
                 let heightFactor = svgHeight - footerHeight - headerHeight;
 
@@ -908,7 +916,7 @@ html
                                     return a + b;
                                 }) / incrimentalResults.length;
 
-                            height = height * heightFactor;
+                            height = height * heightFactor + 1;
                             heights.push(height);
                             return height;
                         })
@@ -917,12 +925,32 @@ html
                         .style("stroke-width", strokeWidth)
                         .attr("width", barWidth)
                         .attr("transform", function (d, i) {
-                            let translate = [i * barZoneWidth / taxa.length / (timeSlices.length - 1) * timeSliceIndex + leftAxisExtraMargin + barPadding, svgHeight - footerHeight - heights[i]];
+                            let translate = [timeSliceIndex * barZoneWidth / taxa.length / (timeSlices.length - 1) + i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding, svgHeight - footerHeight - heights[i]];
                             return "translate(" + translate + ")";
+                        });
+
+                    svg.selectAll("textOfTimeSlice" + timeSliceIndex)
+                        .data(taxa)
+                        .enter()
+                        .append("text")
+                        .attr("class", "chartLabel")
+                        .style("text-anchor", "middle")
+                        .style("font-size", "8px")
+                        .attr("fill", "black")
+                        .attr("width", svgWidth / timeSlices.length)
+                        .attr("transform", function (d, i) {
+                            let translate = [timeSliceIndex * barZoneWidth / taxa.length / (timeSlices.length - 1) + i * barZoneWidth / taxa.length + leftAxisExtraMargin + textPadding, svgHeight - timeSliceTextVerticalSpace];
+                            return "translate(" + translate + ")";
+                        })
+                        .text(function (d) {
+                            if (timeFrame == "month") {
+                                return monthNames[timeSlices[timeSliceIndex].getMonth()];
+                            } else
+                                return timeSlices[timeSliceIndex].getFullYear();
                         });
                 }
 
-                svg.selectAll("text")
+                svg.selectAll("textOfTaxaNames")
                     .data(taxa)
                     .enter()
                     .append("text")
