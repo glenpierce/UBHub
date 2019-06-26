@@ -60,13 +60,16 @@ html
                 startDate = new Date(input.value);
             }
             let endDate = Date.now();
-            function dateEndChanged() {
+            function dateEndChanged(input) {
                 endDate = new Date(input.value);
             }
             let timeFrame = "";
             function timeFrameSelected(selectObject) {
                 timeFrame = selectObject.value;
             }
+
+            let timeSlices;
+
             window.onload = function (ev) {
 
                 if (dataFromServer.id) {
@@ -531,14 +534,6 @@ html
                 let tableData = "";
                 if(table != null)
                     tableData = table.getData();
-                if(startDate == null)
-                    startDate = "";
-                if(endDate == null) {
-                    endDate = "";
-                }
-                if(timeFrame == null) {
-                    timeFrame = "";
-                }
                 let saveData = {
                     "id": id,
                     "name": document.getElementById("projectName").value,
@@ -549,9 +544,9 @@ html
                     markers, //All observations
                     //todo: we'll probably want to store the iNaturalist urls at some point
                     tableData, //This contains the columns and the rows which the user should have also overridden if needed.
-                    startDate,
-                    endDate,
-                    timeFrame
+                    "startDate": startDate,
+                    "endDate": endDate,
+                    "timeFrame": timeFrame
                 }
 
                 httpPost("/createUserDataFromJSON", setId, saveData);
@@ -728,15 +723,42 @@ html
                 //     ]
                 // }
 
+                timeSlices = getTimeSlices(startDate, endDate, timeFrame);
+
                 observationsPerSiteByTaxon(taxa);
+                observationsOfSurrogateSpeciesInAllHabitatsOverTime(taxa, timeSlices);
+            }
+
+            function getTimeSlices(start, end, frame) {
+                console.log(start);
+                console.log(end);
+                console.log(frame);
+                let result = [];
+                if(start == null) {
+                    console.log("start == null");
+                    return result;
+                }
+                let nextDate = new Date(start);
+                if(frame == "month") {
+                    console.log("frame == \"month\"");
+                    while(nextDate < end) {
+                        result.push(new Date(nextDate));
+                        nextDate = new Date(nextDate.setMonth(nextDate.getMonth() + 1));
+                    }
+                } else {
+                    console.log("frame != \"month\"");
+                    while (nextDate < end) {
+                        result.push(nextDate);
+                        nextDate = new Date(nextDate.setFullYear(nextDate.getFullYear() + 1));
+                    }
+                }
+
+                console.log(result);
+                return result;
             }
 
             observationsPerSiteByTaxon = function(taxa) {
                 clearPriorChartIfAny("observationsPerSiteByTaxon");
-
-                if (startDate == null) {
-                    startDate = new Date("1900-01-01");
-                }
 
                 const svgWidth = 500;
                 const svgHeight = 300;
@@ -832,78 +854,93 @@ html
                     .call(yAxis);
             }
 
-            chart = function (sites) {
-                // clearPriorChartIfAny();
-                if(startDate == null) {
-                    startDate = new Date("1900-01-01");
-                }
+            observationsOfSurrogateSpeciesInAllHabitatsOverTime = function (taxa) {
+                clearPriorChartIfAny("observationsOfSurrogateSpeciesInAllHabitatsOverTime");
 
                 const svgWidth = 500;
                 const svgHeight = 300;
-                const strokeWidth = 5;
+                const strokeWidth = 0;
                 const barWidth = 20;
-                const footerHeight = 10;
-                const headerHeight = 5; //we need this so that 100% at the top isn't cut off to look like iuu,o
+                const headerHeight = 20;
+                const footerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
                 const leftAxisMargin = 20;
                 const leftAxisExtraMargin = leftAxisMargin + 24;
                 const barZoneWidth = svgWidth - leftAxisExtraMargin;
-                const barPadding = barZoneWidth / sites.length / 2;
+                const barPadding = barZoneWidth / taxa.length / 2;
 
-                let svg = d3.select('.chart') //there's now multiple svgs in the dom, so it's selecting the first one it finds in dom order...
+                let heightFactor = svgHeight - footerHeight - headerHeight;
+
+                let svg = d3.select('#observationsOfSurrogateSpeciesInAllHabitatsOverTime')
                     .attr("width", svgWidth)
                     .attr("height", svgHeight)
                     .attr("class", "bar-chart");
 
-                svg.selectAll("rect")
-                    .data(sites)
-                    .enter()
-                    .append("rect")
-                    .attr("height", function (d) {
-                        let speciesInPolygon = new Set();
-                        let presence = 0;
-                        for (marker in d.markers) {
-                            if (!speciesInPolygon.has(d.markers[marker].species) && d.siteSpecies.has(d.markers[marker].species) && d.markers[marker].observedOn < endDate && d.markers[marker].observedOn > startDate) { //please make me a function
-                                presence += 1;
+                for(let timeSliceIndex = 0; timeSliceIndex < timeSlices.length - 1; timeSliceIndex++) {
+                    let heights = [];
+                    svg.selectAll("rect" + timeSliceIndex)
+                        .data(taxa)
+                        .enter()
+                        .append("rect")
+                        .attr("height", function (d) {
+                            let incrimentalResults = [];
+                            for (let i = 0; i < sites.length; i++) {
+                                let numerator = 0;
+                                let denominator = 0;
+                                for (let k = 0; k < sites[i].markers.length; k++) {
+                                    if (sites[i].markers[k].observedOn >= timeSlices[timeSliceIndex] && sites[i].markers[k].observedOn < timeSlices[timeSliceIndex + 1] && d == speciesTaxaMap.get(sites[i].markers[k].species)) {
+                                        numerator++;
+                                        break;
+                                    }
+                                }
+                                sites[i].siteSpecies.forEach(function (species) {
+                                    if (d == speciesTaxaMap.get(species))
+                                        denominator++;
+                                });
+                                if (denominator !== 0) {
+                                    incrimentalResults.push(numerator / denominator);
+                                }
                             }
-                            speciesInPolygon.add(d.markers[marker].species);
-                        }
-                        if (d.siteSpecies.size != 0) {
-                            presence = svgHeight * (presence / d.siteSpecies.size);
-                        }
-                        d.presence = presence;
-                        return presence;
-                    })
-                    .style("stroke", "white")
-                    .style("fill", "grey")
-                    .style("stroke-width", strokeWidth)
-                    // .attr("y", function (d) {
-                    //     return svgHeight - d.presence;
-                    // })
-                    .attr("width", barWidth)
-                    .attr("transform", function (d, i) {
-                        let translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding, 0];
-                        return "translate(" + translate + ")";
-                    });
+                            let height;
+                            if (incrimentalResults.length === 0)
+                                height = 0;
+                            else
+                                height = incrimentalResults.reduce(function (a, b) {
+                                    return a + b;
+                                }) / incrimentalResults.length;
+
+                            height = height * heightFactor;
+                            heights.push(height);
+                            return height;
+                        })
+                        .style("stroke", "white")
+                        .style("fill", "grey")
+                        .style("stroke-width", strokeWidth)
+                        .attr("width", barWidth)
+                        .attr("transform", function (d, i) {
+                            let translate = [i * barZoneWidth / taxa.length / (timeSlices.length - 1) * timeSliceIndex + leftAxisExtraMargin + barPadding, svgHeight - footerHeight - heights[i]];
+                            return "translate(" + translate + ")";
+                        });
+                }
 
                 svg.selectAll("text")
-                    .data(sites)
+                    .data(taxa)
                     .enter()
                     .append("text")
                     .attr("class", "chartLabel")
                     .style("text-anchor", "middle")
                     .attr("fill", "black")
-                    .attr("width", svgWidth / sites.length)
+                    .attr("width", svgWidth / taxa.length)
                     .attr("transform", function (d, i) {
-                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight - 10];
+                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight];
                         return "translate(" + translate + ")";
                     })
                     .text(function (d) {
-                        return d.habitat.name;
+                        return d;
                     });
 
                 let yScale = d3.scaleLinear()
                     .domain([1, 0])
-                    .range([footerHeight, svgHeight - footerHeight - headerHeight]);
+                    .range([footerHeight, svgHeight - headerHeight]);
 
                 const formatPercent = d3.format(".0%");
 
@@ -913,9 +950,94 @@ html
                     .tickSize(svgWidth - leftAxisMargin, 0, 0);
 
                 svg.append("g")
-                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + footerHeight + ")")
+                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + 0 + ")")
                     .call(yAxis);
             }
+
+            // chart = function (sites) {
+            //     // clearPriorChartIfAny();
+            //     if(startDate == null) {
+            //         startDate = new Date("1900-01-01");
+            //     }
+            //
+            //     const svgWidth = 500;
+            //     const svgHeight = 300;
+            //     const strokeWidth = 5;
+            //     const barWidth = 20;
+            //     const footerHeight = 10;
+            //     const headerHeight = 5; //we need this so that 100% at the top isn't cut off to look like iuu,o
+            //     const leftAxisMargin = 20;
+            //     const leftAxisExtraMargin = leftAxisMargin + 24;
+            //     const barZoneWidth = svgWidth - leftAxisExtraMargin;
+            //     const barPadding = barZoneWidth / sites.length / 2;
+            //
+            //     let svg = d3.select('.chart') //there's now multiple svgs in the dom, so it's selecting the first one it finds in dom order...
+            //         .attr("width", svgWidth)
+            //         .attr("height", svgHeight)
+            //         .attr("class", "bar-chart");
+            //
+            //     svg.selectAll("rect")
+            //         .data(sites)
+            //         .enter()
+            //         .append("rect")
+            //         .attr("height", function (d) {
+            //             let speciesInPolygon = new Set();
+            //             let presence = 0;
+            //             for (marker in d.markers) {
+            //                 if (!speciesInPolygon.has(d.markers[marker].species) && d.siteSpecies.has(d.markers[marker].species) && d.markers[marker].observedOn < endDate && d.markers[marker].observedOn > startDate) { //please make me a function
+            //                     presence += 1;
+            //                 }
+            //                 speciesInPolygon.add(d.markers[marker].species);
+            //             }
+            //             if (d.siteSpecies.size != 0) {
+            //                 presence = svgHeight * (presence / d.siteSpecies.size);
+            //             }
+            //             d.presence = presence;
+            //             return presence;
+            //         })
+            //         .style("stroke", "white")
+            //         .style("fill", "grey")
+            //         .style("stroke-width", strokeWidth)
+            //         // .attr("y", function (d) {
+            //         //     return svgHeight - d.presence;
+            //         // })
+            //         .attr("width", barWidth)
+            //         .attr("transform", function (d, i) {
+            //             let translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding, 0];
+            //             return "translate(" + translate + ")";
+            //         });
+            //
+            //     svg.selectAll("text")
+            //         .data(sites)
+            //         .enter()
+            //         .append("text")
+            //         .attr("class", "chartLabel")
+            //         .style("text-anchor", "middle")
+            //         .attr("fill", "black")
+            //         .attr("width", svgWidth / sites.length)
+            //         .attr("transform", function (d, i) {
+            //             let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight - 10];
+            //             return "translate(" + translate + ")";
+            //         })
+            //         .text(function (d) {
+            //             return d.habitat.name;
+            //         });
+            //
+            //     let yScale = d3.scaleLinear()
+            //         .domain([1, 0])
+            //         .range([footerHeight, svgHeight - footerHeight - headerHeight]);
+            //
+            //     const formatPercent = d3.format(".0%");
+            //
+            //     let yAxis = d3.axisLeft()
+            //         .scale(yScale)
+            //         .tickFormat(formatPercent)
+            //         .tickSize(svgWidth - leftAxisMargin, 0, 0);
+            //
+            //     svg.append("g")
+            //         .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + footerHeight + ")")
+            //         .call(yAxis);
+            // }
 
             function clearPriorChartIfAny(oldChartId) {
                 let oldChart = document.getElementById(oldChartId);
@@ -1128,7 +1250,7 @@ body
                         h2 Observations of Surrogate Species in All Habitats of Interest Over Time
 
                         div(style="border:solid; width:500px; height:300px; margin:auto;")
-                            svg(class="chart")
+                            svg(id="observationsOfSurrogateSpeciesInAllHabitatsOverTime" class="chart")
 
                         h2 Section 2: Overview of Species by Habitat Type
 
