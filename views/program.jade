@@ -1092,6 +1092,96 @@ html
                     .call(yAxis);
             }
 
+            selectedTaxaByHabitatChart = function (taxaButton) {
+                clearPriorChartIfAny("selectedTaxaByHabitatChart");
+
+                const svgWidth = 500;
+                const svgHeight = 300;
+                const strokeWidth = 0;
+                const barWidth = 20;
+                const headerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
+                const footerHeight = 20;
+                const leftAxisMargin = 20;
+                const leftAxisExtraMargin = leftAxisMargin + 24;
+                const barZoneWidth = svgWidth - leftAxisExtraMargin;
+                const barPadding = barZoneWidth / taxa.length / 2;
+
+                let heightFactor = svgHeight - footerHeight - headerHeight;
+
+                let heights = [];
+
+                let svg = d3.select('#selectedTaxaByHabitatChart')
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .attr("class", "bar-chart");
+
+                svg.selectAll("rect")
+                    .data(sites)
+                    .enter()
+                    .append("rect")
+                    .attr("height", function (d) {
+                        let height;
+                        let numerator = 0;
+                        let denominator = 0;
+                        for (let i = 0; i < d.markers.length; i++) {
+                            if (speciesTaxaMap.get(d.markers[i].species) == taxaButton.innerHTML) {
+                                numerator++;
+                            }
+                        }
+
+                        d.siteSpecies.forEach(function (species) {
+                            if (taxaButton.innerHTML == speciesTaxaMap.get(species))
+                                denominator++;
+                        });
+                        if (denominator == 0) {
+                            return 0;
+                        }
+
+                        height = height * heightFactor;
+                        heights.push(height);
+                        return height;
+                    })
+                    .style("stroke", "white")
+                    .style("fill", "grey")
+                    .style("stroke-width", strokeWidth)
+                    .attr("width", barWidth)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding, footerHeight + heightFactor - heights[i]];
+                        return "translate(" + translate + ")";
+                    });
+
+                svg.selectAll("text")
+                    .data(sites)
+                    .enter()
+                    .append("text")
+                    .attr("class", "chartLabel")
+                    .style("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .attr("width", svgWidth / sites.length)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight];
+                        return "translate(" + translate + ")";
+                    })
+                    .text(function (d) {
+                        return d.name;
+                    });
+
+                let yScale = d3.scaleLinear()
+                    .domain([1, 0])
+                    .range([footerHeight, svgHeight - headerHeight]);
+
+                const formatPercent = d3.format(".0%");
+
+                let yAxis = d3.axisLeft()
+                    .scale(yScale)
+                    .tickFormat(formatPercent)
+                    .tickSize(svgWidth - leftAxisMargin, 0, 0);
+
+                svg.append("g")
+                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + 0 + ")")
+                    .call(yAxis);
+            }
+
             // chart = function (sites) {
             //     // clearPriorChartIfAny();
             //     if(startDate == null) {
