@@ -158,7 +158,7 @@ html
                     newTaxonLabel.textContent = taxa[i];
                     document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
 
-                    addTaxonButton(taxa[i]);
+                    addTaxonButtons(taxa[i]);
                 }
 
                 for (let i = 0; i < sites.length; i++) {
@@ -527,6 +527,21 @@ html
                     surrogateSpeciesByHabitatTable(this);
                 });
                 document.getElementById("surrogateSpeciesByHabitatButtons").appendChild(surrogateSpeciesByHabitatButton);
+
+                let radioButton = document.createElement("input");
+                radioButton.setAttribute("name", "selectHabitatRadioGroup");
+                radioButton.setAttribute("value", habitatName);
+                radioButton.setAttribute("type", "radio");
+
+                let label = document.createElement("div");
+                label.textContent = habitatName;
+                label.style = "display:inline;";
+
+                let buttonThenLabel = document.createElement("div");
+                buttonThenLabel.appendChild(radioButton);
+                buttonThenLabel.appendChild(label);
+
+                document.getElementById("selectHabitatRadioGroup").appendChild(buttonThenLabel);
             }
 
             function addTaxon() {
@@ -539,18 +554,33 @@ html
                 newTaxonLabel.textContent = taxonNameElement.value;
                 document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
 
-                addTaxonButton(taxonNameElement.value);
+                addTaxonButtons(taxonNameElement.value);
 
                 taxonNameElement.value = "";
             }
 
-            function addTaxonButton(taxonName) {
+            function addTaxonButtons(taxonName) {
                 let taxonButton = document.createElement("button");
                 taxonButton.innerHTML = taxonName;
                 taxonButton.addEventListener("click", function () {
                     selectedTaxaByHabitatChart(taxonName);
                 });
                 document.getElementById("taxaButtons").appendChild(taxonButton);
+
+                let radioButton = document.createElement("input");
+                radioButton.setAttribute("name", "taxaRadioButtons");
+                radioButton.setAttribute("value", taxonName);
+                radioButton.setAttribute("type", "radio");
+
+                let label = document.createElement("div");
+                label.textContent = taxonName;
+                label.style = "display:inline;";
+
+                let buttonThenLabel = document.createElement("div");
+                buttonThenLabel.appendChild(radioButton);
+                buttonThenLabel.appendChild(label);
+
+                document.getElementById("selectTaxonRadioGroup").appendChild(buttonThenLabel);
             }
 
             function addSpecies() {
@@ -1189,6 +1219,100 @@ html
                     .call(yAxis);
             }
 
+            selectedHabitatAndTaxonBySiteChart = function () {
+                clearPriorChartIfAny("selectedHabitatAndTaxonBySiteChart");
+
+                let taxaName = document.getElementById("selectTaxonRadioGroup").value;
+                let habitatName = document.getElementById("selectHabitatRadioGroup").value;
+
+                const svgWidth = 500;
+                const svgHeight = 300;
+                const strokeWidth = 0;
+                const barWidth = 20;
+                const headerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
+                const footerHeight = 20;
+                const leftAxisMargin = 20;
+                const leftAxisExtraMargin = leftAxisMargin + 24;
+                const barZoneWidth = svgWidth - leftAxisExtraMargin;
+                const barPadding = barZoneWidth / taxa.length / 2;
+
+                let heightFactor = svgHeight - footerHeight - headerHeight;
+
+                let heights = [];
+
+                let svg = d3.select('#selectedHabitatAndTaxonBySiteChart')
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .attr("class", "bar-chart");
+
+                svg.selectAll("rect")
+                    .data(sites)
+                    .enter()
+                    .append("rect")
+                    .attr("height", function (d) {
+                        let height = 0;
+                        let numerator = 0;
+                        let denominator = 0;
+                        for (let i = 0; i < d.markers.length; i++) {
+                            if (speciesTaxaMap.get(d.markers[i].species) == taxaButtonText) {
+                                numerator++;
+                            }
+                        }
+
+                        d.siteSpecies.forEach(function (species) {
+                            if (taxaButtonText == speciesTaxaMap.get(species))
+                                denominator++;
+                        });
+                        if (denominator == 0) {
+                            heights.push(0);
+                            return 0;
+                        }
+
+                        height = numerator / denominator * heightFactor;
+                        heights.push(height);
+                        return height;
+                    })
+                    .style("stroke", "white")
+                    .style("fill", "grey")
+                    .style("stroke-width", strokeWidth)
+                    .attr("width", barWidth)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding, footerHeight + heightFactor - heights[i]];
+                        return "translate(" + translate + ")";
+                    });
+
+                svg.selectAll("text")
+                    .data(sites)
+                    .enter()
+                    .append("text")
+                    .attr("class", "chartLabel")
+                    .style("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .attr("width", svgWidth / sites.length)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight];
+                        return "translate(" + translate + ")";
+                    })
+                    .text(function (d) {
+                        return d.name;
+                    });
+
+                let yScale = d3.scaleLinear()
+                    .domain([1, 0])
+                    .range([footerHeight, svgHeight - headerHeight]);
+
+                const formatPercent = d3.format(".0%");
+
+                let yAxis = d3.axisLeft()
+                    .scale(yScale)
+                    .tickFormat(formatPercent)
+                    .tickSize(svgWidth - leftAxisMargin, 0, 0);
+
+                svg.append("g")
+                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + 0 + ")")
+                    .call(yAxis);
+            }
+
             // chart = function (sites) {
             //     // clearPriorChartIfAny();
             //     if(startDate == null) {
@@ -1504,9 +1628,15 @@ body
 
                         h2 Section 3: Status of Surrogate Species in ____ Habitat
                         div Overview chart, then up to 6 charts (one for each taxon) showing data from each place
+                        div(class="flex spaceAbove" style="justify-content:space-around")
+                            div Taxa
+                               div(id="selectTaxonRadioGroup")
+                            div Habitat
+                                div(id="selectHabitatRadioGroup")
+                        button(class="spaceAbove spaceBelow" onclick='selectedHabitatAndTaxonBySiteChart()') chart
 
                         div(style="border:solid; width:500px; height:300px; margin:auto;")
-                            svg(class="chart")
+                            svg(id="selectedHabitatAndTaxonBySiteChart" class="chart")
 
                         h2 Appendix: Tables of Species Presence Data
                         div Table for each habitat type listing the species names and indicating presence/absence/unknown status for each according to place and time frame.
