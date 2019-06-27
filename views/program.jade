@@ -529,7 +529,7 @@ html
                 document.getElementById("surrogateSpeciesByHabitatButtons").appendChild(surrogateSpeciesByHabitatButton);
 
                 let radioButton = document.createElement("input");
-                radioButton.setAttribute("name", "selectHabitatRadioGroup");
+                radioButton.setAttribute("name", "habitatRadioButtons");
                 radioButton.setAttribute("value", habitatName);
                 radioButton.setAttribute("type", "radio");
 
@@ -1222,8 +1222,14 @@ html
             selectedHabitatAndTaxonBySiteChart = function () {
                 clearPriorChartIfAny("selectedHabitatAndTaxonBySiteChart");
 
-                let taxaName = document.getElementById("selectTaxonRadioGroup").value;
-                let habitatName = document.getElementById("selectHabitatRadioGroup").value;
+                let taxaName = document.querySelector('input[name="taxaRadioButtons"]:checked') != null ? document.querySelector('input[name="taxaRadioButtons"]:checked').value : null;
+                let habitatName = document.querySelector('input[name="habitatRadioButtons"]:checked') != null ? document.querySelector('input[name="habitatRadioButtons"]:checked').value : null;
+
+                function matchesHabitat(site) {
+                    return site.habitat.name === habitatName;
+                }
+
+                let filteredSites = sites.filter(matchesHabitat);
 
                 const svgWidth = 500;
                 const svgHeight = 300;
