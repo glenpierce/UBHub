@@ -42,13 +42,9 @@ html
                 habitatData = dataFromServer.habitatData;
             }
             let sites = [];
-            if(dataFromServer.sites) {
-                sites = dataFromServer.sites;
-            }
+            let siteData = [];
+            let observationsPersistant = [];
             let markers = [];
-            if(dataFromServer.markers) {
-                markers = dataFromServer.markers;
-            }
             let table;
             let verificationTable;
             let speciesPresenceTable;
@@ -161,8 +157,15 @@ html
                     addTaxonButtons(taxa[i]);
                 }
 
-                for (let i = 0; i < sites.length; i++) {
-                    addSiteToUi(sites[i]);
+                // for (let i = 0; i < sites.length; i++) {
+                //     addSiteToUi(sites[i]);
+                // }
+                if (dataFromServer.siteData) {
+                    console.log(dataFromServer.siteData);
+                }
+
+                if (dataFromServer.observations) {
+                    placeMarkers(dataFromServer.observations);
                 }
 
                 for (let i = 0; i < habitatData.length; i++) {
@@ -502,9 +505,11 @@ html
                 newHabitatLabel.textContent = habitatName
                 document.getElementsByClassName("habitat")[0].appendChild(newHabitatLabel);
                 for (let site in sites) {
-                    let option = document.createElement("OPTION");
-                    option.appendChild(document.createTextNode(habitatName));
-                    sites[site].siteHatbitatSelector.appendChild(option);
+                    if(sites[site].siteHatbitatSelector) {
+                        let option = document.createElement("OPTION");
+                        option.appendChild(document.createTextNode(habitatName));
+                        sites[site].siteHatbitatSelector.appendChild(option);
+                    }
                 }
 
                 let button = document.createElement("button");
@@ -597,8 +602,8 @@ html
                     "description": document.getElementById("projectDescription").value,
                     "taxa": taxa,
                     "habitatData": habitatData,
-                    "sites": sites, //This should contain all of the markers, observations, polygons, and habitats
-                    markers, //All observations
+                    "siteData": siteData, //This should contain all of the markers, observations, polygons, and habitats
+                    "observations": observationsPersistant, //All observations
                     //todo: we'll probably want to store the iNaturalist urls at some point
                     tableData, //This contains the columns and the rows which the user should have also overridden if needed.
                     "startDate": startDate,
@@ -644,7 +649,8 @@ html
                     url: "/images/marker_0_grey_39x59.png",
                     scaledSize: new google.maps.Size(20, 30)
                 };
-                for (observation in observations) {
+                for (let observation in observations) {
+                    observationsPersistant.push(observations[observation]);
                     let position = {
                         lat: parseFloat(observations[observation].latitude),
                         lng: parseFloat(observations[observation].longitude)
@@ -682,25 +688,27 @@ html
                         maxLng = markers[i].getPosition().lng();
                 }
 
-                let rectangle = new google.maps.Rectangle({
-                    strokeColor: "#FFFFFF",
-                    strokeOpacity: 0.0,
-                    strokeWeight: 2,
-                    fillColor: "#FFFFFF",
-                    fillOpacity: 0.0,
-                    map: map,
-                    bounds: {
-                        north: maxLat,
-                        south: minLat,
-                        east: maxLng,
-                        west: minLng
-                    }
-                });
+                if(minLat != null) {
+                    let rectangle = new google.maps.Rectangle({
+                        strokeColor: "#FFFFFF",
+                        strokeOpacity: 0.0,
+                        strokeWeight: 2,
+                        fillColor: "#FFFFFF",
+                        fillOpacity: 0.0,
+                        map: map,
+                        bounds: {
+                            north: maxLat,
+                            south: minLat,
+                            east: maxLng,
+                            west: minLng
+                        }
+                    });
 
-                map.fitBounds(rectangle.getBounds());
+                    map.fitBounds(rectangle.getBounds());
 
-                map.setCenter({lat: ((maxLat - minLat) / 2 + minLat), lng: ((maxLng - minLng) / 2 + minLng)});
-                map.setZoom(17); //todo: set this by bounds
+                    map.setCenter({lat: ((maxLat - minLat) / 2 + minLat), lng: ((maxLng - minLng) / 2 + minLng)});
+                    map.setZoom(17); //todo: set this by bounds
+                }
             }
 
             mapHabitatsToSites = function () {
