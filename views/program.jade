@@ -176,6 +176,18 @@ html
                 table.setColumns(columns);
                 table.redraw(true);
 
+                if(dataFromServer.startDate) {
+                    document.getElementById("startDate").valueAsDate = new Date(dataFromServer.startDate);
+                }
+
+                if (dataFromServer.endDate) {
+                    document.getElementById("endDate").valueAsDate = new Date(dataFromServer.endDate);
+                }
+
+                if (dataFromServer.timeFrame) {
+                    document.getElementById("timeFrame").value = dataFromServer.timeFrame;
+                }
+
             };
 
             function generateTableData(button) {
@@ -1569,15 +1581,15 @@ body
                             div(class="spaceBelow") Choose whether the data will be analyzed by year or month. Then enter the time frame of interest. We recommend no more than 5 time units to br compared (i.e. 5 months or 5 years).
                             div(class="flex")
                                 div Time Interval: make me a radio button group
-                                select(onchange="timeFrameSelected(this)")
+                                select(onchange="timeFrameSelected(this)" id="timeFrame")
                                     option(value = "")
                                     option(value = "month") Month
                                     option(value = "year") Year
                             div(class="flex")
                                 div Time frame: from
-                                input(type="date" onchange="dateStartChanged(this)")
+                                input(type="date" onchange="dateStartChanged(this)" id="startDate")
                                 div(style="margin:8px;") to
-                                input(type="date" onchange="dateEndChanged(this)")
+                                input(type="date" onchange="dateEndChanged(this)" id="endDate")
 
                             div(class="bold spaceAbove") Step 2. Verify data:
                             div(class="spaceBelow") Display the map of polygons and a table of the species for each polygon (select one at a time). User goes through one place/polygon at a time, and can click buttons in the species table for the user to verify presence/absence. Data is to be verified separately for each time frame.
