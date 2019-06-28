@@ -42,7 +42,7 @@ html
                 habitatData = dataFromServer.habitatData;
             }
             let sites = [];
-            let siteData = [];
+            let siteData = {savedCoordinates:[]};
             let observationsPersistant = [];
             let markers = [];
             let table;
@@ -86,7 +86,7 @@ html
                     document.getElementById("projectName").value = dataFromServer.name;
                 }
 
-                if(dataFromServer.description) {
+                if (dataFromServer.description) {
                     description = dataFromServer.description;
                     document.getElementById("projectDescription").value = dataFromServer.description;
                 }
@@ -98,12 +98,12 @@ html
                 columns = [
                     {title: "Species", field: "species", editor: "input"},
                     {title: "Taxa", field: "taxa", editor: "select", editorParams: {}}
-                    ];
+                ];
 
                 table = new Tabulator("#example-table", {
                         layoutColumnsOnNewData: true,
                         data: tableData,           //load row data from array
-                        layout:"fitData",
+                        layout: "fitData",
                         responsiveLayout: "hide",  //hide columns that dont fit on the table
                         tooltips: true,            //show tool tips on cells
                         addRowPos: "bottom",          //when adding a new row, add it to the top of the table
@@ -123,7 +123,7 @@ html
                                     habitatIndex.push(site);
                                 }
                             }
-                            for(let index in habitatIndex) {
+                            for (let index in habitatIndex) {
                                 if (cell._cell.value) {
                                     sites[habitatIndex[index]].siteSpecies.add(cell._cell.row.data.species);
                                     sites[habitatIndex[index]].taxa.add(cell._cell.row.data.taxa);
@@ -150,23 +150,34 @@ html
                     columns[1].editorParams[taxa[i]] = taxa[i];
                     table.setColumns(columns);
                     table.redraw(true);
-                    newTaxonLabel = document.createElement("DIV");
+                    let newTaxonLabel = document.createElement("DIV");
                     newTaxonLabel.textContent = taxa[i];
                     document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
 
                     addTaxonButtons(taxa[i]);
                 }
 
-                // for (let i = 0; i < sites.length; i++) {
-                //     addSiteToUi(sites[i]);
-                // }
                 if (dataFromServer.siteData) {
-                    console.log(dataFromServer.siteData);
+                    if(dataFromServer.siteData.savedCoordinates) {
+                        dataFromServer.siteData.savedCoordinates.forEach(function(coordinates){
+                            let polygon = new google.maps.Polygon({
+                                paths: coordinates,
+                                // strokeColor: '#FF0000',
+                                // strokeOpacity: 0.8,
+                                // strokeWeight: 2,
+                                // // editable: true,
+                                // fillColor: '#FF0000',
+                                // fillOpacity: 0.35
+                            });
+                            polygon.setMap(map);
+                            addSite(polygon);
+                        });
+                    }
                 }
 
-                if (dataFromServer.observations) {
-                    placeMarkers(dataFromServer.observations);
-                }
+                // if (dataFromServer.observations) {
+                //     placeMarkers(dataFromServer.observations);
+                // }
 
                 for (let i = 0; i < habitatData.length; i++) {
                     addHabitatData(habitatData[i].title);
@@ -174,6 +185,9 @@ html
                 }
 
                 table.setColumns(columns);
+                if (dataFromServer.tableData) {
+                    table.setData(dataFromServer.tableData);
+                }
                 table.redraw(true);
 
                 if(dataFromServer.startDate) {
@@ -200,7 +214,7 @@ html
                         columns.push({title: sites[site].name, field: sites[site].name, formatter: "tickCross"});
                         sites[site].siteSpecies.forEach(function (species) {
                             let containsSpecies = false;
-                            for (marker in markers) {
+                            for (let marker in markers) {
                                 if (sites[site].Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
                                     containsSpecies = true;
                                     break;
@@ -400,39 +414,42 @@ html
                     }
                 });
                 drawingManager.setMap(map);
-                google.maps.event.addListener(drawingManager, "polygoncomplete", function (polygon) {
-                        let site = {
-                            polygon: polygon.getPath().getArray(),
-                            Polygon: polygon,
-                            coordinates: [],
-                            markers: [],
-                            habitat: {},
-                            siteSpecies: new Set(),
-                            taxa: new Set(),
-                            minX: polygon.getPath().getArray()[0].lng() + 180,
-                            minY: polygon.getPath().getArray()[0].lat() * -1 + 90,
-                            maxX: polygon.getPath().getArray()[0].lng() + 180,
-                            maxY: polygon.getPath().getArray()[0].lat() * -1 + 90
-                        }
-                        for (let i = 0; i < site.polygon.length; i++) {
-                            site.coordinates.push({lat: site.polygon[i].lat(), lng: site.polygon[i].lng()})
-                            if(site.polygon[i].lat() * -1 + 90 < site.minY) {
-                                site.minY = site.polygon[i].lat() * -1 + 90;
-                            }
-                            if(site.polygon[i].lat() * -1 + 90 > site.maxY) {
-                                site.maxY = site.polygon[i].lat() * -1 + 90;
-                            }
-                            if (site.polygon[i].lng() + 180 < site.minX) {
-                                site.minX = site.polygon[i].lng() + 180;
-                            }
-                            if (site.polygon[i].lng() + 180 > site.maxX) {
-                                site.maxX = site.polygon[i].lng() + 180;
-                            }
-                        }
-                        addSiteToUi(site);
-                        sites.push(site)
-                });
+                google.maps.event.addListener(drawingManager, "polygoncomplete", addSite);
             }
+
+            function addSite(polygon) {
+                let site = {
+                    polygon: polygon.getPath().getArray(),
+                    Polygon: polygon,
+                    coordinates: [],
+                    markers: [],
+                    habitat: {},
+                    siteSpecies: new Set(),
+                    taxa: new Set(),
+                    minX: polygon.getPath().getArray()[0].lng() + 180,
+                    minY: polygon.getPath().getArray()[0].lat() * -1 + 90,
+                    maxX: polygon.getPath().getArray()[0].lng() + 180,
+                    maxY: polygon.getPath().getArray()[0].lat() * -1 + 90
+                }
+                for (let i = 0; i < site.polygon.length; i++) {
+                    site.coordinates.push({lat: site.polygon[i].lat(), lng: site.polygon[i].lng()})
+                    if (site.polygon[i].lat() * -1 + 90 < site.minY) {
+                        site.minY = site.polygon[i].lat() * -1 + 90;
+                    }
+                    if (site.polygon[i].lat() * -1 + 90 > site.maxY) {
+                        site.maxY = site.polygon[i].lat() * -1 + 90;
+                    }
+                    if (site.polygon[i].lng() + 180 < site.minX) {
+                        site.minX = site.polygon[i].lng() + 180;
+                    }
+                    if (site.polygon[i].lng() + 180 > site.maxX) {
+                        site.maxX = site.polygon[i].lng() + 180;
+                    }
+                }
+                addSiteToUi(site);
+                sites.push(site)
+            }
+
             function addSiteToUi(site) {
                 let siteElement = document.createElement("DIV");
                 siteElement.className = "newSite";
@@ -608,6 +625,10 @@ html
                 let tableData = "";
                 if(table != null)
                     tableData = table.getData();
+                siteData.savedCoordinates = [];
+                sites.forEach(function(site) {
+                    siteData.savedCoordinates.push(site.coordinates);
+                });
                 let saveData = {
                     "id": id,
                     "name": document.getElementById("projectName").value,
@@ -617,7 +638,7 @@ html
                     "siteData": siteData, //This should contain all of the markers, observations, polygons, and habitats
                     "observations": observationsPersistant, //All observations
                     //todo: we'll probably want to store the iNaturalist urls at some point
-                    tableData, //This contains the columns and the rows which the user should have also overridden if needed.
+                    "tableData": tableData, //This contains the columns and the rows which the user should have also overridden if needed.
                     "startDate": startDate,
                     "endDate": endDate,
                     "timeFrame": timeFrame
