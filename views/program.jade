@@ -15,15 +15,24 @@ html
             .tabulator-tableHolder {
                 max-height: 400px !important;
             }
-        //link(href="https://unpkg.com/tabulator-tables@4.2.3/dist/css/tabulator.min.css" rel="stylesheet")
-        //script(type="text/javascript" src="https://unpkg.com/tabulator-tables@4.2.3/dist/js/tabulator.min.js")
-        link(href="/stylesheets/tabulator.min.css" rel="stylesheet")
-        script(type="text/javascript" src="/javascripts/tabulator.min.js")
+        link(href="https://unpkg.com/tabulator-tables@4.2.3/dist/css/tabulator.min.css" rel="stylesheet")
+        script(type="text/javascript" src="https://unpkg.com/tabulator-tables@4.2.3/dist/js/tabulator.min.js")
+        //link(href="/stylesheets/tabulator.min.css" rel="stylesheet")
+        //link(href="/stylesheets/tabulator_bootstrap4.min.css" rel="stylesheet")
         link(rel='stylesheet', href='/stylesheets/style.css')
-        //script(src="https://d3js.org/d3.v5.min.js")
-        script(type="text/javascript" src="/javascripts/d3.min.js")
+        script(src="https://d3js.org/d3.v5.min.js")
+        //script(type="text/javascript" src="/javascripts/d3.min.js")
+        script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js")
         script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&libraries=drawing,geometry")
         script.
+
+            Tabulator.prototype.extendModule("format", "formatters", {
+                uppercase: function (cell, formatterParams) {
+                    return cell.getValue().toUpperCase(); //make the contents of the cell uppercase
+                    //this could just return raw html as text
+                }
+            });
+
             let dataFromServer = !{dataFromServer};
             console.log(dataFromServer);
             let id;
@@ -42,7 +51,7 @@ html
                 habitatData = dataFromServer.habitatData;
             }
             let sites = [];
-            let siteData = {savedCoordinates:[]};
+            let siteData = {savedCoordinates:[], names:[], habitats:[]};
             let observationsPersistant = [];
             let markers = [];
             let table;
@@ -104,7 +113,7 @@ html
                         layoutColumnsOnNewData: true,
                         data: tableData,           //load row data from array
                         layout: "fitData",
-                        responsiveLayout: "hide",  //hide columns that dont fit on the table
+                        // responsiveLayout: "hide",  //hide columns that dont fit on the table
                         tooltips: true,            //show tool tips on cells
                         addRowPos: "bottom",          //when adding a new row, add it to the top of the table
                         history: true,             //allow undo and redo actions on the table
@@ -116,26 +125,7 @@ html
                             {column: "name", dir: "asc"},
                         ],
                         columns: columns,
-                        cellEdited: function (cell) {
-                            let habitatIndex = [];
-                            for (let site in sites) {
-                                if (cell._cell.column != null && cell._cell.column.field != null && sites[site].habitat.name == cell._cell.column.field) {
-                                    habitatIndex.push(site);
-                                }
-                            }
-                            for (let index in habitatIndex) {
-                                if (cell._cell.value) {
-                                    sites[habitatIndex[index]].siteSpecies.add(cell._cell.row.data.species);
-                                    sites[habitatIndex[index]].taxa.add(cell._cell.row.data.taxa);
-                                } else {
-                                    sites[habitatIndex[index]].siteSpecies.delete(cell._cell.row.data.species);
-                                    sites[habitatIndex[index]].taxa.delete(cell._cell.row.data.taxa);
-                                }
-                            }
-                            if (cell._cell.column != null && cell._cell.column.field == "taxa") {
-                                speciesTaxaMap.set(cell._cell.row.data.species, cell._cell.row.data.taxa);
-                            }
-                        }
+                        cellEdited: updateCell
                     }
                 );
 
@@ -173,6 +163,22 @@ html
                             addSite(polygon);
                         });
                     }
+
+                    let namesInputs = document.getElementsByClassName("siteName");
+                    let i = 0;
+                    dataFromServer.siteData.names.forEach(function (name) {
+                        namesInputs[i].value = name;
+                        sites[i].name = name;
+                        i++;
+                    });
+
+                    let habitatSelectors = document.getElementsByClassName("siteHabitatSelector");
+                    let k = 0;
+                    dataFromServer.siteData.habitats.forEach(function (habitat) {
+                        // habitatSelectors[k].value = habitat.name;
+                        sites[k].habitat = habitat;
+                        k++;
+                    });
                 }
 
                 // if (dataFromServer.observations) {
@@ -187,6 +193,11 @@ html
                 table.setColumns(columns);
                 if (dataFromServer.tableData) {
                     table.setData(dataFromServer.tableData);
+                    table.getColumns().forEach(function (column) {
+                        let cells = column.getCells();
+                        cells.forEach(updateCell);
+                        cells.forEach(function(cell){speciesSet.add(cell._cell.row.data.species)});
+                    });
                 }
                 table.redraw(true);
 
@@ -202,7 +213,31 @@ html
                     document.getElementById("timeFrame").value = dataFromServer.timeFrame;
                 }
 
+                mapHabitatsToSites();
             };
+
+            function updateCell(cell) {
+                let habitatIndex = [];
+                for (let site in sites) {
+                    if (cell._cell.column != null && cell._cell.column.field != null && sites[site].habitat.name == cell._cell.column.field) {
+                        habitatIndex.push(site);
+                    }
+                }
+                for (let index in habitatIndex) {
+                    if (cell._cell.value) {
+                        // console.log("adding " + cell._cell.row.data.species + " to " + sites[habitatIndex[index]].habitat.name);
+                        sites[habitatIndex[index]].siteSpecies.add(cell._cell.row.data.species);
+                        sites[habitatIndex[index]].taxa.add(cell._cell.row.data.taxa);
+                    } else {
+                        // console.log("removing " + cell._cell.row.data.species + " from " + sites[habitatIndex[index]].habitat.name);
+                        sites[habitatIndex[index]].siteSpecies.delete(cell._cell.row.data.species);
+                        sites[habitatIndex[index]].taxa.delete(cell._cell.row.data.taxa);
+                    }
+                }
+                if (cell._cell.column != null && cell._cell.column.field == "taxa") {
+                    speciesTaxaMap.set(cell._cell.row.data.species, cell._cell.row.data.taxa);
+                }
+            }
 
             function generateTableData(button) {
                 let columns = [{title: "Species", field: "species"}];
@@ -489,7 +524,8 @@ html
                 let siteHabitatSelector = document.createElement("SELECT");
                 siteHabitatSelector.className = "siteHabitatSelector";
                 for(let i = 0; i < habitats.length ; i++) {
-                    let option = document.createElement("OPTION")
+                    let option = document.createElement("OPTION");
+                    // option.value = habitats[i];
                     option.appendChild(document.createTextNode(habitats[i]));
                     siteHabitatSelector.appendChild(option);
                 }
@@ -625,9 +661,11 @@ html
                 let tableData = "";
                 if(table != null)
                     tableData = table.getData();
-                siteData.savedCoordinates = [];
+                siteData = {savedCoordinates:[], names:[], habitats:[]};
                 sites.forEach(function(site) {
                     siteData.savedCoordinates.push(site.coordinates);
+                    siteData.habitats.push(site.habitat);
+                    siteData.names.push(site.name)
                 });
                 let saveData = {
                     "id": id,
@@ -705,7 +743,13 @@ html
                     speciesSet.add(marker.species);
                     markers.push(marker);
                 }
+
                 updateMap();
+
+                table.getColumns().forEach(function (column) {
+                    let cells = column.getCells();
+                    cells.forEach(updateCell);
+                });
             }
 
             updateMap = function () {
@@ -755,71 +799,15 @@ html
 
             chartSites = function () {
                 mapHabitatsToSites();
-                // if(true) {
-                    for (let i = 0; i < markers.length; i++) {
-                        for (let k = 0; k < sites.length; k++) {
-                            if (sites[k].Polygon.Contains(markers[i].getPosition())) {
-                                sites[k].markers.push(markers[i]);
-                                //todo: see UBIF-0015
-                                // break;
-                            }
+                for (let i = 0; i < markers.length; i++) {
+                    for (let k = 0; k < sites.length; k++) {
+                        if (sites[k].Polygon.Contains(markers[i].getPosition())) {
+                            sites[k].markers.push(markers[i]);
+                            //todo: see UBIF-0015
+                            // break;
                         }
                     }
-                // } else {
-                //     let mySiteSpecies = new Set();
-                //     mySiteSpecies.add("Grass");
-                //     mySiteSpecies.add("Tree");
-                //     sites = [
-                //         {
-                //             name: "site 1",
-                //             markers:[
-                //                 {
-                //                     species:"Grass",
-                //                     observedOn: new Date("2019-01-01")
-                //                 },
-                //                 {
-                //                     species: "Tree",
-                //                     observedOn: new Date("2019-02-02")
-                //                 }
-                //                 ],
-                //             habitat: "a",
-                //             taxa: "Plants",
-                //             siteSpecies: mySiteSpecies
-                //         },
-                //         {
-                //             name: "site 2",
-                //             markers: [
-                //                 {
-                //                     species: "Grass",
-                //                     observedOn: new Date("2019-01-01")
-                //                 },
-                //                 {
-                //                     species: "Tree",
-                //                     observedOn: new Date("2019-02-02")
-                //                 }
-                //             ],
-                //             habitat: "a",
-                //             taxa: "Plants",
-                //             siteSpecies: mySiteSpecies
-                //         },
-                //         {
-                //             name: "site 3",
-                //             markers: [
-                //                 {
-                //                     species: "Grass",
-                //                     observedOn: new Date("2019-01-01")
-                //                 },
-                //                 {
-                //                     species: "Tree",
-                //                     observedOn: new Date("2019-02-02")
-                //                 }
-                //             ],
-                //             habitat: "a",
-                //             taxa: "Plants",
-                //             siteSpecies: mySiteSpecies
-                //         }
-                //     ]
-                // }
+                }
 
                 timeSlices = getTimeSlices(startDate, endDate, timeFrame);
 
