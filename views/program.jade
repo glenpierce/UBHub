@@ -172,18 +172,16 @@ html
                         i++;
                     });
 
-                    let habitatSelectors = document.getElementsByClassName("siteHabitatSelector");
-                    let k = 0;
-                    dataFromServer.siteData.habitats.forEach(function (habitat) {
-                        // habitatSelectors[k].value = habitat.name;
-                        sites[k].habitat = habitat;
-                        k++;
-                    });
+                    setTimeout(function() {
+                        let habitatSelectors = document.getElementsByClassName("siteHabitatSelector");
+                        let k = 0;
+                        dataFromServer.siteData.habitats.forEach(function (habitat) {
+                            habitatSelectors[k].value = habitat.name;
+                            sites[k].habitat = habitat;
+                            k++;
+                        });
+                    }, 0);
                 }
-
-                // if (dataFromServer.observations) {
-                //     placeMarkers(dataFromServer.observations);
-                // }
 
                 for (let i = 0; i < habitatData.length; i++) {
                     addHabitatData(habitatData[i].title);
@@ -525,7 +523,7 @@ html
                 siteHabitatSelector.className = "siteHabitatSelector";
                 for(let i = 0; i < habitats.length ; i++) {
                     let option = document.createElement("OPTION");
-                    // option.value = habitats[i];
+                    option.value = habitats[i];
                     option.appendChild(document.createTextNode(habitats[i]));
                     siteHabitatSelector.appendChild(option);
                 }
@@ -573,6 +571,7 @@ html
                     if(sites[site].siteHatbitatSelector) {
                         let option = document.createElement("OPTION");
                         option.appendChild(document.createTextNode(habitatName));
+                        option.value = habitatName;
                         sites[site].siteHatbitatSelector.appendChild(option);
                     }
                 }
