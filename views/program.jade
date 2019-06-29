@@ -15,6 +15,38 @@ html
             .tabulator-tableHolder {
                 max-height: 400px !important;
             }
+
+            .buttonCell {
+                display:flex;
+                justify-content: space-around;
+                width:100%;
+            }
+            .redButton {
+                width: 9px;
+                padding: 5px;
+                border-radius: 5px;
+                background-color: red;
+                text-align: center;
+            }
+            .greenButton {
+                width: 9px;
+                padding: 5px;
+                border-radius: 5px;
+                background-color: green;
+                text-align: center
+            }
+            .greyButton {
+                width: 9px;
+                padding: 5px;
+                border-radius: 5px;
+                background-color: grey;
+                text-align: center
+            }
+            .selectedButtonCell {
+                color: white;
+                font-weight: 700;
+            }
+
         link(href="https://unpkg.com/tabulator-tables@4.2.3/dist/css/tabulator.min.css" rel="stylesheet")
         script(type="text/javascript" src="https://unpkg.com/tabulator-tables@4.2.3/dist/js/tabulator.min.js")
         //link(href="/stylesheets/tabulator.min.css" rel="stylesheet")
@@ -26,10 +58,66 @@ html
         script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&libraries=drawing,geometry")
         script.
 
+            const presenceEditor = function (cell, onRendered, success, cancel, editorParams) {
+                //cell - the cell component for the editable cell
+                //onRendered - function to call when the editor has been rendered
+                //success - function to call to pass the successfully updated value to Tabulator
+                //cancel - function to call to abort the edit and return to a normal cell
+                //editorParams - params object passed into the editorParams column definition property
+
+                let editorValue = cell.getValue();
+
+                let editor = document.createElement("div");
+                editor.className = "buttonCell";
+
+                let redButton = document.createElement("div");
+                let greenButton = document.createElement("div");
+                let greyButton = document.createElement("div");
+
+                redButton.innerHTML = "A";
+                redButton.className = "redButton";
+                redButton.onclick = function (event) {
+                    redButton.className = "redButton selectedButtonCell";
+                    greenButton.className = "greenButton";
+                    greyButton.className = "greyButton";
+                    cell._cell.value = 0;
+                };
+                editor.appendChild(redButton);
+
+                greenButton.innerHTML = "P";
+                greenButton.className = "greenButton";
+                greenButton.onclick = function (event) {
+                    redButton.className = "redButton";
+                    greenButton.className = "greenButton selectedButtonCell";
+                    greyButton.className = "greyButton";
+                    cell._cell.value = 1;
+                };
+                editor.appendChild(greenButton);
+
+                greyButton.innerHTML = "?";
+                greyButton.className = "greyButton";
+                greyButton.onclick = function(event) {
+                    redButton.className = "redButton";
+                    greenButton.className = "greenButton";
+                    greyButton.className = "greyButton selectedButtonCell";
+                    cell._cell.value = 2;
+                };
+                editor.appendChild(greyButton);
+
+                onRendered(function () {
+                    editor.focus();
+                });
+
+                return editor;
+            };
+
             Tabulator.prototype.extendModule("format", "formatters", {
-                uppercase: function (cell, formatterParams) {
-                    return cell.getValue().toUpperCase(); //make the contents of the cell uppercase
-                    //this could just return raw html as text
+                presence: function (cell, formatterParams) {
+                    return "<div class='buttonCell'>" +
+                            "<div class='redButton" + (cell._cell.value == 0 ? " selectedButtonCell" : "") + "'>A</div>" +
+                            "<div class='greenButton" + (cell._cell.value == 1 ? " selectedButtonCell" : "") + "'>P</div>" +
+                            "<div class='greyButton" + (cell._cell.value == 2 ? " selectedButtonCell" : "") + "'>?</div>" +
+                        "</div>";
                 }
             });
 
@@ -244,7 +332,7 @@ html
                 let data = [];
                 for (let site in sites) {
                     if (sites[site].habitat.name === button.innerHTML) {
-                        columns.push({title: sites[site].name, field: sites[site].name, formatter: "tickCross"});
+                        columns.push({title: sites[site].name, field: sites[site].name, formatter: "presence", editor:presenceEditor});
                         sites[site].siteSpecies.forEach(function (species) {
                             let containsSpecies = false;
                             for (let marker in markers) {
@@ -548,9 +636,9 @@ html
                     field: habitatName,
                     width: 90,
                     align: "center",
-                    formatter: "tickCross",
+                    formatter: "presence",
                     sorter: "boolean",
-                    editor: true
+                    editor: presenceEditor
                 }
                 habitatData.push(newHabitat);
                 columns.push(newHabitat);
