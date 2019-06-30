@@ -334,14 +334,17 @@ html
                 }
             }
 
-            function generateTableData(button) {
+            function generateTableData(button, editable) {
                 let columns = [{title: "Species", field: "species"}];
                 let speciesRows = [];
                 let speciesRowCounter = new Set();
                 let data = [];
                 for (let site in sites) {
                     if (sites[site].habitat.name === button.innerHTML) {
-                        columns.push({title: sites[site].name, field: sites[site].name, formatter: "presence", editor:presenceEditor});
+                        if(editable)
+                            columns.push({title: sites[site].name, field: sites[site].name, formatter: "presence", editor:presenceEditor});
+                        else
+                            columns.push({title: sites[site].name, field: sites[site].name, formatter: "presence"});
                         sites[site].siteSpecies.forEach(function (species) {
                             let containsSpecies = false;
                             for (let marker in markers) {
@@ -378,7 +381,7 @@ html
 
             function verifyTable(button) {
                 verificationTable.element.classList.remove("hidden");
-                let {columns, data} = generateTableData(button);
+                let {columns, data} = generateTableData(button, true);
                 verificationTable.setColumns(columns);
                 verificationTable.setData(data);
                 verificationTable.redraw(true);
@@ -386,7 +389,7 @@ html
 
             function surrogateSpeciesByHabitatTable(button) {
                 speciesPresenceTable.element.classList.remove("hidden");
-                let {columns, data} = generateTableData(button);
+                let {columns, data} = generateTableData(button, false);
                 speciesPresenceTable.setColumns(columns);
                 speciesPresenceTable.setData(data);
                 speciesPresenceTable.redraw(true);
@@ -472,17 +475,17 @@ html
                         {"featureType": "water", "elementType": "labels.text.fill", "stylers": [{"color": "#4e6d70"}]}]
                 });
                 google.maps.Polygon.prototype.Contains = function (point) {
-                    var crossings = 0,
+                    let crossings = 0,
                         path = this.getPath();
 
                     // for each edge
-                    for (var i = 0; i < path.getLength(); i++) {
-                        var a = path.getAt(i),
+                    for (let i = 0; i < path.getLength(); i++) {
+                        let a = path.getAt(i),
                             j = i + 1;
                         if (j >= path.getLength()) {
                             j = 0;
                         }
-                        var b = path.getAt(j);
+                        let b = path.getAt(j);
                         if (rayCrossesSegment(point, a, b)) {
                             crossings++;
                         }
@@ -492,7 +495,7 @@ html
                     return (crossings % 2 == 1);
 
                     function rayCrossesSegment(point, a, b) {
-                        var px = point.lng(),
+                        let px = point.lng(),
                             py = point.lat(),
                             ax = a.lng(),
                             ay = a.lat(),
@@ -519,14 +522,14 @@ html
                         if ((py > by || py < ay) || (px > Math.max(ax, bx))) return false;
                         if (px < Math.min(ax, bx)) return true;
 
-                        var red = (ax != bx) ? ((by - ay) / (bx - ax)) : Infinity;
-                        var blue = (ax != px) ? ((py - ay) / (px - ax)) : Infinity;
+                        let red = (ax != bx) ? ((by - ay) / (bx - ax)) : Infinity;
+                        let blue = (ax != px) ? ((py - ay) / (px - ax)) : Infinity;
                         return (blue >= red);
 
                     }
 
                 };
-                var drawingManager = new google.maps.drawing.DrawingManager({
+                let drawingManager = new google.maps.drawing.DrawingManager({
                     drawingMode: google.maps.drawing.OverlayType.POLYGON,
                     drawingControl: true,
                     drawingControlOptions: {
@@ -1444,91 +1447,6 @@ html
                     .call(yAxis);
             }
 
-            // chart = function (sites) {
-            //     // clearPriorChartIfAny();
-            //     if(startDate == null) {
-            //         startDate = new Date("1900-01-01");
-            //     }
-            //
-            //     const svgWidth = 500;
-            //     const svgHeight = 300;
-            //     const strokeWidth = 5;
-            //     const barWidth = 20;
-            //     const footerHeight = 10;
-            //     const headerHeight = 5; //we need this so that 100% at the top isn't cut off to look like iuu,o
-            //     const leftAxisMargin = 20;
-            //     const leftAxisExtraMargin = leftAxisMargin + 24;
-            //     const barZoneWidth = svgWidth - leftAxisExtraMargin;
-            //     const barPadding = barZoneWidth / sites.length / 2;
-            //
-            //     let svg = d3.select('.chart') //there's now multiple svgs in the dom, so it's selecting the first one it finds in dom order...
-            //         .attr("width", svgWidth)
-            //         .attr("height", svgHeight)
-            //         .attr("class", "bar-chart");
-            //
-            //     svg.selectAll("rect")
-            //         .data(sites)
-            //         .enter()
-            //         .append("rect")
-            //         .attr("height", function (d) {
-            //             let speciesInPolygon = new Set();
-            //             let presence = 0;
-            //             for (marker in d.markers) {
-            //                 if (!speciesInPolygon.has(d.markers[marker].species) && d.siteSpecies.has(d.markers[marker].species) && d.markers[marker].observedOn < endDate && d.markers[marker].observedOn > startDate) { //please make me a function
-            //                     presence += 1;
-            //                 }
-            //                 speciesInPolygon.add(d.markers[marker].species);
-            //             }
-            //             if (d.siteSpecies.size != 0) {
-            //                 presence = svgHeight * (presence / d.siteSpecies.size);
-            //             }
-            //             d.presence = presence;
-            //             return presence;
-            //         })
-            //         .style("stroke", "white")
-            //         .style("fill", "grey")
-            //         .style("stroke-width", strokeWidth)
-            //         // .attr("y", function (d) {
-            //         //     return svgHeight - d.presence;
-            //         // })
-            //         .attr("width", barWidth)
-            //         .attr("transform", function (d, i) {
-            //             let translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding, 0];
-            //             return "translate(" + translate + ")";
-            //         });
-            //
-            //     svg.selectAll("text")
-            //         .data(sites)
-            //         .enter()
-            //         .append("text")
-            //         .attr("class", "chartLabel")
-            //         .style("text-anchor", "middle")
-            //         .attr("fill", "black")
-            //         .attr("width", svgWidth / sites.length)
-            //         .attr("transform", function (d, i) {
-            //             let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight - 10];
-            //             return "translate(" + translate + ")";
-            //         })
-            //         .text(function (d) {
-            //             return d.habitat.name;
-            //         });
-            //
-            //     let yScale = d3.scaleLinear()
-            //         .domain([1, 0])
-            //         .range([footerHeight, svgHeight - footerHeight - headerHeight]);
-            //
-            //     const formatPercent = d3.format(".0%");
-            //
-            //     let yAxis = d3.axisLeft()
-            //         .scale(yScale)
-            //         .tickFormat(formatPercent)
-            //         .tickSize(svgWidth - leftAxisMargin, 0, 0);
-            //
-            //     svg.append("g")
-            //         .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + footerHeight + ")")
-            //         .call(yAxis);
-            // }
-
             function clearPriorChartIfAny(oldChartId) {
                 let oldChart = document.getElementById(oldChartId);
                 if (oldChart != null) {
@@ -1560,8 +1478,8 @@ html
             }
 
             function togglePanelOpenOrClosed(tab, panelId) {
-                var panel = document.getElementById(panelId);
-                var status = panel.classList.contains("hide");
+                let panel = document.getElementById(panelId);
+                let status = panel.classList.contains("hide");
                 if (status) {
                     panel.classList.remove("hide");
                     tab.classList.add("active");
