@@ -114,7 +114,8 @@ html
                 });
 
                 editor.addEventListener("click", function () {
-                    setTimeout(success(value), 0);
+                    verifyCell(cell);
+                    success(value);
                 });
 
                 return editor;
@@ -227,7 +228,8 @@ html
                 );
 
                 verificationTable = new Tabulator("#verification-table", {
-                    layoutColumnsOnNewData: true
+                    layoutColumnsOnNewData: true,
+                    cellEdited: verifyCell
                 });
                 speciesPresenceTable = new Tabulator("#speciesPresenceTable", {
                     layoutColumnsOnNewData: true
@@ -334,6 +336,19 @@ html
                 }
             }
 
+            function verifyCell(cell) {
+                for (let site in sites) {
+                    if (cell._cell.column != null && cell._cell.column.field != null && sites[site].name == cell._cell.column.field) {
+                        sites[site].verifiedData.forEach(function(verifiedSiteDataPoint){
+                            if(verifiedSiteDataPoint.species == cell._cell.row.data.species) {
+                                verifiedSiteDataPoint.presence = cell._cell.value;
+                            }
+                        });
+                        return;
+                    }
+                }
+            }
+
             function generateTableData(button, editable) {
                 let columns = [{title: "Species", field: "species"}];
                 let speciesRows = [];
@@ -346,17 +361,20 @@ html
                         else
                             columns.push({title: sites[site].name, field: sites[site].name, formatter: "presence"});
                         sites[site].siteSpecies.forEach(function (species) {
-                            let containsSpecies = false;
-                            for (let marker in markers) {
-                                if (sites[site].Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
-                                    containsSpecies = true;
-                                    break;
+                            if(sites[site].speciesStatus(species) == null) {
+                                let containsSpecies = false;
+                                for (let marker in markers) {
+                                    if (sites[site].Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
+                                        containsSpecies = true;
+                                        break;
+                                    }
                                 }
+                                sites[site].verifiedData.push({species: species, presence: containsSpecies ? 1 : 0});
                             }
                             speciesRows.push({
                                 siteName: sites[site].name,
                                 species: species,
-                                containsSpecies: containsSpecies
+                                containsSpecies: sites[site].speciesStatus(species)
                             });
                             speciesRowCounter.add(species);
                         });
@@ -369,8 +387,8 @@ html
                     columns.forEach(function (column) {
                         newRow[column.title] = false;
                         speciesRows.forEach(function (speciesRow) {
-                            if (newRow.species == speciesRow.species && speciesRow.siteName == column.title && speciesRow.containsSpecies) {
-                                newRow[column.title] = true;
+                            if (newRow.species == speciesRow.species && speciesRow.siteName == column.title) {
+                                newRow[column.title] = speciesRow.containsSpecies;
                             }
                         });
                     });
@@ -559,10 +577,20 @@ html
                     habitat: {},
                     siteSpecies: new Set(),
                     taxa: new Set(),
+                    verifiedData: [],
                     minX: polygon.getPath().getArray()[0].lng() + 180,
                     minY: polygon.getPath().getArray()[0].lat() * -1 + 90,
                     maxX: polygon.getPath().getArray()[0].lng() + 180,
-                    maxY: polygon.getPath().getArray()[0].lat() * -1 + 90
+                    maxY: polygon.getPath().getArray()[0].lat() * -1 + 90,
+
+                    speciesStatus: function (species) {
+                        let presence;
+                        this.verifiedData.forEach(function(verifiedSiteDataPoint) {
+                            if(verifiedSiteDataPoint.species == species)
+                                presence = verifiedSiteDataPoint.presence;
+                        });
+                        return presence;
+                    }
                 }
                 for (let i = 0; i < site.polygon.length; i++) {
                     site.coordinates.push({lat: site.polygon[i].lat(), lng: site.polygon[i].lng()})
@@ -967,14 +995,14 @@ html
                         for (let i = 0; i < sites.length; i++) {
                             let numerator = 0;
                             let denominator = 0;
-                            for (let k = 0; k < sites[i].markers.length; k++) {
-                                if(d == speciesTaxaMap.get(sites[i].markers[k].species)) {
+                            for (let k = 0; k < sites[i].verifiedData.length; k++) {
+                                if(d == speciesTaxaMap.get(sites[i].verifiedData[k].species) && sites[i].verifiedData[k].presence == 1) {
                                     numerator++;
                                     break;
                                 }
                             }
                             sites[i].siteSpecies.forEach(function (species) {
-                                if (d == speciesTaxaMap.get(species))
+                                if (d == speciesTaxaMap.get(species) && sites[i].speciesStatus(species) < 2)
                                     denominator++;
                             });
                             if(denominator !== 0) {
