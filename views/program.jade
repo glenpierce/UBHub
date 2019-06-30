@@ -70,7 +70,7 @@ html
 
                 let editor = document.createElement("div");
                 editor.className = "buttonCell";
-                editor.style.cssText = "margin-top:3px; width:82px; padding-left:3px;";
+                // editor.style.cssText = "margin-top:3px; width:82px; padding-left:3px;";
 
                 let redButton = document.createElement("div");
                 let greenButton = document.createElement("div");
@@ -645,9 +645,9 @@ html
                     field: habitatName,
                     width: 90,
                     align: "center",
-                    formatter: "presence",
+                    formatter: "tickCross",
                     sorter: "boolean",
-                    editor: presenceEditor
+                    editor: true
                 }
                 habitatData.push(newHabitat);
                 columns.push(newHabitat);
