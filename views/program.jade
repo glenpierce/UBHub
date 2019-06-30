@@ -20,6 +20,7 @@ html
                 display:flex;
                 justify-content: space-around;
                 width:100%;
+                user-select: none;
             }
             .redButton {
                 width: 9px;
@@ -65,10 +66,11 @@ html
                 //cancel - function to call to abort the edit and return to a normal cell
                 //editorParams - params object passed into the editorParams column definition property
 
-                let editorValue = cell.getValue();
+                let value;
 
                 let editor = document.createElement("div");
                 editor.className = "buttonCell";
+                editor.style.cssText = "margin-top:3px; width:82px; padding-left:3px;";
 
                 let redButton = document.createElement("div");
                 let greenButton = document.createElement("div");
@@ -81,6 +83,7 @@ html
                     greenButton.className = "greenButton";
                     greyButton.className = "greyButton";
                     cell._cell.value = 0;
+                    value = 0;
                 };
                 editor.appendChild(redButton);
 
@@ -91,6 +94,7 @@ html
                     greenButton.className = "greenButton selectedButtonCell";
                     greyButton.className = "greyButton";
                     cell._cell.value = 1;
+                    value = 1;
                 };
                 editor.appendChild(greenButton);
 
@@ -101,11 +105,16 @@ html
                     greenButton.className = "greenButton";
                     greyButton.className = "greyButton selectedButtonCell";
                     cell._cell.value = 2;
+                    value = 2;
                 };
                 editor.appendChild(greyButton);
 
                 onRendered(function () {
                     editor.focus();
+                });
+
+                editor.addEventListener("click", function () {
+                    setTimeout(success(value), 0);
                 });
 
                 return editor;
