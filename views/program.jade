@@ -29,6 +29,9 @@ html
                 background-color: red;
                 text-align: center;
             }
+            .selectedRed {
+
+            }
             .greenButton {
                 width: 9px;
                 padding: 5px;
@@ -36,12 +39,18 @@ html
                 background-color: green;
                 text-align: center
             }
+            .seletedGreen {
+
+            }
             .greyButton {
                 width: 9px;
                 padding: 5px;
                 border-radius: 5px;
                 background-color: grey;
                 text-align: center
+            }
+            .selectedGrey {
+                background-color: lightgrey;
             }
             .selectedButtonCell {
                 color: white;
@@ -70,7 +79,6 @@ html
 
                 let editor = document.createElement("div");
                 editor.className = "buttonCell";
-                // editor.style.cssText = "margin-top:3px; width:82px; padding-left:3px;";
 
                 let redButton = document.createElement("div");
                 let greenButton = document.createElement("div");
@@ -124,9 +132,9 @@ html
             Tabulator.prototype.extendModule("format", "formatters", {
                 presence: function (cell, formatterParams) {
                     return "<div class='buttonCell'>" +
-                            "<div class='redButton" + (cell._cell.value == 0 ? " selectedButtonCell" : "") + "'>A</div>" +
-                            "<div class='greenButton" + (cell._cell.value == 1 ? " selectedButtonCell" : "") + "'>P</div>" +
-                            "<div class='greyButton" + (cell._cell.value == 2 ? " selectedButtonCell" : "") + "'>?</div>" +
+                            "<div class='redButton" + (cell._cell.value == 0 ? " selectedButtonCell selectedRed" : "") + "'>A</div>" +
+                            "<div class='greenButton" + (cell._cell.value == 1 ? " selectedButtonCell selectedGreen" : "") + "'>P</div>" +
+                            "<div class='greyButton" + (cell._cell.value == 2 ? " selectedButtonCell selectedGreen" : "") + "'>?</div>" +
                         "</div>";
                 }
             });
@@ -356,24 +364,29 @@ html
                 let data = [];
                 for (let site in sites) {
                     if (sites[site].habitat.name === button.innerHTML) {
+                        let groupedColumn = {"title":sites[site].name, "columns":[]};
+                        groupedColumn.columns.push({title: "Observed", field: "observed", formatter: "tickCross"});
                         if(editable)
-                            columns.push({title: sites[site].name, field: sites[site].name, formatter: "presence", editor:presenceEditor});
+                            groupedColumn.columns.push({title: "Verified", field: sites[site].name, formatter: "presence", editor:presenceEditor});
                         else
-                            columns.push({title: sites[site].name, field: sites[site].name, formatter: "presence"});
+                            groupedColumn.columns.push({title: "Verified", field: sites[site].name, formatter: "presence"});
+                        columns.push(groupedColumn);
+
                         sites[site].siteSpecies.forEach(function (species) {
-                            if(sites[site].speciesStatus(species) == null) {
-                                let containsSpecies = false;
-                                for (let marker in markers) {
-                                    if (sites[site].Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
-                                        containsSpecies = true;
-                                        break;
-                                    }
+                            let containsSpecies = false;
+                            for (let marker in markers) {
+                                if (sites[site].Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
+                                    containsSpecies = true;
+                                    break;
                                 }
+                            }
+                            if(sites[site].speciesStatus(species) == null) {
                                 sites[site].verifiedData.push({species: species, presence: containsSpecies ? 1 : 0});
                             }
                             speciesRows.push({
                                 siteName: sites[site].name,
                                 species: species,
+                                observed: containsSpecies,
                                 containsSpecies: sites[site].speciesStatus(species)
                             });
                             speciesRowCounter.add(species);
@@ -388,7 +401,11 @@ html
                         newRow[column.title] = false;
                         speciesRows.forEach(function (speciesRow) {
                             if (newRow.species == speciesRow.species && speciesRow.siteName == column.title) {
-                                newRow[column.title] = speciesRow.containsSpecies;
+                                if(column.field == "observed") {
+                                    newRow.observed = speciesRow.observed;
+                                } else {
+                                    newRow[column.title] = speciesRow.containsSpecies;
+                                }
                             }
                         });
                     });
@@ -400,6 +417,7 @@ html
             function verifyTable(button) {
                 verificationTable.element.classList.remove("hidden");
                 let {columns, data} = generateTableData(button, true);
+                console.log({columns, data});
                 verificationTable.setColumns(columns);
                 verificationTable.setData(data);
                 verificationTable.redraw(true);
