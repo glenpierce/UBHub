@@ -140,7 +140,6 @@ html
             });
 
             let dataFromServer = !{dataFromServer};
-            console.log(dataFromServer);
             let id;
             if(dataFromServer.id) {
                 id = !{id};
@@ -193,6 +192,9 @@ html
             }
 
             let timeSlices;
+
+            let verifiedData = {"habitats":{}}
+
 
             window.onload = function (ev) {
 
@@ -272,9 +274,11 @@ html
                     }
 
                     let namesInputs = document.getElementsByClassName("siteName");
+                    let verificationButtons = document.getElementsByClassName("verificationButton");
                     let i = 0;
                     dataFromServer.siteData.names.forEach(function (name) {
                         namesInputs[i].value = name;
+                        verificationButtons[i].innerHTML = name;
                         sites[i].name = name;
                         i++;
                     });
@@ -307,15 +311,18 @@ html
                 table.redraw(true);
 
                 if(dataFromServer.startDate) {
-                    document.getElementById("startDate").valueAsDate = new Date(dataFromServer.startDate);
+                    startDate = new Date(dataFromServer.startDate);
+                    document.getElementById("startDate").valueAsDate = startDate;
                 }
 
                 if (dataFromServer.endDate) {
-                    document.getElementById("endDate").valueAsDate = new Date(dataFromServer.endDate);
+                    endDate = new Date(dataFromServer.endDate);
+                    document.getElementById("endDate").valueAsDate = endDate;
                 }
 
                 if (dataFromServer.timeFrame) {
-                    document.getElementById("timeFrame").value = dataFromServer.timeFrame;
+                    timeFrame = dataFromServer.timeFrame;
+                    document.getElementById("timeFrame").value = timeFrame;
                 }
 
                 mapHabitatsToSites();
@@ -330,11 +337,9 @@ html
                 }
                 for (let index in habitatIndex) {
                     if (cell._cell.value) {
-                        // console.log("adding " + cell._cell.row.data.species + " to " + sites[habitatIndex[index]].habitat.name);
                         sites[habitatIndex[index]].siteSpecies.add(cell._cell.row.data.species);
                         sites[habitatIndex[index]].taxa.add(cell._cell.row.data.taxa);
                     } else {
-                        // console.log("removing " + cell._cell.row.data.species + " from " + sites[habitatIndex[index]].habitat.name);
                         sites[habitatIndex[index]].siteSpecies.delete(cell._cell.row.data.species);
                         sites[habitatIndex[index]].taxa.delete(cell._cell.row.data.taxa);
                     }
@@ -357,7 +362,85 @@ html
                 }
             }
 
-            function generateTableData(button, editable) {
+            function generateVerificationTableData(button) {
+                timeSlices = getTimeSlices(startDate, endDate, timeFrame);
+                let columns = [{title: "Species", field: "species"}];
+                let speciesRows = [];
+                let speciesRowSet = new Set();
+                let data = [];
+                let selectedSite;
+                for (let site in sites) {
+                    if (sites[site].name === button.innerHTML) {
+                        selectedSite = sites[site];
+                        break;
+                    }
+                }
+
+                for(let timeSliceIndex = 0; timeSliceIndex < timeSlices.length - 1; timeSliceIndex++) {
+                    let groupedColumn = {"title": timeSlices[timeSliceIndex].titleType(), "columns": []};
+                    groupedColumn.columns.push({
+                        title: "Observed",
+                        field: "observed" + timeSlices[timeSliceIndex].titleType(),
+                        formatter: "tickCross"});
+                    groupedColumn.columns.push({
+                        title: "Verified",
+                        field: "verified" + timeSlices[timeSliceIndex].titleType(),
+                        formatter: "presence",
+                        editor: presenceEditor
+                    });
+                    columns.push(groupedColumn);
+
+                    selectedSite.siteSpecies.forEach(function (species) {
+                        let containsSpecies = false;
+                        for (let marker in markers) {
+                            if (selectedSite.Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
+                                containsSpecies = true;
+                                break;
+                            }
+                        }
+                        if(verifiedData.habitats[selectedSite.name] == null) {
+                            verifiedData.habitats[selectedSite.name] = {};
+                        }
+                        if(verifiedData.habitats[selectedSite.name][timeSlices[timeSliceIndex].titleType()] == null) {
+                            verifiedData.habitats[selectedSite.name][timeSlices[timeSliceIndex].titleType()] = {};
+                        }
+                        if(verifiedData.habitats[selectedSite.name][timeSlices[timeSliceIndex].titleType()][species] == null) {
+                            verifiedData.habitats[selectedSite.name][timeSlices[timeSliceIndex].titleType()][species] =  containsSpecies ? 1 : 0;
+                        }
+                        if (selectedSite.speciesStatus(species) == null) {
+                            selectedSite.verifiedData.push({species: species, presence: containsSpecies ? 1 : 0});
+                        }
+                        let newSpeciesRow = {siteName: selectedSite.name, species: species, timeSlice:timeSlices[timeSliceIndex].titleType()};
+                        newSpeciesRow["observed" + timeSlices[timeSliceIndex].titleType()] = containsSpecies;
+                        newSpeciesRow["verified" + timeSlices[timeSliceIndex].titleType()] = verifiedData.habitats[selectedSite.name][timeSlices[timeSliceIndex].titleType()][species];
+                        speciesRows.push(newSpeciesRow);
+                        speciesRowSet.add(species);
+                    });
+                }
+
+                speciesRowSet.forEach(function (uniqueSpecies) {
+                    let newRow = {};
+                    newRow.species = uniqueSpecies;
+                    columns.forEach(function (groupedColumn) {
+                        let i = 0;
+                        if(groupedColumn.columns) {
+                            groupedColumn.columns.forEach(function (column) {
+                                newRow[groupedColumn.title] = 0;
+                                speciesRows.forEach(function (speciesRow) {
+                                    if (newRow.species == speciesRow.species && speciesRow.timeSlice == groupedColumn.title) {
+                                        newRow[groupedColumn.columns[i].field] = speciesRow[groupedColumn.columns[i].field];
+                                        i++;
+                                    }
+                                });
+                            });
+                        }
+                    });
+                    data.push(newRow);
+                });
+                return {columns, data};
+            }
+
+            function generateTableData(button) {
                 let columns = [{title: "Species", field: "species"}];
                 let speciesRows = [];
                 let speciesRowCounter = new Set();
@@ -366,10 +449,7 @@ html
                     if (sites[site].habitat.name === button.innerHTML) {
                         let groupedColumn = {"title":sites[site].name, "columns":[]};
                         groupedColumn.columns.push({title: "Observed", field: "observed", formatter: "tickCross"});
-                        if(editable)
-                            groupedColumn.columns.push({title: "Verified", field: sites[site].name, formatter: "presence", editor:presenceEditor});
-                        else
-                            groupedColumn.columns.push({title: "Verified", field: sites[site].name, formatter: "presence"});
+                        groupedColumn.columns.push({title: "Verified", field: sites[site].name, formatter: "presence"});
                         columns.push(groupedColumn);
 
                         sites[site].siteSpecies.forEach(function (species) {
@@ -416,8 +496,7 @@ html
 
             function verifyTable(button) {
                 verificationTable.element.classList.remove("hidden");
-                let {columns, data} = generateTableData(button, true);
-                console.log({columns, data});
+                let {columns, data} = generateVerificationTableData(button);
                 verificationTable.setColumns(columns);
                 verificationTable.setData(data);
                 verificationTable.redraw(true);
@@ -425,7 +504,7 @@ html
 
             function surrogateSpeciesByHabitatTable(button) {
                 speciesPresenceTable.element.classList.remove("hidden");
-                let {columns, data} = generateTableData(button, false);
+                let {columns, data} = generateTableData(button);
                 speciesPresenceTable.setColumns(columns);
                 speciesPresenceTable.setData(data);
                 speciesPresenceTable.redraw(true);
@@ -651,6 +730,14 @@ html
                 siteSvg.appendChild(sitePolygon);
                 siteElement.appendChild(siteSvg);
 
+                let button = document.createElement("button");
+                button.className = "verificationButton";
+                button.innerHTML = site.name;
+                button.addEventListener("click", function () {
+                    verifyTable(this);
+                });
+                document.getElementById("verifyButtons").appendChild(button);
+
                 let siteData = document.createElement("DIV");
                 siteData.setAttribute("style", "display: flex; flex-direction:column;");
                 let siteName = document.createElement("DIV");
@@ -660,6 +747,7 @@ html
                 siteInput.className = "siteName";
                 siteInput.addEventListener("input", function () {
                     site.name = this.value;
+                    button.innerHTML = site.name;
                 });
                 siteData.appendChild(siteInput);
                 let siteHabitat = document.createElement("DIV");
@@ -721,13 +809,6 @@ html
                         sites[site].siteHatbitatSelector.appendChild(option);
                     }
                 }
-
-                let button = document.createElement("button");
-                button.innerHTML = habitatName;
-                button.addEventListener("click", function () {
-                    verifyTable(this);
-                });
-                document.getElementById("verifyButtons").appendChild(button);
 
                 let surrogateSpeciesByHabitatChartButton = document.createElement("button");
                 surrogateSpeciesByHabitatChartButton.innerHTML = habitatName;
@@ -961,6 +1042,10 @@ html
             }
 
             function getTimeSlices(start, end, frame) {
+                Date.prototype.titleType = Date.prototype.getFullYear;
+                if (timeFrame == "month") {
+                    Date.prototype.titleType = Date.prototype.getMonth;
+                }
                 let result = [];
                 if(start == null) {
                     return result;
