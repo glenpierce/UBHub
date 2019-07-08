@@ -129,6 +129,8 @@ html
                 return editor;
             };
 
+            let selectedHabitat;
+
             Tabulator.prototype.extendModule("format", "formatters", {
                 presence: function (cell, formatterParams) {
                     return "<div class='buttonCell'>" +
@@ -350,19 +352,11 @@ html
             }
 
             function verifyCell(cell) {
-                for (let site in sites) {
-                    if (cell._cell.column != null && cell._cell.column.field != null && sites[site].name == cell._cell.column.field) {
-                        sites[site].verifiedData.forEach(function(verifiedSiteDataPoint){
-                            if(verifiedSiteDataPoint.species == cell._cell.row.data.species) {
-                                verifiedSiteDataPoint.presence = cell._cell.value;
-                            }
-                        });
-                        return;
-                    }
-                }
+                verifiedData.habitats[selectedHabitat][cell._cell.column.parent.definition.title][cell._cell.row.data.species] = cell._cell.value;
             }
 
             function generateVerificationTableData(button) {
+                selectedHabitat = button.innerHTML;
                 timeSlices = getTimeSlices(startDate, endDate, timeFrame);
                 let columns = [{title: "Species", field: "species"}];
                 let speciesRows = [];
