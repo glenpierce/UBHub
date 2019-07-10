@@ -17,6 +17,7 @@ html
             }
 
             .buttonCell {
+                color: white;
                 display:flex;
                 justify-content: space-around;
                 width:100%;
@@ -26,34 +27,33 @@ html
                 width: 9px;
                 padding: 5px;
                 border-radius: 5px;
-                background-color: red;
+                background-color: #f69056;
                 text-align: center;
             }
             .selectedRed {
-
+                background-color: #a63720;
             }
             .greenButton {
                 width: 9px;
                 padding: 5px;
                 border-radius: 5px;
-                background-color: green;
+                background-color: #c1e3cd;
                 text-align: center
             }
-            .seletedGreen {
-
+            .selectedGreen {
+                background-color: #3b7e6a;
             }
             .greyButton {
                 width: 9px;
                 padding: 5px;
                 border-radius: 5px;
-                background-color: grey;
+                background-color: lightgrey;
                 text-align: center
             }
             .selectedGrey {
-                background-color: lightgrey;
+                background-color: grey;
             }
             .selectedButtonCell {
-                color: white;
                 font-weight: 700;
             }
 
@@ -136,7 +136,7 @@ html
                     return "<div class='buttonCell'>" +
                             "<div class='redButton" + (cell._cell.value == 0 ? " selectedButtonCell selectedRed" : "") + "'>A</div>" +
                             "<div class='greenButton" + (cell._cell.value == 1 ? " selectedButtonCell selectedGreen" : "") + "'>P</div>" +
-                            "<div class='greyButton" + (cell._cell.value == 2 ? " selectedButtonCell selectedGreen" : "") + "'>?</div>" +
+                            "<div class='greyButton" + (cell._cell.value == 2 ? " selectedButtonCell selectedGrey" : "") + "'>?</div>" +
                         "</div>";
                 }
             });
@@ -1726,8 +1726,10 @@ body
                         div(style="max-width:400px; margin-bottom:20px; margin:auto;")
                             //h1(class="bold spaceAbove spaceBelow") Data Entry.
 
+                            div(class="bold spaceAbove") Note: If you are returning to this section as part of a new login session, you will first need to scroll up and re-import your iNaturalist observations before continuing on.
+
                             div(class="bold spaceAbove") Step 1. Indicate time frame:
-                            div(class="spaceBelow") Choose whether the data will be analyzed by year or month. Then enter the time frame of interest. We recommend no more than 5 time units to be compared (i.e. 5 months or 5 years).
+                            div(class="spaceBelow") Choose whether the data will be analyzed by year or month. Then enter the time frame of interest. We recommend no more than 5 time units to be compared (i.e. 5 months or 5 years). Only a complete year will be included, so be sure to encompass the entire year (from January 1 to December 31) for each year you want to include.
                             div(class="flex")
                                 div(style="margin-right:5px;") Time Interval:
                                 select(onchange="timeFrameSelected(this)" id="timeFrame")
@@ -1741,7 +1743,7 @@ body
                                 input(type="date" onchange="dateEndChanged(this)" id="endDate")
 
                             div(class="bold spaceAbove") Step 2. Verify data:
-                            div(class="spaceBelow") Display the map of polygons and a table of the species for each polygon (select one at a time). User goes through one place/polygon at a time, and can click buttons in the species table for the user to verify presence/absence. Data is to be verified separately for each time frame.
+                            div(class="spaceBelow") In the table below, you will review the observation data as it has been imported from iNaturalist and verify absence (A), presence (P) or unknown (?) for each surrogate species by place and time frame. It will default to present (P) for logged observations and absent (A) if there are no observations for that time frame. If no data is displayed below, scroll back up to Step 5 in the previous section and re-import the iNaturalist Project(s).
                             div(class="spaceBelow") Note: We do not currently save the data entered in this table, when you leave this page, your overrides will not be saved.
                             div(class="spaceBelow centerContentsViaFlex" id="verifyButtons")
 
