@@ -212,7 +212,7 @@ html
 
                 initMapOnPage();
 
-                let tableData = [{"species": "", "taxa": ""}];
+                let tableData = [];
 
                 columns = [
                     {title: "Species", field: "species", editor: "input"},
@@ -1625,7 +1625,7 @@ body
                     div(style="margin:auto; max-width:400px; display:flex; flex-direction:column; align-items:center;")
                         div
                             //h1(class="bold") UBIF Track 2 Project Setup
-                            div(class="flex spaceBelow") In the Urban Biodiversity Inventory Framework (UBIF), Track 2 system, cities indicate surrogate species they would like to track for each habitat type in their city.  Here you will set up the parameters of your project.
+                            div(class="flex spaceBelow spaceAbove") In the Urban Biodiversity Inventory Framework (UBIF), Track 2 system, cities indicate surrogate species they would like to track for each habitat type in their city.  Here you will set up the parameters of your project.
                                 img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton0()")
                                 div(id="infoButton0" class="hidden popup" onclick="hide(document.getElementById('infoButton0'))")
                                     div Purposefully collecting data to assess urban biodiversity provides cities the ability to generate summary statistics and track changes over time in a more measurable way than is provided by conducting Track 1 data collection only. Track 2 employs presence/absence monitoring of species as a way to track and assess urban biodiversity. Recording the presence of species in Track 1 is valuable information, but knowing where species are not is also essential to assist in decision making for restoration action or other management decisions that can be applied to improve habitat quality and/or quantity.
@@ -1673,7 +1673,7 @@ body
 
                         div(style="max-width:400px;")
                             div(style="font-weight:700;") Step 5. Indicate surrogate species.
-                            div(style="display:flex;") For each habitat type, choose the surrogate species you would like to track. If you have indicated a source of observations from above, species will auto-populate below and you will simply need to verify which ones you would like to include. Alternately, you can manually enter each surrogate species. Indicate the taxon of each species and then check the boxes to indicate which habitat you would like to consider for each surrogate species.
+                            div(style="display:flex;") Each habitat will have its own set of surrogate species. For each species, you will designate a taxon and then select which habitats should include it as surrogate species. You can manually enter each surrogate species in the table below by clicking the 'add species' button and filling in the information for each habitat. A green check indicates that this species is a surrogate species for that habitat. Alternately, you can import species from one or more iNaturalist projects in the field below. Species will auto-populate in the table below and you then indicate which ones you would should be designated as surrogate species for each habitat.
                                 img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton6()")
                                 div(id="infoButton6" class="hidden popup" onclick="hide(document.getElementById('infoButton6'))")
                                     div(class="spaceBelow") Surrogate species are defined by the United States Fish and Wildlife Service (USFWS) as “a commonly-used scientific term for system-based conservation planning that uses a species as an indicator of landscape habitat and system conditions” (USFWS 2014a). The goal of a surrogate species approach is to use a few species to best represent the needs of the larger community (Weins et al. 2008). Depending on the objective of a given project, the characteristics used to select species differ (USFWS 2014b). The Urban Biodiversity Inventory Framework project’s primary goal is to generate a standardized approach -- a “roadmap” -- that can be used by cities to document and track urban biodiversity changes over time. With this project goal in mind, species selections should follow a set of conditions geared toward urban biodiversity representation.
@@ -1689,8 +1689,6 @@ body
                                     div 6. The entire suite of selected species (across taxa and habitat types) should provide a representation of the different native regional habitats and of different classes of native species
 
                             div(class="spaceAbove")
-                                div(class="bold") Import data from pre-existing species observations.
-                                div(style="margin-bottom:20px;") Indicate the sources from which you would like to pull in observations into the project. This step is optional, and you can override this information as you see fit.
                                 div
                                     div(class="bold blue") iNaturalist Project
                                     div Complete the url for your iNaturalist Project below.
@@ -1707,56 +1705,54 @@ body
                                     //    input
                                     //    button(onclick="processRequest()") import
 
-                            div(class="spaceBelow") Optionally, the user may choose to skip this step and manually enter presence/absence data rather than import.
-
                         //div(class="spaceAbove")
                         //    div(class="bold blue") Upload CSV
                         //    input(type="file")
 
-                        div(style="display:flex; flex-direction:column;")
-                            button(onclick="addSpecies()" class="spaceBelow spaceAbove") add species
+                        div(class="spaceAbove" style="display:flex; flex-direction:column;")
+                            button(onclick="addSpecies()" class="spaceBelow") add species
 
                         div(id="example-table")
 
                         button(onclick="save()" class="spaceAbove") Save Program Instance
+
+                        div(class="spaceAbove" style="max-width:400px;")
+                            div(style="font-weight:700;") Next Steps
+                            div You have now set up your project. Next, you will be able to verify presence/absence data and set targets.
+
 
                 +stickyInfoTab("UBIF Track 2 Data Entry", "infant2", "#07456b", false, "stickySecond")
                 div(id="infant2" class="mapInfoContent hide" style="display:flex flex-direction:column; margin:auto;")
                         div(style="max-width:400px; margin-bottom:20px; margin:auto;")
                             //h1(class="bold spaceAbove spaceBelow") Data Entry.
 
-                            div(class="bold") Step 1. Indicate time frame:
-                            div(class="spaceBelow") Choose whether the data will be analyzed by year or month. Then enter the time frame of interest. We recommend no more than 5 time units to br compared (i.e. 5 months or 5 years).
+                            div(class="bold spaceAbove") Step 1. Indicate time frame:
+                            div(class="spaceBelow") Choose whether the data will be analyzed by year or month. Then enter the time frame of interest. We recommend no more than 5 time units to be compared (i.e. 5 months or 5 years).
                             div(class="flex")
-                                div Time Interval: make me a radio button group
+                                div(style="margin-right:5px;") Time Interval:
                                 select(onchange="timeFrameSelected(this)" id="timeFrame")
-                                    option(value = "")
-                                    option(value = "month") Month
                                     option(value = "year") Year
-                            div(class="flex")
-                                div Time frame: from
+                                    option(value = "month") Month
+                            div(class="spaceBelow spaceAbove") Time frame:
+                            div(class="flex" style="justify-content:space-between;")
+                                div from
                                 input(type="date" onchange="dateStartChanged(this)" id="startDate")
-                                div(style="margin:8px;") to
+                                div to
                                 input(type="date" onchange="dateEndChanged(this)" id="endDate")
 
                             div(class="bold spaceAbove") Step 2. Verify data:
                             div(class="spaceBelow") Display the map of polygons and a table of the species for each polygon (select one at a time). User goes through one place/polygon at a time, and can click buttons in the species table for the user to verify presence/absence. Data is to be verified separately for each time frame.
+                            div(class="spaceBelow") Note: We do not currently save the data entered in this table, when you leave this page, your overrides will not be saved.
                             div(class="spaceBelow centerContentsViaFlex" id="verifyButtons")
 
 
-                            div(id="verification-table" class="hidden spaceBelow")
-
+                    div(id="verification-table" class="hidden spaceBelow")
+                    div(style="max-width:400px; margin-bottom:20px; margin:auto;")
                             div(class="bold") Step 3. Set Targets:
                             div(class="spaceBelow") Displays current presence data for each habitat by taxa. For each habitat and each taxa, the user will enter the target presence.
 
                             div(class="centerContentsViaFlex")
                                 button(onclick="save()" class="spaceAbove") Save
-
-                        div(style="max-width:400px;")
-                            div(style="font-weight:700;") Next Steps
-                            div You have now set up your project. Next, you will be able to input the presence/absence data, see the status of observations in each place, set targets for each, and generate reports that indicate your progress towards those targets over time.
-
-                    //button(onclick="window.location='/statusReport'" class="spaceAbove spaceBelow") Next: Status Report
 
                 +stickyInfoTab("UBIF Track 2 Reports", "infant3", "#07456b", false, "stickyThird")
                 div(id="infant3" class="mapInfoContent hide" style="display:flex flex-direction:column; margin:auto;")
@@ -1767,7 +1763,9 @@ body
 
                         h1(class="spaceAbove") Status Report
 
-                        img(src="/images/UBHub_logo_mainwebsite.png")
+                        div(class="flex column")
+                            img(class="spaceBelow" width=150 src="/images/UBILogo.jpg")
+                            img(width=150 src="/images/UBHub_logo_mainwebsite.png")
 
                         div(class="spaceAbove") This report has been automatically generated from data entered into the indicator tracker on www.ubhub.com.
                         div(class="spaceAbove") The Urban Biodiversity Inventory Framework (UBIF) is a standardized system for local governments to measure the status of biodiversity in an urban environment. It was first developed in 2017 in a partnership effort under the Urban Sustainability Directors Network (USDN). In the UBIF system, adherents choose surrogate species which will serve as proxy indicators for biodiversity status. They will also indicate particular places within which to track these species. Data is then tracked by taxonomic group and habitat type over time to measure progress.
