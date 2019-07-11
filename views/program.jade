@@ -27,11 +27,11 @@ html
                 width: 9px;
                 padding: 5px;
                 border-radius: 5px;
-                background-color: #f69056;
+                background-color: #fbd0b7;
                 text-align: center;
             }
             .selectedRed {
-                background-color: #a63720;
+                background-color: #f2600d;
             }
             .greenButton {
                 width: 9px;
@@ -1661,7 +1661,7 @@ body
                                     div(class="habitat boxedChildren smallSpaceAbove")
 
                             div(class="spaceBelow") <b>Step 4. Indicate places of interest.</b>
-                             div(class="flex") Draw a polygon on the map below for each place (such as a park) of interest. Name each place accordingly. Note that each place can only have one habitat type, so it may be appropriate to divide certain parks into multiple places if they cover more than one habitat type. The polygon shapes will be used to pull data from species observations databases in a later step. For each habitat type, you may indicate one place to serve as a reference monitoring site. Reference sites represent desirable conditions for other places of the same habitat type and provide a yardstick to measure the other places of the same habitat against.
+                             div(class="flex") Draw a polygon on the map below for each place (such as a park) of interest. Name each place accordingly. Note that each place can only have one habitat type, so it may be appropriate to divide certain parks into multiple places if they cover more than one habitat type. The polygon shapes will be used to pull data from species observations databases in a later step.
                                  img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton4()")
                                  div(id="infoButton4" class="hidden popup" onclick="hide(document.getElementById('infoButton4'))")
                                         div(class="spaceBelow") From large protected natural areas to small vegetated parking strips, habitat quality and quantity within cities varies greatly. The best utilization of the UBIF, as a means to attain a comprehensive analysis of biodiversity in the city, requires that a diversity of sites be selected. In this way, care should be taken to select sites with a range of perceived quality and avoid the temptation to only select the “best” or “favorite” sites within the city.
@@ -1729,7 +1729,7 @@ body
                             div(class="bold spaceAbove") Note: If you are returning to this section as part of a new login session, you will first need to scroll up and re-import your iNaturalist observations before continuing on.
 
                             div(class="bold spaceAbove") Step 1. Indicate time frame:
-                            div(class="spaceBelow") Choose whether the data will be analyzed by year or month. Then enter the time frame of interest. We recommend no more than 5 time units to be compared (i.e. 5 months or 5 years). Only a complete year will be included, so be sure to encompass the entire year (from January 1 to December 31) for each year you want to include.
+                            div(class="spaceBelow") Choose whether the data will be analyzed by year or month. Then enter the time frame of interest. We recommend no more than 5 time units to be compared (i.e. 5 months or 5 years). Only a complete year will be included, so be sure to encompass the entire year (from January 1 to January 1 the following year) for each year you want to include.
                             div(class="flex")
                                 div(style="margin-right:5px;") Time Interval:
                                 select(onchange="timeFrameSelected(this)" id="timeFrame")
