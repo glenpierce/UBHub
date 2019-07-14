@@ -197,6 +197,8 @@ html
 
             let verifiedData = {"habitats":{}}
 
+            let colors = ["green", "orange", "yellow", "brown", "blue"];
+
 
             window.onload = function (ev) {
 
@@ -372,8 +374,8 @@ html
 
                 for(let timeSliceIndex = 0; timeSliceIndex < timeSlices.length - 1; timeSliceIndex++) {
                     let options = {year: 'numeric', month: 'short', day: 'numeric'};
-                    let title = timeSlices[timeSliceIndex].toLocaleDateString("en-US", options) + "-" + timeSlices[timeSliceIndex].getEndDate().toLocaleDateString("en-US", options);
-                    let groupedColumn = {"title": title, "columns": []};
+                    // let title = timeSlices[timeSliceIndex].toLocaleDateString("en-US", options) + "-" + timeSlices[timeSliceIndex].getEndDate().toLocaleDateString("en-US", options);
+                    let groupedColumn = {"title": timeSlices[timeSliceIndex].titleType(), "columns": []};
                     groupedColumn.columns.push({
                         title: "Observed",
                         field: "observed" + timeSlices[timeSliceIndex].titleType(),
@@ -389,10 +391,8 @@ html
                     selectedSite.siteSpecies.forEach(function (species) {
                         let containsSpecies = false;
                         for (let marker in markers) {
-                            if(markers[marker].observedOn < timeSlices[timeSliceIndex] || markers[marker].observedOn > timeSlices[timeSliceIndex].getEndDate()) {
-                                break;
-                            }
-                            if (selectedSite.Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
+                            if (!(markers[marker].observedOn < timeSlices[timeSliceIndex] || markers[marker].observedOn > timeSlices[timeSliceIndex].getEndDate()) &&
+                                selectedSite.Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
                                 containsSpecies = true;
                                 break;
                             }
@@ -1133,7 +1133,19 @@ html
                         return height;
                     })
                     .style("stroke", "white")
-                    .style("fill", "grey")
+                    .style("fill", function (d, i) {
+                        if(d == "Plants")
+                            return colors[0]
+                        if(d == "Birds")
+                            return colors[1]
+                        if(d == "Invertebrate Pollinators")
+                            return colors[2]
+
+                        if(i % 2 == 1)
+                            return colors[3];
+                        else
+                            return colors[4];
+                    })
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
