@@ -1,3 +1,7 @@
+:root {
+  --blue1: #07456b;
+}
+
 @media only screen and (min-width:700px){
   .hideWhenNarrow{
     /*display: block;*/
@@ -17,6 +21,27 @@
   .showWhenNarrow{
     /*display: block;*/
   }
+}
+
+.sticky {
+  position: sticky;
+  width: 100%;
+}
+
+.sticky > .mapInfoTab {
+  max-width: 800px !important;
+}
+
+.stickyFirst {
+  top: 65px;
+}
+
+.stickySecond {
+  top: 85px;
+}
+
+.stickyThird {
+  top: 105px;
 }
 
 body {
@@ -39,10 +64,64 @@ button {
   border-color: black;
   border-width: 1px;
   border-radius: 5px;
+  cursor: pointer;
 }
 
 button:hover {
   background-color: #e9f6f9;
+}
+
+.bold {
+  font-weight:bold;
+}
+
+.underline {
+  text-decoration:underline;
+}
+
+.spaceBelow {
+  margin-bottom:20px;
+}
+
+.spaceAbove {
+  margin-top:20px;
+}
+
+.smallSpaceAbove {
+  margin-top: 10px;
+}
+
+.flex {
+    display:flex;
+}
+
+.column {
+  flex-direction: column;
+}
+
+.centerContents {
+  margin: auto;
+}
+
+.centerText {
+  text-align: center;
+}
+
+.centerContentsViaFlex {
+  display:flex; flex-direction:column; align-items:center;
+}
+
+.hidden {
+  display: none;
+}
+
+.popup {
+  position: absolute;
+  background: lightgrey;
+  padding: 4px;
+  border: solid;
+  border-radius: 4px;
+  z-index: 4;
 }
 
 .border{
@@ -53,8 +132,48 @@ button:hover {
   border:solid; border-radius:5px; border-width:1px; border-color:#4490ba;
 }
 
+.blue {
+  color:#4490ba;
+}
+
+.redBorder {
+  border:solid; border-radius:5px; border-width:1px; border-color:red;
+}
+
+.mediumPadding {
+  padding: 8px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.thickBorder {
+  border-width:4px;
+}
+
 .largeBlueText{
   color:#4490ba; font-size:30px;
+}
+
+.titleText {
+  color:white; font-weight:700; font-size:20px;
+}
+
+.boxedChildren * {
+  border: solid;
+  border-color: lightgrey;
+  border-width: 1px;
+  background: lightgrey;
+  padding-left: 3px;
+}
+
+.dividingLine {
+  background:white; height:1px; width:50%; margin:auto; margin-top:10px; margin-bottom:10px;
+}
+
+.subTitleText {
+  color:white; padding-right:100px; padding-left:100px; padding-bottom:20px; text-align:center;
 }
 
 .item{
@@ -237,7 +356,6 @@ p.postBody {
 
 .postLinkContent {
   display: inline-block;
-
 }
 
 .postLinkStatus {
@@ -373,7 +491,6 @@ p.postBody {
 
 .forumPager {
   text-align: center;
-
 }
 
 .forumPager .pager {
@@ -453,21 +570,18 @@ p.postBody {
   height: auto;
   opacity: 1;
   height: auto;
-
 }
 
 .mapInfoContent.hide {
   opacity: 0;
   height: 0;
   overflow: hidden;
-
 }
 
 .mapInfoContent .formItem {
   display: inline-block;
   width: calc(33% - 36px);
   padding: 6px 18px
-
 }
 
 .mapInfoContent label {
@@ -508,7 +622,6 @@ p.postBody {
   right: 8px;
   content: "";
   z-index: 98;
-
 }
 
 .selectBox select {
@@ -606,7 +719,6 @@ table.mapValuesTable tr td{
   padding: 12px;
   height: 30px;
   vertical-align: top;
-
 }
 
 table.mapValuesTable tr:nth-child(odd) {
@@ -662,7 +774,6 @@ div.mapValuesControl span {
   color: #4490ba;
   cursor: pointer;
   margin: 12px;
-
 }
 
 div.mapValuesControl span.disabled {
@@ -675,7 +786,7 @@ div.mapValuesControl span.disabled {
 }
 
 .aboutUsHeader {
-  background:#07456b; color:white; text-align:center; padding:5px; font-size:22px;
+  background:var(--blue1, #07456b); color:white; text-align:center; padding:5px; font-size:22px;
 }
 
 

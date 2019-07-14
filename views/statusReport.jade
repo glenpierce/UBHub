@@ -1,0 +1,87 @@
+doctype html
+include mixins
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+body
+    +header(true)
+    div(style="padding-top:40px;")
+    div(style="max-width:800px; margin:auto;")
+        div(style="display:flex; margin:auto;")
+        h1 Status Report
+
+        //img(class="spaceBelow" src="/images/ubif-logo.png")
+        div UBIF Track 2 Status Report
+        div [PROJECT NAME]
+        div [CITY]
+        div [REPORT DATE]
+
+        img(src="/images/UBHub_logo_mainwebsite.png")
+        div(class="spaceBelow") This report has been automatically generated from data entered into the indicator tracker on www.ubhub.com. This data has been managed by [USER] on behalf of [ORGANIZATION].
+
+        div(class="spaceBelow") The Urban Biodiversity Inventory Framework (UBIF) is a standardized system for local governments to measure the status of biodiversity in an urban environment. It was first developed in 2017 in a partnership effort under the Urban Sustainability Directors Network (USDN). In the UBIF system, adherents choose surrogate species which will serve as proxy indicators for biodiversity status. They will also indicate particular places within which to track these species. Data is then tracked by taxonomic group and habitat type over time to measure progress.
+
+        div(class="spaceBelow") Adherents to UBIF can select from three different methods, or “tracks”.  Track 2, used here, calls for species observations to include both presence and absence data for each habitat type. Adherents to UBIF Track 2 set goals for the presence of surrogate species in each habitat and taxon and track their progress over time.
+
+        div(class="underline") Section 1: Overview of Surrogate Species
+        div(class="spaceBelow") Data has been tracked for [CITY] beginning in [YEAR]. Current data aggregates observations made from [DATE] to [DATE].
+        img(width="600px" src="/images/charts/image7.png")
+
+        div(class="spaceBelow") Trends over time for each taxon (a summary chart, then 5-6 charts, TBD).
+
+        div Time Interval:
+            select
+                option Month
+                option Year
+        div(class="flex")
+            div Time frame: from
+            input(type="date")
+            div(style="margin:8px;") to
+            input(type="date")
+
+        img(class="spaceBelow" width="600px" src="/images/charts/image10.png")
+
+        div(class="underline") Section 2: Overview of Species by Habitat Type
+        select(onchange="console.log(this.selectedIndex)")
+            option Select Taxon
+            option Plants
+            option Birds
+            option Invertebrates
+            option Herps
+            option Mollusks
+
+        img(width="600px" src="/images/charts/image8.png")
+        img(width="600px" src="/images/charts/image2.png")
+        img(width="600px" src="/images/charts/image4.png")
+        img(width="600px" src="/images/charts/image11.png")
+        img(width="600px" src="/images/charts/image12.png")
+        img(width="600px" src="/images/charts/image13.png")
+
+
+        div(class="underline") Section 3: Status of Surrogate Species in [RIPARIAN] Habitat
+        div Overview chart, then up to 6 charts (one for each taxon) showing data from each place
+        select
+            option Select Habitat
+            option Dragonfly Creek
+            option Eastern Tributary
+            option El Polin
+            option Lobos Creek
+            option Mountain Lake
+            option Thompson Reach
+
+
+        img(width="600px" src="/images/charts/image5.png")
+        img(width="600px" src="/images/charts/image6.png")
+        img(width="600px" src="/images/charts/image3.png")
+        img(width="600px" src="/images/charts/image9.png")
+
+        div(class="underline") Appendix: Tables of Species Presence Data
+        div Table for each habitat type listing the species names and indicating presence/absence/unknown status for each according to place and time frame.
+        img(width="600px" src="/images/charts/image1.png")
+        div Colored fill = presence
+        div X = absence
+        div Blank = unknown
+
+
++footer()

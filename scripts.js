@@ -419,7 +419,8 @@ update = function() {
         "`programType` INT, " + //0 = index
         "`private` BIT, " +
         "`author` VARCHAR(255), " +
-        "`creationDate` DATE" +
+        "`creationDate` DATE, " +
+        "`iconFileName` VARCHAR(255), " +
         ");";
     query.push(createProgramsTableQuery);
 
@@ -634,6 +635,8 @@ update = function() {
 
     let createUserDataTableQuery =
         "CREATE TABLE userData(" +
+        "`id` NUMERIC(14, 0)," +
+        "`userEmail` VARCHAR(255)," +
         "`site` INT," +
         "`program` INT, " +
         "`year` INT, " +
@@ -643,7 +646,8 @@ update = function() {
         "`numericalValue` FLOAT(10, 2), " +
         "`textValue` VARCHAR(2048), " +
         "`name` VARCHAR(2048), " +
-        "`notes` VARCHAR(2048)" +
+        "`notes` VARCHAR(2048), " +
+        "`jsonData` json" +
         ");";
     query.push(createUserDataTableQuery);
 

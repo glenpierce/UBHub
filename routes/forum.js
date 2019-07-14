@@ -802,7 +802,7 @@ function ForumPost(id, parent, author, subject, body, creationDate, upvotes, dow
   //TODO: make this more readable
   //TODO: get name of accepted post's author
   this.stringCreationDate = creationDate.toDateString() + " at " + creationDate.toTimeString();
-  this.stringAnsweredBy = (acceptedAnswerId != null) ? "Answered with " + acceptedAnswerId : "Not answered yet.";
+  this.stringAnsweredBy = (acceptedAnswerId != null) ? "Answered with " + acceptedAnswerId : "No accepted answer yet.";
 
 }
 

@@ -176,7 +176,7 @@ makeDbCall = function(queryString, callback){
     connection.end();
 };
 
-makeDbCallAsPromise = function(queryString){
+makeDbCallAsPromise = function(queryString) {
     return new Promise((resolve, reject) => {
         connection = mysql.createConnection({
             host: config.rdsHost,
