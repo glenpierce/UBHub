@@ -41,7 +41,7 @@ router.get('/', function (req, res, next) {
                     console.log(query);
                     connection.query(query, function (err, rows, fields) {
                         if (!err) {
-                            // console.log(rows);
+                            console.log(rows);
                             resolve(rows);
                         } else {
                             console.log('Error while performing Query.');
@@ -181,13 +181,24 @@ router.get('/', function (req, res, next) {
             });
         }
 
+        function getBasicProgramData() {
+            return new Promise( function (resolve, reject) {
+                makeDbCall("select id, programName, description, iconFileName from programs where private = 0;", resolve);
+            });
+        }
+
         getSelectedSite().then(function (values) {
-            console.log(values[0][0].siteName);
-            getUserData(values[0][0].id);
-            res.render('dashboard', {username: req.session.user});
+            if(values[0].length < 1) {
+                // getUserData(values[0][0].id);
+                res.render('dashboard', {username: req.session.user, basicProgramData: [], site:{siteName:null}});
+            } else {
+                let site = values[0][0];
+                getBasicProgramData().then(function (basicProgramData) {
+                    res.render('dashboard', {username: req.session.user, basicProgramData: basicProgramData, site:site});
+                });
+            }
         }).catch(function (error) {
                 console.log(error);
-                res.render('dashboard', {username: req.session.user});
             }
         );
 
@@ -222,6 +233,7 @@ router.get('/', function (req, res, next) {
 // });
 
 makeDbCall = function (queryString, callback) {
+    console.log("making connection?");
     connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,

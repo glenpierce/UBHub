@@ -1,32 +1,36 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var session = require('client-sessions');
+let express = require('express');
+let path = require('path');
+let favicon = require('serve-favicon');
+let logger = require('morgan');
+let cookieParser = require('cookie-parser');
+let bodyParser = require('body-parser');
+let session = require('client-sessions');
 
-var index = require('./routes/index');
-var login = require('./routes/login');
-var users = require('./routes/users');
-var createUser = require('./routes/createUser');
-var dashboard = require('./routes/dashboard');
-var forum = require('./routes/forum');
-var indicators = require('./routes/indicators');
-var createCustomProgram = require('./routes/createCustomProgram');
-var createIndicator = require('./routes/createCustomIndicator');
-var changeLocation = require('./routes/changeLocation');
-var createLocation = require('./routes/createLocation');
-var map = require('./routes/map');
-var yourUploads = require('./routes/yourUploads');
-var editUpload = require('./routes/editUpload');
-var createNewUpload = require('./routes/createNewUpload');
-var aboutUs = require('./routes/aboutUs');
-var resources = require('./routes/resources');
-var home = require('./routes/home');
-var account = require('./routes/account');
+let index = require('./routes/index');
+let login = require('./routes/login');
+let users = require('./routes/users');
+let createUser = require('./routes/createUser');
+let dashboard = require('./routes/dashboard');
+let forum = require('./routes/forum');
+let indicators = require('./routes/indicators');
+let createCustomProgram = require('./routes/createCustomProgram');
+let createIndicator = require('./routes/createCustomIndicator');
+let changeLocation = require('./routes/changeLocation');
+let createLocation = require('./routes/createLocation');
+let map = require('./routes/map');
+let yourUploads = require('./routes/yourUploads');
+let editUpload = require('./routes/editUpload');
+let createNewUpload = require('./routes/createNewUpload');
+let aboutUs = require('./routes/aboutUs');
+let resources = require('./routes/resources');
+let home = require('./routes/home');
+let account = require('./routes/account');
+let programs = require('./routes/programs');
+let newProgramRoute = require('./routes/program');
+let statusReport = require('./routes/statusReport');
+let createUserDataFromJSON = require('./routes/createUserDataFromJSON');
 
-var config = require('./config.js');
+let config = require('./config.js');
 
 // var https = require('https');
 // var fs = require('fs');
@@ -40,7 +44,7 @@ var config = require('./config.js');
 // };
 //
 // var app = express.createServer(options);
-var app = express();
+let app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -49,8 +53,10 @@ app.set('view engine', 'jade');
 // uncomment after placing your favicon in /public
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -62,7 +68,8 @@ app.use(session({
     }
 }));
 
-app.use('/', index);
+app.use('/', home);
+app.use('/getInvolved', index);
 app.use('/login', login);
 app.use('/users', users);
 app.use('/createUser', createUser);
@@ -81,6 +88,10 @@ app.use('/aboutUs', aboutUs);
 app.use('/resources', resources);
 app.use('/home', home);
 app.use('/account', account);
+app.use('/programs', programs);
+app.use('/program', newProgramRoute);
+app.use('/statusReport', statusReport);
+app.use('/createUserDataFromJSON', createUserDataFromJSON);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

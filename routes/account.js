@@ -17,13 +17,13 @@ router.get('/', function(req, res, next) {
                     const userRep = rows[0][0].totalScore;
                     res.render('account', {username: req.session.user, userRep: userRep});
                 } else {
-                    res.render('index', {username: req.session.user});
+                    res.render('home', {username: req.session.user});
                 }
             });
         });
     } else {
         req.session.reset();
-        res.render('index');
+        res.render('home');
     }
 });
 
@@ -65,7 +65,7 @@ router.post('/', function(req, res) {
 
 router.get('/logout', function (req, res, next) {
     req.session.reset();
-    res.render('index');
+    res.render('home');
 });
 
 module.exports = router;

@@ -1,6 +1,14 @@
 doctype html
 include mixins
 include mapMixins
+
+mixin partner(partnerIconSrc, partnerUrl, partnerText)
+  div(style="display:flex; margin-bottom:10px;")
+    div(style="width:200px; height:100px; flex-shrink:0;")
+      a(href=partnerUrl rel="noopener noreferrer" target="_blank")
+          img(src=partnerIconSrc style="max-height:150px; width:100%; height:auto; margin:5px;")
+    div(style="margin:10px 10px 10px 20px;") #{partnerText}
+
 html
  head
      link(rel='stylesheet', href='/stylesheets/style.css')
@@ -35,88 +43,103 @@ body
         div(style="margin-top:5px;") The City of Edmonton in Alberta, Canada has a rich natural heritage. The North Saskatchewan River Valley and Ravines System, known locally as the “Ribbon of Green”, winds through the city’s centre and, at 7,400 hectares, forms the largest municipally owned urban park in North America. On the flat tablelands above the river valley, forests and wetlands remain on the landscape among developed areas, and still support a relative diversity of wildlife. As Edmonton and surrounding communities continue to develop, there is a growing recognition of the need for regional collaboration to protect and restore the region’s natural systems.
       div <p>As outlined in Edmonton's Biodiversity Action Plan, the City's vision is to create "A system of conserved natural areas, ecologically and effectively managed, connecting the river valley with tableland natural areas, restored green spaces and regional natural areas, and recognized and supported by the community of Edmonton as a valued asset."<p>The City uses a range of conservation tools to protect and manage natural areas and biodiversity, including plans and policies that set high level strategic direction, planning tools like the dedication of reserve lands that protect habitats from development, management approaches that support the natural function of the landscape (e.g. wildlife connectivity analysis and wildlife passage design), and land purchase and donation programs, such as the Edmonton and Area Land Trust, that help to secure unprotected natural areas.<p>While Edmonton faces significant challenges in natural areas protection, including a rapidly growing economy and population base, limited municipal funds, and restricted legislative authority, it has achieved some important successes through strong partnerships, the support of committed volunteers, and high prioritization of environmental issues by City Council and citizens.
 
+      div(class="aboutUsHeader") COLLABORATORS
+      div(style="margin-top:5px; margin-bottom:20px;") The Urban Biodiversity Hub has ongoing projects with collaborative partners as described below
+      +partner("images/EWS2019_logo.jpg", "http://ecocity2019.com/", "Join us at Ecocity World Summit 2019, October 7-11 in Vancouver, Canada, as we dig into the ecological imperatives to reshape cities for long-term health of human and natural systems. The International Ecocity Standards provide an innovative vision for an ecologically-restorative human civilization as well as a practical methodology for assessing and guiding progress towards the goal. Together we can build the bridge to socially just and ecologically sustainable cities.")
+      +partner("images/GPSC Full Logo.jpg", "https://www.thegpsc.org", "The Global Platform for Sustainable Cities (GPSC) is a partnership and knowledge platform that promotes integrated solutions and cutting-edge support for cities seeking to improve their urban sustainability. The platform comprises 28 cities across 11 countries and is led by the World Bank. GPSC connects its cities with various stakeholders—including development banks, UN agencies, knowledge partners, investment partners, resource partners, and others—to pursue a holistic approach to sustainable urbanization, link projects to financing, and thereby facilitate the transformation of knowledge to investment.")
+      +partner("images/ubif-logo.png", "http://ubif.us/", "The Urban Biodiversity Inventory Framework (UBIF) was developed to guide and support cities in their efforts to successfully record, analyze, and assess biodiversity information in urban areas.  By providing a way to accurately and consistently assess biodiversity resources and track changes over time, the UBIF can assist cities in making appropriate management decisions to protect their ecological assets. The UBIF is a tool cities can use in the collection of biodiversity information to support proactive efforts to maintain and enhance urban biodiversity, as well as identify the need for response when species are declining. By applying the UBIF methodology, cities can monitor the response to actions, such as restoration activities, designed to enhance urban biodiversity. The UBIF structure also allows cities to record changes in urban biodiversity for a specific species, taxa group, or for multiple taxa in a specific habitat of interest. This flexibility provides information at different levels of organization and can also be used to generate a “report card” or summary score, aiding in the communication of biological information to diverse audiences.")
+
       div(style="width=100%; background:#07456b; color:white; text-align:center; padding:5px; font-size:22px; margin-top: 20px") TEAM BIOS
       div(style="padding:10px") See below for bios of some of our active contributors.
 
       div(style="display:flex;padding:10px;")
-        img(src="images/bio_mika.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
+        img(src="images/bio_mika.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
         div(class="bioBackground")
           div(style="overflow-y:auto; height:280px;")
             div(style="padding:0px 12px 0px 0px;")
-              span(style="font-size:18px")
-                <b> Mika Mei Jia Tan </b>
-              | leads the Steering Committee. She has been working with youth in the environmental scene for the past 9 years, from developing public outreach campaigns on sustainability, exploring socio-environmental entrepreneurship, engaging in science communication, to lobbying for conservation policy at the United Nations. As an interdisciplinary thinker, she holds a B.A. in Environmental Studies (Conservation Biology) from Middlebury College, USA, is an inaugural Middlebury Social Entrepreneurship Fellow, and a Loke Cheng-Kim Scholar.
-              p Currently, she works in the International Relations Branch of the National Biodiversity Centre (NBC) to organise international and local youth empowerment workshops and forums, including the Global Youth Biodiversity Network (GYBN) Regional Capacity Building Workshop in Asia. She hopes to continue empowering youth in the region with the upcoming ASEAN Youth Biodiversity Programme. If she's not in the office, Mika can often be found dancing street latin, running, exploring the outdoors, or practising various languages with friends.
-              p
+              span(style="font-size:18px") <b> Mika Mei Jia Tan </b>
+              | leads Urban Biodiversity Hub’s Steering Committee. She has been working with youth in the environmental scene for the past 9 years, from developing capacity building programmes and exploring socio-environmental entrepreneurship, to engaging in science communication and lobbying for conservation policy at the United Nations. As an interdisciplinary thinker, she holds a B.A. in Environmental Studies (Conservation Biology) from Middlebury College, USA, is an inaugural Middlebury Social Entrepreneurship Fellow, and a Loke Cheng-Kim Scholar.
+              p Currently, she is the Coordinator of the ASEAN Youth Biodiversity Programme (AYBP) at the ASEAN Biodiversity Centre based in Los Baños, Philippines. Her work involves crafting training and mentorship programmes to empower youth in the region. If she's not in the office, Mika can often be found dancing street latin, running, exploring the outdoors, or practising various languages with friends.&nbsp;
                 a(href="https://www.linkedin.com/in/mikatan/")
                   img(src="images/logo_linkedin-14px.png")
 
       div(style="display:flex;padding:10px;")
-        img(src="images/bio_jen.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
+        img(src="images/bio_jen.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
         div(class="bioBackground")
           div(style="overflow-y:auto; height:280px;")
             div(style="padding:0px 12px 0px 0px;")
               span(style="font-size:18px")
                 <b> Jennifer Rae Pierce </b>
-              | heads the Partnerships & Engagement team and is a steering committee member.  She is a political ecologist and urban biodiversity planner.  She is currently working on her PhD at the University of British Columbia on the topic of engagement in urban biodiversity planning.  She has an architecture degree from the Illinois Institute of Technology, a Master’s in City and Regional Planning from Cornell University and a Master’s in Environmental Science and Policy from Central European University.
-              p She produced a toolkit on mainstreaming biodiversity and ecosystem services across local governments for ICLEI called the Nature of Mainstreaming.  Her research includes international comparative work on urban biodiversity plans as well as onsite research on biodiversity practices in Curitiba, Brazil, and Jerusalem, Israel.  She taught environmental philosophy and planning at CEPT University.  She has worked with the City of Vancouver as a Greenest City Scholar to develop assessments and recommendations on urban beavers and Canada geese, and also partnered with BCIT to measure the ecological footprint of the city.
-              p
+              | heads Urban Biodiversity Hub’s Partnerships & Engagement team and is a Steering Committee member.  She is a political ecologist and urban biodiversity planner.  She is currently working on her PhD at the University of British Columbia on the topic of engagement in urban biodiversity planning.  She has an architecture degree from the Illinois Institute of Technology, a Master’s in City and Regional Planning from Cornell University and a Master’s in Environmental Science and Policy from Central European University.
+              p She produced a toolkit on mainstreaming biodiversity and ecosystem services across local governments for ICLEI called the Nature of Mainstreaming.  Her research includes international comparative work on urban biodiversity plans as well as onsite research on biodiversity practices in Curitiba, Brazil, and Jerusalem, Israel.  She taught environmental philosophy and planning at CEPT University.  She has worked with the City of Vancouver as a Greenest City Scholar to develop assessments and recommendations on urban beavers and Canada geese, and also partnered with BCIT to measure the ecological footprint of the city.&nbsp;
                 a(href="https://www.linkedin.com/in/nestcities/")
                   img(src="images/logo_linkedin-14px.png")
                 //|  and
                 //a(href="https://twitter.com/NestCities") Twitter
 
       div(style="display:flex;padding:10px;")
-        img(src="images/bio_melissa.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
+        img(src="images/bio_melissa.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
         div(class="bioBackground")
           div(style="overflow-y:auto; height:280px;")
             div(style="padding:0px 12px 0px 0px;")
               span(style="font-size:18px")
                 <b> Melissa Barton </b>
-              | is an independent researcher who heads the Research and Engagement Team. She earned a master’s degree in Environmental Science, Policy and Management in a joint program with Lund University, Central European University, and the University of Manchester, as well as a bachelor’s in Geology from Colorado College. Previously, she worked for the National Ecological Observatory Network (NEON) and the U.S. National Park Service. Her current research focuses on nature-based solutions, green infrastructure, and urban sustainability transitions. She also loves wildlife photography, tidepooling during negative tides, and national parks.
+              | heads the Urban Biodiversity Hub’s Research and Development team and is a Steering Committee member. She is an independent researcher based in Portland, Oregon, USA; her current research focuses on nature-based solutions, green infrastructure, and urban biodiversity. She earned a master’s degree in Environmental Science, Policy and Management in a joint program with Lund University, Central European University, and the University of Manchester, as well as a bachelor’s degree in Geology from Colorado College. Previously, she worked for the National Ecological Observatory Network (NEON) and the U.S. National Park Service.
               p
                 a(href="https://www.linkedin.com/in/melissabarton/")
                   img(src="images/logo_linkedin-14px.png")
 
       div(style="display:flex;padding:10px;")
-        img(src="images/bio_Joshua.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
+          img(src="images/bio_pablo.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
+          div(class="bioBackground")
+              div(style="overflow-y:auto; height:280px;")
+                  div(style="padding:0px 12px 0px 0px;")
+                      span(style="font-size:18px")
+                          <b> Pablo López </b>
+                      | is a Biologist and Master in Environmental Management and was born in Mexico City. He completed his undergraduate studies at the UNAM, where he participated in an exchange program on Nature Conservation with the University of Helsinki, in Finland. Subsequently, he began his postgraduate studies at the University of Queensland in Australia, focusing on the conservation of nature from an international perspective. He is a member of the World Commission on Protected Areas where he participated in the elaboration of the Green List standard. He has worked with the Government of Mexico and the Convention on Biological Diversity of the United Nations in organizing the 5th Global Biodiversity Summit of Cities and Subnational Governments and the 3rd Science for Biodiversity Forum in the United Nations Biodiversity Conference (COP13) in Cancun. His most recent experience has been working for two years at the Ramsar Convention Secretariat, where he supported the 30 countries that are part of the Americas region, following up on projects and working hand in hand with governments and their representations in the United Nations. He is the founder of www.chasingworldheritage.com.
+                      p
+                          a(href="https://www.linkedin.com/in/palg1305/")
+                              img(src="images/logo_linkedin-14px.png")
+
+      div(style="display:flex;padding:10px;")
+        img(src="images/bio_glen.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
+        div(class="bioBackground")
+          div(style="overflow-y:auto; height:280px;")
+            div(style="padding:0px 12px 0px 0px;")
+              span(style="font-size:18px")
+                <b> Glen Vincent Pierce </b>
+              | is head of the Software Engineering Team.  He is a software engineer who enjoys making games and other fun projects. From a background in computational and algorithmic finance, he transitioned into application development in 2013. He works as a Java developer at Jostle. He started work on the UBHub website to learn some of the new technologies that are implemented in the architecture of the site.
+              p
+                a(href="https://www.linkedin.com/in/piercegv/")
+                  img(src="images/logo_linkedin-14px.png")
+                |  and&nbsp;
+                a(href="https://www.github.com/glenpierce/") GitHub
+
+      div(style="display:flex;padding:10px;")
+        img(src="images/bio_Joshua.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
         div(class="bioBackground")
           div(style="overflow-y:auto; height:280px;")
             div(style="padding:0px 12px 0px 0px;")
               span(style="font-size:18px")
                 <b> Joshua Grant </b>
-              | is a member of the Development team. He likes to tinker with digital art, conceptual poetry, artificial intelligence, procedural generation, and mostly-vegetarian cooking. He holds a Bachelor’s in English and a Diploma in Professional Writing. He currently studies computer science at the University of British Columbia.
-              p Find him at
+              | is a member of the Software Engineering team. He likes to tinker with digital art, conceptual poetry, artificial intelligence, procedural generation, and mostly-vegetarian cooking. He holds a Bachelor’s in English and a Diploma in Professional Writing. He currently studies computer science at the University of British Columbia.
+              p Find him at&nbsp;
                 a(href="http://joshua.works") JoshuaDotWorks
 
       div(style="display:flex;padding:10px;")
-        img(src="images/bio_diego.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
+        img(src="images/bio_jaydip.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
         div(class="bioBackground")
           div(style="overflow-y:auto; height:280px;")
             div(style="padding:0px 12px 0px 0px;")
               span(style="font-size:18px")
-                <b> Diego Padilla </b>
-              | heads the Communications Team and is a steering committee member.  He is the CEO & Founder at Centro Urbes. He earned a degree in biology from Universidad Nacional Agraria La Molina with a focus on ecosystem services and resilience in Colombia, France and Argentina.  He has experience working with the public sector, including the Minister of Environment in Peru and the United Nations (GIZ, UNDP).  He is the founder of Proyecto Lomas at the Peruvian Center for Urban Ecosystem Resilience (Centro Peruano para la Resiliencia de Socioecosistemas Urbanos). He is a socio-ecological entrepreneur with experience with urban youth and communication strategies.  He is the creator of the ‘Entronos’ method.  He is a Fellow of SWY of Japan, Red Global 4H, YouthfulCities, Emprende UP and Yunus & Youth.
+                <b> Jaydip Biniwale </b>
+              | contributes graphics skills and heads our twitter account as part of the Communications Team.  He is a graduate of CEPT University in City, Community, and Regional Planning. He is the Designer of Systems at Godrej & Boyce Mfg. Co. Ltd.
               p
-                a(href="https://www.linkedin.com/in/diegopadillahuaman/")
+                a(href="https://www.linkedin.com/in/jaydip-biniwale-819b723b/")
                   img(src="images/logo_linkedin-14px.png")
 
       div(style="display:flex;padding:10px;")
-        img(src="images/bio_adrian.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
-        div(class="bioBackground")
-          div(style="overflow-y:auto; height:280px;")
-            div(style="padding:0px 12px 0px 0px;")
-              span(style="font-size:18px")
-                <b> Adrian Watson </b>
-              | leads the Innovation Initiatives team and is a steering committee member. He graduated from the University of the West Indies, Mona, Jamaica with a double major degree in Geography and Zoology. He is a social entrepreneur and an urban beekeeper. He is the founder and C.E.O. of Honai Beez Apiary. He has experience in working with youth and local communities specifically in the areas of climate change and ecosystem services over the last decade.   He participated in many local and international environmental initiatives such as being a climate change facilitator in the JaREEACH Climate Change Action Agent Schools and sitting on the selection committee for the Global Youth Biodiversity COP 13 and African Workshop selection panels. He has played a leading role in many local and international organizations such as being the Caribbean & Latin American Focal Point for the Global Youth Biodiversity Network, the National Coordinator for the Caribbean Youth Environment Network in Jamaica, Public Relations Officer for the Kingston and St. Andrew Bee Farmers Association, and Management Committee Member with the Jamaica Organic Agriculture Movement.
-              p
-                a(href="https://www.linkedin.com/in/adrian-watson-37097a4a/")
-                  img(src="images/logo_linkedin-14px.png")
-                |  and
-                a(href="http://adrianwatsonactvities.weebly.com/") Website
-
-      div(style="display:flex;padding:10px;")
-        img(src="images/bio_joao.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
+        img(src="images/bio_joao.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
         div(class="bioBackground")
           div(style="overflow-y:auto; height:280px;")
             div(style="padding:0px 12px 0px 0px;")
@@ -125,40 +148,11 @@ body
               | is an illustrator and graphic designer on the Communications Team.  He led the creation of our logo. He is the founder of Zoo do Joo graphic design company.
               p
                 a(href="https://www.behance.net/zoodojoo") Website
-                |  and
+                |  and&nbsp;
                 a(href="https://www.flickr.com/photos/joaoeliasdebrito") Flickr
 
       div(style="display:flex;padding:10px;")
-        img(src="images/bio_glen.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
-        div(class="bioBackground")
-          div(style="overflow-y:auto; height:280px;")
-            div(style="padding:0px 12px 0px 0px;")
-              span(style="font-size:18px")
-                <b> Glen Vincent Pierce </b>
-              | is head of the Development Team.  He is a software engineer who enjoys making games and other fun projects. From a background in computational and algorithmic finance, he transitioned into application development in 2013. He works as a Java developer at Jostle. He started work on the UBHub website to learn some of the new technologies that are implemented in the architecture of the site.
-              p
-                a(href="https://www.linkedin.com/in/piercegv/")
-                  img(src="images/logo_linkedin-14px.png")
-                |  and
-                a(href="https://www.github.com/glenpierce/") GitHub
-
-      div(style="display:flex;padding:10px;")
-        img(src="images/bio_adam.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
-        div(class="bioBackground")
-          div(style="overflow-y:auto; height:280px;")
-            div(style="padding:0px 12px 0px 0px;")
-              span(style="font-size:18px")
-                <b> Adam Venezia </b>
-              | is a member of the Development team.  He is a software engineer with an eclectic background, including civil engineering, teaching, martial arts, and creative writing. A lover of mathematics, science, language, with a recent interest in politics and government policy, he joined the UBHub group to learn how both website development and political activism are done in practice.
-              p
-                a(href="https://www.linkedin.com/in/avenezia")
-                  img(src="images/logo_linkedin-14px.png")
-                a(href="https://github.com/av2335") GitHub
-                div  and
-                a(href="https://adamvenezia.wordpress.com/") WordPress
-
-      div(style="display:flex;padding:10px;")
-        img(src="images/bio_juandedios.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
+        img(src="images/bio_juandedios.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
         div(class="bioBackground")
           div(style="overflow-y:auto; height:280px;")
             div(style="padding:0px 12px 0px 0px;")
@@ -173,33 +167,67 @@ body
                 a(href="https://www.linkedin.com/in/username/")
                   img(src="images/logo_linkedin-14px.png")
 
+      div(style="display:flex;padding:10px;")
+        img(src="images/bio_ayaka.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
+        div(class="bioBackground")
+          div(style="overflow-y:auto; height:280px;")
+            div(style="padding:0px 12px 0px 0px;")
+              span(style="font-size:18px")
+                <b> Ayaka Kanaike </b>
+              | is currently working on her Master’s degree in Landscape and Ecological Planning at Kyoto University. She interned at the terrestrial branch of the National Biodiversity Centre (National Parks Board). There, she worked on her own project “bird diversity in urban green spaces", which is her current research topic. Ayaka completed another internship at WWF-Malaysia and engaged in the “Orangutan conservation project". Ayaka earned a Bachelor’s degree in Biological Sciences (Ecology) from Nara Women’s University. During her degree, she studied abroad at the University of Leicester where she received academic credit in Biological Sciences. There, she engaged in environmental conservation with The Wildlife Trusts as a volunteer. Ayaka is also an active member of Team Business for Sustainability (TB4S), which is a youth platform aimed at promoting social enterprise in Japan.
+              p 奈良女子大学で生物科学を専攻。在学中交換留学生としてイギリスのUniversity of Leicesterにて生物科学を学び、またThe Wildlife Trustで環境保全のボランティア活動をした。現在は京都大学で景観生態保全論を専攻している。シンガポールのNational Parks Boardでインターンシップを行い、都市に生息するインコの生態について調査をした他、WWF-Malaysiaでのインターンシップではオランウータンの保全プロジェクトに参加した。民間企業による社会課題解決型ビジネスを促進するユースプラットフォーム、Team Business for Sustainability(TB4S)に所属しており、日本における社会解決型ビジネスを広めるための活動を行っている。
 
       div(style="display:flex;padding:10px;")
-        img(src="images/bio_ainkaran.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
+        img(src="images/bio_jesse.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
+        div(class="bioBackground")
+          div(style="overflow-y:auto; height:280px;")
+            div(style="padding:0px 12px 0px 0px;")
+              span(style="font-size:18px")
+                <b> Jesse McKenna </b>
+              | is a software engineer on the Software Engineering Team. She is interested in developing software for a good cause.
+              p She is currently studying computer science at Oregon State University. She also holds a Bachelor's in Sustainability from Arizona State University and a Master's in Environmental Analysis from Rice University.
+              p
+                a(href="https://www.linkedin.com/in/jessemckenna/")
+                  img(src="images/logo_linkedin-14px.png")
+                |  and&nbsp;
+                a(href="https://www.github.com/jessemckenna/") GitHub
+
+      div(style="display:flex;padding:10px;")
+        img(src="images/fototessera.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
+        div(class="bioBackground")
+          div(style="overflow-y:auto; height:280px;")
+            div(style="padding:0px 12px 0px 0px;")
+              span(style="font-size:18px")
+                <b> Carolina Mudan Marelli </b>
+              | is a PhD candidate in Social Science at the University of Sassari in Italy. Her first research topics focused on urban inequality, social problems and public policies. In 2015 she started her PhD in urban planning in Paris at the Laboratoire Architecture et Anthropologie (LAVUE UMR 7218). Her thesis is on measure(s) of urban biodiversity. She was a visiting researcher at the National Biodiversity Center in Singapore in 2016, to study the City Biodiversity Index. Her research interest covered alternative means of measuring biodiversity, beyond quantitative methods.
+              p Docteur en sciences sociales à l'Université de Sassari, en Italie. Ses premiers sujets de recherche étaient centrés sur l'inégalité urbaine, les problèmes socio-urbains et les politiques publiques. En 2015, elle a commencé un doctorat en aménagement et urbanisme, à Paris, au Laboratoire Architecture et Anthropologie (LAVUE UMR 7218). Elle travaille actuellement sur sa thèse qui porte sur les Mesures de la Biodiversité Urbaine. En 2016, elle a été visiting researcher au National Biodiversity Centre de Singapour pour étudier l'indice de biodiversité de la ville (CBI). Son intérêt pour la recherche porte également sur la possibilité de produire d'autres façon de mesurer la biodiversité, en essayant d'aller au-delà de la quantification.
+
+      div(style="display:flex;padding:10px;")
+        img(src="images/bio_diego.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
+        div(class="bioBackground")
+          div(style="overflow-y:auto; height:280px;")
+            div(style="padding:0px 12px 0px 0px;")
+              span(style="font-size:18px")
+                <b> Diego Padilla </b>
+              | is the CEO & Founder at Centro Urbes. He earned a degree in biology from Universidad Nacional Agraria La Molina with a focus on ecosystem services and resilience in Colombia, France and Argentina.  He has experience working with the public sector, including the Minister of Environment in Peru and the United Nations (GIZ, UNDP).  He is the founder of Proyecto Lomas at the Peruvian Center for Urban Ecosystem Resilience (Centro Peruano para la Resiliencia de Socioecosistemas Urbanos). He is a socio-ecological entrepreneur with experience with urban youth and communication strategies.  He is the creator of the ‘Entronos’ method.  He is a Fellow of SWY of Japan, Red Global 4H, YouthfulCities, Emprende UP and Yunus & Youth.
+              p
+                a(href="https://www.linkedin.com/in/diegopadillahuaman/")
+                  img(src="images/logo_linkedin-14px.png")
+
+      div(style="display:flex;padding:10px;")
+        img(src="images/bio_ainkaran.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
         div(class="bioBackground")
           div(style="overflow-y:auto; height:280px;")
             div(style="padding:0px 12px 0px 0px;")
               span(style="font-size:18px")
                 <b> Ainkaran Pathmanathan </b>
-              | contributes his coding skills to the Development Team. He is a software developer with over 10 years of Enterprise Data Warehouse, Enterprise Application Integration, and ETL/BI experience (with Cloud Computing) in Business and Information Technology, Marketing/Advertising (media), Health, Telecommunications, Bank/Finance/Insurance, Energy and Agriculture sectors. And also developed web applications with Rails and NodeJS & Express frameworks, created HTTP, RESTful API client endpoints and developed to consume the API using REACT client framework. Wrote TDD on Ruby on Rails, and many unit tests, and API tests using Postman, Google DevTools, and React DevTools.
+              | contributes his coding skills to the Software Engineering Team. He is a software developer with over 10 years of Enterprise Data Warehouse, Enterprise Application Integration, and ETL/BI experience (with Cloud Computing) in Business and Information Technology, Marketing/Advertising (media), Health, Telecommunications, Bank/Finance/Insurance, Energy and Agriculture sectors. And also developed web applications with Rails and NodeJS & Express frameworks, created HTTP, RESTful API client endpoints and developed to consume the API using REACT client framework. Wrote TDD on Ruby on Rails, and many unit tests, and API tests using Postman, Google DevTools, and React DevTools.
               p
                 a(href="https://www.linkedin.com/in/ainkaran/")
                   img(src="images/logo_linkedin-14px.png")
 
       div(style="display:flex;padding:10px;")
-        img(src="images/bio_jaydip.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
-        div(class="bioBackground")
-          div(style="overflow-y:auto; height:280px;")
-            div(style="padding:0px 12px 0px 0px;")
-              span(style="font-size:18px")
-                <b> Jaydip Biniwale </b>
-              | contributes graphics skills and heads our twitter account as part of the Communications Team.  He is a graduate of CEPT University in City, Community, and Regional Planning. He is the Designer of Systems at Godrej & Boyce Mfg. Co. Ltd.
-              p
-                a(href="https://www.linkedin.com/in/jaydip-biniwale-819b723b/")
-                  img(src="images/logo_linkedin-14px.png")
-
-      div(style="display:flex;padding:10px;")
-        img(src="images/bio_anushka.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
+        img(src="images/bio_anushka.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
         div(class="bioBackground")
           div(style="overflow-y:auto; height:280px;")
             div(style="padding:0px 12px 0px 0px;")
@@ -210,90 +238,77 @@ body
                 a(href="https://www.linkedin.com/in/anushri-tiwari-89878291/")
                   img(src="images/logo_linkedin-14px.png")
 
-      //div(style="display:flex;padding:10px;")
-      //  img(src="images/bio_pablo.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
-      //  div(class="bioBackground")
-      //    div(style="overflow-y:auto; height:280px;")
-      //      div(style="padding:0px 12px 0px 0px;")
-      //        span(style="font-size:18px")
-      //          <b> Pablo López </b>
-      //        | is a member of our Partnerships & Engagement Team. He is currently the Assistant Advisor for the Americas at Ramsar Convention Secretariat. He also Organized the 5th Global Biodiversity Summit of Cities and Subnational Governments and the 3rd Science for Biodiversity Forum at the COP13 of the CBD in Cancun, Mexico and he prepared the criteria for the Green List of Protected and Conserved Areas Standard of IUCN.  He has a master’s degree from the University of Queensland in environmental management and a degree in biology from the Universidad Nacional Autónoma de México.
-      //        p
-      //          a(href="https://www.linkedin.com/in/palg1305/")
-      //            img(src="images/logo_linkedin-14px.png")
-
       div(style="display:flex;padding:10px;")
-        img(src="images/bio_ayaka.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
+        img(src="images/bio_adam.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
         div(class="bioBackground")
           div(style="overflow-y:auto; height:280px;")
             div(style="padding:0px 12px 0px 0px;")
               span(style="font-size:18px")
-                <b> Ayaka Kanaike </b>
-              | is currently working on her Master’s degree in Landscape and Ecological Planning at Kyoto University. She interned at the terrestrial branch of the National Biodiversity Centre (National Parks Board). There, she worked on her own project “bird diversity in urban green spaces", which is her current research topic. Ayaka completed another internship at WWF-Malaysia and engaged in the “Orangutan conservation project". Ayaka earned a Bachelor’s degree in Biological Sciences (Ecology) from Nara Women’s University. During her degree, she studied abroad at the University of Leicester where she received academic credit in Biological Sciences. There, she engaged in environmental conservation with The Wildlife Trusts as a volunteer. Ayaka is also an active member of Team Business for Sustainability (TB4S), which is a youth platform aimed at promoting social enterprise in Japan.
-              p 奈良女子大学で生物科学を専攻。在学中交換留学生としてイギリスのUniversity of Leicesterにて生物科学を学び、またThe Wildlife Trustで環境保全のボランティア活動をした。現在は京都大学で景観生態保全論を専攻している。シンガポールのNational Parks Boardでインターンシップを行い、都市に生息するインコの生態について調査をした他、WWF-Malaysiaでのインターンシップではオランウータンの保全プロジェクトに参加した。民間企業による社会課題解決型ビジネスを促進するユースプラットフォーム、Team Business for Sustainability(TB4S)に所属しており、日本における社会解決型ビジネスを広めるための活動を行っている。
-
-      div(style="display:flex;padding:10px;")
-        img(src="images/fototessera.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
-        div(class="bioBackground")
-          div(style="overflow-y:auto; height:280px;")
-            div(style="padding:0px 12px 0px 0px;")
-              span(style="font-size:18px")
-                <b> Carolina Mudan Marelli </b>
-              | is Ph.D in Social science at the University of Sassari, in Italy. Her first research topics was focused on Urban inequality, social problems and public policies. In 2015 she has started a Ph.D in urban planning, in Paris, at the Laboratoire Architecture et Anthropologie (LAVUE UMR 7218). She is currently working on her thesis on the Measure(s) of Urban Biodiversity. She was visiting researcher at the National Biodiversity Center in Singapore in 2016, to study the City Biodiversity Index. Her research interest covered also other possible way to measure the biodiversity, trying to go beyond the quantification.
-              p Docteur en sciences sociales à l'Université de Sassari, en Italie. Ses premiers sujets de recherche étaient centrés sur l'inégalité urbaine, les problèmes socio-urbains et les politiques publiques. En 2015, elle a commencé un doctorat en aménagement et urbanisme, à Paris, au Laboratoire Architecture et Anthropologie (LAVUE UMR 7218). Elle travaille actuellement sur sa thèse qui porte sur les Mesures de la Biodiversité Urbaine. En 2016, elle a été visiting researcher au National Biodiversity Centre de Singapour pour étudier l'indice de biodiversité de la ville (CBI). Son intérêt pour la recherche porte également sur la possibilité de produire d'autres façon de mesurer la biodiversité, en essayant d'aller au-delà de la quantification.
-
-      div(style="display:flex;padding:10px;")
-        img(src="images/bio_jesse.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
-        div(class="bioBackground")
-          div(style="overflow-y:auto; height:280px;")
-            div(style="padding:0px 12px 0px 0px;")
-              span(style="font-size:18px")
-                <b> Jesse McKenna </b>
-              | is a software engineer on the Development Team. She is interested in developing software for a good cause.
-              p She is currently studying computer science at Oregon State University. She also holds a Bachelor's in Sustainability from Arizona State University and a Master's in Environmental Analysis from Rice University.
+                <b> Adam Venezia </b>
+              | is a member of the Software Engineering team.  He is a software engineer with an eclectic background, including civil engineering, teaching, martial arts, and creative writing. A lover of mathematics, science, language, with a recent interest in politics and government policy, he joined the UBHub group to learn how both website development and political activism are done in practice.
               p
-                a(href="https://www.linkedin.com/in/jessemckenna/")
+              div(style="display:flex;")
+                a(href="https://www.linkedin.com/in/avenezia")
                   img(src="images/logo_linkedin-14px.png")
-                |  and
-                a(href="https://www.github.com/jessemckenna/") GitHub
+                div &nbsp;
+                a(href="https://github.com/av2335") GitHub
+                div &nbsp;and&nbsp;
+                a(href="https://adamvenezia.wordpress.com/") WordPress
 
       div(style="display:flex;padding:10px;")
-        img(src="images/bio_chelsea.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
+        img(src="images/bio_adrian.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
         div(class="bioBackground")
           div(style="overflow-y:auto; height:280px;")
             div(style="padding:0px 12px 0px 0px;")
               span(style="font-size:18px")
-                <b> Chelsea Phan </b>
-              | will be joining UBHub as an intern for Summer 2018. She will be connecting urban biodiversity resources in the UBHub database with SDG6, with a focus on wetlands.
-              p She is a first-year student in the MESPOM (Master’s in Environmental Sciences, Policy, and Management) programme, a joint degree programme by Central European University, Lund University, and the University of Manchester. Chelsea is from the United States and completed her undergraduate studies in environmental engineering at Brown University. She is interested in sustainable urban development, coastal management, and social entrepreneurship. In her free time, she likes to collect illustrated books, discover new bands, learn new forms of art and communication, and enjoy the outdoors.
+                <b> Adrian Watson </b>
+              | graduated from the University of the West Indies, Mona, Jamaica with a double major degree in Geography and Zoology. He is a social entrepreneur and an urban beekeeper. He is the founder and C.E.O. of Honai Beez Apiary. He has experience in working with youth and local communities specifically in the areas of climate change and ecosystem services over the last decade.   He participated in many local and international environmental initiatives such as being a climate change facilitator in the JaREEACH Climate Change Action Agent Schools and sitting on the selection committee for the Global Youth Biodiversity COP 13 and African Workshop selection panels. He has played a leading role in many local and international organizations such as being the Caribbean & Latin American Focal Point for the Global Youth Biodiversity Network, the National Coordinator for the Caribbean Youth Environment Network in Jamaica, Public Relations Officer for the Kingston and St. Andrew Bee Farmers Association, and Management Committee Member with the Jamaica Organic Agriculture Movement.
               p
-                a(href="https://www.linkedin.com/in/chelseaphan/")
+                a(href="https://www.linkedin.com/in/adrian-watson-37097a4a/")
                   img(src="images/logo_linkedin-14px.png")
+                |  and&nbsp;
+                a(href="http://adrianwatsonactvities.weebly.com/") Website
+
+      div(style="width=100%; background:#07456b; color:white; text-align:center; padding:5px; font-size:22px;") INTERNS
 
       div(style="display:flex;padding:10px;")
-        img(src="images/bio_buyi.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
-        div(class="bioBackground")
-          div(style="overflow-y:auto; height:280px;")
-            div(style="padding:0px 12px 0px 0px;")
-              span(style="font-size:18px")
-                <b> Buyi Sun </b>
-              | is a student currently studying in Central European University. He started his academic career in MESPOM in 2017, a master’s program on Environmental Sciences, Policy and Management, to understand environmental issues from different perspectives.
-              p Buyi obtained both theoretical knowledge and field experience by participating in red deer habitat investigation and other environmental monitoring programs during the study in China. He volunteered in a program on giant panda habitat protection and local community education. In addition, he has been learning to use geospatial tools to prepare for future professional career, such as ArcGIS, QGIS and Google Earth.
-              p Buyi’s work in UBHub will be creating keywords for the current items in the database, and comparing different types of data in different sites.
-              p
-                a(href="https://www.linkedin.com/in/buyi-sun-893029160/")
-                  img(src="images/logo_linkedin-14px.png")
-
-      div(style="display:flex;padding:10px;")
-        img(src="images/bio_vishv.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
+        img(src="images/bio_vishv.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
         div(class="bioBackground")
           div(style="overflow-y:auto; height:280px;")
             div(style="padding:0px 12px 0px 0px;")
               span(style="font-size:18px")
                 <b> Vishv Doriwala </b>
-              | is joining UBHub as an intern to work on analyzing data and representing it spatially using ArcGIS mapping.
-              p A Civil Engineer born and raised in Ahmedabad, India, he is currently pursuing his Masters in Urban and Regional planning from CEPT University, Ahmedabad. He has done 2 internships during his Bachelor's, and is currently doing a summer internship at 'Town and Country Planning Department' in Goa. He chose this location in order to learn coastal regulations and the methods that are in practice to preserve the coastline.
+              | joined UBHub as an intern for Summer 2018 to work on analyzing data and represent it spatially using ArcGIS mapping.
+              p A Civil Engineer born and raised in Ahmedabad, India, he is currently pursuing his Masters in Urban and Regional planning from CEPT University, Ahmedabad. He has done two internships during his Bachelor's, and is currently doing a summer internship at 'Town and Country Planning Department' in Goa. He chose this location in order to learn coastal regulations and the methods that are in practice to preserve the coastline.
               p He enjoys Scuba diving, sea walking, and life under the water, and joined UBHub to learn new techniques and skills that would help in the betterment of coastal regulations and biodiversity in and around the water.
+
+      div(style="display:flex;padding:10px;")
+          img(src="images/bio_chelsea.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
+          div(class="bioBackground")
+              div(style="overflow-y:auto; height:280px;")
+                  div(style="padding:0px 12px 0px 0px;")
+                      span(style="font-size:18px")
+                          <b> Chelsea Phan </b>
+                      | joined UBHub as an intern for Summer 2018. She is developing urban biodiversity resources in the UBHub database associated with Sustainable Development Goal 6 (SDG6), which focuses on wetlands and water.
+                      p She is a first-year student in the MESPOM (Master’s in Environmental Sciences, Policy, and Management) programme, a joint degree programme by Central European University, Lund University, and the University of Manchester. Chelsea is from the United States and completed her undergraduate studies in environmental engineering at Brown University. She is interested in sustainable urban development, coastal management, and social entrepreneurship. In her free time, she likes to collect illustrated books, discover new bands, learn new forms of art and communication, and enjoy the outdoors.
+                      p
+                          a(href="https://www.linkedin.com/in/chelseaphan/")
+                              img(src="images/logo_linkedin-14px.png")
+
+
+      div(style="display:flex;padding:10px;")
+        img(src="images/bio_buyi.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
+        div(class="bioBackground")
+          div(style="overflow-y:auto; height:280px;")
+            div(style="padding:0px 12px 0px 0px;")
+              span(style="font-size:18px")
+                <b> Buyi Sun </b>
+              | joined UBHub as an intern for Summer 2018 as a student studying in Central European University. He started his academic career in MESPOM in 2017, a master’s program on Environmental Sciences, Policy and Management, to understand environmental issues from different perspectives.
+              p Buyi obtained both theoretical knowledge and field experience by participating in red deer habitat investigation and other environmental monitoring programs during the study in China. He volunteered in a program on giant panda habitat protection and local community education. In addition, he has been learning to use geospatial tools to prepare for future professional career, such as ArcGIS, QGIS and Google Earth.
+              p Buyi’s work in UBHub will be creating keywords for the current items in the database, and comparing different types of data in different sites.
+              p
+                a(href="https://www.linkedin.com/in/buyi-sun-893029160/")
+                  img(src="images/logo_linkedin-14px.png")
 
       div(style="width=100%; background:#07456b; color:white; text-align:center; padding:5px; font-size:22px;") ADVISORY GROUP
       div(style="display:flex")
@@ -310,7 +325,7 @@ body
                 <span style="font-size:18px"><b> David Cadman</b></span> served as president of ICLEI, city councillor for the City of Vancouver, Canada, and Director of the Greater Vancouver Regional District (now Metro Vancouver).
 
       div(style="display:flex;padding:10px;")
-        img(src="images/bio_jose.jpg" style="border-radius:20px 0px 0px 20px;height:300px;")
+        img(src="images/bio_jose.jpg" style="border-radius:20px 0px 0px 20px; height:300px;")
         div(class="bioBackground")
           div(style="overflow-y:auto; height:280px;")
             div(style="padding:0px 12px 0px 0px;")

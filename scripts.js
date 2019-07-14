@@ -13,10 +13,10 @@ log = function () {
 
 updateLocations = function(lower, upper) {
 
-    // config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
+    config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
     // config.rdsHost="127.0.0.1";
-    // config.rdsUser="root";
-    // config.rdsPassword="my-secret-pw";
+    config.rdsUser="root";
+    config.rdsPassword="my-secret-pw";
 
     for (let i = lower; i < upper; i++) {
         let connection = mysql.createConnection({
@@ -60,7 +60,7 @@ function getLatLongSimple(address) {
     getLatLong(address, null);
 }
 
-function getLatLong(address, id){
+function getLatLong(address, id) {
     console.log("getLatLong");
     if(address){
         let addressQueryString = address.replace(/\s+/g, "+");
@@ -138,12 +138,12 @@ function updateLocation(id, lat, lng){
     connection.end();
 }
 
-update = function(){
+update = function() {
 
-    // config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
+    config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
     // config.rdsHost="127.0.0.1"; //this should be your Docker container's IP address
-    // config.rdsUser="root";
-    // config.rdsPassword="my-secret-pw";
+    config.rdsUser="root";
+    config.rdsPassword="my-secret-pw";
 
     connection = mysql.createConnection({
         host: config.rdsHost,
@@ -157,7 +157,7 @@ update = function(){
     let query = [];
 
     let createDbQuery = "CREATE DATABASE ubhub;";
-    // query.push(createDbQuery);
+    query.push(createDbQuery);
 
     let useDbQuery = "use ubhub;";
     query.push(useDbQuery);
@@ -309,6 +309,13 @@ update = function(){
         "END";
     query.push(createGetPostQuery);
 
+    //todo: can cast
+    //npm package sanitize
+    //mysqlrealescapestring - cannot use parameters without an orm
+    //also strip_tags has a js sanitizer
+    //helmet npm package for security
+    //pa11y tool for accesiblity cli like curl
+    //knex or seqlize
     let createGetPostAndAllSubsQuery =
         "CREATE PROCEDURE getPostAndAllSubs(IN postId int)\n"+
         "SELECT * FROM posts WHERE `id` = postId \n"+
@@ -412,7 +419,8 @@ update = function(){
         "`programType` INT, " + //0 = index
         "`private` BIT, " +
         "`author` VARCHAR(255), " +
-        "`creationDate` DATE" +
+        "`creationDate` DATE, " +
+        "`iconFileName` VARCHAR(255), " +
         ");";
     query.push(createProgramsTableQuery);
 
@@ -587,7 +595,8 @@ update = function(){
         "`button_text` VARCHAR(255) CHARACTER SET utf8," +
         "`image` VARCHAR(512) CHARACTER SET utf8," +
         "`marker_colors_by` VARCHAR(255) CHARACTER SET utf8," +
-        "`marker_colors` VARCHAR(255) CHARACTER SET utf8" +
+        "`marker_colors` VARCHAR(255) CHARACTER SET utf8," +
+        "`button_link` VARCHAR(255) CHARACTER SET utf8" +
       ");";
     query.push(createMapButtonsTableQuery);
 
@@ -626,6 +635,8 @@ update = function(){
 
     let createUserDataTableQuery =
         "CREATE TABLE userData(" +
+        "`id` NUMERIC(14, 0)," +
+        "`userEmail` VARCHAR(255)," +
         "`site` INT," +
         "`program` INT, " +
         "`year` INT, " +
@@ -635,7 +646,8 @@ update = function(){
         "`numericalValue` FLOAT(10, 2), " +
         "`textValue` VARCHAR(2048), " +
         "`name` VARCHAR(2048), " +
-        "`notes` VARCHAR(2048)" +
+        "`notes` VARCHAR(2048), " +
+        "`jsonData` json" +
         ");";
     query.push(createUserDataTableQuery);
 

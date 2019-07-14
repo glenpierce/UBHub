@@ -47,7 +47,7 @@ function makeIconArray(colorLevels) {
     var entry = {
       level: levels[i],
       icon: icon
-    }
+    };
     iconArray.push(entry);
   }
   return iconArray;
@@ -56,13 +56,13 @@ function makeIconArray(colorLevels) {
 
 
 function getIconByIndex(index) {
-  var activeIcons = [
+  const activeIcons = [
     orangeImage,
     lightOrangeImage,
     yellowImage,
     greenImage,
     blueImage
-  ]
+  ];
   return activeIcons[index];
 }
 
@@ -163,6 +163,7 @@ function filterValues(value, filterBy){
 }
 
 function filterBySearch(searchTerm){
+    resetFilter();
     markers.forEach(function (marker) {
         let found = marker.element.inst_address.toLowerCase().includes(searchTerm.toLowerCase());
         if(!found){
@@ -344,7 +345,7 @@ function onFilterUpdate(){
 
 //TODO: filters need to remember all active filtering, not just latest
 
-function selectHighlight(filterBy, colorBy, colorLevels, buttonNode){
+function selectHighlight(filterBy, colorBy, colorLevels, buttonNode) {
   highlightValues(filterBy, colorBy, colorLevels);
   if(currentActiveHighlightingButton != null){
     currentActiveHighlightingButton.classList.remove("activeButton");
@@ -354,12 +355,14 @@ function selectHighlight(filterBy, colorBy, colorLevels, buttonNode){
 }
 
 
-function highlightValues(filterBy, colorBy, colorLevels){
+function highlightValues(filterBy, colorBy, colorLevels) {
   var callback = (markers, programs) => {
     var iconArray = makeIconArray(colorLevels);
 
     markers.forEach(function (marker) {
       var found = false;
+      let programLevel = -1;
+      let icon = blueImage;
 
       programs.forEach(function (program) {
         if(marker.element.id == program.inst_id) {
@@ -367,9 +370,9 @@ function highlightValues(filterBy, colorBy, colorLevels){
           switch (colorBy) {
 
             case "part_level":
-              var icon = blueImage;
               for (i = 0; i < iconArray.length; i++) {
-                if (iconArray[i].level == program.part_level) {
+                if (iconArray[i].level == program.part_level && i > programLevel) {
+                  programLevel = i;
                   icon = iconArray[i].icon;
                 }
               }
@@ -611,6 +614,8 @@ function highlightValues(filterBy, colorBy, colorLevels){
 
   function initMap (mapData) {
     console.log(mapData);
+
+    var infowindow = new google.maps.InfoWindow();
     greyImage = {
         url: '/images/marker_0_grey_39x59.png',
         scaledSize: new google.maps.Size(20, 30),
@@ -697,21 +702,18 @@ function highlightValues(filterBy, colorBy, colorLevels){
           if(element.lat){
               var contentString = getMapPopupContent(element);
 
-              var infowindow = new google.maps.InfoWindow({
-                  content: contentString
-              });
-
               var position = {lat:element.lat, lng:element.lng};
               var marker = new google.maps.Marker({
                   position: position,
                   map: map,
                   animation: google.maps.Animation.DROP,
                   title: element.name,
-                  icon: greyImage
+                  icon: greyImage //getIconByIndex(Math.floor(Math.random()*5)) todo: this makes the map go to random color mode when we need it for collateral
               });
               marker.element = element;
 
               marker.addListener('click', function () {
+                  infowindow.setContent(contentString);
                   infowindow.open(map, marker);
               });
               markers.push(marker);
@@ -737,6 +739,13 @@ function highlightValues(filterBy, colorBy, colorLevels){
           map: null,
           preserveViewport: true
       });
+
+      // let legend = document.createElement("DIV");
+      // let legendInfo = document.createElement("DIV");
+      // legend.append(legendInfo);
+      // map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
+      // legendInfo.setAttribute("style", "border:solid; height:100px; width:20px;");
+
 
   }
 

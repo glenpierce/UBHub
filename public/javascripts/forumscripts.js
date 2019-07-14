@@ -2,12 +2,33 @@ const askQuestion = () => {
   window.location='/forum/ask';
 };
 
+const submitComment = (formId, refresh) => {
+    const formElements = document.getElementById(formId).elements;
+    let postData = {};
+    for (let i = 0; i < formElements.length; i++)
+        if (formElements[i].type != "button")
+            postData[formElements[i].name] = formElements[i].value;
+    // postData.questionBody = simplemde.value();
+    if(postData.questionTitle != "" && postData.questionBody != "") {
+        console.log(postData);
+        postQuestion("/forum/submit", postData, messageCallback);
+    } else {
+        console.log("no post data");
+    }
+
+    if(refresh){
+        location.reload();
+    }
+
+};
+
 const submitQuestion = (formId, refresh) => {
   const formElements = document.getElementById(formId).elements;
   let postData = {};
   for (let i = 0; i < formElements.length; i++)
       if (formElements[i].type != "button")
           postData[formElements[i].name] = formElements[i].value;
+  postData.questionBody = simplemdeQuestion.value();
   if(postData.questionTitle != "" && postData.questionBody != "") {
     console.log(postData);
     postQuestion("/forum/submit", postData, messageCallback);

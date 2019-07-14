@@ -2,12 +2,18 @@ doctype html
 include mixins
 html
     head
+        link(rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css")
         link(rel='stylesheet', href='/stylesheets/style.css')
+        script(src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js")
         script(src='/javascripts/forumscripts.js')
         script.
             function goToDashboard() {
                 console.log("clicked");
             }
+            var simplemde;
+            window.onload = function () {
+                simplemdeQuestion = new SimpleMDE({ element: document.getElementById("questionBody"), hideIcons: ["guide", "heading", "fullscreen", "side-by-side", "image", "preview"], status: false });
+                }
 
 
 body
@@ -19,7 +25,7 @@ body
           label Your Question:
           input(type="text" name="questionTitle")
           label Details:
-          textarea(name="questionBody")
+          textarea(name="questionBody" id="questionBody")
           input(type="hidden" name="parentPost" value="-1")
           label Tags
           input(name="tags")

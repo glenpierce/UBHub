@@ -2,8 +2,10 @@ doctype html
 include mixins
 html
     head
+        link(rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css")
         link(rel='stylesheet', href='/stylesheets/style.css')
         script(src='/javascripts/forumscripts.js')
+        script(src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js")
 
         script.
             function goToDashboard() {
@@ -29,7 +31,7 @@ body
       div(style="background-color:#eff6e8; padding:10px; border-radius:5px;")
           p.forumAsker #{postTree.author} asks:
           h2.forumTitle #{postTree.subject}
-          p.postBody #{postTree.body}
+          input(id="postBody")
           +postMeta(postTree)
       div
         +responsePosts(postTree.children)
@@ -37,8 +39,16 @@ body
           label Your Answer:
           input(type="text" name="questionTitle")
           label Details:
-          textarea(name="questionBody")
+          textarea(name="questionBody" id="questionBody")
           input(type="hidden" name="parentPost" value="#{postTree.id}")
           input(type="button" onclick="submitQuestion('askForm')" value="Submit Response")
     div.spacer
   +footer
+
+script.
+  var myPostTree = !{JSON.stringify(postTree)};
+  var simplemdePost = new SimpleMDE({ element: document.getElementById("postBody"), status: false, toolbar: false });
+  simplemdePost.value(myPostTree.body);
+  simplemdePost.togglePreview();
+
+  var simplemdeQuestion = new SimpleMDE({ element: document.getElementById("questionBody"), hideIcons: ["guide", "heading", "fullscreen", "side-by-side", "image", "preview"], status: false });

@@ -1,0 +1,23 @@
+doctype html
+include mixins
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+body
+    +header(true)
+    div(style="padding-top:40px;")
+    div(style="max-width:800px; margin:auto;")
+        case query
+            when "1"
+                h1 UBIF 2.0
+                div You have selected the UBIF 2.0 Program. You can either create a new instance of the program below, or choose from a saved instance.
+            default
+                div
+        div(style="margin:auto;")
+            if rows.names.length > 0
+                -for (let i = 0; i < rows.names.length; i++)
+                    button(class="spaceAbove" style="display:block" onclick="window.location='/program/?id=#{rows.ids[i]}'") !{rows.names[i]}
+            button(class="spaceAbove" style="display:block" onclick="window.location='/program/?newId=#{query}'") Create new
+            button(class="spaceAbove" style="display:block" onclick="window.location='/dashboard'") go back
+    +footer()

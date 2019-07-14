@@ -8,7 +8,13 @@ mixin mapHead
           initMap(mapData);
           tablePage(0);
         }
-      script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&callback=initMapOnPage")
+        function openTab(event, link) {
+            event.stopPropagation();
+            window.open(link);
+        }
+      script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs")
+      script.
+          window.onload = function (ev) { initMapOnPage(); };
       link(rel='stylesheet', href='/stylesheets/style.css')
 
 mixin filterMixin(title, filterBy, attributeList, filterType)
@@ -45,6 +51,16 @@ mixin mapInfoTab(label, contentId, color, reset)
             div.resetButton(onclick="event.stopPropagation(); resetFilter();") reset
           img(class="tabArrow" src="/images/arrow-right3.svg" style="")
 
+mixin stickyInfoTab(label, contentId, color, reset, stickyClass)
+    div(class="sticky " + stickyClass)
+        div(class="centerContentsViaFlex")
+            div.mapInfoTab(style="background-color: #{color}" onclick="togglePanelOpenOrClosed(this, '#{contentId}')")
+                div
+                div #{label}
+                div(style="padding-right:10px;").reset
+                    if reset
+                        div.resetButton(onclick="event.stopPropagation(); resetFilter();") reset
+                    img(class="tabArrow" src="/images/arrow-right3.svg" style="")
 
 mixin mapInfoFilters(mapFilterParameters)
   div.mapInfoContent(class="hide" id="filterSettings" style="background-color: #e9f6f9")
@@ -52,7 +68,7 @@ mixin mapInfoFilters(mapFilterParameters)
       +filterMixin(filterParameter.name, filterParameter.id, filterParameter.options, filterParameter.type)
 
 mixin mapInfoHighlights(mapButtons)
-  div.mapInfoContent(class="hide" id="highlightSettings" style="background-color: #fffceb")
+  div.mapInfoContent(class="hide" id="highlightSettings" style="background-color: #fcf8e9")
     div.quarters
       each cat in mapButtons
         div
@@ -62,6 +78,8 @@ mixin mapInfoHighlights(mapButtons)
               p #{btn.button_text}
               if (btn.image != null)
                 img(src="#{btn.image}")
+              if(btn.button_link != null)
+                img(src="/images/infoIcon.svg" style="height:20px; width:20px; position:absolute; right:3px; bottom:3px;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="openTab(arguments[0], '#{btn.button_link}');")
 
 
 

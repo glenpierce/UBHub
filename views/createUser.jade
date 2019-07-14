@@ -1,11 +1,12 @@
 doctype html
+include mixins
 html
     head
         link(rel='stylesheet', href='/stylesheets/cbiindicators.css')
         script(src='https://www.google.com/recaptcha/api.js')
 
-body(style="font-family:helvetica; background-color:#eff6e8;")
-    block content
+body
+    +header(true)
 
     script.
         function httpPostAsync(theUrl, callback){
@@ -31,18 +32,14 @@ body(style="font-family:helvetica; background-color:#eff6e8;")
             window.location = res;
         }
 
-    div(style="display:flex; align-items:center; width:100%; padding-bottom:20px;")
-        img(src="/images/UBHub_logo_horizwebsite.svg" style="margin:auto; width:50%;")
+    div(style="max-width:400px; text-align:center; padding-bottom:20px; margin:auto; margin-top:50px;")
+        div(style="display:inline;") Please create a new user below. Note that only pre-approved users are permitted to register during  our alpha development phase.
 
-    div(style="max-width:400px; text-align:center; padding-bottom:20px; margin:auto;")
-        div(style="display:inline;") Please create a new user below. Note that only pre-approved users are permitted to register during  our alpha development phase.  If you would like more information, please return to our&nbsp;
-        div(style="display:inline; cursor:pointer;" onclick="window.location='/index'") <u>home page</u>
-
-    form(id="emailForm" name="emailForm", method="post" onsubmit="submitForm()" style="display:flex; flex-direction:column; align-items:center; width:100%; padding-bottom:20px;")
+    form(id="emailForm" name="emailForm", method="post" onsubmit="submitForm()" style="display:flex; flex-direction:column; align-items:center; width:100%; padding-bottom:20px; margin-bottom:50px;")
         div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
             div(style="margin:auto; width:300px;")
                 div(style="display:inline-block; margin-top:4px;") Username
-                input(name="alias" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+                input(name="username" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
         div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
             div(style="margin:auto; width:300px;")
                 div(style="display:inline-block; margin-top:4px;") Mailing Address
@@ -54,11 +51,7 @@ body(style="font-family:helvetica; background-color:#eff6e8;")
         div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
             div(style="margin:auto; width:300px;")
                 div(style="display:inline-block; margin-top:4px;") Email
-                input(name="username" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
-        div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
-            div(style="margin:auto; width:300px;")
-                div(style="display:inline-block; margin-top:4px;") Verify Email
-                input(name="veryifyUsername" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
+                input(name="alias" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
         div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
             div(style="margin:auto; width:300px;")
                 div(style="display:inline-block; margin-top:4px;") Password
@@ -70,3 +63,22 @@ body(style="font-family:helvetica; background-color:#eff6e8;")
         div(style="display:flex; align-items:center; width:100%; margin-bottom:20px;")
             div(class="g-recaptcha" data-sitekey="6LfgLSMUAAAAABRJzT1aYJTLTKHEc7zorV0nRPxm" style="margin:auto;")
         input(type="submit" value="Create User" style="background-color:#4490ba; border-radius:5px; border:none; padding:5px; color: white; cursor:pointer; margin:auto;")
+
+    +footer()
+
+    script.
+        function submitForm() {
+            var formElements = document.getElementById("emailForm").elements;
+            var postData = {};
+            for (var i = 0; i < formElements.length; i++)
+                if (formElements[i].type != "submit")
+                    postData[formElements[i].name] = formElements[i].value;
+        }
+
+    script.
+        window.onload = function (ev) {
+            var errorFromServer = !{errorFromServer};
+            if(errorFromServer){
+                window.alert("There was a problem creating that user, the name is probably in use. Please try again.");
+            }
+        }
