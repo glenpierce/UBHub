@@ -371,7 +371,9 @@ html
                 }
 
                 for(let timeSliceIndex = 0; timeSliceIndex < timeSlices.length - 1; timeSliceIndex++) {
-                    let groupedColumn = {"title": timeSlices[timeSliceIndex].titleType(), "columns": []};
+                    let options = {year: 'numeric', month: 'short', day: 'numeric'};
+                    let title = timeSlices[timeSliceIndex].toLocaleDateString("en-US", options) + "-" + timeSlices[timeSliceIndex].getEndDate().toLocaleDateString("en-US", options);
+                    let groupedColumn = {"title": title, "columns": []};
                     groupedColumn.columns.push({
                         title: "Observed",
                         field: "observed" + timeSlices[timeSliceIndex].titleType(),
@@ -387,6 +389,9 @@ html
                     selectedSite.siteSpecies.forEach(function (species) {
                         let containsSpecies = false;
                         for (let marker in markers) {
+                            if(markers[marker].observedOn < timeSlices[timeSliceIndex] || markers[marker].observedOn > timeSlices[timeSliceIndex].getEndDate()) {
+                                break;
+                            }
                             if (selectedSite.Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
                                 containsSpecies = true;
                                 break;
@@ -1036,10 +1041,21 @@ html
             }
 
             function getTimeSlices(start, end, frame) {
-                Date.prototype.titleType = Date.prototype.getFullYear;
                 if (timeFrame == "month") {
                     Date.prototype.titleType = Date.prototype.getMonth;
+                    Date.prototype.getEndDate = function() {
+                        if (this.getMonth() == 11)
+                            return new Date(this.getFullYear() + 1, 0, this.getDate());
+                        else
+                            return new Date(this.getFullYear(), this.getMonth() + 1, this.getDate());
+                    }
+                } else {
+                    Date.prototype.titleType = Date.prototype.getFullYear;
+                    Date.prototype.getEndDate = function () {
+                        return new Date(this.getFullYear() + 1, this.getMonth(), this.getDate());
+                    }
                 }
+
                 let result = [];
                 if(start == null) {
                     return result;
