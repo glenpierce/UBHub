@@ -450,12 +450,11 @@ html
                 for (let site in sites) {
                     if (sites[site].habitat.name === button.innerHTML) {
                         let groupedColumn = {"title":sites[site].name, "columns":[]};
-                        groupedColumn.columns.push({title: "Observed", field: sites[site].name + "observed", formatter: "tickCross"}); //
+                        groupedColumn.columns.push({title: "Observed", field: sites[site].name + "observed", formatter: "tickCross"});
                         groupedColumn.columns.push({title: "Verified", field: sites[site].name, formatter: "presence"});
                         columns.push(groupedColumn);
 
                         sites[site].siteSpecies.forEach(function (species) {
-                            console.log(species);
                             let containsSpecies = false;
                             for (let marker in markers) {
                                 if (sites[site].Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
@@ -465,9 +464,6 @@ html
                             }
                             if(sites[site].verifiedData[species] == null) {
                                 sites[site].verifiedData[species].presence = containsSpecies ? 1 : 0;
-                                console.log("sites[site].verifiedData[species].presence" + sites[site].verifiedData[species].presence);
-                            } else {
-                                console.log("sites[site].verifiedData[species].presence != null");
                             }
                             speciesRows.push({
                                 siteName: sites[site].name,
@@ -479,33 +475,21 @@ html
                         });
                     }
                 }
-                console.log("speciesRowCounter");
-                console.log(speciesRowCounter);
-                console.log("speciesRows");
-                console.log(speciesRows);
 
                 speciesRowCounter.forEach(function (uniqueSpecies) {
-                    console.log("uniqueSpecies");
-                    console.log(uniqueSpecies);
                     let newRow = {};
                     newRow.species = uniqueSpecies;
                     columns.forEach(function (column) {
-                        console.log("column");
-                        console.log(column);
                         newRow[column.title] = false;
                         speciesRows.forEach(function (speciesRow) {
-                            console.log("speciesRow");
-                            console.log(speciesRow);
                             if (newRow.species == speciesRow.species && speciesRow.siteName == column.title) {
-                                    newRow[column.title + "observed"] = speciesRow.observed; //
+                                    newRow[column.title + "observed"] = speciesRow.observed;
                                     newRow[column.title] = speciesRow.containsSpecies.presence;
                             }
                         });
                     });
                     data.push(newRow);
                 });
-                console.log("{columns, data}");
-                console.log({columns, data});
                 return {columns, data};
             }
 
@@ -1115,14 +1099,14 @@ html
                         for (let i = 0; i < sites.length; i++) {
                             let numerator = 0;
                             let denominator = 0;
-                            for (let k = 0; k < sites[i].verifiedData.length; k++) {
-                                if(d == speciesTaxaMap.get(sites[i].verifiedData[k].species) && sites[i].verifiedData[k].presence == 1) {
+                            for(const key in sites[i].verifiedData) {
+                                if(d == speciesTaxaMap.get(key) && sites[i].verifiedData[key].presence == 1) {
                                     numerator++;
                                     break;
                                 }
                             }
                             sites[i].siteSpecies.forEach(function (species) {
-                                if (d == speciesTaxaMap.get(species) && sites[i][species] < 2)
+                                if (d == speciesTaxaMap.get(species) && sites[i].verifiedData[species].presence < 2)
                                     denominator++;
                             });
                             if(denominator !== 0) {
