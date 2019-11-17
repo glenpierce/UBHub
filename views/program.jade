@@ -1072,7 +1072,7 @@ html
             const svgWidth = 800;
             const svgHeight = 300;
             const strokeWidth = 0;
-            const barWidth = 20;
+            const barWidth = 30;
             const headerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
             const footerHeight = 25;
             const leftAxisMargin = 20;
@@ -1080,7 +1080,7 @@ html
             const barZoneWidth = svgWidth - leftAxisExtraMargin;
             const barPadding = 10;
             const textPadding = barPadding;
-            const timeSliceTextVerticalSpace = 15;
+            const timeSliceTextVerticalSpace = 10;
             const heightFactor = svgHeight - footerHeight - headerHeight;
 
             function createAxis(svg) {
@@ -1182,7 +1182,7 @@ html
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
-                        let translate = [i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding - (barWidth / 2),
+                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin - (barWidth / 2),
                             footerHeight + heightFactor - heights[i]];
                         return "translate(" + translate + ")";
                     });
@@ -1241,7 +1241,7 @@ html
                         .attr("width", barWidth)
                         .attr("transform", function (d, i) {
                             let translate = [timeSliceIndex * barZoneWidth / taxa.length / (timeSlices.length - 1) + i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding - (barWidth / 2),
-                                svgHeight - footerHeight - heights[i]];
+                                svgHeight - footerHeight - heights[i] + 5]; //I don't know why we need this extra 5 px 😣
                             return "translate(" + translate + ")";
                         });
 
@@ -1276,7 +1276,8 @@ html
                     .attr("fill", "black")
                     .attr("width", svgWidth / taxa.length)
                     .attr("transform", function (d, i) {
-                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight];
+                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin,
+                            svgHeight];
                         return "translate(" + translate + ")";
                     })
                     .text(function (d) {
@@ -1303,7 +1304,8 @@ html
                     .attr("fill", "black")
                     .attr("width", svgWidth / taxa.length)
                     .attr("transform", function (d, i) {
-                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight];
+                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin,
+                            svgHeight];
                         return "translate(" + translate + ")";
                     })
                     .text(function (d) {
@@ -1355,7 +1357,7 @@ html
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
-                        let translate = [i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding,
+                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin - (barWidth / 2),
                             footerHeight + heightFactor - heights[i]];
                         return "translate(" + translate + ")";
                     });
@@ -1380,7 +1382,8 @@ html
                     .attr("fill", "black")
                     .attr("width", svgWidth / sites.length)
                     .attr("transform", function (d, i) {
-                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight];
+                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin,
+                            svgHeight];
                         return "translate(" + translate + ")";
                     })
                     .text(function (d) {
@@ -1421,7 +1424,7 @@ html
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
-                        let translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding,
+                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin - (barWidth / 2),
                             footerHeight + heightFactor - heights[i]];
                         return "translate(" + translate + ")";
                     });
@@ -1455,7 +1458,8 @@ html
                     .attr("fill", "black")
                     .attr("width", svgWidth / sites.length)
                     .attr("transform", function (d, i) {
-                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight];
+                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin,
+                            svgHeight];
                         return "translate(" + translate + ")";
                     })
                     .text(function (d) {
@@ -1496,7 +1500,7 @@ html
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
-                        let translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding,
+                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin - (barWidth / 2),
                             footerHeight + heightFactor - heights[i]];
                         return "translate(" + translate + ")";
                     });
