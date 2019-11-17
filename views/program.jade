@@ -147,7 +147,7 @@ html
                 id = !{id};
             }
             let description;
-            let taxa = ["Plants", "Birds", "Invertebrate Pollinators"];
+            let taxa = ["Plants", "Birds", "Pollinators"];
             //green, red, yellow, brown, blue
             if(dataFromServer.taxa) {
                 taxa = dataFromServer.taxa;
@@ -197,7 +197,7 @@ html
 
             let verifiedData = {"habitats":{}}
 
-            let colors = ["green", "orange", "yellow", "brown", "blue"];
+            let colors = ["#7ec7a2", "#f69056", "#fcd77f", "#bb6d37", "#4490ba", "#e0e0e0"];
 
 
             window.onload = function (ev) {
@@ -1069,21 +1069,40 @@ html
                 return result;
             }
 
+            const svgWidth = 800;
+            const svgHeight = 300;
+            const strokeWidth = 0;
+            const barWidth = 20;
+            const headerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
+            const footerHeight = 25;
+            const leftAxisMargin = 20;
+            const leftAxisExtraMargin = leftAxisMargin + 24;
+            const barZoneWidth = svgWidth - leftAxisExtraMargin;
+            const barPadding = 10;
+            const textPadding = barPadding;
+            const timeSliceTextVerticalSpace = 15;
+            const heightFactor = svgHeight - footerHeight - headerHeight;
+
+            function createAxis(svg) {
+                let yScale = d3.scaleLinear()
+                    .domain([1, 0])
+                    .range([footerHeight, svgHeight - headerHeight]);
+
+                const formatPercent = d3.format(".0%");
+
+                let yAxis = d3.axisLeft()
+                    .scale(yScale)
+                    .tickFormat(formatPercent)
+                    .tickValues([0, .2, .4, .6, .8, 1])
+                    .tickSize(svgWidth - leftAxisMargin, 0, 0);
+
+                svg.append("g")
+                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + 0 + ")")
+                    .call(yAxis);
+            }
+
             observationsByTaxon = function(taxa) {
                 clearPriorChartIfAny("observationsByTaxon");
-
-                const svgWidth = 500;
-                const svgHeight = 300;
-                const strokeWidth = 0;
-                const barWidth = 20;
-                const headerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
-                const footerHeight = 20;
-                const leftAxisMargin = 20;
-                const leftAxisExtraMargin = leftAxisMargin + 24;
-                const barZoneWidth = svgWidth - leftAxisExtraMargin;
-                const barPadding = barZoneWidth / taxa.length / 2;
-
-                let heightFactor = svgHeight - footerHeight - headerHeight;
 
                 let heights = [];
 
@@ -1091,6 +1110,25 @@ html
                     .attr("width", svgWidth)
                     .attr("height", svgHeight)
                     .attr("class", "bar-chart");
+
+                svg.selectAll("text")
+                    .data(taxa)
+                    .enter()
+                    .append("text")
+                    .attr("class", "chartLabel")
+                    .style("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .attr("width", svgWidth / taxa.length)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin,
+                            svgHeight];
+                        return "translate(" + translate + ")";
+                    })
+                    .text(function (d) {
+                        return d;
+                    });
+
+                createAxis(svg);
 
                 svg.selectAll("rect")
                     .data(taxa)
@@ -1133,7 +1171,7 @@ html
                             return colors[0]
                         if(d == "Birds")
                             return colors[1]
-                        if(d == "Invertebrate Pollinators")
+                        if(d == "Pollinators")
                             return colors[2]
 
                         if(i % 2 == 1)
@@ -1144,64 +1182,21 @@ html
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
-                        let translate = [i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding, footerHeight + heightFactor - heights[i]];
+                        let translate = [i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding - (barWidth / 2),
+                            footerHeight + heightFactor - heights[i]];
                         return "translate(" + translate + ")";
                     });
-
-                svg.selectAll("text")
-                    .data(taxa)
-                    .enter()
-                    .append("text")
-                    .attr("class", "chartLabel")
-                    .style("text-anchor", "middle")
-                    .attr("fill", "black")
-                    .attr("width", svgWidth / taxa.length)
-                    .attr("transform", function (d, i) {
-                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight];
-                        return "translate(" + translate + ")";
-                    })
-                    .text(function (d) {
-                        return d;
-                    });
-
-                let yScale = d3.scaleLinear()
-                    .domain([1, 0])
-                    .range([footerHeight, svgHeight - headerHeight]);
-
-                const formatPercent = d3.format(".0%");
-
-                let yAxis = d3.axisLeft()
-                    .scale(yScale)
-                    .tickFormat(formatPercent)
-                    .tickSize(svgWidth - leftAxisMargin, 0, 0);
-
-                svg.append("g")
-                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + 0 + ")")
-                    .call(yAxis);
             }
 
             observationsOfSurrogateSpeciesInAllHabitatsOverTime = function (taxa) {
                 clearPriorChartIfAny("observationsOfSurrogateSpeciesInAllHabitatsOverTime");
 
-                const svgWidth = 500;
-                const svgHeight = 300;
-                const strokeWidth = 0;
-                const barWidth = 20;
-                const headerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
-                const footerHeight = 20;
-                const leftAxisMargin = 20;
-                const leftAxisExtraMargin = leftAxisMargin + 24;
-                const barZoneWidth = svgWidth - leftAxisExtraMargin;
-                const barPadding = 10;
-                const textPadding = barPadding + 4;
-                const timeSliceTextVerticalSpace = 10;
-
-                let heightFactor = svgHeight - footerHeight - headerHeight;
-
                 let svg = d3.select('#observationsOfSurrogateSpeciesInAllHabitatsOverTime')
                     .attr("width", svgWidth)
                     .attr("height", svgHeight)
                     .attr("class", "bar-chart");
+
+                createAxis(svg);
 
                 for(let timeSliceIndex = 0; timeSliceIndex < timeSlices.length - 1; timeSliceIndex++) {
                     let heights = [];
@@ -1241,11 +1236,12 @@ html
                             return height;
                         })
                         .style("stroke", "white")
-                        .style("fill", "grey")
+                        .style("fill", "#e0e0e0")
                         .style("stroke-width", strokeWidth)
                         .attr("width", barWidth)
                         .attr("transform", function (d, i) {
-                            let translate = [timeSliceIndex * barZoneWidth / taxa.length / (timeSlices.length - 1) + i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding, svgHeight - footerHeight - heights[i]];
+                            let translate = [timeSliceIndex * barZoneWidth / taxa.length / (timeSlices.length - 1) + i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding - (barWidth / 2),
+                                svgHeight - footerHeight - heights[i]];
                             return "translate(" + translate + ")";
                         });
 
@@ -1259,7 +1255,8 @@ html
                         .attr("fill", "black")
                         .attr("width", svgWidth / timeSlices.length)
                         .attr("transform", function (d, i) {
-                            let translate = [timeSliceIndex * barZoneWidth / taxa.length / (timeSlices.length - 1) + i * barZoneWidth / taxa.length + leftAxisExtraMargin + textPadding, svgHeight - timeSliceTextVerticalSpace];
+                            let translate = [timeSliceIndex * barZoneWidth / taxa.length / (timeSlices.length - 1) + i * barZoneWidth / taxa.length + leftAxisExtraMargin + textPadding,
+                                svgHeight - timeSliceTextVerticalSpace];
                             return "translate(" + translate + ")";
                         })
                         .text(function (d) {
@@ -1285,38 +1282,10 @@ html
                     .text(function (d) {
                         return d;
                     });
-
-                let yScale = d3.scaleLinear()
-                    .domain([1, 0])
-                    .range([footerHeight, svgHeight - headerHeight]);
-
-                const formatPercent = d3.format(".0%");
-
-                let yAxis = d3.axisLeft()
-                    .scale(yScale)
-                    .tickFormat(formatPercent)
-                    .tickSize(svgWidth - leftAxisMargin, 0, 0);
-
-                svg.append("g")
-                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + 0 + ")")
-                    .call(yAxis);
             }
 
             surrogateSpeciesByHabitatChart = function(habitatButton) {
                 clearPriorChartIfAny("surrogateSpeciesByHabitatChart");
-
-                const svgWidth = 500;
-                const svgHeight = 300;
-                const strokeWidth = 0;
-                const barWidth = 20;
-                const headerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
-                const footerHeight = 20;
-                const leftAxisMargin = 20;
-                const leftAxisExtraMargin = leftAxisMargin + 24;
-                const barZoneWidth = svgWidth - leftAxisExtraMargin;
-                const barPadding = barZoneWidth / taxa.length / 2;
-
-                let heightFactor = svgHeight - footerHeight - headerHeight;
 
                 let heights = [];
 
@@ -1324,6 +1293,24 @@ html
                     .attr("width", svgWidth)
                     .attr("height", svgHeight)
                     .attr("class", "bar-chart");
+
+                svg.selectAll("text")
+                    .data(taxa)
+                    .enter()
+                    .append("text")
+                    .attr("class", "chartLabel")
+                    .style("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .attr("width", svgWidth / taxa.length)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight];
+                        return "translate(" + translate + ")";
+                    })
+                    .text(function (d) {
+                        return d;
+                    });
+
+                createAxis(svg);
 
                 svg.selectAll("rect")
                     .data(taxa)
@@ -1364,61 +1351,18 @@ html
                         return height;
                     })
                     .style("stroke", "white")
-                    .style("fill", "grey")
+                    .style("fill", "#e0e0e0")
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
-                        let translate = [i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding, footerHeight + heightFactor - heights[i]];
+                        let translate = [i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding,
+                            footerHeight + heightFactor - heights[i]];
                         return "translate(" + translate + ")";
                     });
-
-                svg.selectAll("text")
-                    .data(taxa)
-                    .enter()
-                    .append("text")
-                    .attr("class", "chartLabel")
-                    .style("text-anchor", "middle")
-                    .attr("fill", "black")
-                    .attr("width", svgWidth / taxa.length)
-                    .attr("transform", function (d, i) {
-                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight];
-                        return "translate(" + translate + ")";
-                    })
-                    .text(function (d) {
-                        return d;
-                    });
-
-                let yScale = d3.scaleLinear()
-                    .domain([1, 0])
-                    .range([footerHeight, svgHeight - headerHeight]);
-
-                const formatPercent = d3.format(".0%");
-
-                let yAxis = d3.axisLeft()
-                    .scale(yScale)
-                    .tickFormat(formatPercent)
-                    .tickSize(svgWidth - leftAxisMargin, 0, 0);
-
-                svg.append("g")
-                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + 0 + ")")
-                    .call(yAxis);
             }
 
             selectedTaxaByHabitatChart = function (taxaButtonText) {
                 clearPriorChartIfAny("selectedTaxaByHabitatChart");
-
-                const svgWidth = 500;
-                const svgHeight = 300;
-                const strokeWidth = 0;
-                const barWidth = 20;
-                const headerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
-                const footerHeight = 20;
-                const leftAxisMargin = 20;
-                const leftAxisExtraMargin = leftAxisMargin + 24;
-                const barZoneWidth = svgWidth - leftAxisExtraMargin;
-                const barPadding = barZoneWidth / taxa.length / 2;
-
-                let heightFactor = svgHeight - footerHeight - headerHeight;
 
                 let heights = [];
 
@@ -1426,6 +1370,24 @@ html
                     .attr("width", svgWidth)
                     .attr("height", svgHeight)
                     .attr("class", "bar-chart");
+
+                svg.selectAll("text")
+                    .data(sites)
+                    .enter()
+                    .append("text")
+                    .attr("class", "chartLabel")
+                    .style("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .attr("width", svgWidth / sites.length)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight];
+                        return "translate(" + translate + ")";
+                    })
+                    .text(function (d) {
+                        return d.name;
+                    });
+
+                createAxis(svg);
 
                 svg.selectAll("rect")
                     .data(sites)
@@ -1455,13 +1417,34 @@ html
                         return height;
                     })
                     .style("stroke", "white")
-                    .style("fill", "grey")
+                    .style("fill", "#e0e0e0")
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
-                        let translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding, footerHeight + heightFactor - heights[i]];
+                        let translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding,
+                            footerHeight + heightFactor - heights[i]];
                         return "translate(" + translate + ")";
                     });
+            }
+
+            selectedHabitatAndTaxonBySiteChart = function () {
+                clearPriorChartIfAny("selectedHabitatAndTaxonBySiteChart");
+
+                let taxaName = document.querySelector('input[name="taxaRadioButtons"]:checked') != null ? document.querySelector('input[name="taxaRadioButtons"]:checked').value : null;
+                let habitatName = document.querySelector('input[name="habitatRadioButtons"]:checked') != null ? document.querySelector('input[name="habitatRadioButtons"]:checked').value : null;
+
+                function matchesHabitat(site) {
+                    return site.habitat.name === habitatName;
+                }
+
+                let filteredSites = sites.filter(matchesHabitat);
+
+                let heights = [];
+
+                let svg = d3.select('#selectedHabitatAndTaxonBySiteChart')
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .attr("class", "bar-chart");
 
                 svg.selectAll("text")
                     .data(sites)
@@ -1479,53 +1462,7 @@ html
                         return d.name;
                     });
 
-                let yScale = d3.scaleLinear()
-                    .domain([1, 0])
-                    .range([footerHeight, svgHeight - headerHeight]);
-
-                const formatPercent = d3.format(".0%");
-
-                let yAxis = d3.axisLeft()
-                    .scale(yScale)
-                    .tickFormat(formatPercent)
-                    .tickSize(svgWidth - leftAxisMargin, 0, 0);
-
-                svg.append("g")
-                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + 0 + ")")
-                    .call(yAxis);
-            }
-
-            selectedHabitatAndTaxonBySiteChart = function () {
-                clearPriorChartIfAny("selectedHabitatAndTaxonBySiteChart");
-
-                let taxaName = document.querySelector('input[name="taxaRadioButtons"]:checked') != null ? document.querySelector('input[name="taxaRadioButtons"]:checked').value : null;
-                let habitatName = document.querySelector('input[name="habitatRadioButtons"]:checked') != null ? document.querySelector('input[name="habitatRadioButtons"]:checked').value : null;
-
-                function matchesHabitat(site) {
-                    return site.habitat.name === habitatName;
-                }
-
-                let filteredSites = sites.filter(matchesHabitat);
-
-                const svgWidth = 500;
-                const svgHeight = 300;
-                const strokeWidth = 0;
-                const barWidth = 20;
-                const headerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
-                const footerHeight = 20;
-                const leftAxisMargin = 20;
-                const leftAxisExtraMargin = leftAxisMargin + 24;
-                const barZoneWidth = svgWidth - leftAxisExtraMargin;
-                const barPadding = barZoneWidth / taxa.length / 2;
-
-                let heightFactor = svgHeight - footerHeight - headerHeight;
-
-                let heights = [];
-
-                let svg = d3.select('#selectedHabitatAndTaxonBySiteChart')
-                    .attr("width", svgWidth)
-                    .attr("height", svgHeight)
-                    .attr("class", "bar-chart");
+                createAxis(svg);
 
                 svg.selectAll("rect")
                     .data(filteredSites)
@@ -1555,44 +1492,14 @@ html
                         return height;
                     })
                     .style("stroke", "white")
-                    .style("fill", "grey")
+                    .style("fill", "#e0e0e0")
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
-                        let translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding, footerHeight + heightFactor - heights[i]];
+                        let translate = [i * barZoneWidth / sites.length + leftAxisExtraMargin + barPadding,
+                            footerHeight + heightFactor - heights[i]];
                         return "translate(" + translate + ")";
                     });
-
-                svg.selectAll("text")
-                    .data(sites)
-                    .enter()
-                    .append("text")
-                    .attr("class", "chartLabel")
-                    .style("text-anchor", "middle")
-                    .attr("fill", "black")
-                    .attr("width", svgWidth / sites.length)
-                    .attr("transform", function (d, i) {
-                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin, svgHeight];
-                        return "translate(" + translate + ")";
-                    })
-                    .text(function (d) {
-                        return d.name;
-                    });
-
-                let yScale = d3.scaleLinear()
-                    .domain([1, 0])
-                    .range([footerHeight, svgHeight - headerHeight]);
-
-                const formatPercent = d3.format(".0%");
-
-                let yAxis = d3.axisLeft()
-                    .scale(yScale)
-                    .tickFormat(formatPercent)
-                    .tickSize(svgWidth - leftAxisMargin, 0, 0);
-
-                svg.append("g")
-                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + 0 + ")")
-                    .call(yAxis);
             }
 
             function clearPriorChartIfAny(oldChartId) {
@@ -1662,7 +1569,7 @@ body
                                 textarea(id="projectDescription" rows="3" class="fullWidth")
 
                             div(style="margin-bottom:20px;") <b>Step 2. Indicate Taxonomic Groups</b>
-                                div(style="display:flex;") Surrogate species must be indicated in at least five different taxonomic groups. The first three of these groups are birds, plants, and invertebrate pollinators. The remaining two are customizable by city. Indicate those here.
+                                div(style="display:flex;") Surrogate species must be indicated in at least five different taxonomic groups. The first three of these groups are birds, plants, and Pollinators. The remaining two are customizable by city. Indicate those here.
                                     img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton2()")
                                     div(id="infoButton2" class="hidden popup" onclick="hide(document.getElementById('infoButton2'))")
                                         div As cities consider surrogate species selections, the first criteria is to select species from diverse taxa groups that are typically found in or are obligate to a given habitat type of good quality and are neither very rare nor overly common.  The plant, bird and invertebrate pollinator taxa groups are universal throughout cities utilizing the UBIF. However, additional taxa groups are chosen at the discretion of the cities, with at least two additional taxa groups recommended.
@@ -1801,12 +1708,12 @@ body
 
                         h2(class="spaceAbove centerText") Observations of Surrogate Species in All Habitats of Interest
 
-                        div(style="border:solid; width:500px; height:300px; margin:auto;")
+                        div(style="width:800px; height:300px; margin:auto;")
                             svg(id="observationsByTaxon" class="chart")
 
                         h2 Observations of Surrogate Species in All Habitats of Interest Over Time
 
-                        div(style="border:solid; width:500px; height:300px; margin:auto;")
+                        div(style="width:800px; height:300px; margin:auto;")
                             svg(id="observationsOfSurrogateSpeciesInAllHabitatsOverTime" class="chart")
 
                         h2 Section 2: Overview of Species by Habitat Type
@@ -1814,14 +1721,14 @@ body
                         h2 Surrogate Species in selected Habitat
                         div(class="spaceAbove spaceBelow centerContentsViaFlex" id="surrogateSpeciesByHabitatChartButtons")
 
-                        div(style="border:solid; width:500px; height:300px; margin:auto;")
+                        div(style="width:800px; height:300px; margin:auto;")
                             svg(id="surrogateSpeciesByHabitatChart" class="chart")
 
                         h2 Presence/Absence of Surrogate Species Within ____ Taxa by Habitat
 
                         div(class="spaceAbove spaceBelow centerContentsViaFlex" id="taxaButtons")
 
-                        div(style="border:solid; width:500px; height:300px; margin:auto;")
+                        div(style="width:800px; height:300px; margin:auto;")
                             svg(id="selectedTaxaByHabitatChart" class="chart")
 
                         h2 Section 3: Status of Surrogate Species in ____ Habitat
@@ -1833,7 +1740,7 @@ body
                                 div(id="selectHabitatRadioGroup")
                         button(class="spaceAbove spaceBelow" onclick='selectedHabitatAndTaxonBySiteChart()') chart
 
-                        div(style="border:solid; width:500px; height:300px; margin:auto;")
+                        div(style="width:800px; height:300px; margin:auto;")
                             svg(id="selectedHabitatAndTaxonBySiteChart" class="chart")
 
                         h2 Appendix: Tables of Species Presence Data
