@@ -354,7 +354,7 @@ html
             }
 
             function verifyCell(cell) {
-                verifiedData.sites[selectedSite][cell._cell.column.parent.definition.title][cell._cell.row.data.species] = cell._cell.value;
+                verifiedData.sites[selectedSite.name][cell._cell.column.parent.definition.title][cell._cell.row.data.species] = cell._cell.value;
             }
 
             function generateVerificationTableData(button) {
@@ -926,13 +926,14 @@ html
                         }
                     };
 
-                    xhr.open("GET", "https://inaturalist.org/observations/project/" + iNaturalistProjectId + ".json", true);
+                    xhr.open("GET", "https://api.inaturalist.org/v1/observations?project_id=" + iNaturalistProjectId, true);
                     xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
                     xhr.send();
                 });
             }
 
-            placeMarkers = function (observations) {
+            placeMarkers = function (result) {
+                let observations = result.results;
                 greyImage = {
                     url: "/images/marker_0_grey_39x59.png",
                     scaledSize: new google.maps.Size(20, 30)
@@ -940,8 +941,8 @@ html
                 for (let observation in observations) {
                     observationsPersistant.push(observations[observation]);
                     let position = {
-                        lat: parseFloat(observations[observation].latitude),
-                        lng: parseFloat(observations[observation].longitude)
+                        lat: parseFloat(observations[observation].geojson.coordinates[1]),
+                        lng: parseFloat(observations[observation].geojson.coordinates[0])
                     };
                     let marker = new google.maps.Marker({
                         position: position,
@@ -950,7 +951,7 @@ html
                     });
                     marker.observation = observations[observation];
                     marker.observedOn = new Date(observations[observation].observed_on);
-                    marker.taxon = observations[observation].iconic_taxon_name;
+                    marker.taxon = observations[observation].taxon.iconic_taxon_name;
                     marker.species = observations[observation].species_guess;
                     marker.presence = 1;
                     if (!speciesSet.has(marker.species) && marker.species != null && marker.species.length != 0) {
@@ -1035,15 +1036,16 @@ html
                 if (timeFrame == "month") {
                     Date.prototype.titleType = Date.prototype.getMonth;
                     Date.prototype.getEndDate = function() {
-                        if (this.getMonth() == 11)
-                            return new Date(this.getFullYear() + 1, 0, this.getDate());
-                        else
-                            return new Date(this.getFullYear(), this.getMonth() + 1, this.getDate());
+                        let getEndDateResult = new Date(this);
+                        getEndDateResult.setMonth(getEndDateResult.getMonth() + 1);
+                        return getEndDateResult;
                     }
                 } else {
                     Date.prototype.titleType = Date.prototype.getFullYear;
                     Date.prototype.getEndDate = function () {
-                        return new Date(this.getFullYear() + 1, this.getMonth(), this.getDate());
+                        let getEndDateResult = new Date(this);
+                        getEndDateResult.setFullYear(this.getFullYear() + 1);
+                        return getEndDateResult;
                     }
                 }
 
@@ -1095,29 +1097,31 @@ html
                     .enter()
                     .append("rect")
                     .attr("height", function (d) {
-                        let incrimentalResults = [];
-                        for (let i = 0; i < sites.length; i++) {
-                            let numerator = 0;
-                            let denominator = 0;
-                            for(const key in sites[i].verifiedData) {
-                                if(d == speciesTaxaMap.get(key) && sites[i].verifiedData[key].presence == 1) {
-                                    numerator++;
-                                    break;
+                        let numerator = 0;
+                        let denominator = 0;
+                        speciesTaxaMap.forEach(function(speciesTaxa, speciesInTaxa, map) {
+                            if(speciesTaxa == d) {
+                                for (let key in verifiedData.sites) {
+                                    key = key.toString();
+                                    const timeSlice = timeSlices[0].titleType();
+                                    for(let speciesObserved in verifiedData.sites[key][timeSlice]) {
+                                        if(speciesInTaxa == speciesObserved) {
+                                            let presence = verifiedData.sites[key][timeSlice][speciesInTaxa.toString()];
+                                            if (presence == 1) {
+                                                numerator++;
+                                            }
+                                            if (presence < 2) {
+                                                denominator++;
+                                            }
+                                        }
+                                    }
                                 }
                             }
-                            sites[i].siteSpecies.forEach(function (species) {
-                                if (d == speciesTaxaMap.get(species) && sites[i].verifiedData[species].presence < 2)
-                                    denominator++;
-                            });
-                            if(denominator !== 0) {
-                                incrimentalResults.push(numerator / denominator);
-                            }
+                        });
+                        let height = 0;
+                        if(denominator !== 0) {
+                            height = numerator / denominator;
                         }
-                        let height;
-                        if(incrimentalResults.length === 0)
-                            height = 0;
-                        else
-                            height = incrimentalResults.reduce(function(a,b){return a+b;}) / incrimentalResults.length;
 
                         height = height * heightFactor;
                         heights.push(height);
@@ -1766,14 +1770,15 @@ body
                             div(class="spaceBelow") Note: We do not currently save the data entered in this table, when you leave this page, your overrides will not be saved.
                             div(class="spaceBelow centerContentsViaFlex" id="verifyButtons")
 
+                        div(class="spaceBelow")
+                            div(style="display:flex; flex-direction:column; max-width:800px; overflow-x:scroll;")
+                                div(id="verification-table" class="hidden")
+                        div(style="max-width:400px; margin-bottom:20px; margin:auto;")
+                                div(class="bold") Step 3. Set Targets:
+                                div(class="spaceBelow") Displays current presence data for each habitat by taxa. For each habitat and each taxa, the user will enter the target presence.
 
-                    div(id="verification-table" class="hidden spaceBelow")
-                    div(style="max-width:400px; margin-bottom:20px; margin:auto;")
-                            div(class="bold") Step 3. Set Targets:
-                            div(class="spaceBelow") Displays current presence data for each habitat by taxa. For each habitat and each taxa, the user will enter the target presence.
-
-                            div(class="centerContentsViaFlex")
-                                button(onclick="save()" class="spaceAbove") Save
+                                div(class="centerContentsViaFlex")
+                                    button(onclick="save()" class="spaceAbove") Save
 
                 +stickyInfoTab("UBIF Track 2 Reports", "infant3", "#07456b", false, "stickyThird")
                 div(id="infant3" class="mapInfoContent hide" style="display:flex flex-direction:column; margin:auto;")

@@ -420,7 +420,7 @@ update = function() {
         "`private` BIT, " +
         "`author` VARCHAR(255), " +
         "`creationDate` DATE, " +
-        "`iconFileName` VARCHAR(255), " +
+        "`iconFileName` VARCHAR(255)" +
         ");";
     query.push(createProgramsTableQuery);
 
