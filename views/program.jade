@@ -15,7 +15,7 @@ body
     +header(true)
 
     - var data = JSON.parse(programData);
-    - for(var i = 0; i < data.categorie.lengths; i += 1) {
+    - for(var i = 0; i < data.categories.lengths; i += 1) {
         div #{data.categories.categoryName}
             - for(var j = 0; j < data.indicators.length; j += 1) {
                 if(data.indicators[j].categoryId == data.categories[i].id)
