@@ -1056,14 +1056,16 @@ html
                 let nextDate = new Date(start);
                 if(frame == "month") {
                     while(nextDate <= end) {
-                        result.push(new Date(nextDate));
+                        result.push(nextDate);
                         nextDate = new Date(nextDate.setMonth(nextDate.getMonth() + 1));
                     }
+                    result.push(new Date(nextDate));
                 } else {
                     while (nextDate <= end) {
                         result.push(nextDate);
                         nextDate = new Date(nextDate.setFullYear(nextDate.getFullYear() + 1));
                     }
+                    result.push(nextDate);
                 }
 
                 return result;
