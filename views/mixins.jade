@@ -24,9 +24,6 @@ mixin site(siteName, siteDescription)
         div #{siteDescription}
 
 mixin header(displayLoginInfo)
-    //div(class="showWhenNarrow")
-    //    div Hi, I'm the special thing that only shows up when the screen is narrow :)
-    //div(class="hideWhenNarrow")
     div
         div(style="width:100%; position:fixed; display:flex; flex-grow:1; z-index: 2;")
             div(style="height:100px; background:white; flex-grow:1;")
@@ -227,32 +224,10 @@ mixin footer()
             div(class="smallText" style="cursor:pointer;" onclick="window.location='/aboutUs'") About Us
             div(class="smallText" style="cursor:pointer;" onclick="window.location='/forum'") Forum
             div(class="smallText" style="cursor:pointer;" onclick="window.location='/account'") Account
-            //div(class="smallText" style="cursor:pointer;" ) Sitemap
         div
             div(class="smallText") Contact us
             div(class="smallText") ubhub.org@gmail.com
             div(class="smallText") Copyright info
-//            a(class="twitter-follow-button" href="https://twitter.com/ubhub_org") Follow @ubhub_org
-//
-//
-//script.
-//    window.twttr = (function(d, s, id) {
-//        var js, fjs = d.getElementsByTagName(s)[0],
-//    t = window.twttr || {};
-//        if (d.getElementById(id))
-//        return t;
-//    js = d.createElement(s);
-//        js.id = id;
-//        js.src = "https://platform.twitter.com/widgets.js";
-//        fjs.parentNode.insertBefore(js, fjs);
-//
-//        t._e = [];
-//        t.ready = function(f) {
-//            t._e.push(f);
-//    };
-//
-//    return t;
-//    }(document, "script", "twitter-wjs"));
 
 script.
 

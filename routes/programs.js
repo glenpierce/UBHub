@@ -33,7 +33,6 @@ router.get('/', function (req, res, next) {
 function getUserDataForProgram(programId, req) {
     return new Promise(function (resolve, reject) {
         let queryString = "select * from userData where program = " + programId + " and userEmail = '" + req.session.user + "';";
-        queryString = "select * from userData;";
         makeDbCall(queryString, resolve);
     });
 }

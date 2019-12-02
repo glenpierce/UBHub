@@ -17,16 +17,37 @@ app.use(session({
     }
 }));
 
+//todo: create sub indicator description
+
 router.get('/', function (req, res, next) {
     if(req.query.newId) {
+        let emptyObject = JSON.stringify({data:""});
         switch (req.query.newId) {
             case "1":
-                let emptyObject = JSON.stringify({data:""});
-                res.render('program', {username: req.session.user, id: req.query.newId, dataFromServer:emptyObject});
+                res.render('ubifProgram', {username: req.session.user, id: req.query.newId, dataFromServer:emptyObject});
                 return;
             default:
-                console.log("incorrect newId query");
-                console.log(req.query.newId);
+                let programData = {};
+                let queryString = "select * from programs where id = " + req.query.newId + " and author = '" + req.session.user + "';";
+                makeDbCallAsPromise(queryString)
+                    .then(rows => {
+                        let queryString = "select * from categories where program = " + req.query.newId + ";";
+                        makeDbCallAsPromise(queryString)
+                            .then(rows => {
+                                programData.categories = rows;
+                                let queryString = "select * from indicators where (categoryId = " + rows[0].id + ")";
+                                for(let i = 1; i < rows.length; i += 1) {
+                                    queryString += " OR (categoryId = " + rows[i].id + ")";
+                                }
+                                queryString += ";";
+                                makeDbCallAsPromise(queryString)
+                                    .then(rows => {
+                                        programData.indicators = rows;
+                                        programData = JSON.stringify(programData);
+                                        res.render('program', {username: req.session.user, id: req.query.newId, programData:programData});
+                                    });
+                            });
+                    });
                 return;
         }
     } else {
@@ -35,7 +56,15 @@ router.get('/', function (req, res, next) {
             .then(rows => {
                 let jsonToSend = rows[0].jsonData;
                 if(req.session.user == rows[0].userEmail) {
-                    res.render('program', {username: req.session.user, id: req.query.id, dataFromServer:jsonToSend});
+                    if(rows[0].program == "1") {
+                        res.render('ubifProgram', {username: req.session.user, id: req.query.id, dataFromServer:jsonToSend});
+                    } else {
+                        res.render('program', {
+                            username: req.session.user,
+                            id: req.query.id,
+                            dataFromServer: jsonToSend
+                        });
+                    }
                 } else {
                     console.log("user mismatch in program.js: " + req.session.user + " " + rows[0]);
                 }

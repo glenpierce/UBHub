@@ -24,8 +24,6 @@ router.post('/editor', function(req, res, next) {
     let someName = "some program name";
     makeDbCallAsPromise("CALL createProgram('" + someName + "', '" + req.session.user + "')").then(function(result){
         const programId = result[0][0].id;
-        console.log(req.body);
-        console.log(JSON.stringify(req.body, null, 4));
         let newProgram = req.body.newProgram;
         let currentCategoryId;
         let currentGroupId;
@@ -89,7 +87,6 @@ router.get('/', function(req, res, next) {
 
     connection.connect();
     query = 'SELECT * from indicators where positionInCategory is null';
-    console.log(query);
     connection.query(query, function(err, rows, fields) {
         if (!err) {
             console.log(rows);
@@ -121,8 +118,6 @@ router.post('/', function(req, res){
 
 createCategoriesFunction = function(program) {
     return function (rows) {
-        console.log(rows);
-        console.log(program);
         programId = rows[0][0].id;
         positionInProgram = 0;
         for (category in program.categories) {
@@ -136,15 +131,9 @@ createCategoriesFunction = function(program) {
 
 createIndicatorsFunction = function(category) {
     return function(rows) {
-        console.log(rows);
-        console.log("category containing indicators=");
-        console.log(category);
         categoryId = rows[0][0].id;
         positionInCategory = 0;
         for (indicator in category.indicators) {
-            //create new indicator
-            console.log(category.indicators);
-            console.log(indicator);
             makeDbCall("CALL createIndicatorInProgram('" + category.indicators[indicator].name + "', '" + positionInCategory + "', '" + categoryId + "')", noop);
             positionInCategory++;
         }
@@ -163,7 +152,6 @@ makeDbCall = function(queryString, callback){
 
     connection.connect();
     query = queryString;
-    console.log(query);
     connection.query(query, function(err, rows, fields) {
         if (!err) {
             callback(rows);
@@ -187,7 +175,6 @@ makeDbCallAsPromise = function(queryString) {
 
         connection.connect();
         query = queryString;
-        console.log(query);
         connection.query(query, function (err, rows, fields) {
             if (!err) {
                 resolve(rows);

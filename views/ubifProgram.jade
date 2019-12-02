@@ -1,0 +1,1756 @@
+doctype html
+include mixins
+include mapMixins
+html
+    head
+        style.
+            .newSite {
+                display: flex;
+                padding: 10px;
+                background: lightgrey;
+            }
+            .newSite svg {
+                margin: 10px;
+            }
+            .tabulator-tableHolder {
+                max-height: 400px !important;
+            }
+
+            .buttonCell {
+                color: white;
+                display:flex;
+                justify-content: space-around;
+                width:100%;
+                user-select: none;
+            }
+            .redButton {
+                width: 9px;
+                padding: 5px;
+                border-radius: 5px;
+                background-color: #fbd0b7;
+                text-align: center;
+            }
+            .selectedRed {
+                background-color: #f2600d;
+            }
+            .greenButton {
+                width: 9px;
+                padding: 5px;
+                border-radius: 5px;
+                background-color: #c1e3cd;
+                text-align: center
+            }
+            .selectedGreen {
+                background-color: #3b7e6a;
+            }
+            .greyButton {
+                width: 9px;
+                padding: 5px;
+                border-radius: 5px;
+                background-color: lightgrey;
+                text-align: center
+            }
+            .selectedGrey {
+                background-color: grey;
+            }
+            .selectedButtonCell {
+                font-weight: 700;
+            }
+
+        link(href="https://unpkg.com/tabulator-tables@4.2.3/dist/css/tabulator.min.css" rel="stylesheet")
+        script(type="text/javascript" src="https://unpkg.com/tabulator-tables@4.2.3/dist/js/tabulator.min.js")
+        //link(href="/stylesheets/tabulator.min.css" rel="stylesheet")
+        //link(href="/stylesheets/tabulator_bootstrap4.min.css" rel="stylesheet")
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        script(src="https://d3js.org/d3.v5.min.js")
+        //script(type="text/javascript" src="/javascripts/d3.min.js")
+        script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js")
+        script(async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEKjvE48-VV37P2pGBWFphvlrx8BXGDCs&libraries=drawing,geometry")
+        script.
+
+            const presenceEditor = function (cell, onRendered, success, cancel, editorParams) {
+                //cell - the cell component for the editable cell
+                //onRendered - function to call when the editor has been rendered
+                //success - function to call to pass the successfully updated value to Tabulator
+                //cancel - function to call to abort the edit and return to a normal cell
+                //editorParams - params object passed into the editorParams column definition property
+
+                let value;
+
+                let editor = document.createElement("div");
+                editor.className = "buttonCell";
+
+                let redButton = document.createElement("div");
+                let greenButton = document.createElement("div");
+                let greyButton = document.createElement("div");
+
+                redButton.innerHTML = "A";
+                redButton.className = "redButton";
+                redButton.onclick = function (event) {
+                    redButton.className = "redButton selectedButtonCell";
+                    greenButton.className = "greenButton";
+                    greyButton.className = "greyButton";
+                    cell._cell.value = 0;
+                    value = 0;
+                };
+                editor.appendChild(redButton);
+
+                greenButton.innerHTML = "P";
+                greenButton.className = "greenButton";
+                greenButton.onclick = function (event) {
+                    redButton.className = "redButton";
+                    greenButton.className = "greenButton selectedButtonCell";
+                    greyButton.className = "greyButton";
+                    cell._cell.value = 1;
+                    value = 1;
+                };
+                editor.appendChild(greenButton);
+
+                greyButton.innerHTML = "?";
+                greyButton.className = "greyButton";
+                greyButton.onclick = function(event) {
+                    redButton.className = "redButton";
+                    greenButton.className = "greenButton";
+                    greyButton.className = "greyButton selectedButtonCell";
+                    cell._cell.value = 2;
+                    value = 2;
+                };
+                editor.appendChild(greyButton);
+
+                onRendered(function () {
+                    editor.focus();
+                });
+
+                editor.addEventListener("click", function () {
+                    verifyCell(cell);
+                    success(value);
+                });
+
+                return editor;
+            };
+
+            let selectedSite;
+
+            Tabulator.prototype.extendModule("format", "formatters", {
+                presence: function (cell, formatterParams) {
+                    return "<div class='buttonCell'>" +
+                            "<div class='redButton" + (cell._cell.value == 0 ? " selectedButtonCell selectedRed" : "") + "'>A</div>" +
+                            "<div class='greenButton" + (cell._cell.value == 1 ? " selectedButtonCell selectedGreen" : "") + "'>P</div>" +
+                            "<div class='greyButton" + (cell._cell.value == 2 ? " selectedButtonCell selectedGrey" : "") + "'>?</div>" +
+                        "</div>";
+                }
+            });
+
+            let dataFromServer = !{dataFromServer};
+            let id;
+            if(dataFromServer.id) {
+                id = !{id};
+            }
+            let description;
+            let taxa = ["Plants", "Birds", "Pollinators"];
+            //green, red, yellow, brown, blue
+            if(dataFromServer.taxa) {
+                taxa = dataFromServer.taxa;
+            }
+            let habitats = [""];
+            let habitatData = [];
+            if(dataFromServer.habitatData) {
+                habitatData = dataFromServer.habitatData;
+            }
+            let sites = [];
+            let siteData = {savedCoordinates:[], names:[], habitats:[]};
+            let observationsPersistant = [];
+            let markers = [];
+            let table;
+            let verificationTable;
+            let speciesPresenceTable;
+            let columns;
+            let speciesSet = new Set();
+            let speciesTaxaMap = new Map();
+            let startDate;
+            function dateStartChanged(input) {
+                startDate = new Date(input.value);
+            }
+            let endDate = Date.now();
+            function dateEndChanged(input) {
+                endDate = new Date(input.value);
+            }
+            let timeFrame = "";
+            const monthNames = [];
+            monthNames[0] = "Jan";
+            monthNames[1] = "Feb";
+            monthNames[2] = "Mar";
+            monthNames[3] = "Apr";
+            monthNames[4] = "May";
+            monthNames[5] = "Jun";
+            monthNames[6] = "Jul";
+            monthNames[7] = "Aug";
+            monthNames[8] = "Sep";
+            monthNames[9] = "Oct";
+            monthNames[10] = "Nov";
+            monthNames[11] = "Dec";
+            function timeFrameSelected(selectObject) {
+                timeFrame = selectObject.value;
+            }
+
+            let timeSlices;
+
+            let verifiedData = {"habitats":{}}
+
+            let colors = ["#7ec7a2", "#f69056", "#fcd77f", "#bb6d37", "#4490ba", "#e0e0e0"];
+
+
+            window.onload = function (ev) {
+
+                if (dataFromServer.id) {
+                    id = !{id};
+                    document.getElementById("projectName").value = dataFromServer.name;
+                }
+
+                if (dataFromServer.description) {
+                    description = dataFromServer.description;
+                    document.getElementById("projectDescription").value = dataFromServer.description;
+                }
+
+                initMapOnPage();
+
+                let tableData = [];
+
+                columns = [
+                    {title: "Species", field: "species", editor: "input"},
+                    {title: "Taxa", field: "taxa", editor: "select", editorParams: {}}
+                ];
+
+                table = new Tabulator("#example-table", {
+                        layoutColumnsOnNewData: true,
+                        data: tableData,           //load row data from array
+                        layout: "fitData",
+                        // responsiveLayout: "hide",  //hide columns that dont fit on the table
+                        tooltips: true,            //show tool tips on cells
+                        addRowPos: "bottom",          //when adding a new row, add it to the top of the table
+                        history: true,             //allow undo and redo actions on the table
+                        // pagination: "local",       //paginate the data
+                        // paginationSize: 7,         //allow 7 rows per page of data
+                        movableColumns: true,      //allow column order to be changed
+                        resizableRows: true,       //allow row order to be changed
+                        initialSort: [             //set the initial sort order of the data
+                            {column: "name", dir: "asc"},
+                        ],
+                        columns: columns,
+                        cellEdited: updateCell
+                    }
+                );
+
+                verificationTable = new Tabulator("#verification-table", {
+                    layoutColumnsOnNewData: true,
+                    cellEdited: verifyCell
+                });
+                speciesPresenceTable = new Tabulator("#speciesPresenceTable", {
+                    layoutColumnsOnNewData: true
+                });
+
+                for (let i = 0; i < taxa.length; i++) {
+                    columns[1].editorParams[taxa[i]] = taxa[i];
+                    table.setColumns(columns);
+                    table.redraw(true);
+                    let newTaxonLabel = document.createElement("DIV");
+                    newTaxonLabel.textContent = taxa[i];
+                    document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
+
+                    addTaxonButtons(taxa[i]);
+                }
+
+                if (dataFromServer.siteData) {
+                    if(dataFromServer.siteData.savedCoordinates) {
+                        dataFromServer.siteData.savedCoordinates.forEach(function(coordinates){
+                            let polygon = new google.maps.Polygon({
+                                paths: coordinates,
+                                // strokeColor: '#FF0000',
+                                // strokeOpacity: 0.8,
+                                // strokeWeight: 2,
+                                // // editable: true,
+                                // fillColor: '#FF0000',
+                                // fillOpacity: 0.35
+                            });
+                            polygon.setMap(map);
+                            addSite(polygon);
+                        });
+                    }
+
+                    let namesInputs = document.getElementsByClassName("siteName");
+                    let verificationButtons = document.getElementsByClassName("verificationButton");
+                    let i = 0;
+                    dataFromServer.siteData.names.forEach(function (name) {
+                        namesInputs[i].value = name;
+                        verificationButtons[i].innerHTML = name;
+                        sites[i].name = name;
+                        i++;
+                    });
+
+                    setTimeout(function() {
+                        let habitatSelectors = document.getElementsByClassName("siteHabitatSelector");
+                        let k = 0;
+                        dataFromServer.siteData.habitats.forEach(function (habitat) {
+                            habitatSelectors[k].value = habitat.name;
+                            sites[k].habitat = habitat;
+                            k++;
+                        });
+                    }, 0);
+                }
+
+                for (let i = 0; i < habitatData.length; i++) {
+                    addHabitatData(habitatData[i].title);
+                    columns.push(habitatData[i]);
+                }
+
+                table.setColumns(columns);
+                if (dataFromServer.tableData) {
+                    table.setData(dataFromServer.tableData);
+                    table.getColumns().forEach(function (column) {
+                        let cells = column.getCells();
+                        cells.forEach(updateCell);
+                        cells.forEach(function(cell){speciesSet.add(cell._cell.row.data.species)});
+                    });
+                }
+                table.redraw(true);
+
+                if(dataFromServer.startDate) {
+                    startDate = new Date(dataFromServer.startDate);
+                    document.getElementById("startDate").valueAsDate = startDate;
+                }
+
+                if (dataFromServer.endDate) {
+                    endDate = new Date(dataFromServer.endDate);
+                    document.getElementById("endDate").valueAsDate = endDate;
+                }
+
+                if (dataFromServer.timeFrame) {
+                    timeFrame = dataFromServer.timeFrame;
+                    document.getElementById("timeFrame").value = timeFrame;
+                }
+
+                mapHabitatsToSites();
+            };
+
+            function updateCell(cell) {
+                let habitatIndex = [];
+                for (let site in sites) {
+                    if (cell._cell.column != null && cell._cell.column.field != null && sites[site].habitat.name == cell._cell.column.field) {
+                        habitatIndex.push(site);
+                    }
+                }
+                for (let index in habitatIndex) {
+                    if (cell._cell.value) {
+                        sites[habitatIndex[index]].siteSpecies.add(cell._cell.row.data.species);
+                        sites[habitatIndex[index]].taxa.add(cell._cell.row.data.taxa);
+                    } else {
+                        sites[habitatIndex[index]].siteSpecies.delete(cell._cell.row.data.species);
+                        sites[habitatIndex[index]].taxa.delete(cell._cell.row.data.taxa);
+                    }
+                }
+                if (cell._cell.column != null && cell._cell.column.field == "taxa") {
+                    speciesTaxaMap.set(cell._cell.row.data.species, cell._cell.row.data.taxa);
+                }
+            }
+
+            function verifyCell(cell) {
+                verifiedData.sites[selectedSite.name][cell._cell.column.parent.definition.title][cell._cell.row.data.species] = cell._cell.value;
+            }
+
+            function generateVerificationTableData(button) {
+                selectedSite = button.innerHTML;
+                timeSlices = getTimeSlices(startDate, endDate, timeFrame);
+                let columns = [{title: "Species", field: "species"}];
+                let speciesRows = [];
+                let speciesRowSet = new Set();
+                let data = [];
+                for (let site in sites) {
+                    if (sites[site].name === button.innerHTML) {
+                        selectedSite = sites[site];
+                        break;
+                    }
+                }
+
+                for(let timeSliceIndex = 0; timeSliceIndex < timeSlices.length - 1; timeSliceIndex++) {
+                    let options = {year: 'numeric', month: 'short', day: 'numeric'};
+                    // let title = timeSlices[timeSliceIndex].toLocaleDateString("en-US", options) + "-" + timeSlices[timeSliceIndex].getEndDate().toLocaleDateString("en-US", options);
+                    let groupedColumn = {"title": timeSlices[timeSliceIndex].titleType(), "columns": []};
+                    groupedColumn.columns.push({
+                        title: "Observed",
+                        field: "observed" + timeSlices[timeSliceIndex].titleType(),
+                        formatter: "tickCross"});
+                    groupedColumn.columns.push({
+                        title: "Verified",
+                        field: "verified" + timeSlices[timeSliceIndex].titleType(),
+                        formatter: "presence",
+                        editor: presenceEditor
+                    });
+                    columns.push(groupedColumn);
+
+                    selectedSite.siteSpecies.forEach(function (species) {
+                        let containsSpecies = false;
+                        for (let marker in markers) {
+                            if (!(markers[marker].observedOn < timeSlices[timeSliceIndex] || markers[marker].observedOn > timeSlices[timeSliceIndex].getEndDate()) &&
+                                selectedSite.Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
+                                containsSpecies = true;
+                                break;
+                            }
+                        }
+                        if(verifiedData.sites == null) {
+                            verifiedData.sites = {};
+                        }
+                        if(verifiedData.sites[selectedSite.name] == null) {
+                            verifiedData.sites[selectedSite.name] = {};
+                        }
+                        if(verifiedData.sites[selectedSite.name][timeSlices[timeSliceIndex].titleType()] == null) {
+                            verifiedData.sites[selectedSite.name][timeSlices[timeSliceIndex].titleType()] = {};
+                        }
+                        if(verifiedData.sites[selectedSite.name][timeSlices[timeSliceIndex].titleType()][species] == null) {
+                            verifiedData.sites[selectedSite.name][timeSlices[timeSliceIndex].titleType()][species] =  containsSpecies ? 1 : 0;
+                        }
+                        if (selectedSite.verifiedData[species] == null || selectedSite.verifiedData[species].presence === 0) {
+                            selectedSite.verifiedData[species] = {};
+                            selectedSite.verifiedData[species].presence = containsSpecies ? 1 : 0;
+                        }
+                        let newSpeciesRow = {siteName: selectedSite.name, species: species, timeSlice:timeSlices[timeSliceIndex].titleType()};
+                        newSpeciesRow["observed" + timeSlices[timeSliceIndex].titleType()] = containsSpecies;
+                        newSpeciesRow["verified" + timeSlices[timeSliceIndex].titleType()] = verifiedData.sites[selectedSite.name][timeSlices[timeSliceIndex].titleType()][species];
+                        speciesRows.push(newSpeciesRow);
+                        speciesRowSet.add(species);
+                    });
+                }
+
+                speciesRowSet.forEach(function (uniqueSpecies) {
+                    let newRow = {};
+                    newRow.species = uniqueSpecies;
+                    columns.forEach(function (groupedColumn) {
+                        let i = 0;
+                        if(groupedColumn.columns) {
+                            groupedColumn.columns.forEach(function (column) {
+                                newRow[groupedColumn.title] = 0;
+                                speciesRows.forEach(function (speciesRow) {
+                                    if (newRow.species == speciesRow.species && speciesRow.timeSlice == groupedColumn.title) {
+                                        newRow[groupedColumn.columns[i].field] = speciesRow[groupedColumn.columns[i].field];
+                                        i++;
+                                    }
+                                });
+                            });
+                        }
+                    });
+                    data.push(newRow);
+                });
+                return {columns, data};
+            }
+
+            function generateTableData(button) {
+                let columns = [{title: "Species", field: "species"}];
+                let speciesRows = [];
+                let speciesRowCounter = new Set();
+                let data = [];
+                for (let site in sites) {
+                    if (sites[site].habitat.name === button.innerHTML) {
+                        let groupedColumn = {"title":sites[site].name, "columns":[]};
+                        groupedColumn.columns.push({title: "Observed", field: sites[site].name + "observed", formatter: "tickCross"});
+                        groupedColumn.columns.push({title: "Verified", field: sites[site].name, formatter: "presence"});
+                        columns.push(groupedColumn);
+
+                        sites[site].siteSpecies.forEach(function (species) {
+                            let containsSpecies = false;
+                            for (let marker in markers) {
+                                if (sites[site].Polygon.Contains(markers[marker].getPosition()) && markers[marker].species == species) {
+                                    containsSpecies = true;
+                                    break;
+                                }
+                            }
+                            if(sites[site].verifiedData[species] == null) {
+                                sites[site].verifiedData[species].presence = containsSpecies ? 1 : 0;
+                            }
+                            speciesRows.push({
+                                siteName: sites[site].name,
+                                species: species,
+                                observed: containsSpecies,
+                                containsSpecies: sites[site].verifiedData[species]
+                            });
+                            speciesRowCounter.add(species);
+                        });
+                    }
+                }
+
+                speciesRowCounter.forEach(function (uniqueSpecies) {
+                    let newRow = {};
+                    newRow.species = uniqueSpecies;
+                    columns.forEach(function (column) {
+                        newRow[column.title] = false;
+                        speciesRows.forEach(function (speciesRow) {
+                            if (newRow.species == speciesRow.species && speciesRow.siteName == column.title) {
+                                    newRow[column.title + "observed"] = speciesRow.observed;
+                                    newRow[column.title] = speciesRow.containsSpecies.presence;
+                            }
+                        });
+                    });
+                    data.push(newRow);
+                });
+                return {columns, data};
+            }
+
+            function verifyTable(button) {
+                verificationTable.element.classList.remove("hidden");
+                let {columns, data} = generateVerificationTableData(button);
+                verificationTable.setColumns(columns);
+                verificationTable.setData(data);
+                verificationTable.redraw(true);
+            }
+
+            function surrogateSpeciesByHabitatTable(button) {
+                speciesPresenceTable.element.classList.remove("hidden");
+                let {columns, data} = generateTableData(button);
+                speciesPresenceTable.setColumns(columns);
+                speciesPresenceTable.setData(data);
+                speciesPresenceTable.redraw(true);
+            }
+
+            function initMapOnPage() {
+                let center = {lat: 20, lng: 15};
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 2, streetViewControl: false,
+                    center: center,
+                    styles: [{"elementType": "geometry", "stylers": [{"color": "#b6d5e3"}]},
+                        {"elementType": "labels.text.fill", "stylers": [{"color": "#6da4c7"}]},
+                        {"elementType": "labels.text.stroke", "stylers": [{"color": "#b6d5e3"}]},
+                        {"featureType": "administrative", "stylers": [{"visibility": "simplified"}]},
+                        {"featureType": "administrative", "elementType": "geometry", "stylers": [{"color": "#f2f2f2"}]},
+                        //country borders color is next line
+                        {
+                            "featureType": "administrative",
+                            "elementType": "geometry.stroke",
+                            "stylers": [{"color": "#ffffff"}, {"visibility": "on"}]
+                        },
+                        //main labels color is the next line
+                        {
+                            "featureType": "administrative",
+                            "elementType": "labels.text",
+                            "stylers": [{"color": "#939393"}]
+                        },
+                        //urban land color is next line
+                        {"featureType": "landscape", "stylers": [{"color": "#cccccc"}]},
+                        {
+                            "featureType": "landscape.man_made",
+                            "elementType": "geometry.stroke",
+                            "stylers": [{"color": "#334e87"}]
+                        },
+                        //main land color is the next line
+                        {"featureType": "landscape.natural", "stylers": [{"color": "#d3e9d5"}]},
+                        {"featureType": "poi", "stylers": [{"visibility": "off"}]},
+                        {"featureType": "poi", "elementType": "geometry", "stylers": [{"color": "#283d6a"}]},
+                        {"featureType": "poi", "elementType": "labels.text.fill", "stylers": [{"color": "#6f9ba5"}]},
+                        {"featureType": "poi", "elementType": "labels.text.stroke", "stylers": [{"color": "#1d2c4d"}]},
+                        //park areas color is next line
+                        {"featureType": "poi.park", "stylers": [{"color": "#b8ddc3"}, {"visibility": "simplified"}]},
+                        {"featureType": "poi.park", "elementType": "labels", "stylers": [{"visibility": "off"}]},
+                        {"featureType": "poi.park", "elementType": "labels.icon", "stylers": [{"visibility": "off"}]},
+                        //road color is the next line
+                        {"featureType": "road", "elementType": "geometry", "stylers": [{"color": "#f2f2f2"}]},
+                        {"featureType": "road", "elementType": "labels", "stylers": [{"visibility": "off"}]},
+                        {"featureType": "road", "elementType": "labels.text.fill", "stylers": [{"color": "#4e6d70"}]},
+                        {"featureType": "road", "elementType": "labels.text.stroke", "stylers": [{"color": "#f2f2f2"}]},
+                        {"featureType": "road.arterial", "stylers": [{"visibility": "simplified"}]},
+                        {
+                            "featureType": "road.arterial",
+                            "elementType": "geometry",
+                            "stylers": [{"visibility": "simplified"}]
+                        },
+                        {"featureType": "road.arterial", "elementType": "labels", "stylers": [{"visibility": "off"}]},
+                        {"featureType": "road.highway", "stylers": [{"visibility": "simplified"}]},
+                        {"featureType": "road.highway", "elementType": "labels", "stylers": [{"visibility": "off"}]},
+                        {
+                            "featureType": "road.highway",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{"color": "#4e6d70"}]
+                        },
+                        {
+                            "featureType": "road.highway",
+                            "elementType": "labels.text.stroke",
+                            "stylers": [{"color": "#f2f2f2"}]
+                        },
+                        //transit lines and land area polygons are the next line
+                        {"featureType": "transit", "stylers": [{"color": "#b2b2b2"}]},
+                        {"featureType": "transit", "elementType": "labels", "stylers": [{"visibility": "off"}]},
+                        {
+                            "featureType": "transit",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{"color": "#98d2b2"}]
+                        },
+                        {
+                            "featureType": "transit",
+                            "elementType": "labels.text.stroke",
+                            "stylers": [{"color": "#F2F2F2"}]
+                        },
+                        {"featureType": "water", "stylers": [{"color": "#b6d5e3"}]},
+                        {"featureType": "water", "elementType": "labels.text.fill", "stylers": [{"color": "#4e6d70"}]}]
+                });
+                google.maps.Polygon.prototype.Contains = function (point) {
+                    let crossings = 0,
+                        path = this.getPath();
+
+                    // for each edge
+                    for (let i = 0; i < path.getLength(); i++) {
+                        let a = path.getAt(i),
+                            j = i + 1;
+                        if (j >= path.getLength()) {
+                            j = 0;
+                        }
+                        let b = path.getAt(j);
+                        if (rayCrossesSegment(point, a, b)) {
+                            crossings++;
+                        }
+                    }
+
+                    // odd number of crossings?
+                    return (crossings % 2 == 1);
+
+                    function rayCrossesSegment(point, a, b) {
+                        let px = point.lng(),
+                            py = point.lat(),
+                            ax = a.lng(),
+                            ay = a.lat(),
+                            bx = b.lng(),
+                            by = b.lat();
+                        if (ay > by) {
+                            ax = b.lng();
+                            ay = b.lat();
+                            bx = a.lng();
+                            by = a.lat();
+                        }
+                        // alter longitude to cater for 180 degree crossings
+                        if (px < 0) {
+                            px += 360;
+                        }
+                        if (ax < 0) {
+                            ax += 360;
+                        }
+                        if (bx < 0) {
+                            bx += 360;
+                        }
+
+                        if (py == ay || py == by) py += 0.00000001;
+                        if ((py > by || py < ay) || (px > Math.max(ax, bx))) return false;
+                        if (px < Math.min(ax, bx)) return true;
+
+                        let red = (ax != bx) ? ((by - ay) / (bx - ax)) : Infinity;
+                        let blue = (ax != px) ? ((py - ay) / (px - ax)) : Infinity;
+                        return (blue >= red);
+
+                    }
+
+                };
+                let drawingManager = new google.maps.drawing.DrawingManager({
+                    drawingMode: google.maps.drawing.OverlayType.POLYGON,
+                    drawingControl: true,
+                    drawingControlOptions: {
+                        position: google.maps.ControlPosition.TOP_CENTER,
+                        drawingModes: ["polygon"]
+                    },
+                    markerOptions: {icon: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"},
+                    circleOptions: {
+                        fillColor: "#ffff00",
+                        fillOpacity: 1,
+                        strokeWeight: 5,
+                        clickable: false,
+                        editable: true,
+                        zIndex: 1
+                    }
+                });
+                drawingManager.setMap(map);
+                google.maps.event.addListener(drawingManager, "polygoncomplete", addSite);
+            }
+
+            function addSite(polygon) {
+                let site = {
+                    polygon: polygon.getPath().getArray(),
+                    Polygon: polygon,
+                    coordinates: [],
+                    markers: [],
+                    habitat: {},
+                    siteSpecies: new Set(),
+                    taxa: new Set(),
+                    verifiedData: [],
+                    minX: polygon.getPath().getArray()[0].lng() + 180,
+                    minY: polygon.getPath().getArray()[0].lat() * -1 + 90,
+                    maxX: polygon.getPath().getArray()[0].lng() + 180,
+                    maxY: polygon.getPath().getArray()[0].lat() * -1 + 90,
+
+                }
+                for (let i = 0; i < site.polygon.length; i++) {
+                    site.coordinates.push({lat: site.polygon[i].lat(), lng: site.polygon[i].lng()})
+                    if (site.polygon[i].lat() * -1 + 90 < site.minY) {
+                        site.minY = site.polygon[i].lat() * -1 + 90;
+                    }
+                    if (site.polygon[i].lat() * -1 + 90 > site.maxY) {
+                        site.maxY = site.polygon[i].lat() * -1 + 90;
+                    }
+                    if (site.polygon[i].lng() + 180 < site.minX) {
+                        site.minX = site.polygon[i].lng() + 180;
+                    }
+                    if (site.polygon[i].lng() + 180 > site.maxX) {
+                        site.maxX = site.polygon[i].lng() + 180;
+                    }
+                }
+                addSiteToUi(site);
+                sites.push(site)
+            }
+
+            function addSiteToUi(site) {
+                let siteElement = document.createElement("DIV");
+                siteElement.className = "newSite";
+                let siteSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                siteSvg.setAttribute("height", "30px");
+                siteSvg.setAttribute("width", "60px");
+                let viewBox = site.minX + " " + site.minY + " " + (site.maxX - site.minX) + " " + (site.maxY - site.minY);
+                siteSvg.setAttribute("viewBox", viewBox);
+                let sitePolygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+
+                let points = "";
+                for(let i = 0; i < site.coordinates.length; i++) {
+                    points += (site.coordinates[i].lng + 180) + " " + (site.coordinates[i].lat * -1 + 90);
+                    if(i < site.coordinates.length - 1) {
+                        points += " ";
+                    }
+                }
+                sitePolygon.setAttribute("points", points);
+
+                siteSvg.appendChild(sitePolygon);
+                siteElement.appendChild(siteSvg);
+
+                let button = document.createElement("button");
+                button.className = "verificationButton";
+                button.innerHTML = site.name;
+                button.addEventListener("click", function () {
+                    verifyTable(this);
+                });
+                document.getElementById("verifyButtons").appendChild(button);
+
+                let siteData = document.createElement("DIV");
+                siteData.setAttribute("style", "display: flex; flex-direction:column;");
+                let siteName = document.createElement("DIV");
+                siteData.appendChild(siteName);
+                siteName.innerText = "Site Name";
+                let siteInput = document.createElement("INPUT");
+                siteInput.className = "siteName";
+                siteInput.addEventListener("input", function () {
+                    site.name = this.value;
+                    button.innerHTML = site.name;
+                });
+                siteData.appendChild(siteInput);
+                let siteHabitat = document.createElement("DIV");
+                siteData.appendChild(siteHabitat);
+                siteHabitat.innerText = "Habitat Select";
+                let siteHabitatSelector = document.createElement("SELECT");
+                siteHabitatSelector.className = "siteHabitatSelector";
+                for(let i = 0; i < habitats.length ; i++) {
+                    let option = document.createElement("OPTION");
+                    option.value = habitats[i];
+                    option.appendChild(document.createTextNode(habitats[i]));
+                    siteHabitatSelector.appendChild(option);
+                }
+
+                siteData.appendChild(siteHabitatSelector);
+
+                siteHabitatSelector.onchange = function () {
+                    site.habitat.name = this.value;
+                };
+
+                siteElement.appendChild(siteData);
+                site.siteHatbitatSelector = siteHabitatSelector;
+
+                document.getElementById("habitatsPanel").appendChild(siteElement);
+            }
+
+            function addHabitat() {
+                let habitatNameElement = document.getElementById("habitatNameId");
+                let habitatName = habitatNameElement.value;
+                let newHabitat = {
+                    title: habitatName,
+                    field: habitatName,
+                    width: 90,
+                    align: "center",
+                    formatter: "tickCross",
+                    sorter: "boolean",
+                    editor: true
+                }
+                habitatData.push(newHabitat);
+                columns.push(newHabitat);
+                table.setColumns(columns);
+                table.redraw(true);
+
+                addHabitatData(habitatName);
+
+                habitatNameElement.value = "";
+            }
+
+            function addHabitatData(habitatName) {
+                habitats.push(habitatName);
+                let newHabitatLabel = document.createElement("DIV");
+                newHabitatLabel.textContent = habitatName
+                document.getElementsByClassName("habitat")[0].appendChild(newHabitatLabel);
+                for (let site in sites) {
+                    if(sites[site].siteHatbitatSelector) {
+                        let option = document.createElement("OPTION");
+                        option.appendChild(document.createTextNode(habitatName));
+                        option.value = habitatName;
+                        sites[site].siteHatbitatSelector.appendChild(option);
+                    }
+                }
+
+                let surrogateSpeciesByHabitatChartButton = document.createElement("button");
+                surrogateSpeciesByHabitatChartButton.innerHTML = habitatName;
+                surrogateSpeciesByHabitatChartButton.addEventListener("click", function () {
+                    surrogateSpeciesByHabitatChart(this);
+                });
+                document.getElementById("surrogateSpeciesByHabitatChartButtons").appendChild(surrogateSpeciesByHabitatChartButton);
+
+                let surrogateSpeciesByHabitatButton = document.createElement("button");
+                surrogateSpeciesByHabitatButton.innerHTML = habitatName;
+                surrogateSpeciesByHabitatButton.addEventListener("click", function () {
+                    surrogateSpeciesByHabitatTable(this);
+                });
+                document.getElementById("surrogateSpeciesByHabitatButtons").appendChild(surrogateSpeciesByHabitatButton);
+
+                let radioButton = document.createElement("input");
+                radioButton.setAttribute("name", "habitatRadioButtons");
+                radioButton.setAttribute("value", habitatName);
+                radioButton.setAttribute("type", "radio");
+
+                let label = document.createElement("div");
+                label.textContent = habitatName;
+                label.style = "display:inline;";
+
+                let buttonThenLabel = document.createElement("div");
+                buttonThenLabel.appendChild(radioButton);
+                buttonThenLabel.appendChild(label);
+
+                document.getElementById("selectHabitatRadioGroup").appendChild(buttonThenLabel);
+            }
+
+            function addTaxon() {
+                taxonNameElement = document.getElementById("taxonNameId");
+                taxa.push(taxonNameElement.value);
+                columns[1].editorParams[taxonNameElement.value] = taxonNameElement.value;
+                table.setColumns(columns);
+                table.redraw(true);
+                newTaxonLabel = document.createElement("DIV");
+                newTaxonLabel.textContent = taxonNameElement.value;
+                document.getElementsByClassName("taxon")[0].appendChild(newTaxonLabel);
+
+                addTaxonButtons(taxonNameElement.value);
+
+                taxonNameElement.value = "";
+            }
+
+            function addTaxonButtons(taxonName) {
+                let taxonButton = document.createElement("button");
+                taxonButton.innerHTML = taxonName;
+                taxonButton.addEventListener("click", function () {
+                    selectedTaxaByHabitatChart(taxonName);
+                });
+                document.getElementById("taxaButtons").appendChild(taxonButton);
+
+                let radioButton = document.createElement("input");
+                radioButton.setAttribute("name", "taxaRadioButtons");
+                radioButton.setAttribute("value", taxonName);
+                radioButton.setAttribute("type", "radio");
+
+                let label = document.createElement("div");
+                label.textContent = taxonName;
+                label.style = "display:inline;";
+
+                let buttonThenLabel = document.createElement("div");
+                buttonThenLabel.appendChild(radioButton);
+                buttonThenLabel.appendChild(label);
+
+                document.getElementById("selectTaxonRadioGroup").appendChild(buttonThenLabel);
+            }
+
+            function addSpecies() {
+                table.addRow(); //it is annoying AF to add every taxa to these, set the default to "sought"
+            }
+
+            function save() {
+                let tableData = "";
+                if(table != null)
+                    tableData = table.getData();
+                siteData = {savedCoordinates:[], names:[], habitats:[]};
+                sites.forEach(function(site) {
+                    siteData.savedCoordinates.push(site.coordinates);
+                    siteData.habitats.push(site.habitat);
+                    siteData.names.push(site.name)
+                });
+                let saveData = {
+                    "id": id,
+                    "name": document.getElementById("projectName").value,
+                    "description": document.getElementById("projectDescription").value,
+                    "taxa": taxa,
+                    "habitatData": habitatData,
+                    "siteData": siteData, //This should contain all of the markers, observations, polygons, and habitats
+                    "observations": observationsPersistant, //All observations
+                    //todo: we'll probably want to store the iNaturalist urls at some point
+                    "tableData": tableData, //This contains the columns and the rows which the user should have also overridden if needed.
+                    "startDate": startDate,
+                    "endDate": endDate,
+                    "timeFrame": timeFrame
+                }
+
+                httpPost("/createUserDataFromJSON", setId, saveData);
+            }
+
+            function setId(response) {
+                id = response;
+            }
+
+            processRequest = function () {
+                getINaturalistData().then(placeMarkers);
+            }
+
+            getINaturalistData = function () {
+                return new Promise(function (resolve) {
+                    iNaturalistProjectId = document.getElementById("input").value;
+                    iNaturalistProjectId = encodeURIComponent(iNaturalistProjectId);
+                    document.getElementById("input").value = "";
+
+                    let xhr = new XMLHttpRequest();
+
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState == 3) {
+
+                        } else if (xhr.readyState == 4 && xhr.status == 200) {
+                            resolve(JSON.parse(xhr.responseText));
+                        }
+                    };
+
+                    xhr.open("GET", "https://api.inaturalist.org/v1/observations?project_id=" + iNaturalistProjectId, true);
+                    xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                    xhr.send();
+                });
+            }
+
+            placeMarkers = function (result) {
+                let observations = result.results;
+                greyImage = {
+                    url: "/images/marker_0_grey_39x59.png",
+                    scaledSize: new google.maps.Size(20, 30)
+                };
+                for (let observation in observations) {
+                    observationsPersistant.push(observations[observation]);
+                    let position = {
+                        lat: parseFloat(observations[observation].geojson.coordinates[1]),
+                        lng: parseFloat(observations[observation].geojson.coordinates[0])
+                    };
+                    let marker = new google.maps.Marker({
+                        position: position,
+                        map: map,
+                        icon: greyImage
+                    });
+                    marker.observation = observations[observation];
+                    marker.observedOn = new Date(observations[observation].observed_on);
+                    marker.taxon = observations[observation].taxon.iconic_taxon_name;
+                    marker.species = observations[observation].species_guess;
+                    marker.presence = 1;
+                    if (!speciesSet.has(marker.species) && marker.species != null && marker.species.length != 0) {
+                        table.addRow({species: marker.species});
+                    }
+                    table.redraw(true);
+                    speciesSet.add(marker.species);
+                    markers.push(marker);
+                }
+
+                updateMap();
+
+                table.getColumns().forEach(function (column) {
+                    let cells = column.getCells();
+                    cells.forEach(updateCell);
+                });
+            }
+
+            updateMap = function () {
+                let minLat, maxLat, minLng, maxLng;
+                for (i = 0; i < markers.length; i++) {
+                    if (minLat == null || markers[i].getPosition().lat() < minLat)
+                        minLat = markers[i].getPosition().lat();
+                    if (maxLat == null || markers[i].getPosition().lat() > maxLat)
+                        maxLat = markers[i].getPosition().lat();
+                    if (minLng == null || markers[i].getPosition().lng() < minLng)
+                        minLng = markers[i].getPosition().lng();
+                    if (maxLng == null || markers[i].getPosition().lng() > maxLng)
+                        maxLng = markers[i].getPosition().lng();
+                }
+
+                if(minLat != null) {
+                    let rectangle = new google.maps.Rectangle({
+                        strokeColor: "#FFFFFF",
+                        strokeOpacity: 0.0,
+                        strokeWeight: 2,
+                        fillColor: "#FFFFFF",
+                        fillOpacity: 0.0,
+                        map: map,
+                        bounds: {
+                            north: maxLat,
+                            south: minLat,
+                            east: maxLng,
+                            west: minLng
+                        }
+                    });
+
+                    map.fitBounds(rectangle.getBounds());
+
+                    map.setCenter({lat: ((maxLat - minLat) / 2 + minLat), lng: ((maxLng - minLng) / 2 + minLng)});
+                }
+            }
+
+            mapHabitatsToSites = function () {
+                let habitatSelectors = document.getElementsByClassName("siteHabitatSelector");
+                let siteNames = document.getElementsByClassName("siteName");
+                for (let i = 0; i < habitatSelectors.length; i++) {
+                    sites[i].habitat.name = habitatSelectors[i].options[habitatSelectors[i].selectedIndex].value;
+                    sites[i].name = siteNames[i].value;
+                }
+            }
+
+            chartSites = function () {
+                mapHabitatsToSites();
+                for (let i = 0; i < markers.length; i++) {
+                    for (let k = 0; k < sites.length; k++) {
+                        if (sites[k].Polygon.Contains(markers[i].getPosition())) {
+                            sites[k].markers.push(markers[i]);
+                            //todo: see UBIF-0015
+                            // break;
+                        }
+                    }
+                }
+
+                timeSlices = getTimeSlices(startDate, endDate, timeFrame);
+
+                observationsByTaxon(taxa);
+                observationsOfSurrogateSpeciesInAllHabitatsOverTime(taxa, timeSlices);
+            }
+
+            function getTimeSlices(start, end, frame) {
+                if (timeFrame == "month") {
+                    Date.prototype.titleType = Date.prototype.getMonth;
+                    Date.prototype.getEndDate = function() {
+                        let getEndDateResult = new Date(this);
+                        getEndDateResult.setMonth(getEndDateResult.getMonth() + 1);
+                        return getEndDateResult;
+                    }
+                } else {
+                    Date.prototype.titleType = Date.prototype.getFullYear;
+                    Date.prototype.getEndDate = function () {
+                        let getEndDateResult = new Date(this);
+                        getEndDateResult.setFullYear(this.getFullYear() + 1);
+                        return getEndDateResult;
+                    }
+                }
+
+                let result = [];
+                if(start == null) {
+                    return result;
+                }
+                let nextDate = new Date(start);
+                if(frame == "month") {
+                    while(nextDate <= end) {
+                        result.push(new Date(nextDate));
+                        nextDate = new Date(nextDate.setMonth(nextDate.getMonth() + 1));
+                    }
+                } else {
+                    while (nextDate <= end) {
+                        result.push(nextDate);
+                        nextDate = new Date(nextDate.setFullYear(nextDate.getFullYear() + 1));
+                    }
+                }
+
+                return result;
+            }
+
+            const svgWidth = 800;
+            const svgHeight = 300;
+            const strokeWidth = 0;
+            const barWidth = 30;
+            const headerHeight = 20; //we need this so that 100% at the top isn't cut off to look like iuu,o
+            const footerHeight = 25;
+            const leftAxisMargin = 20;
+            const leftAxisExtraMargin = leftAxisMargin + 24;
+            const barZoneWidth = svgWidth - leftAxisExtraMargin;
+            const barPadding = 10;
+            const textPadding = barPadding;
+            const timeSliceTextVerticalSpace = 10;
+            const heightFactor = svgHeight - footerHeight - headerHeight;
+
+            function createAxis(svg) {
+                let yScale = d3.scaleLinear()
+                    .domain([1, 0])
+                    .range([footerHeight, svgHeight - headerHeight]);
+
+                const formatPercent = d3.format(".0%");
+
+                let yAxis = d3.axisLeft()
+                    .scale(yScale)
+                    .tickFormat(formatPercent)
+                    .tickValues([0, .2, .4, .6, .8, 1])
+                    .tickSize(svgWidth - leftAxisMargin, 0, 0);
+
+                svg.append("g")
+                    .attr("transform", "translate(" + (svgWidth + leftAxisMargin) + ", " + 0 + ")")
+                    .call(yAxis);
+            }
+
+            observationsByTaxon = function(taxa) {
+                clearPriorChartIfAny("observationsByTaxon");
+
+                let heights = [];
+
+                let svg = d3.select('#observationsByTaxon')
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .attr("class", "bar-chart");
+
+                svg.selectAll("text")
+                    .data(taxa)
+                    .enter()
+                    .append("text")
+                    .attr("class", "chartLabel")
+                    .style("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .attr("width", svgWidth / taxa.length)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin,
+                            svgHeight];
+                        return "translate(" + translate + ")";
+                    })
+                    .text(function (d) {
+                        return d;
+                    });
+
+                createAxis(svg);
+
+                svg.selectAll("rect")
+                    .data(taxa)
+                    .enter()
+                    .append("rect")
+                    .attr("height", function (d) {
+                        let numerator = 0;
+                        let denominator = 0;
+                        speciesTaxaMap.forEach(function(speciesTaxa, speciesInTaxa, map) {
+                            if(speciesTaxa == d) {
+                                for (let key in verifiedData.sites) {
+                                    key = key.toString();
+                                    const timeSlice = timeSlices[0].titleType();
+                                    for(let speciesObserved in verifiedData.sites[key][timeSlice]) {
+                                        if(speciesInTaxa == speciesObserved) {
+                                            let presence = verifiedData.sites[key][timeSlice][speciesInTaxa.toString()];
+                                            if (presence == 1) {
+                                                numerator++;
+                                            }
+                                            if (presence < 2) {
+                                                denominator++;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        let height = 0;
+                        if(denominator !== 0) {
+                            height = numerator / denominator;
+                        }
+
+                        height = height * heightFactor;
+                        heights.push(height);
+                        return height;
+                    })
+                    .style("stroke", "white")
+                    .style("fill", function (d, i) {
+                        if(d == "Plants")
+                            return colors[0]
+                        if(d == "Birds")
+                            return colors[1]
+                        if(d == "Pollinators")
+                            return colors[2]
+
+                        if(i % 2 == 1)
+                            return colors[3];
+                        else
+                            return colors[4];
+                    })
+                    .style("stroke-width", strokeWidth)
+                    .attr("width", barWidth)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin - (barWidth / 2),
+                            footerHeight + heightFactor - heights[i]];
+                        return "translate(" + translate + ")";
+                    });
+            }
+
+            observationsOfSurrogateSpeciesInAllHabitatsOverTime = function (taxa) {
+                clearPriorChartIfAny("observationsOfSurrogateSpeciesInAllHabitatsOverTime");
+
+                let svg = d3.select('#observationsOfSurrogateSpeciesInAllHabitatsOverTime')
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .attr("class", "bar-chart");
+
+                createAxis(svg);
+
+                for(let timeSliceIndex = 0; timeSliceIndex < timeSlices.length - 1; timeSliceIndex++) {
+                    let heights = [];
+                    svg.selectAll("rect" + timeSliceIndex)
+                        .data(taxa)
+                        .enter()
+                        .append("rect")
+                        .attr("height", function (d) {
+                            let incrimentalResults = [];
+                            for (let i = 0; i < sites.length; i++) {
+                                let numerator = 0;
+                                let denominator = 0;
+                                for (let k = 0; k < sites[i].markers.length; k++) {
+                                    if (sites[i].markers[k].observedOn >= timeSlices[timeSliceIndex] && sites[i].markers[k].observedOn < timeSlices[timeSliceIndex + 1] && d == speciesTaxaMap.get(sites[i].markers[k].species)) {
+                                        numerator++;
+                                        break;
+                                    }
+                                }
+                                sites[i].siteSpecies.forEach(function (species) {
+                                    if (d == speciesTaxaMap.get(species))
+                                        denominator++;
+                                });
+                                if (denominator !== 0) {
+                                    incrimentalResults.push(numerator / denominator);
+                                }
+                            }
+                            let height;
+                            if (incrimentalResults.length === 0)
+                                height = 0;
+                            else
+                                height = incrimentalResults.reduce(function (a, b) {
+                                    return a + b;
+                                }) / incrimentalResults.length;
+
+                            height = height * heightFactor;
+                            heights.push(height);
+                            return height;
+                        })
+                        .style("stroke", "white")
+                        .style("fill", "#e0e0e0")
+                        .style("stroke-width", strokeWidth)
+                        .attr("width", barWidth)
+                        .attr("transform", function (d, i) {
+                            let translate = [timeSliceIndex * barZoneWidth / taxa.length / (timeSlices.length - 1) + i * barZoneWidth / taxa.length + leftAxisExtraMargin + barPadding - (barWidth / 2),
+                                svgHeight - footerHeight - heights[i] + 5]; //I don't know why we need this extra 5 px 😣
+                            return "translate(" + translate + ")";
+                        });
+
+                    svg.selectAll("textOfTimeSlice" + timeSliceIndex)
+                        .data(taxa)
+                        .enter()
+                        .append("text")
+                        .attr("class", "chartLabel")
+                        .style("text-anchor", "middle")
+                        .style("font-size", "8px")
+                        .attr("fill", "black")
+                        .attr("width", svgWidth / timeSlices.length)
+                        .attr("transform", function (d, i) {
+                            let translate = [timeSliceIndex * barZoneWidth / taxa.length / (timeSlices.length - 1) + i * barZoneWidth / taxa.length + leftAxisExtraMargin + textPadding,
+                                svgHeight - timeSliceTextVerticalSpace];
+                            return "translate(" + translate + ")";
+                        })
+                        .text(function (d) {
+                            if (timeFrame == "month") {
+                                return monthNames[timeSlices[timeSliceIndex].getMonth()];
+                            } else
+                                return timeSlices[timeSliceIndex].getFullYear();
+                        });
+                }
+
+                svg.selectAll("textOfTaxaNames")
+                    .data(taxa)
+                    .enter()
+                    .append("text")
+                    .attr("class", "chartLabel")
+                    .style("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .attr("width", svgWidth / taxa.length)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin,
+                            svgHeight];
+                        return "translate(" + translate + ")";
+                    })
+                    .text(function (d) {
+                        return d;
+                    });
+            }
+
+            surrogateSpeciesByHabitatChart = function(habitatButton) {
+                clearPriorChartIfAny("surrogateSpeciesByHabitatChart");
+
+                let heights = [];
+
+                let svg = d3.select('#surrogateSpeciesByHabitatChart')
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .attr("class", "bar-chart");
+
+                svg.selectAll("text")
+                    .data(taxa)
+                    .enter()
+                    .append("text")
+                    .attr("class", "chartLabel")
+                    .style("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .attr("width", svgWidth / taxa.length)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin,
+                            svgHeight];
+                        return "translate(" + translate + ")";
+                    })
+                    .text(function (d) {
+                        return d;
+                    });
+
+                createAxis(svg);
+
+                svg.selectAll("rect")
+                    .data(taxa)
+                    .enter()
+                    .append("rect")
+                    .attr("height", function (d) {
+                        let incrimentalResults = [];
+                        for (let i = 0; i < sites.length; i++) {
+                            if(sites[i].habitat.name != habitatButton.innerHTML){
+                                continue;
+                            }
+                            let numerator = 0;
+                            let denominator = 0;
+                            for (let k = 0; k < sites[i].markers.length; k++) {
+                                if (d == speciesTaxaMap.get(sites[i].markers[k].species)) {
+                                    numerator++;
+                                    break;
+                                }
+                            }
+                            sites[i].siteSpecies.forEach(function (species) {
+                                if (d == speciesTaxaMap.get(species))
+                                    denominator++;
+                            });
+                            if (denominator !== 0) {
+                                incrimentalResults.push(numerator / denominator);
+                            }
+                        }
+                        let height;
+                        if (incrimentalResults.length === 0)
+                            height = 0;
+                        else
+                            height = incrimentalResults.reduce(function (a, b) {
+                                return a + b;
+                            }) / incrimentalResults.length;
+
+                        height = height * heightFactor;
+                        heights.push(height);
+                        return height;
+                    })
+                    .style("stroke", "white")
+                    .style("fill", "#e0e0e0")
+                    .style("stroke-width", strokeWidth)
+                    .attr("width", barWidth)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / taxa.length) + (barZoneWidth / taxa.length - strokeWidth) / 2 + leftAxisExtraMargin - (barWidth / 2),
+                            footerHeight + heightFactor - heights[i]];
+                        return "translate(" + translate + ")";
+                    });
+            }
+
+            selectedTaxaByHabitatChart = function (taxaButtonText) {
+                clearPriorChartIfAny("selectedTaxaByHabitatChart");
+
+                let heights = [];
+
+                let svg = d3.select('#selectedTaxaByHabitatChart')
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .attr("class", "bar-chart");
+
+                svg.selectAll("text")
+                    .data(sites)
+                    .enter()
+                    .append("text")
+                    .attr("class", "chartLabel")
+                    .style("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .attr("width", svgWidth / sites.length)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin,
+                            svgHeight];
+                        return "translate(" + translate + ")";
+                    })
+                    .text(function (d) {
+                        return d.name;
+                    });
+
+                createAxis(svg);
+
+                svg.selectAll("rect")
+                    .data(sites)
+                    .enter()
+                    .append("rect")
+                    .attr("height", function (d) {
+                        let height = 0;
+                        let numerator = 0;
+                        let denominator = 0;
+                        for (let i = 0; i < d.markers.length; i++) {
+                            if (speciesTaxaMap.get(d.markers[i].species) == taxaButtonText) {
+                                numerator++;
+                            }
+                        }
+
+                        d.siteSpecies.forEach(function (species) {
+                            if (taxaButtonText == speciesTaxaMap.get(species))
+                                denominator++;
+                        });
+                        if (denominator == 0) {
+                            heights.push(0);
+                            return 0;
+                        }
+
+                        height = numerator / denominator * heightFactor;
+                        heights.push(height);
+                        return height;
+                    })
+                    .style("stroke", "white")
+                    .style("fill", "#e0e0e0")
+                    .style("stroke-width", strokeWidth)
+                    .attr("width", barWidth)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin - (barWidth / 2),
+                            footerHeight + heightFactor - heights[i]];
+                        return "translate(" + translate + ")";
+                    });
+            }
+
+            selectedHabitatAndTaxonBySiteChart = function () {
+                clearPriorChartIfAny("selectedHabitatAndTaxonBySiteChart");
+
+                let taxaName = document.querySelector('input[name="taxaRadioButtons"]:checked') != null ? document.querySelector('input[name="taxaRadioButtons"]:checked').value : null;
+                let habitatName = document.querySelector('input[name="habitatRadioButtons"]:checked') != null ? document.querySelector('input[name="habitatRadioButtons"]:checked').value : null;
+
+                function matchesHabitat(site) {
+                    return site.habitat.name === habitatName;
+                }
+
+                let filteredSites = sites.filter(matchesHabitat);
+
+                let heights = [];
+
+                let svg = d3.select('#selectedHabitatAndTaxonBySiteChart')
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight)
+                    .attr("class", "bar-chart");
+
+                svg.selectAll("text")
+                    .data(sites)
+                    .enter()
+                    .append("text")
+                    .attr("class", "chartLabel")
+                    .style("text-anchor", "middle")
+                    .attr("fill", "black")
+                    .attr("width", svgWidth / sites.length)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin,
+                            svgHeight];
+                        return "translate(" + translate + ")";
+                    })
+                    .text(function (d) {
+                        return d.name;
+                    });
+
+                createAxis(svg);
+
+                svg.selectAll("rect")
+                    .data(filteredSites)
+                    .enter()
+                    .append("rect")
+                    .attr("height", function (d) {
+                        let height = 0;
+                        let numerator = 0;
+                        let denominator = 0;
+                        for (let i = 0; i < d.markers.length; i++) {
+                            if (speciesTaxaMap.get(d.markers[i].species) == taxaName) {
+                                numerator++;
+                            }
+                        }
+
+                        d.siteSpecies.forEach(function (species) {
+                            if (taxaName == speciesTaxaMap.get(species))
+                                denominator++;
+                        });
+                        if (denominator == 0) {
+                            heights.push(0);
+                            return 0;
+                        }
+
+                        height = numerator / denominator * heightFactor;
+                        heights.push(height);
+                        return height;
+                    })
+                    .style("stroke", "white")
+                    .style("fill", "#e0e0e0")
+                    .style("stroke-width", strokeWidth)
+                    .attr("width", barWidth)
+                    .attr("transform", function (d, i) {
+                        let translate = [i * (barZoneWidth / sites.length) + (barZoneWidth / sites.length - strokeWidth) / 2 + leftAxisExtraMargin - (barWidth / 2),
+                            footerHeight + heightFactor - heights[i]];
+                        return "translate(" + translate + ")";
+                    });
+            }
+
+            function clearPriorChartIfAny(oldChartId) {
+                let oldChart = document.getElementById(oldChartId);
+                if (oldChart != null) {
+                    while (oldChart.firstChild) {
+                        oldChart.removeChild(oldChart.firstChild);
+                    }
+                    oldChart.setAttribute("class", "chart");
+                }
+            }
+
+            function hide(element) {
+                element.classList.add("hidden");
+            }
+
+            function displayInfoButton0() {
+                document.getElementById("infoButton0").classList.remove("hidden");
+            }
+
+            function displayInfoButton2() {
+                document.getElementById("infoButton2").classList.remove("hidden");
+            }
+
+            function displayInfoButton4() {
+                document.getElementById("infoButton4").classList.remove("hidden");
+            }
+
+            function displayInfoButton6() {
+                document.getElementById("infoButton6").classList.remove("hidden");
+            }
+
+            function togglePanelOpenOrClosed(tab, panelId) {
+                let panel = document.getElementById(panelId);
+                let status = panel.classList.contains("hide");
+                if (status) {
+                    panel.classList.remove("hide");
+                    tab.classList.add("active");
+                } else {
+                    panel.classList.add("hide");
+                    tab.classList.remove("active");
+                }
+            }
+
+body
+    +header(true)
+
+    div(style="padding-top:40px;")
+
+            div(style="margin:auto; display:flex; flex-direction:column; align-items:center;")
+                +stickyInfoTab("UBIF Track 2 Project Setup", "infant1", "#07456b", false, "stickyFirst")
+                div(id="infant1" class="mapInfoContent hide")
+                    div(style="margin:auto; max-width:400px; display:flex; flex-direction:column; align-items:center;")
+                        div
+                            //h1(class="bold") UBIF Track 2 Project Setup
+                            div(class="flex spaceBelow spaceAbove") In the Urban Biodiversity Inventory Framework (UBIF), Track 2 system, cities indicate surrogate species they would like to track for each habitat type in their city.  Here you will set up the parameters of your project.
+                                img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton0()")
+                                div(id="infoButton0" class="hidden popup" onclick="hide(document.getElementById('infoButton0'))")
+                                    div Purposefully collecting data to assess urban biodiversity provides cities the ability to generate summary statistics and track changes over time in a more measurable way than is provided by conducting Track 1 data collection only. Track 2 employs presence/absence monitoring of species as a way to track and assess urban biodiversity. Recording the presence of species in Track 1 is valuable information, but knowing where species are not is also essential to assist in decision making for restoration action or other management decisions that can be applied to improve habitat quality and/or quantity.
+                                    div Two major decisions must be made before presence/absence monitoring can begin: Which species will be surveyed for, and what locations will be surveyed. With unlimited resources, a city could attempt to exhaustively record all species of all taxa at every possible location. However, given normal limitations, this is an unattainable goal. In order to best use limited resources, a surrogate species approach (Caro 2010) and recommendations for selecting reference sites within as well as outside of the city, are employed for Track 2 and Track 3.
+
+                            div(style="margin-bottom:20px;") <b>Step 1. Name your project</b>
+                                div Choose a name to encompass the entire UBIF Track 2 initiative for your city through time as long as it maintains the same overall structure (such as taxon). Only small changes to the project can be accommodated without starting a new project.
+                                div(class="bold blue smallSpaceAbove") Enter Project Name
+                                input(id="projectName")
+                                div(class="bold blue smallSpaceAbove") Enter Project Description
+                                textarea(id="projectDescription" rows="3" class="fullWidth")
+
+                            div(style="margin-bottom:20px;") <b>Step 2. Indicate Taxonomic Groups</b>
+                                div(style="display:flex;") Surrogate species must be indicated in at least five different taxonomic groups. The first three of these groups are birds, plants, and Pollinators. The remaining two are customizable by city. Indicate those here.
+                                    img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton2()")
+                                    div(id="infoButton2" class="hidden popup" onclick="hide(document.getElementById('infoButton2'))")
+                                        div As cities consider surrogate species selections, the first criteria is to select species from diverse taxa groups that are typically found in or are obligate to a given habitat type of good quality and are neither very rare nor overly common.  The plant, bird and invertebrate pollinator taxa groups are universal throughout cities utilizing the UBIF. However, additional taxa groups are chosen at the discretion of the cities, with at least two additional taxa groups recommended.
+
+                                div(class="flex column smallSpaceAbove")
+                                    div(class="bold blue") Enter Taxa
+                                    div(class="flex")
+                                        input(id="taxonNameId")
+                                        button(onclick="addTaxon()") add taxon
+                                    div(class="taxon boxedChildren smallSpaceAbove")
+
+                            div(style="margin-bottom:20px;") <b>Step 3. Indicate your habitats of interest.</b>
+                                div Indicate the various habitats that you will be tracking in this project. The type and number of habitats of interest should be based on known native habitats found currently or historically within the city and is completely up to the individual city’s discretion. Note that the surrogate species will be the same across each habitat (each habitat will often have multiple sites known as “place”). Some examples include: prairie, wetland, freshwater, douglas fir forest, brownfields.
+                                div(class="flex column smallSpaceAbove")
+                                    div(class="bold blue") Enter Habitats
+                                    div(class="flex")
+                                        input(id="habitatNameId")
+                                        button(onclick="addHabitat()") add habitat
+                                    div(class="habitat boxedChildren smallSpaceAbove")
+
+                            div(class="spaceBelow") <b>Step 4. Indicate places of interest.</b>
+                             div(class="flex") Draw a polygon on the map below for each place (such as a park) of interest. Name each place accordingly. Note that each place can only have one habitat type, so it may be appropriate to divide certain parks into multiple places if they cover more than one habitat type. The polygon shapes will be used to pull data from species observations databases in a later step.
+                                 img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton4()")
+                                 div(id="infoButton4" class="hidden popup" onclick="hide(document.getElementById('infoButton4'))")
+                                        div(class="spaceBelow") From large protected natural areas to small vegetated parking strips, habitat quality and quantity within cities varies greatly. The best utilization of the UBIF, as a means to attain a comprehensive analysis of biodiversity in the city, requires that a diversity of sites be selected. In this way, care should be taken to select sites with a range of perceived quality and avoid the temptation to only select the “best” or “favorite” sites within the city.
+                                        div(class="spaceBelow") Collecting biodiversity data exclusively within the city allows for documentation of the often surprising diversity that can be found in and around urban centers. However, it can be difficult to detect larger scale trends (such as climate change) that may influence species presence. Therefore reference sites should be selected to complement city monitoring sites. A reference site should be of the best quality and/or an ideal example of a given habitat of interest, located as near to the city as possible. For example, biodiversity monitoring in wetland habitats within the city could be compared to highly functional wetland sites in undeveloped areas outside the city.
+                                        div Utilization of a reference site does not mean that the goal is for city sites to meet exactly the same parameter values as are found in a reference site. The conditions within urban and urbanizing areas are such that it is not necessarily possible to have equal values as those found within a reference site. Rather, reference sites provide the city with a yardstick to measure against and allow for tracking of larger scale change that may influence results. For example, if a particular surrogate species is experiencing a range shift due to climate change, it may gradually become undetectable in the region. By simultaneously collecting data in reference and city sites it may be possible to avoid erroneous assumptions that the change in species detection is strictly correlated to city activities or management actions.
+
+                        div#map(style="height:400px; width:800px; margin-bottom:20px;")
+                        div(id="habitatsPanel" style="margin-bottom:20px;")
+
+                        div(style="max-width:400px;")
+                            div(style="font-weight:700;") Step 5. Indicate surrogate species.
+                            div(style="display:flex;") Each habitat will have its own set of surrogate species. For each species, you will designate a taxon and then select which habitats should include it as surrogate species. You can manually enter each surrogate species in the table below by clicking the 'add species' button and filling in the information for each habitat. A green check indicates that this species is a surrogate species for that habitat. Alternately, you can import species from one or more iNaturalist projects in the field below. Species will auto-populate in the table below and you then indicate which ones you would should be designated as surrogate species for each habitat.
+                                img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton6()")
+                                div(id="infoButton6" class="hidden popup" onclick="hide(document.getElementById('infoButton6'))")
+                                    div(class="spaceBelow") Surrogate species are defined by the United States Fish and Wildlife Service (USFWS) as “a commonly-used scientific term for system-based conservation planning that uses a species as an indicator of landscape habitat and system conditions” (USFWS 2014a). The goal of a surrogate species approach is to use a few species to best represent the needs of the larger community (Weins et al. 2008). Depending on the objective of a given project, the characteristics used to select species differ (USFWS 2014b). The Urban Biodiversity Inventory Framework project’s primary goal is to generate a standardized approach -- a “roadmap” -- that can be used by cities to document and track urban biodiversity changes over time. With this project goal in mind, species selections should follow a set of conditions geared toward urban biodiversity representation.
+
+                                    div(class="spaceBelow") Final species selections should highlight a range of species needs but focus primarily on species that have some level of tolerance of the urban environment. The surrogate species group should provide a representation of use of the different native regional habitats and of the different classes of native species. By using this surrogate species approach, our goal is to select species that also represent the needs of similar species or species groups and sensitive species whenever possible.
+
+                                    div Final Surrogate species selections, both individually and as a group, should meet the following conditions:
+                                    div 1. Close association/reliance on a given functional habitat type of good quality
+                                    div 2. Species that are neither very rare nor overly common
+                                    div 3. Species selected should represent the needs of additional species found in the given habitat type
+                                    div 4. Species selected should also represent the needs of sensitive species whenever possible
+                                    div 5. The group of species selected to represent a given habitat type should highlight a range of species needs provided by functional habitat but will primarily focus on species with some tolerance of the urban environment
+                                    div 6. The entire suite of selected species (across taxa and habitat types) should provide a representation of the different native regional habitats and of different classes of native species
+
+                            div(class="spaceAbove")
+                                div
+                                    div(class="bold blue") iNaturalist Project
+                                    div Complete the url for your iNaturalist Project below.
+                                    div(class="flex spaceBelow")
+                                        div https://www.inaturalist.org/
+                                        input(id="input" value="test-project-for-glen")
+                                        //dragonfly-creek-riparian-ubif
+                                        button(onclick="processRequest()") import
+
+                                    //div(class="bold blue") iNaturalist Trips
+                                    //div Complete the url for your iNaturalist Trips below. Import each trip individually.
+                                    //div(class="flex spaceBelow")
+                                    //    div https://www.inaturalist.org/trips/
+                                    //    input
+                                    //    button(onclick="processRequest()") import
+
+                        //div(class="spaceAbove")
+                        //    div(class="bold blue") Upload CSV
+                        //    input(type="file")
+
+                        div(class="spaceAbove" style="display:flex; flex-direction:column;")
+                            button(onclick="addSpecies()" class="spaceBelow") add species
+
+                        div(id="example-table")
+
+                        button(onclick="save()" class="spaceAbove") Save Program Instance
+
+                        div(class="spaceAbove" style="max-width:400px;")
+                            div(style="font-weight:700;") Next Steps
+                            div You have now set up your project. Next, you will be able to verify presence/absence data and set targets.
+
+
+                +stickyInfoTab("UBIF Track 2 Data Entry", "infant2", "#07456b", false, "stickySecond")
+                div(id="infant2" class="mapInfoContent hide" style="display:flex flex-direction:column; margin:auto;")
+                        div(style="max-width:400px; margin-bottom:20px; margin:auto;")
+                            //h1(class="bold spaceAbove spaceBelow") Data Entry.
+
+                            div(class="bold spaceAbove") Note: If you are returning to this section as part of a new login session, you will first need to scroll up and re-import your iNaturalist observations before continuing on.
+
+                            div(class="bold spaceAbove") Step 1. Indicate time frame:
+                            div(class="spaceBelow") Choose whether the data will be analyzed by year or month. Then enter the time frame of interest. We recommend no more than 5 time units to be compared (i.e. 5 months or 5 years). Only a complete year will be included, so be sure to encompass the entire year (from January 1 to January 1 the following year) for each year you want to include.
+                            div(class="flex")
+                                div(style="margin-right:5px;") Time Interval:
+                                select(onchange="timeFrameSelected(this)" id="timeFrame")
+                                    option(value = "year") Year
+                                    option(value = "month") Month
+                            div(class="spaceBelow spaceAbove") Time frame:
+                            div(class="flex" style="justify-content:space-between;")
+                                div from
+                                input(type="month" onchange="dateStartChanged(this)" id="startDate")
+                                div to
+                                input(type="month" onchange="dateEndChanged(this)" id="endDate")
+
+                            div(class="bold spaceAbove") Step 2. Verify data:
+                            div(class="spaceBelow") In the table below, you will review the observation data as it has been imported from iNaturalist and verify absence (A), presence (P) or unknown (?) for each surrogate species by place and time frame. It will default to present (P) for logged observations and absent (A) if there are no observations for that time frame. If no data is displayed below, scroll back up to Step 5 in the previous section and re-import the iNaturalist Project(s).
+                            div(class="spaceBelow") Note: We do not currently save the data entered in this table, when you leave this page, your overrides will not be saved.
+                            div(class="spaceBelow centerContentsViaFlex" id="verifyButtons")
+
+                        div(class="spaceBelow")
+                            div(style="display:flex; flex-direction:column; max-width:800px; overflow-x:scroll;")
+                                div(id="verification-table" class="hidden")
+                        div(style="max-width:400px; margin-bottom:20px; margin:auto;")
+                                div(class="bold") Step 3. Set Targets:
+                                div(class="spaceBelow") Displays current presence data for each habitat by taxa. For each habitat and each taxa, the user will enter the target presence.
+
+                                div(class="centerContentsViaFlex")
+                                    button(onclick="save()" class="spaceAbove") Save
+
+                +stickyInfoTab("UBIF Track 2 Reports", "infant3", "#07456b", false, "stickyThird")
+                div(id="infant3" class="mapInfoContent hide" style="display:flex flex-direction:column; margin:auto;")
+                    div(style="max-width:800px; margin-bottom:20px; margin:auto;")
+
+                        div(class="spaceAbove spaceBelow centerContentsViaFlex")
+                            button(onclick="chartSites()") Chart Sites
+
+                        h1(class="spaceAbove") Status Report
+
+                        div(class="flex column")
+                            img(class="spaceBelow" width=150 src="/images/UBILogo.jpg")
+                            img(width=150 src="/images/UBHub_logo_mainwebsite.png")
+
+                        div(class="spaceAbove") This report has been automatically generated from data entered into the indicator tracker on www.ubhub.com.
+                        div(class="spaceAbove") The Urban Biodiversity Inventory Framework (UBIF) is a standardized system for local governments to measure the status of biodiversity in an urban environment. It was first developed in 2017 in a partnership effort under the Urban Sustainability Directors Network (USDN). In the UBIF system, adherents choose surrogate species which will serve as proxy indicators for biodiversity status. They will also indicate particular places within which to track these species. Data is then tracked by taxonomic group and habitat type over time to measure progress.
+                        div(class="spaceAbove") Adherents to UBIF can select from three different methods, or “tracks”. Track 2, used here, calls for species observations to include both presence and absence data for each habitat type. Adherents to UBIF Track 2 set goals for the presence of surrogate species in each habitat and taxon and track their progress over time.
+
+                        h2(class="spaceAbove") Section 1: Overview of Surrogate Species
+
+                        h2(class="spaceAbove centerText") Observations of Surrogate Species in All Habitats of Interest
+
+                        div(style="width:800px; height:300px; margin:auto;")
+                            svg(id="observationsByTaxon" class="chart")
+
+                        h2 Observations of Surrogate Species in All Habitats of Interest Over Time
+
+                        div(style="width:800px; height:300px; margin:auto;")
+                            svg(id="observationsOfSurrogateSpeciesInAllHabitatsOverTime" class="chart")
+
+                        h2 Section 2: Overview of Species by Habitat Type
+
+                        h2 Surrogate Species in selected Habitat
+                        div(class="spaceAbove spaceBelow centerContentsViaFlex" id="surrogateSpeciesByHabitatChartButtons")
+
+                        div(style="width:800px; height:300px; margin:auto;")
+                            svg(id="surrogateSpeciesByHabitatChart" class="chart")
+
+                        h2 Presence/Absence of Surrogate Species Within ____ Taxa by Habitat
+
+                        div(class="spaceAbove spaceBelow centerContentsViaFlex" id="taxaButtons")
+
+                        div(style="width:800px; height:300px; margin:auto;")
+                            svg(id="selectedTaxaByHabitatChart" class="chart")
+
+                        h2 Section 3: Status of Surrogate Species in ____ Habitat
+                        div Overview chart, then up to 6 charts (one for each taxon) showing data from each place
+                        div(class="flex spaceAbove" style="justify-content:space-around")
+                            div Taxa
+                               div(id="selectTaxonRadioGroup")
+                            div Habitat
+                                div(id="selectHabitatRadioGroup")
+                        button(class="spaceAbove spaceBelow" onclick='selectedHabitatAndTaxonBySiteChart()') chart
+
+                        div(style="width:800px; height:300px; margin:auto;")
+                            svg(id="selectedHabitatAndTaxonBySiteChart" class="chart")
+
+                        h2 Appendix: Tables of Species Presence Data
+                        div Table for each habitat type listing the species names and indicating presence/absence/unknown status for each according to place and time frame.
+                        div(class="spaceAbove spaceBelow centerContentsViaFlex" id="surrogateSpeciesByHabitatButtons")
+                        div(id="speciesPresenceTable" class="spaceAbove spaceBelow hidden")
+
+
+    +footer()
