@@ -147,7 +147,7 @@ html
                 id = !{id};
             }
             let description;
-            let taxa = ["Plants", "Birds", "Pollinators"];
+            let taxa = ["Plants", "Birds", "Invertebrates"];
             //green, red, yellow, brown, blue
             if(dataFromServer.taxa) {
                 taxa = dataFromServer.taxa;
@@ -197,7 +197,7 @@ html
 
             let verifiedData = {"habitats":{}}
 
-            let colors = ["#7ec7a2", "#f69056", "#fcd77f", "#bb6d37", "#4490ba", "#e0e0e0"];
+            let colors = ["#5ebd93", "#f69056", "#fcd77f", "#bd935e", "#4490ba", "#935ebd"];
 
 
             window.onload = function (ev) {
@@ -330,7 +330,18 @@ html
                 }
 
                 mapHabitatsToSites();
+
+                // document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
             };
+
+            // function handleFileSelect(event) {
+            //     let fileReader = new FileReader();
+            //     fileReader.onload = function (event) {
+            //         console.log(event.target.result);
+            //     }
+            //     let file = event.target.files[0];
+            //     fileReader.readAsText(file);
+            // }
 
             function updateCell(cell) {
                 let habitatIndex = [];
@@ -1103,6 +1114,42 @@ html
                     .call(yAxis);
             }
 
+            function getFillColorByTaxa(taxaName) {
+                console.log(taxaName);
+                if (taxaName == "Plants")
+                    return colors[0];
+                if (taxaName == "Birds")
+                    return colors[1];
+                if (taxaName == "Invertebrates")
+                    return colors[2];
+
+                for(let i = 3; i < taxa.length; i += 1) {
+                    if(taxa[i] == taxaName) {
+                        if (i % 2 == 1)
+                            return colors[3];
+                        else
+                            return colors[4];
+                    }
+                }
+                return colors[4];
+            }
+
+            function getFillColor() {
+                return function(d, i) {
+                    if (d == "Plants")
+                        return colors[0];
+                    if (d == "Birds")
+                        return colors[1];
+                    if (d == "Invertebrates")
+                        return colors[2];
+
+                    if (i % 2 == 1)
+                        return colors[3];
+                    else
+                        return colors[4];
+                };
+            }
+
             observationsByTaxon = function(taxa) {
                 clearPriorChartIfAny("observationsByTaxon");
 
@@ -1168,19 +1215,7 @@ html
                         return height;
                     })
                     .style("stroke", "white")
-                    .style("fill", function (d, i) {
-                        if(d == "Plants")
-                            return colors[0]
-                        if(d == "Birds")
-                            return colors[1]
-                        if(d == "Pollinators")
-                            return colors[2]
-
-                        if(i % 2 == 1)
-                            return colors[3];
-                        else
-                            return colors[4];
-                    })
+                    .style("fill", getFillColor())
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
@@ -1238,7 +1273,7 @@ html
                             return height;
                         })
                         .style("stroke", "white")
-                        .style("fill", "#e0e0e0")
+                        .style("fill", getFillColor())
                         .style("stroke-width", strokeWidth)
                         .attr("width", barWidth)
                         .attr("transform", function (d, i) {
@@ -1355,7 +1390,7 @@ html
                         return height;
                     })
                     .style("stroke", "white")
-                    .style("fill", "#e0e0e0")
+                    .style("fill", getFillColor())
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
@@ -1422,7 +1457,7 @@ html
                         return height;
                     })
                     .style("stroke", "white")
-                    .style("fill", "#e0e0e0")
+                    .style("fill", getFillColorByTaxa(taxaButtonText))
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
@@ -1498,7 +1533,7 @@ html
                         return height;
                     })
                     .style("stroke", "white")
-                    .style("fill", "#e0e0e0")
+                    .style("fill", getFillColorByTaxa(taxaName))
                     .style("stroke-width", strokeWidth)
                     .attr("width", barWidth)
                     .attr("transform", function (d, i) {
@@ -1575,10 +1610,10 @@ body
                                 textarea(id="projectDescription" rows="3" class="fullWidth")
 
                             div(style="margin-bottom:20px;") <b>Step 2. Indicate Taxonomic Groups</b>
-                                div(style="display:flex;") Surrogate species must be indicated in at least five different taxonomic groups. The first three of these groups are birds, plants, and Pollinators. The remaining two are customizable by city. Indicate those here.
+                                div(style="display:flex;") Surrogate species must be indicated in at least five different taxonomic groups. The first three of these groups are birds, plants, and invertebrates. The remaining two are customizable by city. Indicate those here.
                                     img(src="/images/infoIcon.svg" style="height:20px; width:20px; align-self:flex-end;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="displayInfoButton2()")
                                     div(id="infoButton2" class="hidden popup" onclick="hide(document.getElementById('infoButton2'))")
-                                        div As cities consider surrogate species selections, the first criteria is to select species from diverse taxa groups that are typically found in or are obligate to a given habitat type of good quality and are neither very rare nor overly common.  The plant, bird and invertebrate pollinator taxa groups are universal throughout cities utilizing the UBIF. However, additional taxa groups are chosen at the discretion of the cities, with at least two additional taxa groups recommended.
+                                        div As cities consider surrogate species selections, the first criteria is to select species from diverse taxa groups that are typically found in or are obligate to a given habitat type of good quality and are neither very rare nor overly common.  The plant, bird and invertebrate taxa groups are universal throughout cities utilizing the UBIF. However, additional taxa groups are chosen at the discretion of the cities, with at least two additional taxa groups recommended.
 
                                 div(class="flex column smallSpaceAbove")
                                     div(class="bold blue") Enter Taxa
@@ -1625,6 +1660,8 @@ body
                                     div 6. The entire suite of selected species (across taxa and habitat types) should provide a representation of the different native regional habitats and of different classes of native species
 
                             div(class="spaceAbove")
+                                //div
+                                    //input(type="file" id="fileInput")
                                 div
                                     div(class="bold blue") iNaturalist Project
                                     div Complete the url for your iNaturalist Project below.
