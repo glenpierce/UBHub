@@ -12,21 +12,24 @@ body
 
     div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="createNewIndicatorModal" onclick="hideModal('createNewIndicatorModal')")
         div(style="height:200px; width:400px; background-color:white; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
-            input(id="createNewIndicatorInput")
-            div(class="flex column") Indicator type
-                div(class="flex")
-                    input(type="radio" name="type")
-                    label boolean
-                div(class="flex")
-                    input(type="radio" name="type")
-                    label checkbox
-                div(class="flex")
-                    input(type="radio" name="type")
-                    label radio button
-                div(class="flex")
-                    input(type="radio" name="type")
-                    label number
-            button(onclick="createIndicator(); hideModal('createNewIndicatorModal');") add indicator
+            div(class="flex")
+                div
+                    input(id="createNewIndicatorInput")
+                    div(class="flex column") Indicator type
+                        div(class="flex")
+                            input(type="radio" name="type" onchange="indicatorChange('boolean')")
+                            label boolean
+                        div(class="flex")
+                            input(type="radio" name="type" onchange="indicatorChange('checkbox')")
+                            label checkbox
+                        div(class="flex")
+                            input(type="radio" name="type" onchange="indicatorChange('radio')")
+                            label radio button
+                        div(class="flex")
+                            input(type="radio" name="type" onchange="indicatorChange('number')")
+                            label number
+                    button(onclick="createIndicator(); hideModal('createNewIndicatorModal');") add indicator
+                div(id="indicatorDetailsPanel")
 
     div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="colorPickerModal" onclick="hideModal('colorPickerModal')")
         div(style="height:200px; width:400px; background-color:#B7B7B7; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
@@ -45,6 +48,29 @@ body
     +header(true)
 
     script.
+
+        indicatorChange = function(type) {
+            var indicatorDetailsPanel = document.getElementById("indicatorDetailsPanel");
+            while(indicatorDetailsPanel.childElementCount > 0) {
+                indicatorDetailsPanel.firstChild.remove();
+            }
+
+            switch (type) {
+                case 'boolean':
+                    var booleanDetails = document.createElement('div');
+                    booleanDetails.textContent = "boolean details";
+                    indicatorDetailsPanel.append(booleanDetails);
+                    break;
+                case 'checkbox':
+                    break;
+                case 'radio':
+                    break;
+                case 'number':
+                    break;
+                default:
+                    break;
+            }
+        }
 
         var newProgram = {
             categories: []
