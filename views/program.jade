@@ -7,20 +7,21 @@ html
         link(rel='stylesheet', href='/stylesheets/style.css')
         script.
             let dataFromServer = !{programData};
-            window.onLoad = function() {
+            window.onload = function() {
                 console.log(dataFromServer);
             }
 
 body
     +header(true)
 
+    div(class="spaceAbove")
+
     - var data = JSON.parse(programData);
-    - for(var i = 0; i < data.categories.lengths; i += 1) {
-        div #{data.categories.categoryName}
-            - for(var j = 0; j < data.indicators.length; j += 1) {
-                if(data.indicators[j].categoryId == data.categories[i].id)
-                    div #{data.indicators.indicatorName}
-            - }
-    - }
+    - for(var i = 0; i < data.categories.length; i += 1)
+        div category name: #{data.categories[i].categoryName}
+             - for(var j = 0; j < data.indicators.length; j += 1) {
+                 if(data.indicators[j].categoryId == data.categories[i].id)
+                     div(style="margin-left:10px;") indicator name: #{data.indicators[j].indicatorName}
+             - }
 
     div(class="button spaceAbove") Save Program Instance
