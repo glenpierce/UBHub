@@ -13,6 +13,19 @@ body
     div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="createNewIndicatorModal" onclick="hideModal('createNewIndicatorModal')")
         div(style="height:200px; width:400px; background-color:white; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
             input(id="createNewIndicatorInput")
+            div(class="flex column") Indicator type
+                div(class="flex")
+                    input(type="radio" name="type")
+                    label boolean
+                div(class="flex")
+                    input(type="radio" name="type")
+                    label checkbox
+                div(class="flex")
+                    input(type="radio" name="type")
+                    label radio button
+                div(class="flex")
+                    input(type="radio" name="type")
+                    label number
             button(onclick="createIndicator(); hideModal('createNewIndicatorModal');") add indicator
 
     div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="colorPickerModal" onclick="hideModal('colorPickerModal')")
