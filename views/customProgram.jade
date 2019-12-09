@@ -28,7 +28,7 @@ body
                         div(class="flex")
                             input(type="radio" name="type" onchange="indicatorChange('number')")
                             label number
-                    button(onclick="createIndicator(); hideModal('createNewIndicatorModal');") add indicator
+                    button(onclick="createIndicator(getIndicatorValue()); hideModal('createNewIndicatorModal');") add indicator
                 div(id="indicatorDetailsPanel")
 
     div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="colorPickerModal" onclick="hideModal('colorPickerModal')")
@@ -70,6 +70,12 @@ body
                 default:
                     break;
             }
+        }
+
+        getIndicatorValue = function() {
+            let indicatorValue = {};
+            indicatorValue.value = document.getElementById("indicatorDetailsPanel").innerHTML; //todo: start here
+            return indicatorValue;
         }
 
         var newProgram = {
@@ -183,25 +189,28 @@ body
             document.getElementById('createNewIndicatorInput').focus();
         }
 
-        function createIndicator() {
+        function createIndicator(indicatorValues) {
             newIndicatorSendToServer = {
                 name: document.getElementById('createNewIndicatorInput').value
             };
 
-            httpPost("/createCustomIndicator", createIndicatorCallback, newIndicatorSendToServer);
+            httpPost("/createCustomIndicator", createIndicatorCallback(indicatorValues), newIndicatorSendToServer);
         }
 
-        function createIndicatorCallback(responseFromServer) {
-            responseFromServer = JSON.parse(responseFromServer)
-            console.log(responseFromServer);
-            var newIndicator = document.createElement("div");
-            newIndicator.textContent = responseFromServer.indicatorName;
-            newIndicator.setAttribute("draggable", "true");
-            newIndicator.setAttribute("ondragstart", "drag(event)");
-            newIndicator.setAttribute("style", "border:solid;")
-            newIndicator.id = responseFromServer.id;
-            document.getElementById("indicatorsContainer").appendChild(newIndicator);
-            document.getElementById('createNewIndicatorInput').value = "";
+        function createIndicatorCallback(indicatorValues) {
+            return function (responseFromServer) {
+                httpPost("/createCustomIndicatorValues", console.log, indicatorValues);
+                responseFromServer = JSON.parse(responseFromServer);
+                console.log(responseFromServer);
+                var newIndicator = document.createElement("div");
+                newIndicator.textContent = responseFromServer.indicatorName;
+                newIndicator.setAttribute("draggable", "true");
+                newIndicator.setAttribute("ondragstart", "drag(event)");
+                newIndicator.setAttribute("style", "border:solid;");
+                newIndicator.id = responseFromServer.id;
+                document.getElementById("indicatorsContainer").appendChild(newIndicator);
+                document.getElementById('createNewIndicatorInput').value = "";
+            }
         }
 
         function createProgram() {

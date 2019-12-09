@@ -29,6 +29,7 @@ let programs = require('./routes/programs');
 let newProgramRoute = require('./routes/program');
 let statusReport = require('./routes/statusReport');
 let createUserDataFromJSON = require('./routes/createUserDataFromJSON');
+let createCustomIndicatorValues = require('./routes/createCustomIndicatorValues');
 
 let config = require('./config.js');
 
@@ -92,6 +93,7 @@ app.use('/programs', programs);
 app.use('/program', newProgramRoute);
 app.use('/statusReport', statusReport);
 app.use('/createUserDataFromJSON', createUserDataFromJSON);
+app.use('/createCustomIndicatorValues', createCustomIndicatorValues);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
