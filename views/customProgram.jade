@@ -27,6 +27,8 @@ html
                 }
             }
 
+            let targetCategory;
+
 
 body
     div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="createNewCategoryModal" onclick="hideModal('createNewCategoryModal')")
@@ -58,16 +60,16 @@ body
     div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="colorPickerModal" onclick="hideModal('colorPickerModal')")
         div(style="height:200px; width:400px; background-color:#B7B7B7; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
             div(style="display:flex;")
-                div(class="color" style="background:#E94A35;")
-                div(class="color" style="background:#F59D00;")
-                div(class="color" style="background:#F5E100;")
-                div(class="color" style="background:#009755;")
-                div(class="color" style="background:#0073BF;")
-                div(class="color" style="background:#083D7A;")
-                div(class="color" style="background:#6EC4FD;")
-                div(class="color" style="background:#7935E9;")
-                div(class="color" style="background:#000000;")
-                div(class="color" style="background:#B58989;")
+                div(class="color" style="background:#E94A35;" onclick="setTargetCategoryColor(this);")
+                div(class="color" style="background:#F59D00;" onclick="setTargetCategoryColor(this);")
+                div(class="color" style="background:#F5E100;" onclick="setTargetCategoryColor(this);")
+                div(class="color" style="background:#009755;" onclick="setTargetCategoryColor(this);")
+                div(class="color" style="background:#0073BF;" onclick="setTargetCategoryColor(this);")
+                div(class="color" style="background:#083D7A;" onclick="setTargetCategoryColor(this);")
+                div(class="color" style="background:#6EC4FD;" onclick="setTargetCategoryColor(this);")
+                div(class="color" style="background:#7935E9;" onclick="setTargetCategoryColor(this);")
+                div(class="color" style="background:#000000;" onclick="setTargetCategoryColor(this);")
+                div(class="color" style="background:#B58989;" onclick="setTargetCategoryColor(this);")
 
     +header(true)
 
@@ -101,7 +103,7 @@ body
             let indicatorType = indicatorPanel.children[0].getAttribute("class");
             switch (indicatorType) {
                 case 'boolean':
-                    let children = document.getElementsByClassName("booleanChildren"); //todo: ok, let's test this a bit next. We'll need to finish up the html of the boolean panel.
+                    let children = document.getElementsByClassName("booleanChildren");
                     for(var i = 0; i < children.length; i += 1) {
                         let indicatorValue = {type: indicatorType, name: children[i].value, required:children[i].getAttribute('required')}
                         indicatorValues.push(indicatorValue);
@@ -215,8 +217,14 @@ body
         }
 
         function openColorPicker(target) {
+            targetCategory = target;
             document.getElementById('colorPickerModal').style.display = "flex";
             //target.style.backgroundColor = "blue";
+        }
+
+        function setTargetCategoryColor(colorPickerElement) {
+            let colorPicked = colorPickerElement.style.backgroundColor;
+            targetCategory.style.backgroundColor = colorPicked;
         }
 
         function createNewIndicator() {
