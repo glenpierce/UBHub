@@ -246,7 +246,8 @@ body
 
         function createIndicatorCallback(indicatorValues) {
             return function (responseFromServer) {
-                httpPost("/createCustomIndicatorValues", console.log, indicatorValues);
+                const indicatorValuesPackaged = {responseFromServer, indicatorValues};
+                httpPost("/createCustomIndicatorValues", console.log, indicatorValuesPackaged);
                 responseFromServer = JSON.parse(responseFromServer);
                 let newIndicator = document.createElement("div");
                 newIndicator.textContent = responseFromServer.indicatorName;

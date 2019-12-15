@@ -545,6 +545,13 @@ update = function() {
         ");";
     query.push(createIndicatorValuesTableQuery);
 
+    let createIndicatorValueProcedure =
+        "CREATE PROCEDURE createIndicatorValue(IN indicatorName VARCHAR(2048), indicatorId INT, type INT)\n" +
+        "BEGIN\n" +
+        "INSERT INTO indicatorValues(name, subIndicator, type) VALUES (indicatorName, indicatorId, type);\n" +
+        "END";
+    query.push(createIndicatorValueProcedure);
+
     let createIndicatorRatingsTableQuery =
         "CREATE TABLE indicatorRatings(" +
         "`indicator` INT, " +
