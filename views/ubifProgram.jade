@@ -1246,9 +1246,13 @@ html
                             for (let i = 0; i < sites.length; i++) {
                                 let numerator = 0;
                                 let denominator = 0;
+                                let speciesObserved = new Set();
                                 for (let k = 0; k < sites[i].markers.length; k++) {
                                     if (sites[i].markers[k].observedOn >= timeSlices[timeSliceIndex] && sites[i].markers[k].observedOn < timeSlices[timeSliceIndex + 1] && d == speciesTaxaMap.get(sites[i].markers[k].species)) {
-                                        numerator++;
+                                        if(!speciesObserved.has(d)) {
+                                            numerator++;
+                                        }
+                                        speciesObserved.add(d);
                                         break;
                                     }
                                 }
@@ -1363,9 +1367,13 @@ html
                             }
                             let numerator = 0;
                             let denominator = 0;
+                            let speciesObserved = new Set();
                             for (let k = 0; k < sites[i].markers.length; k++) {
                                 if (d == speciesTaxaMap.get(sites[i].markers[k].species)) {
-                                    numerator++;
+                                    if(!speciesObserved.has(d)) {
+                                        numerator++;
+                                    }
+                                    speciesObserved.add(d);
                                     break;
                                 }
                             }
@@ -1437,9 +1445,13 @@ html
                         let height = 0;
                         let numerator = 0;
                         let denominator = 0;
+                        let speciesObserved = new Set();
                         for (let i = 0; i < d.markers.length; i++) {
                             if (speciesTaxaMap.get(d.markers[i].species) == taxaButtonText) {
-                                numerator++;
+                                if(!speciesObserved.has(taxaButtonText)) {
+                                    numerator++;
+                                }
+                                speciesObserved.add(taxaButtonText);
                             }
                         }
 
@@ -1513,9 +1525,13 @@ html
                         let height = 0;
                         let numerator = 0;
                         let denominator = 0;
+                        let speciesObserved = new Set();
                         for (let i = 0; i < d.markers.length; i++) {
                             if (speciesTaxaMap.get(d.markers[i].species) == taxaName) {
-                                numerator++;
+                                if(!speciesObserved.has(taxaName)) {
+                                    numerator++;
+                                }
+                                speciesObserved.add(taxaName);
                             }
                         }
 
