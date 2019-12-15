@@ -3,6 +3,30 @@ include mixins
 html
     head
         link(rel='stylesheet', href='/stylesheets/style.css')
+        style.
+            .booleanChildren {
+                display: block;
+            }
+
+        script.
+            class BooleanIndicator {
+                static create() {
+                    let booleanDetails = document.createElement('div');
+                    booleanDetails.textContent = "boolean details";
+                    booleanDetails.className = "boolean";
+
+                    let firstBool = document.createElement('input');
+                    firstBool.className = "booleanChildren";
+                    booleanDetails.append(firstBool);
+
+                    let secondBool = document.createElement('input');
+                    secondBool.className = "booleanChildren";
+                    booleanDetails.append(secondBool);
+
+                    return booleanDetails;
+                }
+            }
+
 
 body
     div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="createNewCategoryModal" onclick="hideModal('createNewCategoryModal')")
@@ -49,7 +73,7 @@ body
 
     script.
 
-        indicatorChange = function(type) {
+        function indicatorChange(type) {
             var indicatorDetailsPanel = document.getElementById("indicatorDetailsPanel");
             while(indicatorDetailsPanel.childElementCount > 0) {
                 indicatorDetailsPanel.firstChild.remove();
@@ -57,8 +81,7 @@ body
 
             switch (type) {
                 case 'boolean':
-                    var booleanDetails = document.createElement('div');
-                    booleanDetails.textContent = "boolean details";
+                    var booleanDetails = BooleanIndicator.create();
                     indicatorDetailsPanel.append(booleanDetails);
                     break;
                 case 'checkbox':
@@ -72,10 +95,22 @@ body
             }
         }
 
-        getIndicatorValue = function() {
-            let indicatorValue = {};
-            indicatorValue.value = document.getElementById("indicatorDetailsPanel").innerHTML; //todo: start here
-            return indicatorValue;
+         function getIndicatorValue() {
+            let indicatorValues = [];
+            let indicatorPanel = document.getElementById("indicatorDetailsPanel");
+            let indicatorType = indicatorPanel.children[0].getAttribute("class");
+            switch (indicatorType) {
+                case 'boolean':
+                    let children = document.getElementsByClassName("booleanChildren"); //todo: ok, let's test this a bit next. We'll need to finish up the html of the boolean panel.
+                    for(var i = 0; i < children.length; i += 1) {
+                        let indicatorValue = {type: indicatorType, name: children[i].value, required:children[i].getAttribute('required')}
+                        indicatorValues.push(indicatorValue);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return indicatorValues;
         }
 
         var newProgram = {
@@ -179,14 +214,15 @@ body
             document.getElementById('createNewCategoryInput').value = "";
         }
 
-        function openColorPicker(target){
+        function openColorPicker(target) {
             document.getElementById('colorPickerModal').style.display = "flex";
             //target.style.backgroundColor = "blue";
         }
 
-        function createNewIndicator(){
+        function createNewIndicator() {
             document.getElementById('createNewIndicatorModal').style.display = "flex";
             document.getElementById('createNewIndicatorInput').focus();
+            indicatorChange('boolean');
         }
 
         function createIndicator(indicatorValues) {
@@ -202,6 +238,7 @@ body
                 httpPost("/createCustomIndicatorValues", console.log, indicatorValues);
                 responseFromServer = JSON.parse(responseFromServer);
                 console.log(responseFromServer);
+                console.log(indicatorValues);
                 var newIndicator = document.createElement("div");
                 newIndicator.textContent = responseFromServer.indicatorName;
                 newIndicator.setAttribute("draggable", "true");
@@ -221,8 +258,6 @@ body
 
     div(style="padding:40px;")
         - var indicatorsJSON = JSON.parse(indicators);
-        //div #{indicators}
-        //div #{indicatorsJSON}
         div(style="display:flex;")
             div(style="flex-grow:1;") Indicators
                 div(onclick="createNewIndicator()" class="button") create new indicator
@@ -234,14 +269,5 @@ body
                 div(onclick="createNewCategory();" class="button") Create new category
                 div(style="height:100%; width:100%; border:solid;" id="categoriesContainer")
         div(onclick="createProgram()" class="button") Create Program
-        //script.
-        //    var indicators = !{indicators};
-        //    console.log(indicators);
-        //    console.log(indicators.length);
-        //    for (var i = 0; i < indicators.length; i++) {
-        //        console.log(indicators[i]);
-        //        console.log(indicators[i].indicatorName);
-        //        document.write("<div> indicator " + indicators[i].id +" </div>");
-        //    }
 
     +footer()
