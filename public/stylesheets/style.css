@@ -232,6 +232,10 @@ button:hover {
   cursor: pointer; border: solid; border-width: 1px; border-radius: 10px; background-color: #4490ba; width: fit-content; padding: 10px;
 }
 
+.customProgramItem{
+  cursor: pointer; font-weight:bold; color: darkblue; border: none; background-color: lightblue; margin: 5px; border-radius: 10px; width: fit-content; padding: 10px;
+}
+
 .color{
   border-radius: 100%;
   cursor: pointer;

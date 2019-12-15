@@ -11,7 +11,7 @@ mixin textInShape(textValue, colorValue, percentFill, radius)
 
 mixin indicator(indicatorName, indicatorDescription, descriptionOfCalculation, id)
     div(style="display:flex;" id=id draggable="true" ondragstart="drag(event)")
-        div(style="border:solid;")
+        div(class="customProgramItem")
             div #{indicatorName}
             div #{indicatorDescription}
             div #{descriptionOfCalculation}
