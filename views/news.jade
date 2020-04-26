@@ -1,0 +1,18 @@
+doctype html
+include mixins
+html
+    head
+        title UBHub
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+body
+
+    +header(true)
+
+    iframe(src="https://urbanbiodiversityhub.blogspot.com/" width="100%" id="iframe")
+
+    +footer()
+
+    script.
+        window.onLoad = document.getElementById("iframe").height = (screen.height - 100 - 130) + "px;";
+        console.log(screen.height + "px;");

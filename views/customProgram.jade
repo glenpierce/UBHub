@@ -32,6 +32,16 @@ html
                 }
             }
 
+            class FloatIndicator {
+                static create() {
+                    let floatIndicator = document.createElement('div');
+                    floatIndicator.textContent = "float details";
+                    floatIndicator.className = "floatClassName";
+
+                    return floatIndicator;
+                }
+            }
+
             let targetCategory;
 
 
@@ -50,6 +60,9 @@ body
                         div(class="flex")
                             input(type="radio" name="type" onchange="indicatorChange('boolean')")
                             label boolean
+                        div(class="flex")
+                            input(type="radio" name="type" onchange="indicatorChange('float')")
+                            label float
                         div(class="flex")
                             input(type="radio" name="type" onchange="indicatorChange('checkbox')")
                             label checkbox
@@ -91,6 +104,10 @@ body
                     let booleanDetails = BooleanIndicator.create();
                     indicatorDetailsPanel.append(booleanDetails);
                     break;
+                case 'float':
+                    let floatDetails = FloatIndicator.create();
+                    indicatorDetailsPanel.append(floatDetails);
+                    break;
                 case 'checkbox':
                     break;
                 case 'radio':
@@ -111,6 +128,17 @@ body
                     let children = document.getElementsByClassName("booleanChildren");
                     for(var i = 0; i < children.length; i += 1) {
                         let indicatorValue = {type: indicatorType, name: children[i].value, required:children[i].getAttribute('required')}
+                        indicatorValues.push(indicatorValue);
+                    }
+                    break;
+                case 'float':
+                    let children = document.getElementsByClassName("");
+                    for (var i = 0; i < children.length; i += 1) {
+                        let indicatorValue = {
+                            type: indicatorType,
+                            name: children[i].value,
+                            required: children[i].getAttribute('required')
+                        }
                         indicatorValues.push(indicatorValue);
                     }
                     break;

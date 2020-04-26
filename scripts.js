@@ -276,7 +276,7 @@ update = function() {
     let getAllUploadsByUserQuery =
         "CREATE PROCEDURE getAllUploadsByUser(IN userId VARCHAR(2048))\n" +
         "BEGIN\n" +
-        "SELECT * from locations where update_by = userId;\n" +
+        "SELECT * from locations where update_by = userId;\n" + //wrong
         "END";
     query.push(getAllUploadsByUserQuery);
 
@@ -534,7 +534,7 @@ update = function() {
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`name` VARCHAR(2048), " +
         "`subIndicator` INT, " +
-        "`type` INT, " + //text, float, int / stage
+        "`type` INT, " + //boolean, text, float, int / stage
         "`required` BIT, " +
         "`orderInOperation` INT, " +
         "`rangeMin` FLOAT(10, 2), " +
@@ -612,6 +612,7 @@ update = function() {
         "CREATE TABLE categories(" +
         "`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
         "`program` INT, " +
+        "`subCategory` INT," + //todo: structural change update
         "`categoryName` VARCHAR(2048) CHARACTER SET utf8, " +
         "`positionInProgram` INT, " +
         "`description` VARCHAR(2048) CHARACTER SET utf8, " +
@@ -655,8 +656,16 @@ update = function() {
         "`name` VARCHAR(2048), " +
         "`notes` VARCHAR(2048), " +
         "`jsonData` json" +
+        "`type` INT" + //recorded value, projected value, target value, baseline, ACTION (optional, and set as added automatically to an Indicator as it is added to a Program Instance)
+        "`privilegesLookUpId` INT" +
         ");";
     query.push(createUserDataTableQuery);
+
+    let createPrivilegesLookUpId =
+        "CREATE TABLE privilegesLookUp(" +
+        "`id` NUMERIC(14, 0)," +
+        ");";
+    query.push(createPrivilegesLookUpId);
 
     let getRepByUser =
         "CREATE PROCEDURE getRepByUser(IN inUser VARCHAR(255))\n" +

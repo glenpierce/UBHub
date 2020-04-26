@@ -1,12 +1,11 @@
-var express = require('express');
-var router = express.Router();
-var mysql = require('mysql');
-var session = require('client-sessions');
-var path = require("path");
+const express = require('express');
+const router = express.Router();
+const mysql = require('mysql');
+const session = require('client-sessions');
 
-var app = express();
+const app = express();
 
-var config = require('../config.js');
+const config = require('../config.js');
 
 app.use(session({
     cookieName: 'session',
@@ -24,13 +23,16 @@ router.post('/', function(req, res){
                 case 'boolean':
                     type = 1;
                     break;
+                case 'float':
+                    type = 2;
+                    break;
                 default:
                     type = 0;
                     break;
             }
-            query = "CALL createIndicatorValue('" + req.body.indicatorValues[indicatorIndex].name + "', " + id + ", " + type + ");";
+            const query = "CALL createIndicatorValue('" + req.body.indicatorValues[indicatorIndex].name + "', " + id + ", " + type + ");";
 
-            connection = mysql.createConnection({
+            const connection = mysql.createConnection({
                 host: config.rdsHost,
                 user: config.rdsUser,
                 password: config.rdsPassword,
