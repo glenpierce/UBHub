@@ -26,6 +26,8 @@ router.post('/', function(req, res){
                 case 'float':
                     type = 2;
                     break;
+
+                //TODO new caes
                 default:
                     type = 0;
                     break;

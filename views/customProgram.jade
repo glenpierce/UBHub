@@ -89,6 +89,10 @@ body
                 div(class="color" style="background:#000000;" onclick="setTargetCategoryColor(this);")
                 div(class="color" style="background:#B58989;" onclick="setTargetCategoryColor(this);")
 
+    div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="noCategoryErrorPopUp" onclick="hideModal('noCategoryErrorPopUp')")
+        div(style="height:200px; width:400px; background-color:white; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
+            | Please create a category first!
+
     +header(true)
 
     script.
@@ -125,19 +129,19 @@ body
             let indicatorType = indicatorPanel.children[0].getAttribute("class");
             switch (indicatorType) {
                 case 'boolean':
-                    let children = document.getElementsByClassName("booleanChildren");
-                    for(var i = 0; i < children.length; i += 1) {
-                        let indicatorValue = {type: indicatorType, name: children[i].value, required:children[i].getAttribute('required')}
+                    let booleanChildren = document.getElementsByClassName("booleanChildren");
+                    for(var i = 0; i < booleanChildren.length; i += 1) {
+                        let indicatorValue = {type: indicatorType, name: booleanChildren[i].value, required:booleanChildren[i].getAttribute('required')}
                         indicatorValues.push(indicatorValue);
                     }
                     break;
                 case 'float':
-                    let children = document.getElementsByClassName("");
-                    for (var i = 0; i < children.length; i += 1) {
+                    let floatChildren = document.getElementsByClassName("floatChildren");
+                    for (var i = 0; i < floatChildren.length; i += 1) {
                         let indicatorValue = {
                             type: indicatorType,
-                            name: children[i].value,
-                            required: children[i].getAttribute('required')
+                            name: floatChildren[i].value,
+                            required: floatChildren[i].getAttribute('required')
                         }
                         indicatorValues.push(indicatorValue);
                     }
@@ -289,7 +293,24 @@ body
         }
 
         function createProgram() {
-            httpPost("/createCustomProgram", console.log, newProgram);
+            if (newProgram.categories.length < 1) {
+                noCategoryErrorPopUp(); // makes new div visible
+            } else {
+                httpPost("/createCustomProgram", console.log, newProgram);
+            }
+        }
+
+        function removeCategory() {
+            if (newProgram.categories.length < 1) {
+                noCategoryErrorPopUp(); // makes new div visible
+            } else {
+                httpPost("/createCustomProgram", console.log, newProgram);
+            }
+        }
+
+        function noCategoryErrorPopUp() {
+            document.getElementById('noCategoryErrorPopUp').style.display = "flex";
+            document.getElementById('noCategoryErrorField').focus();
         }
 
     div(style="padding:40px;")
@@ -297,14 +318,14 @@ body
         div(style="display:flex;")
             div(style="flex-grow:1;")
                 div Indicators
-                button(onclick="createNewIndicator()") create new indicator
+                button(onclick="createNewIndicator()") Create new indicator
                 div(style="height:100%; width:100%; border:solid; border-width:1px; border-color:grey;" ondrop="drop(event)" ondragover="allowDrop(event)" id="indicatorsContainer")
                     - for (let i = 0; i < indicatorsJSON.length; i++) {
                         +indicator(indicatorsJSON[i].indicatorName, indicatorsJSON[i].description, indicatorsJSON[i].descriptionOfCalculation, indicatorsJSON[i].id)
                     - }
             div(style="flex-grow:1;")
                 div Categories
-                button(onclick="createNewCategory();") Create new category
+                button(onclick="createNewCategory()") Create new category
                 div(style="height:100%; width:100%; border:solid; border-width:1px; border-color:grey;" id="categoriesContainer")
         button(onclick="createProgram()") Create Program
 
