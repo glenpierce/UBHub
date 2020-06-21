@@ -98,15 +98,24 @@ router.get('/', function(req, res, next) {
     connection.end();
 });
 
-router.post('/', function(req, res){
+router.post('/', function(req, res) {
     var newProgram = req.body;
     response = "";
 
     if (req.session && req.session.user) {
         //create new program
+        if (dataIsValid(newProgram)){
+
         createCategories = createCategoriesFunction(newProgram); //this is creating a callback function that includes a closure containing the newProgram object that we want to keep track of in our callbacks.
         makeDbCall("CALL createProgram('" + newProgram.categories[0].name + "', '" + req.session.user + "')", createCategories);
         response = "here we go!"
+        } else {
+            res.writeHead(422, {'Content-Type': 'text/html'});
+            res.write('you need to create a new category');
+            res.end();
+            return;
+
+        }
     } else {
         //send the user a popup that tells them they aren't logged in
         response = "you aren't logged in";
@@ -115,6 +124,11 @@ router.post('/', function(req, res){
     res.write(response);
     res.end();
 });
+
+function dataIsValid(program){
+    // TODO - do data validation on program.
+    return true;
+};
 
 createCategoriesFunction = function(program) {
     return function (rows) {
