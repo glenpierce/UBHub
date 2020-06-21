@@ -13,8 +13,8 @@ log = function () {
 
 updateLocations = function(lower, upper) {
 
-    config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
-    // config.rdsHost="127.0.0.1";
+    // config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
+    config.rdsHost="127.0.0.1"; 
     config.rdsUser="root";
     config.rdsPassword="my-secret-pw";
 
@@ -140,8 +140,8 @@ function updateLocation(id, lat, lng){
 
 update = function() {
 
-    config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
-    // config.rdsHost="127.0.0.1"; //this should be your Docker container's IP address
+    // config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
+    config.rdsHost="127.0.0.1"; //this should be your Docker container's IP address
     config.rdsUser="root";
     config.rdsPassword="my-secret-pw";
 
