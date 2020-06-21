@@ -104,7 +104,7 @@ router.post('/', function(req, res) {
 
     if (req.session && req.session.user) {
         //create new program
-        if (dataIsValid(newProgram)){
+        if (dataIsValid(newProgram)) {
 
         createCategories = createCategoriesFunction(newProgram); //this is creating a callback function that includes a closure containing the newProgram object that we want to keep track of in our callbacks.
         makeDbCall("CALL createProgram('" + newProgram.categories[0].name + "', '" + req.session.user + "')", createCategories);
@@ -125,7 +125,7 @@ router.post('/', function(req, res) {
     res.end();
 });
 
-function dataIsValid(program){
+function dataIsValid(program) {
     // TODO - do data validation on program.
     return true;
 };
