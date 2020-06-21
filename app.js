@@ -72,7 +72,7 @@ app.use(session({
 
 app.use('/', home);
 app.use('/getInvolved', index);
-app.use('/login', login); //
+app.use('/login', login);
 app.use('/users', users);
 app.use('/createUser', createUser);
 app.use('/dashboard', dashboard);
