@@ -98,6 +98,7 @@ body
     script.
 
         function indicatorChange(type) {
+
             let indicatorDetailsPanel = document.getElementById("indicatorDetailsPanel");
             while(indicatorDetailsPanel.childElementCount > 0) {
                 indicatorDetailsPanel.firstChild.remove();
@@ -124,6 +125,7 @@ body
         }
 
          function getIndicatorValue() {
+
             let indicatorValues = [];
             let indicatorPanel = document.getElementById("indicatorDetailsPanel");
             let indicatorType = indicatorPanel.children[0].getAttribute("class");
@@ -157,15 +159,18 @@ body
         };
 
         function allowDrop(ev) {
+
             ev.preventDefault();
         }
 
         function drag(ev) {
+
             ev.dataTransfer.setData("text", ev.target.textContent);
             ev.dataTransfer.setData("id", ev.target.id);
         }
 
         function drop(ev) {
+
             ev.preventDefault();
             let data = ev.dataTransfer.getData("text");
             let id = ev.dataTransfer.getData("id");
@@ -198,19 +203,23 @@ body
         }
 
         function hideModal(id) {
+
             document.getElementById(id).style.display = "none";
         }
 
         function stopPropagation(e) {
+
             e.stopPropagation();
         }
 
         function createNewCategory() {
+
             document.getElementById('createNewCategoryModal').style.display = "flex";
             document.getElementById('createNewCategoryInput').focus();
         }
 
         function createCategory() {
+
             let newCategoryWrapper = document.createElement("div");
             newCategoryWrapper.setAttribute("ondrop", "drop(event)");
             newCategoryWrapper.setAttribute("ondragover", "allowDrop(event)");
@@ -264,21 +273,25 @@ body
         }
 
         function openColorPicker(target) {
+
             targetCategory = target;
             document.getElementById('colorPickerModal').style.display = "flex";
         }
 
         function setTargetCategoryColor(colorPickerElement) {
+
             targetCategory.style.backgroundColor = colorPickerElement.style.backgroundColor;
         }
 
         function createNewIndicator() {
+
             document.getElementById('createNewIndicatorModal').style.display = "flex";
             document.getElementById('createNewIndicatorInput').focus();
             indicatorChange('boolean');
         }
 
         function createIndicator(indicatorValues) {
+
             let newIndicatorSendToServer = {
                 name: document.getElementById('createNewIndicatorInput').value
             };
@@ -287,6 +300,7 @@ body
         }
 
         function createIndicatorCallback(indicatorValues) {
+
             return function (responseFromServer) {
                 const indicatorValuesPackaged = {responseFromServer, indicatorValues};
                 httpPost("/createCustomIndicatorValues", console.log, indicatorValuesPackaged);
@@ -303,6 +317,7 @@ body
         }
 
         function createProgram() {
+
             if (newProgram.categories.length < 1) {
                 noCategoryErrorPopUp(); // makes new div visible
             } else {
@@ -311,7 +326,8 @@ body
         }
 
         function removeCategory(categoryId){
-            for(let i = 0; i < newProgram.categories.length; i ++) {
+
+            for(let i=0; i < newProgram.categories.length; i++) {
                 if (newProgram.categories[i].id === categoryId){
                     newProgram.categories.splice(i, 1);
                     document.getElementById(categoryId).remove();
@@ -320,9 +336,10 @@ body
         };
 
         function noCategoryErrorPopUp() {
+
             document.getElementById('noCategoryErrorPopUp').style.display = "flex";
             document.getElementById('noCategoryErrorField').focus();
-        }
+        };
 
     div(style="padding:40px;")
         - let indicatorsJSON = JSON.parse(indicators);
