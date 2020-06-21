@@ -234,8 +234,18 @@ body
                 id: Date.now(),
                 indicators: []
             };
+
+
+            let removeCategoryButton = document.createElement("div");
+            removeCategoryButton.setAttribute("style", "background-color:black; border-radius:100%; width:30px; height:30px;");
+            removeCategoryButton.setAttribute("onclick", "removeCategory(" + newCategoryObject.id + ");");
+            newCategory.appendChild(removeCategoryButton);
+
+
             newCategoryWrapper.setAttribute("categoryName", newCategoryObject.name);
             newCategoryWrapper.setAttribute("categoryId", newCategoryObject.id);
+            newCategoryWrapper.setAttribute("id", newCategoryObject.id);
+
             newProgram.categories.push(newCategoryObject);
             newCategoryInput.onblur = function (event) {
                 newCategoryWrapper.setAttribute("categoryName", newCategoryInput.value);
@@ -300,13 +310,14 @@ body
             }
         }
 
-        function removeCategory() {
-            if (newProgram.categories.length < 1) {
-                noCategoryErrorPopUp(); // makes new div visible
-            } else {
-                httpPost("/createCustomProgram", console.log, newProgram);
-            }
-        }
+        function removeCategory(categoryId){
+            for(let i = 0; i < newProgram.categories.length; i ++) {
+                if (newProgram.categories[i].id === categoryId){
+                    newProgram.categories.splice(i, 1);
+                    document.getElementById(categoryId).remove();
+                }
+             }
+        };
 
         function noCategoryErrorPopUp() {
             document.getElementById('noCategoryErrorPopUp').style.display = "flex";

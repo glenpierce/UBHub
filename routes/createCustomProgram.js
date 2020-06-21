@@ -123,6 +123,11 @@ router.post('/', function(req, res) {
     res.writeHead(200, {'Content-Type': 'text/html'});
     res.write(response);
     res.end();
+
+    function dataIsValid(program){
+        return True;
+    };
+
 });
 
 createCategoriesFunction = function(program) {
