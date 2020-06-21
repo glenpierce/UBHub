@@ -1,0 +1,32 @@
+doctype html
+include mixins
+html
+    head
+        title Intro to MapView - Create a 2D map - 4.15
+        style.
+            #viewDiv {
+                padding: 0;
+                margin: 0;
+                height: 100vh;
+                width: 100%;
+            }
+
+        link(rel="stylesheet" href="https://js.arcgis.com/4.15/esri/themes/light/main.css")
+        script(src="https://js.arcgis.com/4.15/")
+
+        script.
+            require(["esri/Map", "esri/views/MapView"], function(Map, MapView) {
+                var map = new Map({
+                    basemap: "dark-gray"
+                });
+
+                var view = new MapView({
+                    container: "viewDiv",
+                    map: map,
+                    zoom: 4,
+                    center: [15, 65] // longitude, latitude
+                });
+            });
+
+    body
+        div(id="viewDiv")
