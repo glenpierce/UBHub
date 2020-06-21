@@ -125,7 +125,8 @@ router.post('/', function(req, res) {
     res.end();
 
     function dataIsValid(program){
-        return True;
+    
+        return true;
     };
 
 });
