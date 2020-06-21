@@ -311,8 +311,8 @@ body
         }
 
         function removeCategory(categoryId) {
-            for(let i=0; i < newProgram.categories.length; i++) {
-                if (newProgram.categories[i].id === categoryId){
+            for(let i = 0; i < newProgram.categories.length; i++) {
+                if (newProgram.categories[i].id === categoryId) {
                     newProgram.categories.splice(i, 1);
                     document.getElementById(categoryId).remove();
                 }
