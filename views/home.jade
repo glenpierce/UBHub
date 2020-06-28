@@ -4,6 +4,22 @@ html
     head
         title UBHub
         link(rel='stylesheet', href='/stylesheets/style.css')
+        script.
+            function httpGet(theUrl, callback, data) {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function () {
+                    if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                        callback(xmlHttp.responseText);
+                }
+                xmlHttp.open("GET", theUrl, true); // true for asynchronous
+                xmlHttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                xmlHttp.send();
+            }
+            httpGet('https://www.googleapis.com/blogger/v3/blogs/1660816896968470904/posts?key=AIzaSyAJzX-c2RmMNs71ujqAGAGtzmvTyoWZz3g', populateNews)
+            function populateNews(data) {
+                data = JSON.parse(data);
+                document.getElementById('news').innerHTML = data.items[0].content;
+            }
 
 body
 
@@ -30,6 +46,11 @@ body
                             div(class="homePageWhiteBox") Forum for Experts and Practitioners
                             div(class="homePageWhiteBox") Indicator Tracker to Manage Your Projects
             img(style="align-self:flex-end; height:70%;" src="/images/owl.svg")
+    div(style="padding: 10px;")
+        div(style="background-color:#d8ecd4; padding: 10px; border-radius:5px;")
+            div(style="font-weight:bold; font-size:20px; width:100%; border-radius:5px; background-color:#82caa0; text-align:center;") News
+            div(style="width=100%; height:600px; overflow-y:hidden; display:flex; flex-direction:column;" id='news')
+            div(onclick="window.location='/news'" style="cursor:pointer; font-weight:bold; font-size:20px; width:100%; border-radius:5px; background-color:#82caa0; text-align:center;") Read More
 
     div(style="display:flex; flex-direction:column; width:100%; margin-bottom:40px; margin-top:40px;")
         div(style="color:#326f90; font-size:20px; margin:auto; margin-bottom:10px; margin-top:10px;") <b>What kind of species live in cities?</b>

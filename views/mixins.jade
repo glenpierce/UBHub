@@ -55,6 +55,7 @@ mixin header(displayLoginInfo)
                     div(style="display:flex; justify-content:space-between;")
                         div(style="display:flex; justify-content:space-around; flex-grow:1;")
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/home'") Home
+                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/news'") News
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/map'") Map
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/resources'") Guide
                             div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/aboutUs'") About Us
@@ -63,7 +64,7 @@ mixin header(displayLoginInfo)
                                 div(style="padding:2px 5px 2px 2px;")
                                     div(style="background-color:#d3e9d5; cursor:pointer; color:#316b59; padding:5px 45px 5px 45px; border-radius:20px; font-weight:700;" onclick="window.location='/account/logout'") Logout
                             else
-                                div(style="padding:2px 5px 2px 2px;")
+                                div
                                     div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/createUser'") Sign up
             div(style="height:75px; background:white; flex-grow:1;")
 
