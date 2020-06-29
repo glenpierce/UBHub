@@ -130,14 +130,14 @@ body
             switch (indicatorType) {
                 case 'boolean':
                     let booleanChildren = document.getElementsByClassName("booleanChildren");
-                    for(var i = 0; i < booleanChildren.length; i += 1) {
+                    for(let i = 0; i < booleanChildren.length; i += 1) {
                         let indicatorValue = {type: indicatorType, name: booleanChildren[i].value, required:booleanChildren[i].getAttribute('required')}
                         indicatorValues.push(indicatorValue);
                     }
                     break;
                 case 'float':
                     let floatChildren = document.getElementsByClassName("floatChildren");
-                    for (var i = 0; i < floatChildren.length; i += 1) {
+                    for (let i = 0; i < floatChildren.length; i += 1) {
                         let indicatorValue = {
                             type: indicatorType,
                             name: floatChildren[i].value,
