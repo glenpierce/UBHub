@@ -121,8 +121,6 @@ router.post('/', function(req, res) {
                     let currentGroupId;
                     createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId);
                 });
-            const createCategories = createCategoriesFunction(newProgram); //this is creating a callback function that includes a closure containing the newProgram object that we want to keep track of in our callbacks.
-            makeDbCall("CALL createProgram('" + newProgram.categories[0].name + "', '" + req.session.user + "')", createCategories);
         } else {
             res.writeHead(422, {'Content-Type': 'text/html'});
             res.write('you need to create a new category');
