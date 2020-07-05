@@ -1,12 +1,12 @@
-var express = require('express');
-var router = express.Router();
-var mysql = require('mysql');
-var session = require('client-sessions');
-var path = require("path");
+const express = require('express');
+const router = express.Router();
+const mysql = require('mysql');
+const session = require('client-sessions');
+const path = require("path");
 
-var app = express();
+const app = express();
 
-var config = require('../config.js');
+const config = require('../config.js');
 
 app.use(session({
     cookieName: 'session',
@@ -16,69 +16,60 @@ app.use(session({
     }
 }));
 
-router.get('/editor', function(req, res, next) {
-    res.render('programEditor', {username: req.session.user});
-});
-
-router.post('/editor', function(req, res, next) {
-    let someName = "some program name";
-    makeDbCallAsPromise("CALL createProgram('" + someName + "', '" + req.session.user + "')").then(function(result){
-        const programId = result[0][0].id;
-        let newProgram = req.body.newProgram;
-        let currentCategoryId;
-        let currentGroupId;
-        createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId);
-    });
-});
-
-function createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId){
-    for(let i = 0; i < newProgram.length; i++){
-        if(newProgram[i].isProcessed){
+function createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId) {
+    for(let i = 0; i < newProgram.items.length; i++) {
+        console.log("creating program recursively: " + i);
+        if(newProgram.items[i].isProcessed) {
             continue;
         }
-        switch (newProgram[i].type){
+        switch (newProgram.items[i].type) {
             case "Category":
-                newProgram[i].isProcessed = true;
-                makeDbCallAsPromise("CALL createCategory('" + "newProgram[i].name" + "', '" + i + "', '" + programId + "')").then(function (rows) {
-                    console.log(rows[0][0].id);
-                    currentCategoryId = rows[0][0].id;
-                    createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId);
+                newProgram.items[i].isProcessed = true;
+                makeDbCallAsPromise("CALL createCategory('" + newProgram.items[i].name + "', '" + i + "', '" + programId + "')")
+                    .then(function (rows) {
+                        console.log(rows[0][0].id);
+                        currentCategoryId = rows[0][0].id;
+                        createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId);
                 });
                 break;
             case "CheckBoxGroup":
-                makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram[i].name + "', '" + i + "', '" + currentCategoryId + "')").then(function (rows) {
-                    createChildrenRecursively(rows[0][0].id, newProgram[i].architype, newProgram[i].children);
+                makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram.items[i].name + "', '" + i + "', '" + currentCategoryId + "')")
+                    .then(function (rows) {
+                        createChildrenRecursively(rows[0][0].id, newProgram.items[i].architype, newProgram.items[i].children);
                 });
                 break;
             case "RadioButtonGroup":
-                makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram[i].name + "', '" + i + "', '" + currentCategoryId + "')").then(function (rows) {
-                    createChildrenRecursively(rows[0][0].id, newProgram[i].architype, newProgram[i].children);
+                makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram.items[i].name + "', '" + i + "', '" + currentCategoryId + "')")
+                    .then(function (rows) {
+                        createChildrenRecursively(rows[0][0].id, newProgram.items[i].architype, newProgram.items[i].children);
                 });
                 break;
             default:
+                console.log("default case reached.");
                 break;
         }
         return;
     }
 }
 
-function createChildrenRecursively(parentId, parentArchitype, children){
+function createChildrenRecursively(parentId, parentArchetype, children) {
+    console.log("createChildrenRecursively");
     for(let i = 0; i < children.length; i++) {
         if (children[i].isProcessed) {
             continue;
         }
         children[i].isProcessed = true;
-        makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram[i].name + "', '" + i + "', '" + currentCategoryId + "')").then(function (rows) {
-            createChildrenRecursively(parentId, parentArchitype, children);
+        makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram.items[i].name + "', '" + i + "', '" + currentCategoryId + "')").then(function (rows) {
+            createChildrenRecursively(parentId, parentArchetype, children);
         });
         return;
     }
 }
 
 router.get('/', function(req, res, next) {
-    var indicators = "";
+    let indicators = "";
 
-    connection = mysql.createConnection({
+    const connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
         password: config.rdsPassword,
@@ -99,16 +90,39 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/', function(req, res) {
-    var newProgram = req.body;
-    response = "";
+    console.log(req.body);
+    let program = req.body;
+    let newProgram = {
+        name: "newProgramName",
+        items: []
+    };
+    for(let i = 0; i < program.categories.length; i++) {
+        const category = program.categories[i];
+        category.type = "Category";
+        newProgram.items.push(category);
+        for(let j = 0; j < program.categories[i].indicators.length; j++) {
+            let indicator = program.categories[i].indicators[j];
+            indicator.type = "Indicator";
+            newProgram.items.push(indicator);
+        }
+    }
+
+    console.log("newProgram:");
+    console.log(newProgram);
+    let response = "";
 
     if (req.session && req.session.user) {
-        //create new program
         if (dataIsValid(newProgram)) {
-
-        createCategories = createCategoriesFunction(newProgram); //this is creating a callback function that includes a closure containing the newProgram object that we want to keep track of in our callbacks.
-        makeDbCall("CALL createProgram('" + newProgram.categories[0].name + "', '" + req.session.user + "')", createCategories);
-        response = "here we go!"
+            makeDbCallAsPromise("CALL createProgram('" + newProgram.name + "', '" + req.session.user + "')")
+                .then(function(result) {
+                    console.log("created Program");
+                    const programId = result[0][0].id;
+                    let currentCategoryId;
+                    let currentGroupId;
+                    createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId);
+                });
+            const createCategories = createCategoriesFunction(newProgram); //this is creating a callback function that includes a closure containing the newProgram object that we want to keep track of in our callbacks.
+            makeDbCall("CALL createProgram('" + newProgram.categories[0].name + "', '" + req.session.user + "')", createCategories);
         } else {
             res.writeHead(422, {'Content-Type': 'text/html'});
             res.write('you need to create a new category');
@@ -127,16 +141,17 @@ router.post('/', function(req, res) {
 
 function dataIsValid(program) {
     // TODO - do data validation on program.
+    console.log("data is valid");
     return true;
-};
+}
 
 createCategoriesFunction = function(program) {
     return function (rows) {
-        programId = rows[0][0].id;
-        positionInProgram = 0;
-        for (category in program.categories) {
+        const programId = rows[0][0].id;
+        let positionInProgram = 0;
+        for (const category in program.categories) {
             //create new category
-            createIndicators = createIndicatorsFunction(program.categories[category]);
+            const createIndicators = createIndicatorsFunction(program.categories[category]);
             makeDbCall("CALL createCategory('" + program.categories[category].name + "', '" + positionInProgram + "', '" + programId + "')", createIndicators);
             positionInProgram++;
         }
@@ -145,9 +160,9 @@ createCategoriesFunction = function(program) {
 
 createIndicatorsFunction = function(category) {
     return function(rows) {
-        categoryId = rows[0][0].id;
-        positionInCategory = 0;
-        for (indicator in category.indicators) {
+        const categoryId = rows[0][0].id;
+        let positionInCategory = 0;
+        for (const indicator in category.indicators) {
             makeDbCall("CALL createIndicatorInProgram('" + category.indicators[indicator].name + "', '" + positionInCategory + "', '" + categoryId + "')", noop);
             positionInCategory++;
         }
@@ -156,8 +171,8 @@ createIndicatorsFunction = function(category) {
 
 noop = function(){};
 
-makeDbCall = function(queryString, callback){
-    connection = mysql.createConnection({
+makeDbCall = function(queryString, callback) {
+    const connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
         password: config.rdsPassword,
@@ -180,7 +195,7 @@ makeDbCall = function(queryString, callback){
 
 makeDbCallAsPromise = function(queryString) {
     return new Promise((resolve, reject) => {
-        connection = mysql.createConnection({
+        const connection = mysql.createConnection({
             host: config.rdsHost,
             user: config.rdsUser,
             password: config.rdsPassword,
