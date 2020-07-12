@@ -13,7 +13,7 @@ app.use(session({
     expires: new Date(Date.now() + (config.expires))
 }));
 
-router.post('/', function(req, res){
+router.post('/', function(req, res) {
     let id = JSON.parse(req.body.responseFromServer).id;
 
     if (req.session && req.session.user) {
@@ -27,7 +27,7 @@ router.post('/', function(req, res){
                     type = 2;
                     break;
 
-                //TODO new caes
+                //TODO new case
                 default:
                     type = 0;
                     break;

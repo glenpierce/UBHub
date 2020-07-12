@@ -170,6 +170,7 @@ body
         function drop(ev) {
             ev.preventDefault();
             let data = ev.dataTransfer.getData("text");
+            console.log(data);
             let id = ev.dataTransfer.getData("id");
             let i = 0;
             let element = ev.target;
