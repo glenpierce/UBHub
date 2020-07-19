@@ -181,7 +181,7 @@ body
             element.appendChild(document.getElementById(id));
             for (let i = 0; i < newProgram.categories.length; i++) {
                 for(let j = 0; j < newProgram.categories[i].indicators.length; j++) {
-                    if(newProgram.categories[i].indicators[j].id == id){ //yes we are relying on type coercion here
+                    if(newProgram.categories[i].indicators[j].id == id) { //yes we are relying on type coercion here
                         newProgram.categories[i].indicators.splice(j, 1);
                         break;
                     }

@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql');
+const pool = require('../ConnectionPool.js').pool;
 const session = require('client-sessions');
 const path = require("path");
-
 const app = express();
-
 const config = require('../config.js');
 
 app.use(session({
@@ -32,17 +30,23 @@ function createProgramRecursively(newProgram, programId, currentCategoryId, curr
                         createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId);
                 });
                 break;
-            case "CheckBoxGroup":
+            // case "CheckBoxGroup":
+            //     makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram.items[i].name + "', '" + i + "', '" + currentCategoryId + "')")
+            //         .then(function (rows) {
+            //             createChildrenRecursively(rows[0][0].id, newProgram.items[i].architype, newProgram.items[i].children);
+            //     });
+            //     break;
+            // case "RadioButtonGroup":
+            //     makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram.items[i].name + "', '" + i + "', '" + currentCategoryId + "')")
+            //         .then(function (rows) {
+            //             createChildrenRecursively(rows[0][0].id, newProgram.items[i].architype, newProgram.items[i].children);
+            //     });
+            //     break;
+            case "boolean":
                 makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram.items[i].name + "', '" + i + "', '" + currentCategoryId + "')")
                     .then(function (rows) {
                         createChildrenRecursively(rows[0][0].id, newProgram.items[i].architype, newProgram.items[i].children);
-                });
-                break;
-            case "RadioButtonGroup":
-                makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram.items[i].name + "', '" + i + "', '" + currentCategoryId + "')")
-                    .then(function (rows) {
-                        createChildrenRecursively(rows[0][0].id, newProgram.items[i].architype, newProgram.items[i].children);
-                });
+                    });
                 break;
             default:
                 console.log("default case reached.");
@@ -69,24 +73,11 @@ function createChildrenRecursively(parentId, parentArchetype, children) {
 router.get('/', function(req, res, next) {
     let indicators = "";
 
-    const connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
+    makeDbCallAsPromise('SELECT * from indicators where positionInCategory is null').then((resolve, reject) => {
+        console.log(resolve);
+        const indicators = resolve;
+        res.render('customProgram', {indicators:JSON.stringify(indicators), username:req.session.user});
     });
-
-    connection.connect();
-    query = 'SELECT * from indicators where positionInCategory is null';
-    connection.query(query, function(err, rows, fields) {
-        if (!err) {
-            console.log(rows);
-            indicators = rows;
-            res.render('customProgram', {indicators:JSON.stringify(indicators), username:req.session.user});
-            console.log({indicators:JSON.stringify(indicators)});
-        }
-    });
-    connection.end();
 });
 
 router.post('/', function(req, res) {
@@ -143,77 +134,22 @@ function dataIsValid(program) {
     return true;
 }
 
-createCategoriesFunction = function(program) {
-    return function (rows) {
-        const programId = rows[0][0].id;
-        let positionInProgram = 0;
-        for (const category in program.categories) {
-            //create new category
-            const createIndicators = createIndicatorsFunction(program.categories[category]);
-            makeDbCall("CALL createCategory('" + program.categories[category].name + "', '" + positionInProgram + "', '" + programId + "')", createIndicators);
-            positionInProgram++;
-        }
-    };
-};
-
-createIndicatorsFunction = function(category) {
-    return function(rows) {
-        const categoryId = rows[0][0].id;
-        let positionInCategory = 0;
-        for (const indicator in category.indicators) {
-            makeDbCall("CALL createIndicatorInProgram('" + category.indicators[indicator].name + "', '" + positionInCategory + "', '" + categoryId + "')", noop);
-            positionInCategory++;
-        }
-    };
-};
-
-noop = function(){};
-
-makeDbCall = function(queryString, callback) {
-    const connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
-    });
-
-    connection.connect();
-    query = queryString;
-    connection.query(query, function(err, rows, fields) {
-        if (!err) {
-            callback(rows);
-        } else {
-            console.log('Error while performing Query.');
-            console.log(err.code);
-            console.log(err.message);
-        }
-    });
-    connection.end();
-};
-
 makeDbCallAsPromise = function(queryString) {
     return new Promise((resolve, reject) => {
-        const connection = mysql.createConnection({
-            host: config.rdsHost,
-            user: config.rdsUser,
-            password: config.rdsPassword,
-            database: config.rdsDatabase
+        pool.getConnection(function (error, connection) {
+            connection.query(queryString, function (err, rows, fields) {
+                if (!err) {
+                    resolve(rows);
+                } else {
+                    console.log('Error while performing Query.');
+                    console.log(err.code);
+                    console.log(err.message);
+                    reject(err);
+                }
+            });
+            connection.release();
         });
-
-        connection.connect();
-        query = queryString;
-        connection.query(query, function (err, rows, fields) {
-            if (!err) {
-                resolve(rows);
-            } else {
-                console.log('Error while performing Query.');
-                console.log(err.code);
-                console.log(err.message);
-                reject(err);
-            }
-        });
-        connection.end();
-    })
+    });
 };
 
 module.exports = router;
