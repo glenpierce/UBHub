@@ -1,12 +1,10 @@
-var express = require('express');
-var router = express.Router();
-var mysql = require('mysql');
-var session = require('client-sessions');
-var path = require("path");
-
-var app = express();
-
-var config = require('../config.js');
+const express = require('express');
+const router = express.Router();
+const mysql = require('mysql');
+const session = require('client-sessions');
+const path = require("path");
+const app = express();
+const config = require('../config.js');
 
 app.use(session({
     cookieName: 'session',
@@ -15,29 +13,13 @@ app.use(session({
 }));
 
 router.get('/', function(req, res, next) {
-    var indicators = "";
-
-    // connection = mysql.createConnection({
-    //     host: config.rdsHost,
-    //     user: config.rdsUser,
-    //     password: config.rdsPassword,
-    //     database: config.rdsDatabase
-    // });
-    //
-    // connection.connect();
-    // connection.query(query, function(err, rows, fields) {
-    //     if (!err) {
-            res.render('createIndicator', {username:req.session.user});
-            // console.log({indicators:JSON.stringify(indicators)});
-    //     }
-    // });
-    // connection.end();
+    res.render('createIndicator', {username:req.session.user});
 });
 
 router.post('/', function(req, res){
     console.log(req.body);
     if (true || req.session && req.session.user) {
-        query = "CALL createIndicator('" + req.body.name + "', '" + req.session.user +"');";
+        query = "CALL createIndicator('" + req.body.name + "', '" + req.session.user + "', '" + req.body.type + "');";
 
         connection = mysql.createConnection({
             host: config.rdsHost,

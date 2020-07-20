@@ -43,9 +43,9 @@ function createProgramRecursively(newProgram, programId, currentCategoryId, curr
             //     });
             //     break;
             case "boolean":
-                makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram.items[i].name + "', '" + i + "', '" + currentCategoryId + "')")
+                makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram.items[i].name + "', '" + i + "', '" + currentCategoryId + "', '" + newProgram.items[i].type + "')")
                     .then(function (rows) {
-                        createChildrenRecursively(rows[0][0].id, newProgram.items[i].architype, newProgram.items[i].children);
+                        createChildrenRecursively(rows[0][0].id, newProgram.items[i].type, newProgram.items[i].children);
                     });
                 break;
             default:
@@ -57,7 +57,6 @@ function createProgramRecursively(newProgram, programId, currentCategoryId, curr
 }
 
 function createChildrenRecursively(parentId, parentArchetype, children) {
-    console.log("createChildrenRecursively");
     for(let i = 0; i < children.length; i++) {
         if (children[i].isProcessed) {
             continue;
@@ -88,12 +87,20 @@ router.post('/', function(req, res) {
         items: []
     };
     for(let i = 0; i < program.categories.length; i++) {
-        const category = program.categories[i];
-        category.type = "Category";
+        const category = {
+            name: program.categories[i].name,
+            type: "Category",
+            id: program.categories[i].id
+        };
         newProgram.items.push(category);
         for(let j = 0; j < program.categories[i].indicators.length; j++) {
-            let indicator = program.categories[i].indicators[j];
-            indicator.type = "Indicator";
+            let indicator = {
+                name: program.categories[i].indicators[j].name,
+                type: program.categories[i].indicators[j].type,
+                id: program.categories[i].indicators[j].id, // overwritten by DB calls.
+                positionInCategory: j,
+                categoryId: program.categories[i].id
+            };
             newProgram.items.push(indicator);
         }
     }

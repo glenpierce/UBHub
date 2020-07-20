@@ -514,17 +514,17 @@ update = function() {
     query.push(createIndicatorsTableQuery);
 
     let createIndicatorQuery =
-        "CREATE PROCEDURE createIndicator(IN indicatorName VARCHAR(2048), IN author VARCHAR(255))\n" +
+        "CREATE PROCEDURE createIndicator(IN indicatorName VARCHAR(2048), IN archetype VARCHAR(255), IN author VARCHAR(255))\n" +
         "BEGIN\n" +
-        "INSERT INTO indicators(indicatorName, author) VALUES (indicatorName, author);\n" +
+        "INSERT INTO indicators(indicatorName, archetype, author) VALUES (indicatorName, archetype, author);\n" +
         "SELECT * FROM indicators WHERE id=LAST_INSERT_ID();\n" +
         "END";
     query.push(createIndicatorQuery);
 
     let createIndicatorInProgramQuery =
-        "CREATE PROCEDURE createIndicatorInProgram(IN indicatorName VARCHAR(2048), positionInCategory INT, categoryId INT)\n" +
+        "CREATE PROCEDURE createIndicatorInProgram(IN indicatorName VARCHAR(2048), positionInCategory INT, categoryId INT, IN archetype VARCHAR(255))\n" +
         "BEGIN\n" +
-        "INSERT INTO indicators(indicatorName, positionInCategory, categoryId) VALUES (indicatorName, positionInCategory, categoryId);\n" +
+        "INSERT INTO indicators(indicatorName, positionInCategory, categoryId, archetype) VALUES (indicatorName, positionInCategory, categoryId, archetype);\n" +
         "SELECT * FROM indicators WHERE id=LAST_INSERT_ID();\n" +
         "END";
     query.push(createIndicatorInProgramQuery);
@@ -779,7 +779,7 @@ update = function() {
     // }
 
 
-    // query = [useDbQuery, createLocationsTableQuery];
+    // query = [useDbQuery, createIndicatorQuery, createIndicatorInProgramQuery];
 
     for(let i = 0; i < query.length; i++) {
 
