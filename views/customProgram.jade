@@ -28,19 +28,74 @@ html
                     secondBool.className = "booleanChildren";
                     booleanDetails.append(secondBool);
 
+                    let required = document.createElement('input');
+                    required.type = 'checkbox';
+                    required.id = 'required';
+                    booleanDetails.append(required);
+
+                    let requiredLabel = document.createElement('label');
+                    requiredLabel.appendChild(document.createTextNode('Required?'));
+                    booleanDetails.append(requiredLabel);
+
                     return booleanDetails;
                 }
             }
 
             class FloatIndicator {
                 static create() {
-                    let floatIndicator = document.createElement('div');
-                    floatIndicator.textContent = "float details";
-                    floatIndicator.className = "floatClassName";
+                    let floatDetails = document.createElement('div');
+                    floatDetails.textContent = "float details";
+                    floatDetails.className = "float";
 
-                    return floatIndicator;
+                    var br = document.createElement('br');
+                    floatDetails.append(br);
+
+                    let valueLabel = document.createElement('label');
+                    valueLabel.appendChild(document.createTextNode('Value: '));
+                    floatDetails.append(valueLabel);
+
+                    let floatValue = document.createElement('input');
+                    floatValue.className = "floatChildren";
+                    floatValue.type = 'text';
+                    floatValue.id = 'floatValue';
+                    floatDetails.append(floatValue);
+
+                    let rangeMinLabel = document.createElement('label');
+                    rangeMinLabel.appendChild(document.createTextNode('Range Min.: '));
+                    floatDetails.append(rangeMinLabel);
+
+                    let rangeMin = document.createElement('input');
+                    rangeMin.className = "floatChildren";
+                    rangeMin.type = 'text';
+                    rangeMin.id = 'rangeMin';
+                    floatDetails.append(rangeMin);
+
+                    let rangeMaxLabel = document.createElement('label');
+                    rangeMaxLabel.appendChild(document.createTextNode('Range Max.: '));
+                    floatDetails.append(rangeMaxLabel);
+
+                    let rangeMax = document.createElement('input');
+                    rangeMax.className = "floatChildren";
+                    rangeMax.type = 'text';
+                    rangeMax.id = 'rangeMax';
+                    floatDetails.append(rangeMax);
+                    floatDetails.append(br);
+
+                    let required = document.createElement('input');
+                    required.type = 'checkbox';
+                    required.id = 'required';
+                    floatDetails.append(required);
+
+                    let requiredLabel = document.createElement('label');
+                    requiredLabel.appendChild(document.createTextNode('Required?'));
+                    floatDetails.append(requiredLabel);
+
+
+                    return floatDetails;
                 }
             }
+
+            // TODO - add remaining category classes
 
             let targetCategory;
 
@@ -56,6 +111,8 @@ body
             div(class="flex")
                 div
                     input(id="createNewIndicatorInput" class="customProgramItem")
+
+
                     div(class="flex column") Indicator type
                         div(class="flex")
                             input(type="radio" name="type" onchange="indicatorChange('boolean')")
@@ -96,7 +153,7 @@ body
     +header(true)
 
     script.
-
+        let archetype;
         function indicatorChange(type) {
             let indicatorDetailsPanel = document.getElementById("indicatorDetailsPanel");
             while(indicatorDetailsPanel.childElementCount > 0) {
@@ -107,10 +164,12 @@ body
                 case 'boolean':
                     let booleanDetails = BooleanIndicator.create();
                     indicatorDetailsPanel.append(booleanDetails);
+                    archetype = booleanDetails.className;
                     break;
                 case 'float':
                     let floatDetails = FloatIndicator.create();
                     indicatorDetailsPanel.append(floatDetails);
+                    archetype = floatDetails.className;
                     break;
                 case 'checkbox':
                     break;
@@ -281,7 +340,9 @@ body
 
         function createIndicator(indicatorValues) {
             let newIndicatorSendToServer = {
-                name: document.getElementById('createNewIndicatorInput').value
+                name: document.getElementById('createNewIndicatorInput').value,
+                archetype: archetype,
+                required: document.getElementById('required').checked
             };
 
             httpPost("/createCustomIndicator", createIndicatorCallback(indicatorValues), newIndicatorSendToServer);
