@@ -779,7 +779,7 @@ update = function() {
     // }
 
 
-    // query = [useDbQuery, createIndicatorQuery, createIndicatorInProgramQuery];
+     query = [useDbQuery, createIndicatorQuery, createIndicatorInProgramQuery];
 
     for(let i = 0; i < query.length; i++) {
 
