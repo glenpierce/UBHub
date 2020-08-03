@@ -15,17 +15,19 @@ app.use(session({
 }));
 
 function createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId) {
+    console.log("newProgram.items.length = " + newProgram.items.length);
     for(let i = 0; i < newProgram.items.length; i++) {
         console.log("creating program recursively: " + i);
         if(newProgram.items[i].isProcessed) {
             continue;
         }
+        console.log("newProgram.items[i].type = " + newProgram.items[i].type);
         switch (newProgram.items[i].type) {
             case "Category":
                 newProgram.items[i].isProcessed = true;
                 makeDbCallAsPromise("CALL createCategory('" + newProgram.items[i].name + "', '" + i + "', '" + programId + "')")
                     .then(function (rows) {
-                        console.log(rows[0][0].id);
+                        console.log("new category id = " + rows[0][0].id);
                         currentCategoryId = rows[0][0].id;
                         createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId);
                 });
@@ -96,7 +98,6 @@ router.post('/', function(req, res) {
         for(let j = 0; j < program.categories[i].indicators.length; j++) {
             let indicator = {
                 name: program.categories[i].indicators[j].name,
-                type: program.categories[i].indicators[j].type,
                 id: program.categories[i].indicators[j].id, // overwritten by DB calls.
                 positionInCategory: j,
                 categoryId: program.categories[i].id
