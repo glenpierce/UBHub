@@ -14,61 +14,6 @@ app.use(session({
     }
 }));
 
-function createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId) {
-    for(let i = 0; i < newProgram.items.length; i++) {
-        console.log("creating program recursively: " + i);
-        if(newProgram.items[i].isProcessed) {
-            continue;
-        }
-        switch (newProgram.items[i].type) {
-            case "Category":
-                newProgram.items[i].isProcessed = true;
-                makeDbCallAsPromise("CALL createCategory('" + newProgram.items[i].name + "', '" + i + "', '" + programId + "')")
-                    .then(function (rows) {
-                        console.log(rows[0][0].id);
-                        currentCategoryId = rows[0][0].id;
-                        createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId);
-                });
-                break;
-            // case "CheckBoxGroup":
-            //     makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram.items[i].name + "', '" + i + "', '" + currentCategoryId + "')")
-            //         .then(function (rows) {
-            //             createChildrenRecursively(rows[0][0].id, newProgram.items[i].architype, newProgram.items[i].children);
-            //     });
-            //     break;
-            // case "RadioButtonGroup":
-            //     makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram.items[i].name + "', '" + i + "', '" + currentCategoryId + "')")
-            //         .then(function (rows) {
-            //             createChildrenRecursively(rows[0][0].id, newProgram.items[i].architype, newProgram.items[i].children);
-            //     });
-            //     break;
-            case "boolean":
-                makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram.items[i].name + "', '" + i + "', '" + currentCategoryId + "', '" + newProgram.items[i].type + "')")
-                    .then(function (rows) {
-                        createChildrenRecursively(rows[0][0].id, newProgram.items[i].type, newProgram.items[i].children);
-                    });
-                break;
-            default:
-                console.log("default case reached.");
-                break;
-        }
-        return;
-    }
-}
-
-function createChildrenRecursively(parentId, parentArchetype, children) {
-    for(let i = 0; i < children.length; i++) {
-        if (children[i].isProcessed) {
-            continue;
-        }
-        children[i].isProcessed = true;
-        makeDbCallAsPromise("CALL createIndicatorInProgram('" + newProgram.items[i].name + "', '" + i + "', '" + currentCategoryId + "')").then(function (rows) {
-            createChildrenRecursively(parentId, parentArchetype, children);
-        });
-        return;
-    }
-}
-
 router.get('/', function(req, res, next) {
     let indicators = "";
 
@@ -82,42 +27,16 @@ router.get('/', function(req, res, next) {
 router.post('/', function(req, res) {
     console.log(req.body);
     let program = req.body;
-    let newProgram = {
-        name: "newProgramName",
-        items: []
-    };
-    for(let i = 0; i < program.categories.length; i++) {
-        const category = {
-            name: program.categories[i].name,
-            type: "Category",
-            id: program.categories[i].id
-        };
-        newProgram.items.push(category);
-        for(let j = 0; j < program.categories[i].indicators.length; j++) {
-            let indicator = {
-                name: program.categories[i].indicators[j].name,
-                type: program.categories[i].indicators[j].type,
-                id: program.categories[i].indicators[j].id, // overwritten by DB calls.
-                positionInCategory: j,
-                categoryId: program.categories[i].id
-            };
-            newProgram.items.push(indicator);
-        }
-    }
 
-    console.log("newProgram:");
-    console.log(newProgram);
     let response = "";
 
     if (req.session && req.session.user) {
-        if (dataIsValid(newProgram)) {
-            makeDbCallAsPromise("CALL createProgram('" + newProgram.name + "', '" + req.session.user + "')")
+        if (dataIsValid(program)) {
+            makeDbCallAsPromise("CALL createProgram('" + program.name + "', '" + req.session.user + "')")
                 .then(function(result) {
                     console.log("created Program");
                     const programId = result[0][0].id;
-                    let currentCategoryId;
-                    let currentGroupId;
-                    createProgramRecursively(newProgram, programId, currentCategoryId, currentGroupId);
+                    populateProgramCategories(program, programId);
                 });
         } else {
             res.writeHead(422, {'Content-Type': 'text/html'});
@@ -139,6 +58,26 @@ function dataIsValid(program) {
     // TODO - do data validation on program.
     console.log("data is valid");
     return true;
+}
+
+function populateProgramCategories(program, programId) {
+    console.log("newProgram.items.length = " + program.categories.length);
+    for(let i = 0; i < program.categories.length; i++) {
+        console.log("creating program categories: " + i);
+        makeDbCallAsPromise("CALL createCategory('" + program.categories[i].name + "', '" + i + "', '" + programId + "')")
+            .then(function (rows) {
+                console.log("new category id = " + rows[0][0].id);
+                currentCategoryId = rows[0][0].id;
+                populateCategoryIndicators(program.categories[i], currentCategoryId);
+            });
+    }
+}
+
+function populateCategoryIndicators(category, categoryId) {
+    for(let i = 0; i < category.length; i++) {
+        console.log("creating indicator in category: " + i);
+        makeDbCallAsPromise("CALL createIndicatorInCategory('" + category.indicators[i].id + "', '" + i + "', '" + categoryId + "')")
+    }
 }
 
 makeDbCallAsPromise = function(queryString) {

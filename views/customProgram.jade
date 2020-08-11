@@ -185,12 +185,12 @@ body
          function getIndicatorValue() {
             let indicatorValues = [];
             let indicatorPanel = document.getElementById("indicatorDetailsPanel");
-            let indicatorType = indicatorPanel.children[0].getAttribute("class");
-            switch (indicatorType) {
+            let indicatorArchetype = indicatorPanel.children[0].getAttribute("class");
+            switch (indicatorArchetype) {
                 case 'boolean':
                     let booleanChildren = document.getElementsByClassName("booleanChildren");
                     for(let i = 0; i < booleanChildren.length; i += 1) {
-                        let indicatorValue = {type: indicatorType, name: booleanChildren[i].value, required:booleanChildren[i].getAttribute('required')}
+                        let indicatorValue = {archetype: indicatorArchetype, name: booleanChildren[i].value, required:booleanChildren[i].getAttribute('required')}
                         indicatorValues.push(indicatorValue);
                     }
                     break;
@@ -198,7 +198,7 @@ body
                     let floatChildren = document.getElementsByClassName("floatChildren");
                     for (let i = 0; i < floatChildren.length; i += 1) {
                         let indicatorValue = {
-                            type: indicatorType,
+                            archetype: indicatorArchetype,
                             name: floatChildren[i].value,
                             required: floatChildren[i].getAttribute('required')
                         }
@@ -246,7 +246,7 @@ body
             }
 
             for (let i = 0; i < newProgram.categories.length; i++) {
-                if(element.getAttribute("categoryId") == newProgram.categories[i].id){ //yes we are relying on type coercion here element.getAttribute("categoryId") is a string, newProgram.categories[i].id is a number
+                if(element.getAttribute("categoryId") == newProgram.categories[i].id) { //yes we are relying on type coercion here element.getAttribute("categoryId") is a string, newProgram.categories[i].id is a number
                     indicator = {
                         id: id,
                         name: data
