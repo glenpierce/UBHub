@@ -67,14 +67,16 @@ function populateProgramCategories(program, programId) {
         makeDbCallAsPromise("CALL createCategory('" + program.categories[i].name + "', '" + i + "', '" + programId + "')")
             .then(function (rows) {
                 console.log("new category id = " + rows[0][0].id);
-                currentCategoryId = rows[0][0].id;
+                const currentCategoryId = rows[0][0].id;
                 populateCategoryIndicators(program.categories[i], currentCategoryId);
             });
     }
 }
 
 function populateCategoryIndicators(category, categoryId) {
-    for(let i = 0; i < category.length; i++) {
+    console.log(`categoryId = ${categoryId}`);
+    console.log(category);
+    for(let i = 0; i < category.indicators.length; i++) {
         console.log("creating indicator in category: " + i);
         makeDbCallAsPromise("CALL createIndicatorInCategory('" + category.indicators[i].id + "', '" + i + "', '" + categoryId + "')")
     }
