@@ -1,7 +1,7 @@
 const express = require('express');
 const mysql = require('mysql');
 const router = express.Router();
-const path = require(path);
+const path = require("path");
 const https = require('https');
 const config = require('./config.js');
 const session = require('client-sessions');
@@ -335,7 +335,7 @@ update = function() {
     getAllUploadsByUserProcedure =
         `CREATE PROCEDURE getAllUploadsByUser(IN userId VARCHAR(2048))\n
             BEGIN\n
-            SELECT * from locations where update_by = userId;\n //wrong
+            SELECT * from locations where update_by = userId;\n
         END;`;
     query.push(getAllUploadsByUserProcedure);
 
