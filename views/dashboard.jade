@@ -43,16 +43,16 @@ body
                             div(onclick="window.location='/changeLocation'" style="align-self:flex-start; font-size:10px; color:#326f90; margin-right:2px; text-decoration:underline; cursor:pointer;") You must first create or select a location
                     if site.siteName
                         div(style="display:flex; margin:auto;")
-                            div(style="display:flex; margin:auto; background-color:#f2f2f2f2; padding:5px;")
+                            div(style="display:flex; flex-direction:column; margin:auto; padding:5px;")
                                  for program in basicProgramData
                                      if program.iconFileName
-                                         div(id="#{program.id}" style="display:flex; flex-direction:column; cursor:pointer; margin:5px; padding:10px; align-items:center; justify-content:space-between;" onclick="window.location='/programs/?id=#{program.id}'" onmouseover="onHover(#{program.id});")
+                                         div(id="#{program.id}" style="display:flex; flex-direction:column; cursor:pointer; margin:5px; border:solid; padding:10px; align-items:center; justify-content:space-between;" onclick="window.location='/programs/?id=#{program.id}'" onmouseover="onHover(#{program.id});")
                                             div(style="font-weight:700; margin-bottom:10px; text-align:center; font-size:15px; color:#808080") SELECT
                                             div(style="height:90px;")
                                                 image(src="/images/#{program.iconFileName}" style="max-width:150px; max-height:90px; height:auto; width:auto;")
                                             div(style="font-weight:700; margin:10px 0px 10px 0px; text-align:center; max-width:150px; height:32px; vertical-align:middle;") #{program.programName}
                                      else
-                                         div(style="display:flex; flex-direction:column;")
+                                         div(style="display:flex; flex-direction:column; cursor:pointer; margin:5px; border:solid; padding:5px;")
                                             div #{program.programName}
                 if site.siteName
                     div(style="flex-basis:0; flex-grow:1;")

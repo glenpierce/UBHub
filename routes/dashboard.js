@@ -1,12 +1,12 @@
-var express = require('express');
-var router = express.Router();
-var mysql = require('mysql');
-var session = require('client-sessions');
-var path = require("path");
+const express = require('express');
+const router = express.Router();
+const mysql = require('mysql');
+const session = require('client-sessions');
+const path = require("path");
 
-var app = express();
+const app = express();
 
-var config = require('../config.js');
+const config = require('../config.js');
 
 app.use(session({
     cookieName: 'session',
@@ -20,7 +20,7 @@ router.get('/', function (req, res, next) {
 
     if (req.session.user) {
 
-        var userData = {};
+        const userData = {};
 
         function getSelectedSite() {
             return new Promise(function (resolve, reject) {
@@ -30,7 +30,7 @@ router.get('/', function (req, res, next) {
                     } else {
                         query = `Call getSelectedSiteByUserQuery('${req.session.user}')`;
                     }
-                    connection = mysql.createConnection({
+                    let connection = mysql.createConnection({
                         host: config.rdsHost,
                         user: config.rdsUser,
                         password: config.rdsPassword,
@@ -183,17 +183,20 @@ router.get('/', function (req, res, next) {
 
         function getBasicProgramData() {
             return new Promise( function (resolve, reject) {
-                makeDbCall("select id, programName, description, iconFileName from programs where private = 0;", resolve);
+                makeDbCall(`select id, programName, description, iconFileName from programs;`, resolve);
             });
         }
 
         getSelectedSite().then(function (values) {
             if(values[0].length < 1) {
+                console.log("values[0].length < 1");
                 // getUserData(values[0][0].id);
                 res.render('dashboard', {username: req.session.user, basicProgramData: [], site:{siteName:null}});
             } else {
                 let site = values[0][0];
                 getBasicProgramData().then(function (basicProgramData) {
+                    console.log("after getting basic program data");
+                    console.log(basicProgramData);
                     res.render('dashboard', {username: req.session.user, basicProgramData: basicProgramData, site:site});
                 });
             }

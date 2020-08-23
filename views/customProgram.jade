@@ -147,8 +147,12 @@ body
                 div(class="color" style="background:#B58989;" onclick="setTargetCategoryColor(this);")
 
     div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="noCategoryErrorPopUp" onclick="hideModal('noCategoryErrorPopUp')")
-        div(style="height:200px; width:400px; background-color:white; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
-            | Please create a category first!
+        div(style="display:flex; flex-direction:column; justify-content:center; text-align:center; height:200px; width:400px; background-color:white; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
+            | Please create a category first
+
+    div(style="display:none; position:fixed; height:100%; width:100%; background-color:rgba(0,0,0,0.4); z-index:4;" id="noProgramNameErrorPopUp" onclick="hideModal('noProgramNameErrorPopUp')")
+        div(style="display:flex; flex-direction:column; justify-content:center; text-align:center; height:200px; width:400px; background-color:white; margin:auto; border-radius:10px;" onclick="stopPropagation(event);")
+            | Please enter a Program Name
 
     +header(true)
 
@@ -367,6 +371,8 @@ body
         function createProgram() {
             if (newProgram.categories.length < 1) {
                 noCategoryErrorPopUp(); // makes new div visible
+            } else if (newProgram.name == null) {
+                noProgramNameErrorPopUp();
             } else {
                 httpPost("/createCustomProgram", console.log, newProgram);
             }
@@ -386,7 +392,15 @@ body
             document.getElementById('noCategoryErrorField').focus();
         };
 
+        function noProgramNameErrorPopUp() {
+            document.getElementById('noProgramNameErrorPopUp').style.display = "flex";
+            document.getElementById('noProgramNameErrorPopUp').focus();
+        };
+
     div(style="padding:40px;")
+        div(style="display:flex;")
+            div Program Name
+            input(id="programNameInput" onchange="newProgram.name=this.value;")
         - let indicatorsJSON = JSON.parse(indicators);
         div(style="display:flex;")
             div(style="flex-grow:1;")
