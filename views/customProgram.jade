@@ -374,7 +374,7 @@ body
             } else if (newProgram.name == null) {
                 noProgramNameErrorPopUp();
             } else {
-                httpPost("/createCustomProgram", console.log, newProgram);
+                httpPost("/createCustomProgram", window.location='/dashboard', newProgram);
             }
         }
 
