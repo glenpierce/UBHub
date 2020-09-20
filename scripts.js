@@ -57,7 +57,7 @@ let selectSiteForUserAndReturnItProcedure;
 let createSiteProcedure;
 let indicatorsTable;
 let createIndicatorProcedure;
-let createIndicatorInCategoryTable;
+let indicatorInCategoryTable;
 let createIndicatorInCategoryProcedure;
 let indicatorValuesTable;
 let createIndicatorValueProcedure;
@@ -65,6 +65,7 @@ let indicatorRatingsTable;
 let categoriesTable;
 let createCategoryProcedure;
 let userDataTable;
+let dropProgramSchema;
 
 let documentsTable;
 let participationTable;
@@ -375,7 +376,7 @@ createIndicatorProcedure =
             SELECT * FROM indicators WHERE id=LAST_INSERT_ID();\n
         END;`;
 
-createIndicatorInCategoryTable =
+indicatorInCategoryTable =
     `CREATE TABLE indicatorInCategory(
             \`id\` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
             \`indicatorTemplateId\` INT,
@@ -512,6 +513,28 @@ userDataTable =
         );`;
 //recorded value, projected value, target value, baseline, ACTION (optional, and set as added automatically to an Indicator as it is added to a Program Instance)
 
+dropProgramSchema = [
+        `drop table IF EXISTS programs;`,
+        `drop procedure IF EXISTS createProgram;`,
+        `drop table IF EXISTS sites;`,
+        `drop table IF EXISTS sitesByUser;`,
+        `drop procedure IF EXISTS getSitesByUser;`,
+        `drop procedure IF EXISTS getSelectedSiteByUserQuery;`,
+        `drop procedure IF EXISTS selectSiteForUser;`,
+        `drop procedure IF EXISTS selectSiteForUserAndReturnIt;`,
+        `drop procedure IF EXISTS createSite;`,
+        `drop table IF EXISTS indicators;`,
+        `drop procedure IF EXISTS createIndicator;`,
+        `drop table indicatorInCategory`,
+        `drop procedure IF EXISTS createIndicatorInCategory;`,
+        `drop table IF EXISTS indicatorValues;`,
+        `drop procedure IF EXISTS createIndicatorValue;`,
+        `drop table IF EXISTS indicatorRatings;`,
+        `drop table IF EXISTS categories;`,
+        `drop procedure IF EXISTS createCategory;`,
+        `drop table IF EXISTS userData;`
+];
+
 privilegesLookUpTable =
     `CREATE TABLE privilegesLookUp(
             \`id\` NUMERIC(14, 0)
@@ -538,7 +561,7 @@ updateLocations = function(lower, upper) {
         });
 
         connection.connect();
-        let query = `select id, address, lat from locations where id = ${i};`;
+        let query = `select id, inst_address, lat from locations where id = ${i};`;
         console.log(query);
         connection.query(query, function (err, rows, fields) {
             if (!err) {
@@ -699,7 +722,7 @@ update = function() {
     query.push(createSiteProcedure);
     query.push(indicatorsTable);
     query.push(createIndicatorProcedure);
-    query.push(createIndicatorInCategoryTable);
+    query.push(indicatorInCategoryTable);
     query.push(createIndicatorInCategoryProcedure);
     query.push(indicatorValuesTable);
     query.push(createIndicatorValueProcedure);
@@ -728,7 +751,11 @@ update = function() {
     dbQuery(query);
 };
 
-resetPrograms = function () {
+clearPrograms = function () {
+    dbQuery(dropProgramSchema);
+}
+
+rebuildPrograms = function () {
     let query = [];
 
     query.push(programsTable);
@@ -742,15 +769,15 @@ resetPrograms = function () {
     query.push(createSiteProcedure);
     query.push(indicatorsTable);
     query.push(createIndicatorProcedure);
-    query.push(createIndicatorInCategoryTable);
+    query.push(indicatorInCategoryTable);
     query.push(createIndicatorInCategoryProcedure);
     query.push(indicatorValuesTable);
     query.push(createIndicatorValueProcedure);
     query.push(indicatorRatingsTable);
-    query.push(participationTable);
     query.push(createCategoryProcedure);
     query.push(userDataTable);
 
+    dbQuery(query);
 }
 
 //node
@@ -760,8 +787,8 @@ function dbQuery(query) {
     const connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
-        password: config.rdsPassword
-        //database: config.rdsDatabase //we have not yet created the database schema, so trying to connect to a schema will not work
+        password: config.rdsPassword,
+        database: config.rdsDatabase //if you have not yet created the database schema, comment this line out since trying to connect to a schema will not work
     });
 
     connection.connect();
