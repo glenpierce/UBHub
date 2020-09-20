@@ -774,6 +774,7 @@ rebuildPrograms = function () {
     query.push(indicatorValuesTable);
     query.push(createIndicatorValueProcedure);
     query.push(indicatorRatingsTable);
+    query.push(categoriesTable);
     query.push(createCategoryProcedure);
     query.push(userDataTable);
 
