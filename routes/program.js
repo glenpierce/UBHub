@@ -42,6 +42,7 @@ router.get('/', function (req, res, next) {
                     return makeDbCallAsPromise(queryString);
                 })
                 .then(indicatorIds => {
+                    programData.indicatorIds = indicatorIds;
                     let queryString = `select * from indicators where (id = ${indicatorIds[0].indicatorTemplateId})`;
                     for(let i = 1; i < indicatorIds.length - 1; i += 1) {
                         queryString += ` OR (categoryId = ${indicatorIds[i].indicatorTemplateId})`;

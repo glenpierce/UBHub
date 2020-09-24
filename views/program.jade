@@ -20,7 +20,7 @@ body
     - for(var i = 0; i < data.categories.length; i += 1)
         div category name: #{data.categories[i].categoryName}
              - for(var j = 0; j < data.indicators.length; j += 1) {
-                 if(data.indicators[j].categoryId == data.categories[i].id)
+                 if(data.indicatorIds[j].categoryId == data.categories[i].id)
                      div(style="margin-left:10px;") indicator name: #{data.indicators[j].indicatorName}
              - }
 
