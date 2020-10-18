@@ -38,19 +38,28 @@ router.get('/', function (req, res, next) {
                         queryString += ` OR (categoryId = ${categories[i].id})`;
                     }
                     queryString += `;`;
-                    console.log(queryString);
                     return makeDbCallAsPromise(queryString);
                 })
                 .then(indicatorIds => {
                     programData.indicatorIds = indicatorIds;
                     let queryString = `select * from indicators where (id = ${indicatorIds[0].indicatorTemplateId})`;
                     for(let i = 1; i < indicatorIds.length - 1; i += 1) {
-                        queryString += ` OR (categoryId = ${indicatorIds[i].indicatorTemplateId})`;
+                        queryString += ` OR (id = ${indicatorIds[i].indicatorTemplateId})`;
                     }
+                    queryString += `;`;
                     return makeDbCallAsPromise(queryString);
                 })
                 .then(indicators => {
                     programData.indicators = indicators;
+                    let queryString = `select * from indicatorValues where (subIndicator = ${indicators[0].id})`;
+                    for(let i = 1; i < indicators.length - 1; i += 1) {
+                        queryString += ` OR (subIndicator = ${indicators[i].id})`;
+                    }
+                    queryString += `;`;
+                    return makeDbCallAsPromise(queryString);
+                })
+                .then(indicatorValues => {
+                    programData.indicatorValues = indicatorValues;
                     programData = JSON.stringify(programData);
                     res.render('program', {username: req.session.user, id: req.query.newId, programData:programData});
                 });
