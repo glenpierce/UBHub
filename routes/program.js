@@ -34,7 +34,7 @@ router.get('/', function (req, res, next) {
                 .then(categories => {
                     programData.categories = categories;
                     let queryString = `select * from indicatorInCategory where (categoryId = ${categories[0].id})`;
-                    for(let i = 1; i < categories.length - 1; i += 1) {
+                    for(let i = 1; i < categories.length; i += 1) {
                         queryString += ` OR (categoryId = ${categories[i].id})`;
                     }
                     queryString += `;`;
@@ -43,7 +43,7 @@ router.get('/', function (req, res, next) {
                 .then(indicatorIds => {
                     programData.indicatorIds = indicatorIds;
                     let queryString = `select * from indicators where (id = ${indicatorIds[0].indicatorTemplateId})`;
-                    for(let i = 1; i < indicatorIds.length - 1; i += 1) {
+                    for(let i = 1; i < indicatorIds.length; i += 1) {
                         queryString += ` OR (id = ${indicatorIds[i].indicatorTemplateId})`;
                     }
                     queryString += `;`;
@@ -52,7 +52,7 @@ router.get('/', function (req, res, next) {
                 .then(indicators => {
                     programData.indicators = indicators;
                     let queryString = `select * from indicatorValues where (subIndicator = ${indicators[0].id})`;
-                    for(let i = 1; i < indicators.length - 1; i += 1) {
+                    for(let i = 1; i < indicators.length; i += 1) {
                         queryString += ` OR (subIndicator = ${indicators[i].id})`;
                     }
                     queryString += `;`;
