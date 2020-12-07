@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const session = require('client-sessions');
+const service = require('../services/dataService');
+const model = require('../public/javascripts/model');
 
 const app = express();
 
@@ -17,6 +19,7 @@ app.use(session({
 //todo: create sub indicator description
 
 router.get('/', function (req, res, next) {
+    model.myFunction("asdf");
     if(req.query.newId) {
         let emptyObject = JSON.stringify({data:""});
         switch (req.query.newId) {

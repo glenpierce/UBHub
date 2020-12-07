@@ -13,9 +13,12 @@ html
                 font-weight:bold; color: darkblue; border: none; background-color: lightblue; border-radius: 10px; width: fit-content; padding: 10px;
             }
 
+
+        script(type="text/javascript" src="/javascripts/model.js")
         script.
             class BooleanIndicator {
                 static create() {
+                    model.myFunction("this function is defined in model.js");
                     let booleanDetails = document.createElement('div');
                     booleanDetails.textContent = "boolean details";
                     booleanDetails.className = "boolean";
