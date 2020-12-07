@@ -23,12 +23,13 @@ function isUserNameUnique(req, res){
     connection.connect();
     query = "select * from users where email = '" + req.body.alias + "';";
     console.log(query);
-    connection.query(query, function(err, rows, fields){
+    connection.query(query, function(err, rows, fields) {
         if (!err) {
             if(rows.size) {
-                    res.render('createUser', {errorFromServer: true});
-            } else
+                res.render('createUser', {errorFromServer: true});
+            } else {
                 createUser(req, res);
+            }
         } else {
             console.log('Error while performing Query.');
             res.render('createUser', {errorFromServer: true});
@@ -41,15 +42,15 @@ function isUserNameUnique(req, res){
 function createUser(req, res) {
     console.log("creating user");
 
-    var connection = mysql.createConnection({
+    const connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
         password: config.rdsPassword,
         database: config.rdsDatabase
     });
 
-    var salt = bcrypt.genSaltSync(10) + req.body.username.toLowerCase() + config.salt;
-    var hash = bcrypt.hashSync(req.body.password, salt);
+    const salt = bcrypt.genSaltSync(10) + req.body.username.toLowerCase() + config.salt;
+    const hash = bcrypt.hashSync(req.body.password, salt);
 
     connection.connect();
 
