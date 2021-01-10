@@ -5,10 +5,14 @@ html
     head
         style.
         link(rel='stylesheet', href='/stylesheets/style.css')
+        script(type="text/javascript" src="/javascripts/model.js")
         script.
             let dataFromServer = !{programData};
             window.onload = function() {
                 console.log(dataFromServer);
+                let program = new model.Program();
+                program.create(dataFromServer);
+                console.log(program);
             }
 
 body
