@@ -1,17 +1,35 @@
+/*
+We've created a class called Program here, it has 2 functions as of the writing of this doc:
+create(programTemplateData) - this creates a Program instance and populates it with Categories and Indicators, but NOT user data (yet)
+    -We might be adding the saved data to this at some point though.
+save(programInstanceData) - This will be called when the program instance needs to be saved with user data.
+    -It would be called from the Save Program Instance event.
+    -We would stringify this object and send back to the server to persist it.
+    -We'll need to unwrap it on the server, which is probably the code we'll add next to this file as this is accessible from front and back ends.
+*/
 (function(exports) {
       exports.myFunction = function(myParameter) {
         console.log(myParameter);
       };
 
       exports.Program = function () {
-          this.create = function(data) {
+          this.create = function(programTemplateData) {
               this.categories = [];
-              for(let i = 0; i < data.categories.length; i += 1) {
-                  this.categories.push(data.categories[i])
-                  for (let j = 0; j < data.indicators.length; j += 1) {
-                      if (data.indicatorIds[j].categoryId == data.categories[i].id) {
-                          this.categories[i].indicators = {id:data.indicatorIds[j]};
+              for(let i = 0; i < programTemplateData.categories.length; i += 1) {
+                  this.categories.push(programTemplateData.categories[i])
+                  this.categories[i].indicators = [];
+                  for (let j = 0; j < programTemplateData.indicators.length; j += 1) {
+                      if (programTemplateData.indicatorIds[j].categoryId == programTemplateData.categories[i].id) {
+                          this.categories[i].indicators.push({id:programTemplateData.indicatorIds[j]});
                       }
+                  }
+              }
+          }
+
+          this.save = function (programInstanceData) {
+              for(let i = 0; i < programInstanceData.categories.length; i += 1) {
+                  for (let j = 0; j < programInstanceData.categories[i].indicators; j += 1) {
+                      this.categories[i].indicators[j].indicatorValue = programInstanceData.categories[i].indicators[j].indicatorValue;
                   }
               }
           }
