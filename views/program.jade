@@ -8,9 +8,10 @@ html
         script(type="text/javascript" src="/javascripts/model.js")
         script.
             let dataFromServer = !{programData};
+            let program;
             window.onload = function() {
                 console.log(dataFromServer);
-                let program = new model.Program();
+                program = new model.Program();
                 program.create(dataFromServer);
                 console.log(program);
             }
@@ -28,4 +29,4 @@ body
                      div(style="margin-left:10px;") indicator name: #{data.indicators[j].indicatorName}
              - }
 
-    div(class="button spaceAbove") Save Program Instance
+    div(class="button spaceAbove" onclick="console.log(program);") Save Program Instance
