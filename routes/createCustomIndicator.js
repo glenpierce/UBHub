@@ -20,7 +20,6 @@ router.post('/', function(req, res){
     console.log(req.body);
     if (true || req.session && req.session.user) {
         query = "CALL createIndicator('" + req.body.name + "', '" + req.body.archetype + "', '" + req.body.user + "');";
-
         connection = mysql.createConnection({
             host: config.rdsHost,
             user: config.rdsUser,
