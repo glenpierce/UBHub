@@ -14,6 +14,20 @@ html
                 program = new model.Program();
                 program.create(dataFromServer);
                 console.log(program);
+                for (let i = 0; i < program.categories.length; i += 1) {
+                    let category = document.createElement('div');
+                    category.textContent = program.categories[i].categoryName;
+
+                    for (let j = 0; j < program.categories[i].indicators.length; j += 1) {
+                        let indicator = document.createElement('div');
+                        indicator.textContent = program.categories[i].indicators[j].indicatorName;
+
+                        indicator.style = "margin-left:10px;";
+                        category.append(indicator);
+                    }
+                    let container = document.getElementById("container");
+                    container.append(category);
+                }
             }
 
 body
@@ -21,12 +35,6 @@ body
 
     div(class="spaceAbove")
 
-    - var data = JSON.parse(programData);
-    - for(var i = 0; i < data.categories.length; i += 1)
-        div category name: #{data.categories[i].categoryName}
-             - for(var j = 0; j < data.indicators.length; j += 1) {
-                 if(data.indicatorIds[j].categoryId == data.categories[i].id)
-                     div(style="margin-left:10px;") indicator name: #{data.indicators[j].indicatorName}
-             - }
+    div(id="container")
 
     div(class="button spaceAbove" onclick="console.log(program);") Save Program Instance
