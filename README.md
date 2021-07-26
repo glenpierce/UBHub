@@ -22,7 +22,7 @@ module.exports = config;
 
 You will also need to install and run Docker and run the following command in Docker:
 
-docker run --name ubhub -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql
+docker run --name ubhub -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql:5.7.35
 
 This container should be running when you are running the project.
 
