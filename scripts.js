@@ -672,7 +672,7 @@ function updateLocation(id, lat, lng){
     connection.end();
 }
 
-update = function() {
+update = function(existingDB = true) {
     let query = [];
     query.push(createDb);
     query.push(useDb);
@@ -748,7 +748,7 @@ update = function() {
     // }
 
     // query = [useDbQuery, createIndicatorQuery, createIndicatorInProgramQuery];
-    dbQuery(query);
+    dbQuery(query, existingDB);
 };
 
 clearPrograms = function () {
@@ -784,13 +784,25 @@ rebuildPrograms = function () {
 //node
 //var scripts = require('./scripts');
 
-function dbQuery(query) {
-    const connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase //if you have not yet created the database schema, comment this line out since trying to connect to a schema will not work
-    });
+function dbQuery(query, exitingDB = true) {
+    let newConnection;
+
+    if (exitingDB) {
+        newConnection = mysql.createConnection({
+            host: config.rdsHost,
+            user: config.rdsUser,
+            password: config.rdsPassword,
+            database: config.rdsDatabase
+        });
+    } else {
+        newConnection = mysql.createConnection({
+            host: config.rdsHost,
+            user: config.rdsUser,
+            password: config.rdsPassword
+        });
+    }
+
+    const connection =  newConnection;
 
     connection.connect();
 

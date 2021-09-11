@@ -29,13 +29,16 @@ Note: if you are running an M1 Mac the Docker install can be found here: https:/
 This container should be running when you are running the project.
 
 To setup the initial database schema, from the project's working directory, enter the node REPL terminal by typing node
-then, in the REPL type: var scripts = require('./scripts');
-press enter
-then type: scripts.update();
-press enter
-You should see a lot of logs indicating success on several different database queries.
-To exit the REPL, press ctl + c
+then, in the REPL type: <br>
+var scripts = require('./scripts'); <br>
+press enter <br>
+then type: scripts.update(false); <br>
+press enter <br>
+You should see a lot of logs indicating success on several different database queries. <br>
+To exit the REPL, press ctl + c <br>
 
-To start the Node.js server, run: node bin/www from the command line ( or node bin\www for Mac/Linux systems )
+To start the Node.js server, run: <br>
+node bin/www from the command line ( or node bin\www for Mac/Linux systems )<br>
+<br>
 From there, you can visit localhost:3000 and should see the home page of the website.
 The Map requires some additional data in the database and visiting it without that will cause the node server to stop.
