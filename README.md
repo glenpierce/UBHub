@@ -26,7 +26,12 @@ docker run --name ubhub -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql
 
 Note: if you are running an M1 Mac the Docker install can be found here: https://docs.docker.com/docker-for-mac/apple-silicon/ , the command would be: docker run --platform linux/x86_64 --name ubhub -e MYSQL_ROOT_PASSWORD=my-secret-pw -p 3306:3306 mysql 
 
-This container should be running when you are running the project.
+This container should be running when you are running the project.<br>
+<br>
+A common problem we are seeing on setup of the DB is that the latest versions of MySQL are complaining about authentication protocols. To solve this problem, enter this command into MySQL, probably via MySQL workbench or via the commandline.<br>
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';<br>
+flush privileges;<br>
+If that doesn't work, try it without @'localhost' part.<br>
 
 To setup the initial database schema, from the project's working directory, enter the node REPL terminal by typing node
 then, in the REPL type: <br>
@@ -42,3 +47,6 @@ node bin/www from the command line ( or node bin\www for Mac/Linux systems )<br>
 <br>
 From there, you can visit localhost:3000 and should see the home page of the website.
 The Map requires some additional data in the database and visiting it without that will cause the node server to stop.
+<br>
+<br>If you're having trouble with the container, to login to it: <br>
+docker exec -it ubhub bash
