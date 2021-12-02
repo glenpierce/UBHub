@@ -5,7 +5,7 @@ html
     head
         style.
         link(rel='stylesheet', href='/stylesheets/style.css')
-        script(type="text/javascript" src="/javascripts/model.js")
+        script(type='text/javascript' src='/javascripts/model.js')
         script.
             let dataFromServer = !{programData};
             let program;
@@ -14,27 +14,76 @@ html
                 program = new model.Program();
                 program.create(dataFromServer);
                 console.log(program);
+
+                const form = document.getElementById('form');
+                form.action = '/program/submit';
+                form.method = 'POST';
+
                 for (let i = 0; i < program.categories.length; i += 1) {
                     let category = document.createElement('div');
                     category.textContent = program.categories[i].categoryName;
 
                     for (let j = 0; j < program.categories[i].indicators.length; j += 1) {
-                        let indicator = document.createElement('div');
-                        indicator.textContent = program.categories[i].indicators[j].indicatorName;
+                        let indicator = createIndicatorEntry(program.categories[i].indicators[j]);
 
-                        indicator.style = "margin-left:10px;";
+                        indicator.style = 'margin-left:10px;';
                         category.append(indicator);
                     }
-                    let container = document.getElementById("container");
-                    container.append(category);
+                    form.append(category);
                 }
+
+                const submitButton = document.createElement('input');
+                submitButton.setAttribute('type', 'submit');
+                submitButton.setAttribute('value', 'Submit');
+                submitButton.textContent = 'submit';
+                form.append(submitButton);
+            }
+
+            function createIndicatorEntry(indicator) {
+                if(indicator.archetype == 'boolean') {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = indicator.indicatorName;
+                    if(indicator.required || true) {
+                        checkbox.required = true; //todo: problem - this requirement makes it required to be checked...
+                    }
+
+                    const checkboxLabel = document.createElement('label');
+                    checkboxLabel.textContent = indicator.indicatorName;
+
+                    const checkboxAndLabel = document.createElement('div');
+
+                    checkboxAndLabel.append(checkbox);
+                    checkboxAndLabel.append(checkboxLabel);
+                    return checkboxAndLabel;
+                }
+
+                if(indicator.archetype == 'float') {
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.step = 0.001;
+                    input.name = indicator.indicatorName;
+
+                    const label = document.createElement('label');
+                    label.textContent = indicator.indicatorName;
+
+                    const inputAndLabel = document.createElement('div');
+                    inputAndLabel.append(input);
+                    inputAndLabel.append(label);
+
+                    return inputAndLabel;
+                }
+
+                const label = document.createElement('div');
+                label.textContent = indicator.indicatorName;
+                return label;
             }
 
 body
     +header(true)
 
-    div(class="spaceAbove")
+    div(class='spaceAbove')
 
-    div(id="container")
+    form(id='form')
 
-    div(class="button spaceAbove" onclick="console.log(program);") Save Program Instance
+    //div(class='button spaceAbove' onclick='console.log(program);') Save Program Instance

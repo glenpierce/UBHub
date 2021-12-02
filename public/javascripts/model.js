@@ -14,13 +14,15 @@ save(programInstanceData) - This will be called when the program instance needs 
 
       exports.Program = function () {
           this.create = function(programTemplateData) {
+              this.id = programTemplateData.id;
+              this.site = programTemplateData.site;
               this.categories = [];
               for(let i = 0; i < programTemplateData.categories.length; i += 1) {
                   this.categories.push(programTemplateData.categories[i])
                   this.categories[i].indicators = [];
                   for (let j = 0; j < programTemplateData.indicatorIds.length; j += 1) {
                       if(programTemplateData.indicatorIds[j].categoryId == this.categories[i].id) {
-                          indicatorId = programTemplateData.indicatorIds[j].indicatorTemplateId;
+                          let indicatorId = programTemplateData.indicatorIds[j].indicatorTemplateId;
                           for(let k = 0; k < programTemplateData.indicators.length; k++) {
                               if(programTemplateData.indicators[k].id == indicatorId) {
                                   this.categories[i].indicators.push(programTemplateData.indicators[k]);

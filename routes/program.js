@@ -3,10 +3,13 @@ const router = express.Router();
 const session = require('client-sessions');
 const service = require('../services/dataService');
 const model = require('../public/javascripts/model');
+const bodyParser = require('body-parser');
+const urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 const app = express();
 
 const config = require('../config.js');
+const {makeDbCallAsPromise} = require("../ConnectionPool");
 
 app.use(session({
     cookieName: 'session',
@@ -18,8 +21,23 @@ app.use(session({
 
 //todo: create sub indicator description
 
+router.post('/submit', urlencodedParser, (req, res) => {
+    console.log('Got body:', req.body);
+    const query = `Call getSelectedSiteByUserQuery('${req.session.user}')`;
+    makeDbCallAsPromise(query).then(function (values) {
+        const site = values[0][0];
+        Object.keys(req.body).forEach(function(key) {
+            console.log(key, req.body[key]);
+            let queryString = 'INSERT into userData (userEmail, site, program, indicatorId, indicatorValue) VALUES (' + req.session.user + ', ' + site.id + ');';
+            console.log(queryString);
+            // makeDbCallAsPromise(queryString);
+        });
+    });
+    res.redirect('/dashboard');
+});
+
 router.get('/', function (req, res, next) {
-    model.myFunction("asdf");
+    // model.myFunction("asdf");
     if(req.query.newId) {
         let emptyObject = JSON.stringify({data:""});
         switch (req.query.newId) {
@@ -27,7 +45,7 @@ router.get('/', function (req, res, next) {
                 res.render('ubifProgram', {username: req.session.user, id: req.query.newId, dataFromServer:emptyObject});
                 return;
             default:
-                let programData = {};
+                let programData = {id:req.query.newId};
                 let queryString = `select * from programs where id = '${req.query.newId}' and author = '${req.session.user}';`;
                 makeDbCallAsPromise(queryString)
                 .then(program => {
