@@ -7,12 +7,14 @@ html
             function goToDashboard() {
                 console.log("clicked");
             }
-            var lastId;
+            let lastId;
             function onHover(id) {
-                if(lastId) {
+                if(lastId && document.getElementById(lastId) != null) {
                     document.getElementById(lastId).style.backgroundColor = "transparent";
                 }
-                document.getElementById(id).style.backgroundColor = "white";
+                if(document.getElementById(id) != null) {
+                    document.getElementById(id).style.backgroundColor = "white";
+                }
                 lastId = id;
             }
 
