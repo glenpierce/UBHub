@@ -27,7 +27,7 @@ let resources = require('./routes/resources');
 let home = require('./routes/home');
 let account = require('./routes/account');
 let programs = require('./routes/programs');
-let newProgramRoute = require('./routes/program');
+let program = require('./routes/program');
 let statusReport = require('./routes/statusReport');
 let createUserDataFromJSON = require('./routes/createUserDataFromJSON');
 let createCustomIndicatorValues = require('./routes/createCustomIndicatorValues');
@@ -55,7 +55,6 @@ app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
 // app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({limit: '50mb'}));
@@ -93,11 +92,13 @@ app.use('/resources', resources);
 app.use('/home', home);
 app.use('/account', account);
 app.use('/programs', programs);
-app.use('/program', newProgramRoute);
+app.use('/program', program);
 app.use('/statusReport', statusReport);
 app.use('/createUserDataFromJSON', createUserDataFromJSON);
 app.use('/createCustomIndicatorValues', createCustomIndicatorValues);
 app.use('/news', news);
+
+app.use(logger('dev'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
