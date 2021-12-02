@@ -38,10 +38,10 @@ router.get('/', function (req, res, next) {
                     });
 
                     connection.connect();
-                    console.log(query);
+                    // console.log(query);
                     connection.query(query, function (err, rows, fields) {
                         if (!err) {
-                            console.log(rows);
+                            // console.log(rows);
                             resolve(rows);
                         } else {
                             console.log('Error while performing Query.');
@@ -69,10 +69,10 @@ router.get('/', function (req, res, next) {
                     });
 
                     connection.connect();
-                    console.log(query);
+                    // console.log(query);
                     connection.query(query, function (err, rows, fields) {
                         if (!err) {
-                            console.log(rows);
+                            // console.log(rows);
                             resolve(rows);
                         } else {
                             console.log('Error while performing Query.');
@@ -100,10 +100,10 @@ router.get('/', function (req, res, next) {
                     });
 
                     connection.connect();
-                    console.log(query);
+                    // console.log(query);
                     connection.query(query, function (err, rows, fields) {
                         if (!err) {
-                            console.log(rows);
+                            // console.log(rows);
                             resolve(rows);
                         } else {
                             console.log('Error while performing Query.');
@@ -131,10 +131,10 @@ router.get('/', function (req, res, next) {
                     });
 
                     connection.connect();
-                    console.log(query);
+                    // console.log(query);
                     connection.query(query, function (err, rows, fields) {
                         if (!err) {
-                            console.log(rows);
+                            // console.log(rows);
                             resolve(rows);
                         } else {
                             console.log('Error while performing Query.');
@@ -162,10 +162,10 @@ router.get('/', function (req, res, next) {
                     });
 
                     connection.connect();
-                    console.log(query);
+                    // console.log(query);
                     connection.query(query, function (err, rows, fields) {
                         if (!err) {
-                            console.log(rows);
+                            // console.log(rows);
                             resolve(rows);
                         } else {
                             console.log('Error while performing Query.');
@@ -195,8 +195,7 @@ router.get('/', function (req, res, next) {
             } else {
                 let site = values[0][0];
                 getBasicProgramData().then(function (basicProgramData) {
-                    console.log("after getting basic program data");
-                    console.log(basicProgramData);
+                    // console.log(basicProgramData);
                     res.render('dashboard', {username: req.session.user, basicProgramData: basicProgramData, site:site});
                 });
             }
@@ -236,7 +235,7 @@ router.get('/', function (req, res, next) {
 // });
 
 makeDbCall = function (queryString, callback) {
-    console.log("making connection?");
+    // console.log("making connection?");
     connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
@@ -246,10 +245,10 @@ makeDbCall = function (queryString, callback) {
 
     connection.connect();
     query = queryString;
-    console.log(query);
+    // console.log(query);
     connection.query(query, function (err, rows, fields) {
         if (!err) {
-            console.log(rows);
+            // console.log(rows);
             callback(rows);
         } else {
             console.log('Error while performing Query.');
