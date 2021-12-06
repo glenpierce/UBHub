@@ -101,23 +101,58 @@ router.get('/', function (req, res, next) {
         }
     } else {
         let queryString = `select * from userData where id = ${req.query.id};`;
+        let programData = {id: {}, userData: {}};
         makeDbCallAsPromise(queryString)
             .then(rows => {
                 if(req.session.user == rows[0].userEmail) {
                     if(rows[0].program == '1') {
                         res.render('ubifProgram', {username: req.session.user, id: req.query.id, dataFromServer:rows[0].jsonData});
                     } else {
-                        let programData = {data:[]};
+                        let userData = [];
                         Object.keys(rows).forEach(function(key) {
-                            programData.data.push(JSON.parse(JSON.stringify(rows[key])));
+                            userData.push(JSON.parse(JSON.stringify(rows[key])));
                         });
-                        console.log(programData);
-                        programData = JSON.stringify(programData);
-                        res.render('program', {
-                            username: req.session.user,
-                            id: req.query.id,
-                            programData: programData
-                        });
+                        programData.userData = userData;
+                        programData.id = programData.userData[0].program;
+                        let queryString = `select * from programs where id = '${programData.id}' and author = '${req.session.user}';`;
+                        makeDbCallAsPromise(queryString)
+                            .then(program => {
+                                let queryString = `select * from categories where program = ${programData.id};`;
+                                return makeDbCallAsPromise(queryString);
+                            })
+                            .then(categories => {
+                                programData.categories = categories;
+                                let queryString = `select * from indicatorInCategory where (categoryId = ${categories[0].id})`;
+                                for(let i = 1; i < categories.length; i += 1) {
+                                    queryString += ` OR (categoryId = ${categories[i].id})`;
+                                }
+                                queryString += `;`;
+                                return makeDbCallAsPromise(queryString);
+                            })
+                            .then(indicatorIds => {
+                                programData.indicatorIds = indicatorIds;
+                                let queryString = `select * from indicators where (id = ${indicatorIds[0].indicatorTemplateId})`;
+                                for(let i = 1; i < indicatorIds.length; i += 1) {
+                                    queryString += ` OR (id = ${indicatorIds[i].indicatorTemplateId})`;
+                                }
+                                queryString += `;`;
+                                return makeDbCallAsPromise(queryString);
+                            })
+                            .then(indicators => {
+                                programData.indicators = indicators;
+                                let queryString = `select * from indicatorValues where (subIndicator = ${indicators[0].id})`;
+                                for(let i = 1; i < indicators.length; i += 1) {
+                                    queryString += ` OR (subIndicator = ${indicators[i].id})`;
+                                }
+                                queryString += `;`;
+                                return makeDbCallAsPromise(queryString);
+                            })
+                            .then(indicatorValues => {
+                                programData.indicatorValues = indicatorValues;
+                                programData = JSON.stringify(programData);
+                                res.render('program', {username: req.session.user, id: programData.id, programData:programData});
+                            });
+                        return;
                     }
                 } else {
                     console.log(`user mismatch in program.js: ${req.session.user} ${rows[0]}`);
