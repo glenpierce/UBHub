@@ -26,14 +26,25 @@ router.post('/submit', urlencodedParser, (req, res) => {
     const query = `Call getSelectedSiteByUserQuery('${req.session.user}')`;
     makeDbCallAsPromise(query).then(function (values) {
         const site = values[0][0];
-        Object.keys(req.body).forEach(function(key) {
-            console.log(key, req.body[key]);
-            let queryString = 'INSERT into userData (userEmail, site, program, indicatorId, indicatorValue) VALUES (' + req.session.user + ', ' + site.id + ');';
-            console.log(queryString);
-            // makeDbCallAsPromise(queryString);
-        });
+        const year = req.body.header.year;
+        const name = req.body.header.name;
+        if(req.body.values != null) {
+            Object.keys(req.body.values).forEach(function (key) {
+                console.log(key, req.body.values[key]);
+                let value = req.body.values[key];
+                if (value == null || value == '') {
+                    value = 0;
+                }
+                const userDataId = req.session.programInstanceId;
+                let queryString = 'INSERT into userData (id, userEmail, site, program, indicatorId, indicatorValue, name, year) VALUES' +
+                    ' (' + userDataId + ', \'' + req.session.user + '\', ' + site.id + ', ' + req.session.programId + ', ' + key + ', ' + value + ', \'' + name + '\', ' + year + ');';
+                console.log(queryString);
+                makeDbCallAsPromise(queryString);
+            });
+        }
     });
-    res.redirect('/dashboard');
+    // res.redirect('/dashboard');
+    res.sendStatus(200);
 });
 
 router.get('/', function (req, res, next) {
@@ -46,6 +57,8 @@ router.get('/', function (req, res, next) {
                 return;
             default:
                 let programData = {id:req.query.newId};
+                req.session.programId = req.query.newId;
+                req.session.programInstanceId = Date.now();
                 let queryString = `select * from programs where id = '${req.query.newId}' and author = '${req.session.user}';`;
                 makeDbCallAsPromise(queryString)
                 .then(program => {
@@ -87,6 +100,7 @@ router.get('/', function (req, res, next) {
                 return;
         }
     } else {
+        //todo: add authentication to avoid showing user data to non-permissioned users
         let queryString = `select * from userData where id = ${req.query.id};`;
         makeDbCallAsPromise(queryString)
             .then(rows => {

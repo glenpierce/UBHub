@@ -18,9 +18,31 @@ html
                 const form = document.getElementById('form');
                 form.action = '/program/submit';
                 form.method = 'POST';
+                form.onsubmit = function (event) {
+                    event.preventDefault();
+                    const name = document.getElementsByClassName('nameInput').item(0).value;
+                    const year = document.getElementsByClassName('yearInput').item(0).value;
+                    const data ={'header': {'year':year, 'name':name}, 'values':{}};
+                    data.values = Object.fromEntries(new FormData(event.target).entries())
+                    console.log(data);
+                    const stringifiedData = JSON.stringify(data);
+                    console.log(stringifiedData);
+
+                    const xmlHttp = new XMLHttpRequest();
+                    xmlHttp.onreadystatechange = function () {
+                        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                            console.log(xmlHttp.responseText);
+                    }
+                    xmlHttp.open("POST", '/program/submit/', true); // true for asynchronous
+                    xmlHttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                    xmlHttp.send(stringifiedData);
+
+                    return false;
+                }
 
                 for (let i = 0; i < program.categories.length; i += 1) {
                     let category = document.createElement('div');
+                    category.style = 'margin:10px;';
                     category.textContent = program.categories[i].categoryName;
 
                     for (let j = 0; j < program.categories[i].indicators.length; j += 1) {
@@ -41,12 +63,20 @@ html
 
             function createIndicatorEntry(indicator) {
                 if(indicator.archetype == 'boolean') {
+                    const hiddenOffButton = document.createElement('input');
+                    hiddenOffButton.type = 'hidden';
+                    hiddenOffButton.name = indicator.id;
+                    hiddenOffButton.value = 0;
+
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
-                    checkbox.name = indicator.indicatorName;
-                    if(indicator.required || true) {
-                        checkbox.required = true; //todo: problem - this requirement makes it required to be checked...
-                    }
+                    checkbox.name = indicator.id;
+                    checkbox.addEventListener('change', event => {
+                        hiddenOffButton.value = checkbox.checked ? 1 : 0;
+                    });
+                    // if(indicator.required || true) {
+                    //     checkbox.required = true; //todo: problem - this requirement makes it required to be checked...
+                    // }
 
                     const checkboxLabel = document.createElement('label');
                     checkboxLabel.textContent = indicator.indicatorName;
@@ -54,6 +84,7 @@ html
                     const checkboxAndLabel = document.createElement('div');
 
                     checkboxAndLabel.append(checkbox);
+                    checkboxAndLabel.append(hiddenOffButton);
                     checkboxAndLabel.append(checkboxLabel);
                     return checkboxAndLabel;
                 }
@@ -62,7 +93,7 @@ html
                     const input = document.createElement('input');
                     input.type = 'number';
                     input.step = 0.001;
-                    input.name = indicator.indicatorName;
+                    input.name = indicator.id;
 
                     const label = document.createElement('label');
                     label.textContent = indicator.indicatorName;
@@ -84,6 +115,15 @@ body
 
     div(class='spaceAbove')
 
-    form(id='form')
+    div(style='margin-left:10px;')
+        div
+            div name
+            input(type='' class='nameInput' style='margin-left:10px;')
+
+        div
+            div year
+            input(type='' class='yearInput' style='margin-left:10px;')
+
+        form(id='form')
 
     //div(class='button spaceAbove' onclick='console.log(program);') Save Program Instance

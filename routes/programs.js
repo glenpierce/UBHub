@@ -20,11 +20,18 @@ router.get('/', function (req, res, next) {
     getUserDataForProgram(req.query.id, req).then(function (result) {
         let jsonData = {names:[], ids:[]};
         Object.keys(result).forEach(function(key) {
-            let row = result[key];
-            row = JSON.parse(JSON.stringify(row));
-            let rowData = JSON.parse(row.jsonData);
-            jsonData.names.push(rowData.name);
-            jsonData.ids.push(row.id);
+            let row = JSON.parse(JSON.stringify(result[key]));
+            let found = false;
+            for(let i = 0; i < jsonData.ids.length; i++) {
+                if (jsonData.ids[i] == row.id) {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                jsonData.names.push(row.name);
+                jsonData.ids.push(row.id);
+            }
         });
         res.render('programs', {username: req.session.user, rows: jsonData, query: req.query.id});
     });
