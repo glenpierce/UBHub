@@ -34,11 +34,11 @@ router.post('/', function(req, res){
 
     connection.connect();
 
-    connection.query('CALL login("' + req.body.username + '")', function(err, rows, fields){
+    connection.query('CALL login("' + req.body.username + '")', function(err, rows, fields) {
         if (!err && rows[0][0] != undefined) {
-            console.log(rows);
+            // console.log(rows);
             bcrypt.compare(req.body.password, rows[0][0].hashedPassword, function(err, response) {
-                console.log(response);
+                // console.log(response);
                 if(response){
                     req.session.user = req.body.username;
                     return res.send('/dashboard');
