@@ -100,19 +100,23 @@ router.get('/', function (req, res, next) {
                 return;
         }
     } else {
-        //todo: add authentication to avoid showing user data to non-permissioned users
         let queryString = `select * from userData where id = ${req.query.id};`;
         makeDbCallAsPromise(queryString)
             .then(rows => {
-                let jsonToSend = rows[0].jsonData;
                 if(req.session.user == rows[0].userEmail) {
                     if(rows[0].program == '1') {
-                        res.render('ubifProgram', {username: req.session.user, id: req.query.id, dataFromServer:jsonToSend});
+                        res.render('ubifProgram', {username: req.session.user, id: req.query.id, dataFromServer:rows[0].jsonData});
                     } else {
+                        let programData = {data:[]};
+                        Object.keys(rows).forEach(function(key) {
+                            programData.data.push(JSON.parse(JSON.stringify(rows[key])));
+                        });
+                        console.log(programData);
+                        programData = JSON.stringify(programData);
                         res.render('program', {
                             username: req.session.user,
                             id: req.query.id,
-                            dataFromServer: jsonToSend
+                            programData: programData
                         });
                     }
                 } else {
