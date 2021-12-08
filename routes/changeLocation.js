@@ -1,12 +1,9 @@
-var express = require('express');
-var router = express.Router();
-var mysql = require('mysql');
-var session = require('client-sessions');
-var path = require("path");
-
-var app = express();
-
-var config = require('../config.js');
+const express = require('express');
+const router = express.Router();
+const session = require('client-sessions');
+const config = require('../config.js');
+const {makeDbCallAsPromise} = require("../ConnectionPool");
+const app = express();
 
 app.use(session({
     cookieName: 'session',
@@ -15,24 +12,14 @@ app.use(session({
 }));
 
 router.get('/', function(req, res, next) {
-    var sites = "";
+    let sites = "";
 
-    connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
-    });
-
-    connection.connect();
-    query = `Call getSitesByUser('${req.session.user}')`;
-    connection.query(query, function(err, rows, fields) {
-        if (!err) {
+    const queryString = `Call getSitesByUser('${req.session.user}')`;
+    makeDbCallAsPromise(queryString)
+        .then(rows => {
             sites = rows[0];
             res.render('changeLocation', {sites:JSON.stringify(sites), username:req.session.user});
-        }
     });
-    connection.end();
 });
 
 router.post('/', function(req, res){

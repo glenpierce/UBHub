@@ -1,31 +1,14 @@
-var express = require('express');
-var mysql = require('mysql');
-var router = express.Router();
-var path = require("path");
-var config = require('../config.js');
+const express = require('express');
+const {makeDbCallAsPromise} = require("../ConnectionPool");
+const router = express.Router();
 
 router.get('/', function(req, res, next) {
-    connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
-    });
-
-    connection.connect();
-    query = 'CALL getAllUploadsByUser("' + req.session.user + '")';
-    console.log(query);
-    connection.query(query, function(err, rows, fields) {
-        if (!err) {
-            // console.log({data:rows[0]});
+    const queryString = 'CALL getAllUploadsByUser("' + req.session.user + '")';
+    makeDbCallAsPromise(queryString)
+        .then(rows => {
             data = JSON.stringify(rows[0]);
-            console.log(data);
             res.render('yourUploads', {fromServer:data, username: req.session.user});
-        } else {
-            console.log(err);
-        }
-    });
-    connection.end();
+        });
 });
 
 module.exports = router;

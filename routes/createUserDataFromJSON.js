@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../ConnectionPool.js').pool;
 const session = require('client-sessions');
-const path = require("path");
 const app = express();
 const config = require('../config.js');
+const {makeDbCallAsPromise} = require("../ConnectionPool");
 
 app.use(session({
     cookieName: 'session',
@@ -39,24 +38,5 @@ router.post('/', function(req, res){
         }
     );
 });
-
-
-makeDbCallAsPromise = function(queryString) {
-    return new Promise((resolve, reject) => {
-        pool.getConnection(function (error, connection) {
-            connection.query(queryString, function (err, rows, fields) {
-                if (!err) {
-                    resolve(rows);
-                } else {
-                    console.log('Error while performing Query.');
-                    console.log(err.code);
-                    console.log(err.message);
-                    reject(err);
-                }
-            });
-            connection.release();
-        });
-    });
-};
 
 module.exports = router;

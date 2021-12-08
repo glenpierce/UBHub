@@ -1,12 +1,11 @@
-var express = require('express');
-var router = express.Router();
-var mysql = require('mysql');
-var session = require('client-sessions');
-var path = require("path");
+const express = require('express');
+const router = express.Router();
+const session = require('client-sessions');
 
-var app = express();
+const app = express();
 
-var config = require('../config.js');
+const config = require('../config.js');
+const {makeDbCallAsPromise} = require("../ConnectionPool");
 
 app.use(session({
     cookieName: 'session',
@@ -22,27 +21,13 @@ router.get('/', function(req, res, next) {
 
 router.post('/', function(req, res){
     console.log(req.body);
-    connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
-    });
 
-    connection.connect();
-    query = 'call createSite(\'' + req.body.siteName + '\', \'' + req.session.user + '\')';
-    console.log(query);
-    connection.query(query, function(err, rows, fields) {
-        if (!err) {
+    const queryString = 'call createSite(\'' + req.body.siteName + '\', \'' + req.session.user + '\')';
+    makeDbCallAsPromise(queryString)
+        .then(rows => {
             console.log(rows);
             res.send('dashboard');
-        } else {
-            console.log('Error while performing Query.');
-            console.log(err.code);
-            console.log(err.message);
-        }
-    });
-    connection.end();
+        });
 });
 
 module.exports = router;
