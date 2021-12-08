@@ -108,12 +108,14 @@ router.get('/', function (req, res, next) {
                     if(rows[0].program == '1') {
                         res.render('ubifProgram', {username: req.session.user, id: req.query.id, dataFromServer:rows[0].jsonData});
                     } else {
+                        req.session.programInstanceId = req.query.id;
                         let userData = [];
                         Object.keys(rows).forEach(function(key) {
                             userData.push(JSON.parse(JSON.stringify(rows[key])));
                         });
                         programData.userData = userData;
                         programData.id = programData.userData[0].program;
+                        req.session.programId = programData.id;
                         let queryString = `select * from programs where id = '${programData.id}' and author = '${req.session.user}';`;
                         makeDbCallAsPromise(queryString)
                             .then(program => {

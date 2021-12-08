@@ -17,6 +17,10 @@ save(programInstanceData) - This will be called when the program instance needs 
               this.id = programTemplateData.id;
               this.site = programTemplateData.site;
               this.categories = [];
+              if(programTemplateData.userData != null) {
+                  programTemplateData.name = programTemplateData.userData[0].name;
+                  programTemplateData.year = programTemplateData.userData[0].year;
+              }
               for(let i = 0; i < programTemplateData.categories.length; i += 1) {
                   this.categories.push(programTemplateData.categories[i])
                   this.categories[i].indicators = [];

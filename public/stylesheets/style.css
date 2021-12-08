@@ -115,6 +115,12 @@ button:hover {
   display: none;
 }
 
+.readOnly {
+  outline: none;
+  border: none;
+  color: grey;
+}
+
 .popup {
   position: absolute;
   background: lightgrey;

@@ -15,6 +15,8 @@ html
                 program.create(dataFromServer);
                 console.log(program);
 
+                populateBasicUserData(dataFromServer);
+
                 const form = document.getElementById('form');
                 form.action = '/program/submit';
                 form.method = 'POST';
@@ -74,6 +76,11 @@ html
                     checkbox.addEventListener('change', event => {
                         hiddenOffButton.value = checkbox.checked ? 1 : 0;
                     });
+
+                    if(indicator.userData != null) {
+                        checkbox.checked = indicator.userData.indicatorValue == 1 ? true : false;
+                        hiddenOffButton.value = indicator.userData.indicatorValue;
+                    }
                     // if(indicator.required || true) {
                     //     checkbox.required = true; //todo: problem - this requirement makes it required to be checked...
                     // }
@@ -95,6 +102,10 @@ html
                     input.step = 0.001;
                     input.name = indicator.id;
 
+                    if (indicator.userData != null) {
+                        input.value = indicator.userData.indicatorValue;
+                    }
+
                     const label = document.createElement('label');
                     label.textContent = indicator.indicatorName;
 
@@ -108,6 +119,20 @@ html
                 const label = document.createElement('div');
                 label.textContent = indicator.indicatorName;
                 return label;
+            }
+
+            function populateBasicUserData(dataFromServer) {
+                if (dataFromServer.userData != null) {
+                    const nameInput = document.getElementsByClassName('nameInput')[0];
+                    nameInput.value = dataFromServer.userData[0].name;
+                    nameInput.readOnly = true;
+                    nameInput.classList.add('readOnly');
+
+                    const yearInput = document.getElementsByClassName('yearInput')[0];
+                    yearInput.value = dataFromServer.userData[0].year;
+                    yearInput.readOnly = true;
+                    yearInput.classList.add('readOnly');
+                }
             }
 
 body
