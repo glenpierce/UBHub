@@ -25,6 +25,13 @@ save(programInstanceData) - This will be called when the program instance needs 
                           let indicatorId = programTemplateData.indicatorIds[j].indicatorTemplateId;
                           for(let k = 0; k < programTemplateData.indicators.length; k++) {
                               if(programTemplateData.indicators[k].id == indicatorId) {
+                                  if(programTemplateData.userData != null) {
+                                      for(let index in programTemplateData.userData) {
+                                          if(programTemplateData.userData[index].indicatorId == indicatorId) {
+                                              programTemplateData.indicators[k].userData = programTemplateData.userData[index];
+                                          }
+                                      }
+                                  }
                                   this.categories[i].indicators.push(programTemplateData.indicators[k]);
                               }
                           }
