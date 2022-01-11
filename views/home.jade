@@ -4,9 +4,10 @@ html
     head
         title UBHub
         link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel='stylesheet', href='/stylesheets/bootstrap.css')
         script.
             function httpGet(theUrl, callback, data) {
-                var xmlHttp = new XMLHttpRequest();
+                const xmlHttp = new XMLHttpRequest();
                 xmlHttp.onreadystatechange = function () {
                     if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
                         callback(xmlHttp.responseText);

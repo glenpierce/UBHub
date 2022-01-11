@@ -1,10 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql');
 const session = require('client-sessions');
-const path = require("path");
-const http = require('http');
-const https = require('https');
 const pool = require('../ConnectionPool.js').pool;
 
 const app = express();
@@ -20,20 +16,20 @@ app.use(session({
 }));
 
 router.get('/', function(req, res, next) {
-    //var mapData = "";
+    //let mapData = "";
 
     pool.getConnection(function (error, connection) {
 
-        locationsQuery = 'SELECT * from locations limit 2000';
+        const locationsQuery = 'SELECT * from locations limit 2000';
 
         getMapLocations(connection, locationsQuery)
         .then((mapData) => {
-            mapSummary = getSummary(mapData);
-            buttonsQuery = 'SELECT * from mapButtons';
+            const mapSummary = getSummary(mapData);
+            const buttonsQuery = 'SELECT * from mapButtons';
             getMapData(connection, buttonsQuery)
                 .then((buttons) => {
                     connection.release();
-                    var mapButtons = categorizeButtons(buttons);
+                    const mapButtons = categorizeButtons(buttons);
                     if (req.session && req.session.user) {
                         res.render('map', {
                             mapFilterParameters: mapFilterParameters,
@@ -66,18 +62,18 @@ router.get('/update', function(req, res, next) {
 
 router.post('/tableData', function(req, res, next){
 
-    var mapData = "";
-    var string = "";
-    var page = req.body.page;
-    var filters = req.body.filters;
+    let mapData = "";
+    let string = "";
+    let page = req.body.page;
+    let filters = req.body.filters;
 
     if(page == null){
         page = 1;
     }
 
-    var limit = 10;
+    const limit = 10;
 
-    var query = buildLocationsQuery(filters, page, limit);
+    const query = buildLocationsQuery(filters, page, limit);
 
     pool.getConnection(function (error, connection) {
         connection.query(query, function(err, rows, fields) {
@@ -112,13 +108,13 @@ router.post('/tableData', function(req, res, next){
 });
 
 router.post('/resultCounts', function(req, res, next){
-    var filters = req.body.filters;
-    var query = buildLocationsQuery(filters, -1, -1);
+    const filters = req.body.filters;
+    const query = buildLocationsQuery(filters, -1, -1);
 
     pool.getConnection(function (error, connection) {
         connection.query(query, function (err, rows, fields) {
             connection.release();
-            var counts;
+            let counts;
             if (rows != undefined) {
                 counts = {
                     total: rows.length,
@@ -136,13 +132,13 @@ router.post('/resultCounts', function(req, res, next){
 });
 
 router.post('/getProgramMembers', function(req, res, next) {
-    var programName = req.body.programName;
-    var query = "SELECT * FROM participation WHERE `part_name` = '" + programName + "'";
+    const programName = req.body.programName;
+    const query = "SELECT * FROM participation WHERE `part_name` = '" + programName + "'";
 
     pool.getConnection(function (error, connection) {
         connection.query(query, function (err, rows, fields) {
             connection.release();
-            var members = [];
+            let members = [];
             if (rows != undefined) {
                 members = rows;
             }
@@ -153,18 +149,18 @@ router.post('/getProgramMembers', function(req, res, next) {
 
 function buildLocationsQuery(filters, page, limit){
   //PICK FIELDS
-  var query = `SELECT * from locations as l `;
-  var useWhere = false;
+  let query = `SELECT * from locations as l `;
+  let useWhere = false;
 
-  var whereClause = "";
-  var joinClause = "";
-  var firstWhere = true;
+  let whereClause = "";
+  let joinClause = "";
+  let firstWhere = true;
 
   //DEAL WITH FILTERS
     if (filters.length > 0) {
 
         //do WHERE filters first
-        for (i = 0; i < filters.length; i++) {
+        for (let i = 0; i < filters.length; i++) {
 
             switch (filters[i].type) {
                 case("select"):
@@ -222,19 +218,18 @@ function buildLocationsQuery(filters, page, limit){
 
 function attachProgramsToGivenInstitutions(connection, locations){
 
-
-  institutionIds = locations.map((x) => {
+  const institutionIds = locations.map((x) => {
     return x.id;
   });
 
-  var institutionIdsString = institutionIds.join(", ");
+  const institutionIdsString = institutionIds.join(", ");
 
-  partQuery = "SELECT * from participation WHERE inst_id in (" + institutionIdsString + ")";
+  const partQuery = "SELECT * from participation WHERE inst_id in (" + institutionIdsString + ")";
   return new Promise((resolve, reject) => {
     getMapData(connection, partQuery)
     .then(partData => {
       locations = mapParticipitationDataToLocations(partData, locations);
-      var documentQuery = "SELECT * FROM documents WHERE inst_id in (" + institutionIdsString + ")";
+      const documentQuery = "SELECT * FROM documents WHERE inst_id in (" + institutionIdsString + ")";
       getMapData(connection, documentQuery)
       .then((documentData) => {
         locations = mapDocumentDataToLocations(documentData, locations);
@@ -251,14 +246,19 @@ function getMapLocations(connection, query){
     getMapData(connection, query)
     .then ((locations) => {
 
-      var partQueryIds = locations.map((x) => {
+      const partQueryIds = locations.map((x) => {
         return x.id;
       });
 
-      var partQueryStrings = partQueryIds.join(", ");
+      const partQueryStrings = partQueryIds.join(", ");
 
 
-      var partQuery = "SELECT * FROM participation WHERE inst_id in (" + partQueryStrings + ")";
+      let partQuery = "SELECT * FROM participation";
+      if(partQueryStrings.length > 0) {
+          partQuery += "WHERE inst_id in (" + partQueryStrings + ")";
+      }
+
+      console.log(partQuery);
 
       getMapData(connection, partQuery)
       .then((partData => {
@@ -289,8 +289,8 @@ function getMapData(connection, query){
 function mapParticipitationDataToLocations(participationData, locations){
   //TODO: optimize this
   participationData.forEach((part) => {
-    var found = false;
-    var i = 0;
+    let found = false;
+    let i = 0;
 
     while (!found && i < locations.length) {
 
@@ -308,8 +308,8 @@ function mapParticipitationDataToLocations(participationData, locations){
 
 function mapDocumentDataToLocations(documentData, locations){
     documentData.forEach((document) => {
-        var found = false;
-        var i = 0;
+        let found = false;
+        let i = 0;
 
         while (!found && i < locations.length) {
 
@@ -350,11 +350,11 @@ function attachDocument(location, document) {
 }
 
 function categorizeButtons(buttons) {
-  var mapButtonCategories = [];
+  let mapButtonCategories = [];
   for (i = 0; i < buttons.length; i++) {
 
-    var found = false;
-    var j = 0;
+    let found = false;
+    let j = 0;
 
     while (j < mapButtonCategories.length && !found) {
       if (buttons[i].button_category == mapButtonCategories[j].categoryName){
@@ -365,7 +365,7 @@ function categorizeButtons(buttons) {
     }
 
     if(!found) {
-      var newCategory = {
+      const newCategory = {
         categoryName: buttons[i].button_category,
         buttons: [buttons[i]]
       };
@@ -377,7 +377,7 @@ function categorizeButtons(buttons) {
 }
 
 function outputProgramsAndActivities(entry) {
-  var contentString = "";
+  let contentString = "";
 
   if (entry.biodiversity_url != undefined) {
     contentString += `<a href="${entry.biodiversity_url}" target="_blank"><p>Biodiversity Website</p></a>`;
@@ -426,7 +426,7 @@ function outputProgramsAndActivities(entry) {
 
 
 function getSummary(data){
-  var summary = {};
+  let summary = {};
   summary.total = data.length;
 
   summary.municipalities = data.filter((x) => {
@@ -473,7 +473,7 @@ function getSummary(data){
 // }
 
 
-var mapActivities = [
+const mapActivities = [
     {
         name: "Biodiversity Data Portal"
     },
@@ -524,7 +524,7 @@ var mapActivities = [
     }
 ];
 
-var mapIndices = [
+const mapIndices = [
     {
         name: "Biocapacity"
     },
@@ -607,7 +607,7 @@ var mapIndices = [
     }
 ];
 
-var mapFilterParameters = [
+const mapFilterParameters = [
   {
     name: "Scale",
     id: "scale",

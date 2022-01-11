@@ -29,7 +29,7 @@ Note: if you are running an M1 Mac the Docker install can be found here: https:/
 This container should be running when you are running the project.<br>
 <br>
 A common problem we are seeing on setup of the DB is that the latest versions of MySQL are complaining about authentication protocols. To solve this problem, enter this command into MySQL, probably via MySQL workbench or via the commandline.<br>
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';<br>
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'my-secret-pw';<br>
 flush privileges;<br>
 If that doesn't work, try it without @'localhost' part.<br>
 
