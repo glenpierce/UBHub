@@ -24,7 +24,13 @@ header{
     }
 
     .nav-container {
+        display: flex;
         flex-grow: 1;
+        flex-direction: column-reverse;
+
+        @media (min-width: 930px) {
+            flex-direction: column;
+        }
     }
 
     img {
@@ -42,6 +48,7 @@ header{
             width: 80%;
             float: right;
             position: static;
+            align-self: end;
         }
 
     

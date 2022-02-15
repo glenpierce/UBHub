@@ -20,7 +20,14 @@ header .login-container {
   }
 }
 header .nav-container {
+  display: flex;
   flex-grow: 1;
+  flex-direction: column-reverse;
+}
+@media (min-width: 930px) {
+  header .nav-container {
+    flex-direction: column;
+  }
 }
 header img {
   max-width: 100%;
@@ -37,6 +44,7 @@ header nav {
     width: 80%;
     float: right;
     position: static;
+    align-self: end;
   }
 }
 header nav ul {
