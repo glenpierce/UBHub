@@ -23,18 +23,13 @@ mixin site(siteName, siteDescription)
         div #{siteDescription}
 
 mixin header(displayLoginInfo)
-    div
-        div(style="width:100%; position:fixed; display:flex; flex-grow:1; z-index: 2;")
-            div(style="height:100px; background:white; flex-grow:1;")
-            div(style="max-width:1200px; display:flex; justify-content:space-between; height: 40px; width:100%; flex-grow:5;")
-                div
-                    div(style="position:fixed; width:100%; max-width:1200px; height:35px; background-color:#b8ddc3; z-index:-1; top:0px;")
-                    div(style="position:fixed; width:100%; max-width:1200px; height:35px; background-color:#eff6e8; z-index:-1; top:35px;")
-                    div(style="position:fixed; width:100%; max-width:1200px; height:5px; background:white; z-index:-1; top: 70px;")
-                    img(src="/images/UBHub_logo_mainwebsite.svg" style="height:100px; margin-bottom:10px;")
-                div(style="width:100%;")
+    header
+                div(class="nav-container")
+                    div(class="logo-container")
+                      img(src="/images/UBHub_logo_mainwebsite.svg")
                     div
-                        div(style="display:flex; justify-content:space-between;")
+                        div(class="login-container")
+                            button(class="menu-toggle")
                             if(displayLoginInfo)
                                 if(username)
                                     div(style="padding:0px 100px 0px 50px; display:flex; justify-content:space-around; flex-grow:1;")
@@ -52,23 +47,37 @@ mixin header(displayLoginInfo)
                                     div(style="background-color:#d3e9d5; color:#316b59; padding:5px 30px 5px 30px; border-radius:20px; font-weight:700; cursor:pointer;" onclick="window.location='/login'") Log in
                             else
                                 div(style="color:#fab279; font-weight:700;") Signup / Log in
-                    div(style="display:flex; justify-content:space-between;")
-                        div(style="display:flex; justify-content:space-around; flex-grow:1;")
-                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/home'") Home
-                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/news'") News
-                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/map'") Map
-                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/resources'") Guide
-                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/aboutUs'") About Us
-                            div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/getInvolved'") Get Involved
+                    nav(role='navigation' aria-label="main navigation") 
+                        ul()
+                            li(onclick="window.location='/home'") Home
+                            li(onclick="window.location='/news'") News
+                            li(onclick="window.location='/map'") Map
+                            li(onclick="window.location='/resources'") Guide
+                            li(onclick="window.location='/aboutUs'") About Us
+                            li(onclick="window.location='/getInvolved'") Get Involved
                             if(username)
                                 div(style="padding:2px 5px 2px 2px;")
                                     div(style="background-color:#d3e9d5; cursor:pointer; color:#316b59; padding:5px 45px 5px 45px; border-radius:20px; font-weight:700;" onclick="window.location='/account/logout'") Logout
                             else
                                 div
                                     div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/createUser'") Sign up
-            div(style="height:75px; background:white; flex-grow:1;")
+            div(style="background:white; flex-grow:1;")
 
-        div(style="width:100%; height:80px;")
+        div(style="width:100%;")
+
+
+script.
+  window.onload = function(){
+      const navButton = document.querySelector('.menu-toggle');
+      const activeButton = document.querySelector('nav ul');
+      navButton.addEventListener('click', (e) => {
+        if(e.target.nodeName == "BUTTON") {
+          activeButton.classList.toggle('active-nav');
+        }
+  });
+
+  };
+
 
 mixin indexPostLinks(posts)
   div.indexPostLinks
