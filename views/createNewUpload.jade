@@ -4,6 +4,7 @@ html
     head
         title Create New Upload
         link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel='stylesheet', href='/stylesheets/index.css')
 
         mixin filterMixin(filterBy, attributeList)
             select(style="flex-grow:1; margin: 5px;" onchange="filter(this.value, #{filterBy})").border
