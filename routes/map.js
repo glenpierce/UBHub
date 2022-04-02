@@ -253,7 +253,7 @@ function getMapLocations(connection, query){
       const partQueryStrings = partQueryIds.join(", ");
 
 
-      let partQuery = "SELECT * FROM participation";
+      let partQuery = "SELECT * FROM participation ";
       if(partQueryStrings.length > 0) {
           partQuery += "WHERE inst_id in (" + partQueryStrings + ")";
       }
