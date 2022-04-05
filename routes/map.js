@@ -216,7 +216,7 @@ function buildLocationsQuery(filters, page, limit){
 }
 
 
-function attachProgramsToGivenInstitutions(connection, locations){
+function attachProgramsToGivenInstitutions(connection, locations) {
 
   const institutionIds = locations.map((x) => {
     return x.id;
@@ -224,12 +224,22 @@ function attachProgramsToGivenInstitutions(connection, locations){
 
   const institutionIdsString = institutionIds.join(", ");
 
-  const partQuery = "SELECT * from participation WHERE inst_id in (" + institutionIdsString + ")";
+  let partQuery = "SELECT * from participation";
+  if(institutionIdsString.length > 0) {
+      partQuery += " WHERE inst_id in (" + institutionIdsString + ")";
+  } else {
+      partQuery += ";";
+  }
   return new Promise((resolve, reject) => {
     getMapData(connection, partQuery)
     .then(partData => {
       locations = mapParticipitationDataToLocations(partData, locations);
-      const documentQuery = "SELECT * FROM documents WHERE inst_id in (" + institutionIdsString + ")";
+      let documentQuery = "SELECT * FROM documents";
+      if(institutionIdsString.length > 0) {
+          documentQuery += " WHERE inst_id in (" + institutionIdsString + ")";
+      } else {
+          documentQuery += ";";
+      }
       getMapData(connection, documentQuery)
       .then((documentData) => {
         locations = mapDocumentDataToLocations(documentData, locations);
@@ -241,7 +251,7 @@ function attachProgramsToGivenInstitutions(connection, locations){
 }
 
 
-function getMapLocations(connection, query){
+function getMapLocations(connection, query) {
   return new Promise((resolve, reject) => {
     getMapData(connection, query)
     .then ((locations) => {
@@ -250,22 +260,27 @@ function getMapLocations(connection, query){
         return x.id;
       });
 
-      const partQueryStrings = partQueryIds.join(", ");
+      const partQueryStrings = partQueryIds.join(", "); // todo: rename this variable, it's not clear - be consistent with others like it from above
 
 
-      let partQuery = "SELECT * FROM participation ";
+      let partQuery = "SELECT * FROM participation"; // todo: rename this variable, it's not clear
       if(partQueryStrings.length > 0) {
-          partQuery += "WHERE inst_id in (" + partQueryStrings + ")";
+          partQuery += " WHERE inst_id in (" + partQueryStrings + ")";
+      } else {
+          partQuery += ";";
       }
-
-      console.log(partQuery);
 
       getMapData(connection, partQuery)
       .then((partData => {
         locations = mapParticipitationDataToLocations(partData, locations);
       }))
       .then(() => {
-          const documentQuery = "SELECT * FROM documents WHERE inst_id in (" + partQueryStrings + ")";
+          let documentQuery = "SELECT * FROM documents";
+           if(partQueryStrings.length > 0) {
+               documentQuery += " WHERE inst_id in (" + partQueryStrings + ")"; // todo: we need to check the name of this variable
+           } else {
+               documentQuery += ";";
+           }
           getMapData(connection, documentQuery)
           .then((documentData) => locations = mapDocumentDataToLocations(documentData, locations))
           .then((() => resolve(locations)));
@@ -274,7 +289,8 @@ function getMapLocations(connection, query){
   });
 }
 
-function getMapData(connection, query){
+function getMapData(connection, query) {
+  console.log(query);
   return new Promise((resolve, reject) => {
     connection.query(query, function(err, rows, fields) {
       if (!err) {
@@ -286,7 +302,7 @@ function getMapData(connection, query){
   });
 }
 
-function mapParticipitationDataToLocations(participationData, locations){
+function mapParticipitationDataToLocations(participationData, locations) {
   //TODO: optimize this
   participationData.forEach((part) => {
     let found = false;
@@ -306,7 +322,7 @@ function mapParticipitationDataToLocations(participationData, locations){
   return locations;
 }
 
-function mapDocumentDataToLocations(documentData, locations){
+function mapDocumentDataToLocations(documentData, locations) {
     documentData.forEach((document) => {
         let found = false;
         let i = 0;

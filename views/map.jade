@@ -3,6 +3,9 @@ include mixins
 include mapMixins
 html
     +mapHead
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap.css')
+    link(rel='stylesheet', href='/stylesheets/index.css')
     script.
         function searchMap(){
             filterBySearch(document.getElementById("searchBox").value);
@@ -13,7 +16,7 @@ html
             }
         }
 body
-    +mapHeader(true)
+    +header(true)
 
     div(class="contentContainer noBorder")
         div.mapIntro
