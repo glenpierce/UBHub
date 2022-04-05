@@ -56,6 +56,7 @@ Now that you've got this all setup, you might someday want to shutdown your comp
 To run the app:<br>
 1. Start Docker (this might be the desktop application)<br>
    Start the mysql container in Docker
+   give command docker start ubhub
 2. start the Node.js server, run:<br>
-node bin/www from the command line ( or node bin\www for Mac/Linux systems )<br>
+node bin/www from the command line ( or node bin/www for Mac/Linux systems )<br>
 <br>
