@@ -68,6 +68,7 @@ let userDataTable;
 let dropProgramSchema;
 
 let documentsTable;
+let getAllDocumentsProcedure;
 let participationTable;
 let mapButtonsTable;
 
@@ -431,6 +432,12 @@ documentsTable =
             \`source_url\` VARCHAR(255) CHARACTER SET utf8,
             \`link_verified\` VARCHAR(255) CHARACTER SET utf8
         );`;
+
+getAllDocumentsProcedure =
+    `CREATE PROCEDURE getAllDocumentsProcedure()\n
+            BEGIN\n
+            SELECT * from documents;\n
+        END;`;
 
 participationTable =
     `CREATE TABLE participation (
