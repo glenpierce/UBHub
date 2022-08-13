@@ -1,8 +1,4 @@
 #!/bin/bash
 
-cd nodeServer
-echo npm start
-
-cd ..
-cd pythonServer
-echo python document_reporting.py
+echo npm --prefix nodeServer/start
+echo python pythonServer/document_reporting.py

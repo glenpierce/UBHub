@@ -10,12 +10,14 @@ WORKDIR /usr/src/app
 # where available (npm@5+)
 COPY nodeServer/package*.json ./nodeServer
 
+# Bundle app source
+COPY . .
+
+RUN chmod a+rx start.sh
+
 RUN cd nodeServer && npm install
 # If you are building your code for production
 # RUN npm ci --only=production
-
-# Bundle app source
-COPY . .
 
 EXPOSE 3000
 CMD ./start.sh
