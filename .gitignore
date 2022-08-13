@@ -1,4 +1,4 @@
-/node_modules/
+/nodeServer/node_modules/
 .DS_Store
 config.js
 populateDBScript.js
