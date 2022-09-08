@@ -4,7 +4,7 @@ const path = require("path");
 const request = require('request');
 const pool = require('../ConnectionPool.js').pool;
 const bcrypt = require('bcryptjs');
-const config = require('../config.js');
+const environment = require('../environment.js');
 
 router.get('/', function(req, res, next) {
 
@@ -38,7 +38,7 @@ router.post('/', function(req, res) {
             if (!err && rows[0][0] != undefined) {
                 bcrypt.compare(req.body.oldPassword, rows[0][0].hashedPassword, function (err, response) {
                     if (response) {
-                        var salt = bcrypt.genSaltSync(10) + req.session.user.toLowerCase() + config.salt;
+                        var salt = bcrypt.genSaltSync(10) + req.session.user.toLowerCase() + environment.salt;
                         var hash = bcrypt.hashSync(req.body.newPassword, salt);
 
                         const query = "update users set hashedPassword = \"" + hash + "\" where email = \"" + req.session.user + "\";";

@@ -6,13 +6,13 @@ const path = require("path");
 
 const app = express();
 
-const config = require('../config.js');
+const environment = require('../environment.js');
 
 app.use(session({
     cookieName: 'session',
-    secret: config.secret,
+    secret: environment.secret,
     cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
+        maxAge: new Date(Date.now() + (environment.expires))
     }
 }));
 
@@ -139,10 +139,10 @@ router.post("/submit", function (req, res) {
       if(req.body.tags)
           tags = req.body.tags;
       const connection = mysql.createConnection({
-          host: config.rdsHost,
-          user: config.rdsUser,
-          password: config.rdsPassword,
-          database: config.rdsDatabase
+          host: environment.rdsHost,
+          user: environment.rdsUser,
+          password: environment.rdsPassword,
+          database: environment.rdsDatabase
       });
 
       let path = "";
@@ -194,10 +194,10 @@ router.post("/vote", function(req, res) {
 
   if (req.session && req.session.user) {
     const connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
+        host: environment.rdsHost,
+        user: environment.rdsUser,
+        password: environment.rdsPassword,
+        database: environment.rdsDatabase
     });
 
     connection.connect();
@@ -236,10 +236,10 @@ router.post("/unvote", function(req, res) {
 
   if (req.session && req.session.user) {
     const connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
+        host: environment.rdsHost,
+        user: environment.rdsUser,
+        password: environment.rdsPassword,
+        database: environment.rdsDatabase
     });
 
     const voteDelta = req.body.voteDelta;
@@ -259,10 +259,10 @@ router.post("/accept", function(req, res){
 
   if (req.session && req.session.user) {
     const connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
+        host: environment.rdsHost,
+        user: environment.rdsUser,
+        password: environment.rdsPassword,
+        database: environment.rdsDatabase
     });
 
     connection.connect();
@@ -372,10 +372,10 @@ const getPostsAsListByTag = (callback, req, res, perPage, page, sort, search, ta
     //TODO: implement pagination
 
     const connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
+        host: environment.rdsHost,
+        user: environment.rdsUser,
+        password: environment.rdsPassword,
+        database: environment.rdsDatabase
     });
     connection.connect();
 
@@ -409,10 +409,10 @@ const getPostsAsList = (callback, req, res, perPage, page, sort, search) => {
   //TODO: implement pagination
 
   const connection = mysql.createConnection({
-      host: config.rdsHost,
-      user: config.rdsUser,
-      password: config.rdsPassword,
-      database: config.rdsDatabase
+      host: environment.rdsHost,
+      user: environment.rdsUser,
+      password: environment.rdsPassword,
+      database: environment.rdsDatabase
   });
   connection.connect();
 
@@ -445,10 +445,10 @@ const getPostsAsList = (callback, req, res, perPage, page, sort, search) => {
 const getPostsAsTree = function(postId, res, userId, callback) {
 
   const connection = mysql.createConnection({
-      host: config.rdsHost,
-      user: config.rdsUser,
-      password: config.rdsPassword,
-      database: config.rdsDatabase
+      host: environment.rdsHost,
+      user: environment.rdsUser,
+      password: environment.rdsPassword,
+      database: environment.rdsDatabase
   });
   connection.connect();
 
@@ -578,10 +578,10 @@ function attachPostVoteStatus(post, authorId, connection){
 
 function addViews(posts) {
   const connection = mysql.createConnection({
-      host: config.rdsHost,
-      user: config.rdsUser,
-      password: config.rdsPassword,
-      database: config.rdsDatabase
+      host: environment.rdsHost,
+      user: environment.rdsUser,
+      password: environment.rdsPassword,
+      database: environment.rdsDatabase
   });
   connection.connect();
 
@@ -733,10 +733,10 @@ function insertIntoTree(lop, t, u, a){
 function getFirstAncestor(postId){
 
   const connection = mysql.createConnection({
-      host: config.rdsHost,
-      user: config.rdsUser,
-      password: config.rdsPassword,
-      database: config.rdsDatabase
+      host: environment.rdsHost,
+      user: environment.rdsUser,
+      password: environment.rdsPassword,
+      database: environment.rdsDatabase
   });
 
   return new Promise((resolve, reject) =>{

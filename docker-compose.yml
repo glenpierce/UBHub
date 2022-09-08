@@ -1,0 +1,26 @@
+version: "3.1"
+services:
+  ubhub:
+    container_name: ubhub
+    restart: on-failure
+    build: ./
+    environment:
+      RDS_HOST: /run/secrets/rds_host
+      RDS_DATABASE: /run/secrets/rds_database
+      RDS_USER: /run/secrets/rds_user
+      RDS_PASSWORD: /run/secrets/rds_password
+    secrets:
+      - rds_host
+      - rds_database
+      - rds_user
+      - rds_password
+
+secrets:
+  rds_host:
+    file: rds_host.txt
+  rds_database:
+    file: rds_database.txt
+  rds_user:
+    file: rds_user.txt
+  rds_password:
+    file: rds_password.txt

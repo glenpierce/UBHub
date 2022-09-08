@@ -2,14 +2,14 @@ const express = require('express');
 const router = express.Router();
 const session = require('client-sessions');
 const app = express();
-const config = require('../config.js');
+const environment = require('../environment.js');
 const {makeDbCallAsPromise} = require("../ConnectionPool");
 
 app.use(session({
     cookieName: 'session',
-    secret: config.secret,
+    secret: environment.secret,
     cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
+        maxAge: new Date(Date.now() + (environment.expires))
     }
 }));
 

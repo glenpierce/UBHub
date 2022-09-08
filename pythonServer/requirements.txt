@@ -1,3 +1,6 @@
 pandas
 seaborn
 sqlalchemy
+cbook
+# Could not find a version that satisfies the requirement PyQt5 (from cbook->-r requirements.txt (line 4)) (from versions: )
+#  No matching distribution found for PyQt5 (from cbook->-r requirements.txt (line 4))

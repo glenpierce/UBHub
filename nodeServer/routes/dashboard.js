@@ -6,13 +6,13 @@ const path = require("path");
 
 const app = express();
 
-const config = require('../config.js');
+const environment = require('../environment.js');
 
 app.use(session({
     cookieName: 'session',
-    secret: config.secret,
+    secret: environment.secret,
     cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
+        maxAge: new Date(Date.now() + (environment.expires))
     }
 }));
 
@@ -31,10 +31,10 @@ router.get('/', function (req, res, next) {
                         query = `Call getSelectedSiteByUserQuery('${req.session.user}')`;
                     }
                     let connection = mysql.createConnection({
-                        host: config.rdsHost,
-                        user: config.rdsUser,
-                        password: config.rdsPassword,
-                        database: config.rdsDatabase
+                        host: environment.rdsHost,
+                        user: environment.rdsUser,
+                        password: environment.rdsPassword,
+                        database: environment.rdsDatabase
                     });
 
                     connection.connect();
@@ -62,10 +62,10 @@ router.get('/', function (req, res, next) {
                 query = "";
                 if (req.session && req.session.user) {
                     connection = mysql.createConnection({
-                        host: config.rdsHost,
-                        user: config.rdsUser,
-                        password: config.rdsPassword,
-                        database: config.rdsDatabase
+                        host: environment.rdsHost,
+                        user: environment.rdsUser,
+                        password: environment.rdsPassword,
+                        database: environment.rdsDatabase
                     });
 
                     connection.connect();
@@ -93,10 +93,10 @@ router.get('/', function (req, res, next) {
                 query = "";
                 if (req.session && req.session.user) {
                     connection = mysql.createConnection({
-                        host: config.rdsHost,
-                        user: config.rdsUser,
-                        password: config.rdsPassword,
-                        database: config.rdsDatabase
+                        host: environment.rdsHost,
+                        user: environment.rdsUser,
+                        password: environment.rdsPassword,
+                        database: environment.rdsDatabase
                     });
 
                     connection.connect();
@@ -124,10 +124,10 @@ router.get('/', function (req, res, next) {
                 query = "";
                 if (req.session && req.session.user) {
                     connection = mysql.createConnection({
-                        host: config.rdsHost,
-                        user: config.rdsUser,
-                        password: config.rdsPassword,
-                        database: config.rdsDatabase
+                        host: environment.rdsHost,
+                        user: environment.rdsUser,
+                        password: environment.rdsPassword,
+                        database: environment.rdsDatabase
                     });
 
                     connection.connect();
@@ -155,10 +155,10 @@ router.get('/', function (req, res, next) {
                 query = "select * from userData where site = " + siteId;
                 if (req.session && req.session.user) {
                     connection = mysql.createConnection({
-                        host: config.rdsHost,
-                        user: config.rdsUser,
-                        password: config.rdsPassword,
-                        database: config.rdsDatabase
+                        host: environment.rdsHost,
+                        user: environment.rdsUser,
+                        password: environment.rdsPassword,
+                        database: environment.rdsDatabase
                     });
 
                     connection.connect();
@@ -237,10 +237,10 @@ router.get('/', function (req, res, next) {
 makeDbCall = function (queryString, callback) {
     // console.log("making connection?");
     connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
+        host: environment.rdsHost,
+        user: environment.rdsUser,
+        password: environment.rdsPassword,
+        database: environment.rdsDatabase
     });
 
     connection.connect();

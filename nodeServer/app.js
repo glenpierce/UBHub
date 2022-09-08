@@ -33,7 +33,7 @@ let createUserDataFromJSON = require('./routes/createUserDataFromJSON');
 let createCustomIndicatorValues = require('./routes/createCustomIndicatorValues');
 let news = require('./routes/news');
 
-let config = require('./config.js');
+let environment = require('./environment.js');
 
 // var https = require('https');
 // var fs = require('fs');
@@ -64,9 +64,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
     cookieName: 'session',
-    secret: config.secret,
+    secret: environment.secret,
     cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
+        maxAge: new Date(Date.now() + (environment.expires))
     }
 }));
 

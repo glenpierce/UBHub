@@ -5,13 +5,13 @@ const pool = require('../ConnectionPool.js').pool;
 
 const app = express();
 
-const config = require('../config.js');
+const environment = require('../environment.js');
 
 app.use(session({
     cookieName: 'session',
-    secret: config.secret,
+    secret: environment.secret,
     cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
+        maxAge: new Date(Date.now() + (environment.expires))
     }
 }));
 
@@ -465,10 +465,10 @@ function getSummary(data){
 //     mapData = "";
 //
 //     connection = mysql.createConnection({
-//         host: config.rdsHost,
-//         user: config.rdsUser,
-//         password: config.rdsPassword,
-//         database: config.rdsDatabase
+//         host: environment.rdsHost,
+//         user: environment.rdsUser,
+//         password: environment.rdsPassword,
+//         database: environment.rdsDatabase
 //     });
 //
 //     connection.connect();

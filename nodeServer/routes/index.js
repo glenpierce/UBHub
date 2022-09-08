@@ -3,7 +3,7 @@ var mysql = require('mysql');
 var router = express.Router();
 var path = require("path");
 var request = require('request');
-var config = require('../config.js');
+var environment = require('../environment.js');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -25,7 +25,7 @@ router.post('/', function(req, res, next) {
 });
 
 function sendRecaptchaToGoogle(response, email){
-    request.post("https://www.google.com/recaptcha/api/siteverify?secret=" + config.reCAPTCHASecret + "&response=" + response,
+    request.post("https://www.google.com/recaptcha/api/siteverify?secret=" + environment.reCAPTCHASecret + "&response=" + response,
         function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 body = JSON.parse(body);
@@ -38,10 +38,10 @@ function sendRecaptchaToGoogle(response, email){
 
 function addEmailToList(email){
     var connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
+        host: environment.rdsHost,
+        user: environment.rdsUser,
+        password: environment.rdsPassword,
+        database: environment.rdsDatabase
     });
 
 connection.connect();
