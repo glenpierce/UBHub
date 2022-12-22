@@ -6,13 +6,13 @@ var path = require("path");
 
 var app = express();
 
-var environment = require('../environment.js');
+var config = require('../config.js');
 
 app.use(session({
     cookieName: 'session',
-    secret: environment.secret,
+    secret: config.secret,
     cookie: {
-        maxAge: new Date(Date.now() + (environment.expires))
+        maxAge: new Date(Date.now() + (config.expires))
     }
 }));
 

@@ -7,13 +7,13 @@ var path = require("path");
 
 var app = express();
 
-var environment = require('../environment.js');
+var config = require('../config.js');
 
 app.use(session({
     cookieName: 'session',
-    secret: environment.secret,
+    secret: config.secret,
     cookie: {
-        maxAge: new Date(Date.now() + (environment.expires))
+        maxAge: new Date(Date.now() + (config.expires))
     }
 }));
 
@@ -26,10 +26,10 @@ router.post('/', function(req, res){
     console.log('login request received');
 
     var connection = mysql.createConnection({
-        host: environment.rdsHost,
-        user: environment.rdsUser,
-        password: environment.rdsPassword,
-        database: environment.rdsDatabase
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
     });
 
     connection.connect();

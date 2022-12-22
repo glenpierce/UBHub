@@ -2,7 +2,7 @@ var express = require('express');
 var mysql = require('mysql');
 var router = express.Router();
 var path = require("path");
-var environment = require('../environment.js');
+var config = require('../config.js');
 
 router.get('/', function(req, res, next) {
     console.log("get login");

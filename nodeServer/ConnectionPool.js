@@ -1,11 +1,11 @@
-const environment = require('./environment.js');
+const config = require('./config.js');
 const mysql = require('mysql');
 
 const pool = mysql.createPool({
-    host: environment.rdsHost,
-    user: environment.rdsUser,
-    password: environment.rdsPassword,
-    database: environment.rdsDatabase
+    host: config.rdsHost,
+    user: config.rdsUser,
+    password: config.rdsPassword,
+    database: config.rdsDatabase
 });
 
 const makeDbCallAsPromise = function(queryString) {

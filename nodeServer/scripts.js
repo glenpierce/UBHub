@@ -3,14 +3,14 @@ const mysql = require('mysql');
 const router = express.Router();
 const path = require("path");
 const https = require('https');
-const environment = require('./environment.js');
+const config = require('./config.js');
 const session = require('client-sessions');
 
 
-// environment.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
-environment.rdsHost="127.0.0.1"; //this should be your Docker container's IP address
-environment.rdsUser="root";
-environment.rdsPassword="my-secret-pw";
+// config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
+config.rdsHost="127.0.0.1"; //this should be your Docker container's IP address
+config.rdsUser="root";
+config.rdsPassword="my-secret-pw";
 
 let createDb;
 let useDb;
@@ -561,10 +561,10 @@ updateLocations = function(lower, upper) {
 
     for (let i = lower; i < upper; i++) {
         let connection = mysql.createConnection({
-            host: environment.rdsHost,
-            user: environment.rdsUser,
-            password: environment.rdsPassword,
-            database: environment.rdsDatabase
+            host: config.rdsHost,
+            user: config.rdsUser,
+            password: config.rdsPassword,
+            database: config.rdsDatabase
         });
 
         connection.connect();
@@ -660,10 +660,10 @@ function getLatLong(address, id) {
 
 function updateLocation(id, lat, lng){
     const connection = mysql.createConnection({
-        host: environment.rdsHost,
-        user: environment.rdsUser,
-        password: environment.rdsPassword,
-        database: environment.rdsDatabase
+        host: config.rdsHost,
+        user: config.rdsUser,
+        password: config.rdsPassword,
+        database: config.rdsDatabase
     });
 
     connection.connect();
@@ -796,16 +796,16 @@ function dbQuery(query, exitingDB = true) {
 
     if (exitingDB) {
         newConnection = mysql.createConnection({
-            host: environment.rdsHost,
-            user: environment.rdsUser,
-            password: environment.rdsPassword,
-            database: environment.rdsDatabase
+            host: config.rdsHost,
+            user: config.rdsUser,
+            password: config.rdsPassword,
+            database: config.rdsDatabase
         });
     } else {
         newConnection = mysql.createConnection({
-            host: environment.rdsHost,
-            user: environment.rdsUser,
-            password: environment.rdsPassword
+            host: config.rdsHost,
+            user: config.rdsUser,
+            password: config.rdsPassword
         });
     }
 

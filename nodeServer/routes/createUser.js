@@ -26,7 +26,7 @@ function isUserNameUnique(req, res){
 function createUser(req, res) {
     console.log("creating user");
 
-    const salt = bcrypt.genSaltSync(10) + req.body.username.toLowerCase() + environment.salt;
+    const salt = bcrypt.genSaltSync(10) + req.body.username.toLowerCase() + config.salt;
     const hash = bcrypt.hashSync(req.body.password, salt);
 
     const queryString = 'CALL createUser("' + req.body.username + '", "' + hash + '", "' + req.body.alias + '", "' + req.body.userAddress + '")';

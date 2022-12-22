@@ -3,7 +3,7 @@ var mysql = require('mysql');
 var router = express.Router();
 var path = require("path");
 var request = require('request');
-var environment = require('../environment.js');
+var config = require('../config.js');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {

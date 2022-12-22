@@ -5,12 +5,12 @@ const session = require('client-sessions');
 
 const app = express();
 
-const environment = require('../environment.js');
+const config = require('../config.js');
 
 app.use(session({
     cookieName: 'session',
-    secret: environment.secret,
-    expires: new Date(Date.now() + (environment.expires))
+    secret: config.secret,
+    expires: new Date(Date.now() + (config.expires))
 }));
 
 router.post('/', function(req, res) {
@@ -35,10 +35,10 @@ router.post('/', function(req, res) {
             const query = "CALL createIndicatorValue('" + req.body.indicatorValues[indicatorIndex].name + "', " + id + ", " + type + ");";
 
             const connection = mysql.createConnection({
-                host: environment.rdsHost,
-                user: environment.rdsUser,
-                password: environment.rdsPassword,
-                database: environment.rdsDatabase
+                host: config.rdsHost,
+                user: config.rdsUser,
+                password: config.rdsPassword,
+                database: config.rdsDatabase
             });
 
             connection.connect();

@@ -4,13 +4,13 @@ const pool = require('../ConnectionPool.js').pool;
 const session = require('client-sessions');
 const path = require("path");
 const app = express();
-const environment = require('../environment.js');
+const config = require('../config.js');
 
 app.use(session({
     cookieName: 'session',
-    secret: environment.secret,
+    secret: config.secret,
     cookie: {
-        maxAge: new Date(Date.now() + (environment.expires))
+        maxAge: new Date(Date.now() + (config.expires))
     }
 }));
 

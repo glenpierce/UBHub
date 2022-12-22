@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const session = require('client-sessions');
-const environment = require('../environment.js');
+const config = require('../config.js');
 const app = express();
 const {makeDbCallAsPromise} = require("../ConnectionPool");
 
 app.use(session({
     cookieName: 'session',
-    secret: environment.secret,
-    expires: new Date(Date.now() + (environment.expires))
+    secret: config.secret,
+    expires: new Date(Date.now() + (config.expires))
 }));
 
 router.get('/', function(req, res, next) {
