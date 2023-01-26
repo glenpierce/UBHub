@@ -32,6 +32,7 @@ let statusReport = require('./routes/statusReport');
 let createUserDataFromJSON = require('./routes/createUserDataFromJSON');
 let createCustomIndicatorValues = require('./routes/createCustomIndicatorValues');
 let news = require('./routes/news');
+let pythonInstanceManager = require('./routes/pythonInstanceManager');
 
 let config = require('./config.js');
 
@@ -97,6 +98,7 @@ app.use('/statusReport', statusReport);
 app.use('/createUserDataFromJSON', createUserDataFromJSON);
 app.use('/createCustomIndicatorValues', createCustomIndicatorValues);
 app.use('/news', news);
+app.use('/pythonInstanceManager', pythonInstanceManager);
 
 app.use(logger('dev'));
 

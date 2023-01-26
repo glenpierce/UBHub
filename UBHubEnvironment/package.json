@@ -1,0 +1,20 @@
+{
+  "name": "ub_hub_environment",
+  "version": "0.1.0",
+  "bin": {
+    "ub_hub_environment": "bin/ub_hub_environment.js"
+  },
+  "scripts": {
+    "build": "echo \"The build step is not required when using JavaScript!\" && exit 0",
+    "cdk": "cdk",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "aws-cdk": "2.62.0",
+    "jest": "^29.3.1"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.62.0",
+    "cdk-ec2-key-pair": "^3.3.1"
+  }
+}
