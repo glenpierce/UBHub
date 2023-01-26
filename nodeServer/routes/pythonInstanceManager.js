@@ -15,7 +15,7 @@ app.use(session({
 }));
 
 router.get('/start', function(req, res, next) {
-    if (req.session && req.session.user && req.session.user === "user") {
+    if (req.session && req.session.user && req.session.user === config.adminUserName) {
         startPythonServer();
     } else {
         req.session.reset();
