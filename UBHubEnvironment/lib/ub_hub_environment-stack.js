@@ -14,11 +14,13 @@ class UbHubEnvironmentStack extends cdk.Stack {
     //   vpc: vpc
     // });
 
-    const key = new keypair.KeyPair(this, "KeyPair", {
-      name: "UBHub-cdk-keypair",
-      description: "Key Pair created with UBHub CDK Deployment",
-    });
-    key.grantReadOnPublicKey;
+    // Create a Key Pair to be used with this EC2 Instance
+    // Temporarily disabled since `cdk-ec2-key-pair` is not yet CDK v2 compatible
+    // const key = new keypair.KeyPair(this, "KeyPair", {
+    //   name: "UBHub-cdk-keypair",
+    //   description: "Key Pair created with UBHub CDK Deployment",
+    // });
+    // key.grantReadOnPublicKey
 
     const ami = new cdk.aws_ec2.AmazonLinuxImage({
       generation: cdk.aws_ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
@@ -63,7 +65,7 @@ class UbHubEnvironmentStack extends cdk.Stack {
       ),
       machineImage: ami,
       securityGroup: securityGroup,
-      keyName: key.keyPairName,
+      // keyName: key.keyPairName,
       role: role,
     });
 
