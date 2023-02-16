@@ -1,6 +1,6 @@
 const path = require("path");
 const cdk = require('aws-cdk-lib');
-const keypair = require("cdk-ec2-key-pair");
+// const keypair = require("cdk-ec2-key-pair");
 
 class UbHubEnvironmentStack extends cdk.Stack {
   constructor(scope, id, props) {
