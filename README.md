@@ -1,6 +1,6 @@
 # UB Hub
 
-This is the main webapp for UB Hub. We are a group of volunteers working to improve urband biodiversity measurement by municipalities, academics, and citizen scientists. Our team consists of enthusiastic volunteers from 16 different countries.
+This is the main webapp for UB Hub. We are a group of volunteers working to improve urban biodiversity measurement by municipalities, academics, and citizen scientists. Our team consists of enthusiastic volunteers from 16 different countries.
 
 To run this project, you will need to add a config.js file in the root directory of the project. Its contents should read:
 
