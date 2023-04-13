@@ -7,7 +7,7 @@ serverPort = 8080
 
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
-        document_reporting.main('UBHub_database_test.xlsx', 1, 'doc_type', 'doc_year')
+        document_reporting.main('UBHub_database_test.xlsx', 1, 0,'doc_type', 'doc_year','inst_id','id','lat','lng','continent')
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
