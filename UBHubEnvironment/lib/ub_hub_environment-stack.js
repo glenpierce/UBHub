@@ -6,13 +6,22 @@ class UbHubEnvironmentStack extends cdk.Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
 
+    const subnetConfiguration = {
+      name: "name",
+      mapPublicIpOnLaunch: true,
+    };
+
     const vpc = new cdk.aws_ec2.Vpc(this, "UBHubVpc", {
-      maxAzs: 3 // Default is all AZs in region
+      cidr: '10.0.0.0/16',
+      natGateways: 0,
+      subnetConfiguration: [
+        {name: 'public', cidrMask: 24, subnetType: cdk.aws_ec2.SubnetType.PUBLIC},
+      ],
     });
 
-    // const cluster = new ecs.Cluster(this, "UBHubCluster", {
-    //   vpc: vpc
-    // });
+    const cluster = new cdk.aws_ecs.Cluster(this, "UBHubCluster", {
+      vpc: vpc
+    });
 
     // Create a Key Pair to be used with this EC2 Instance
     // Temporarily disabled since `cdk-ec2-key-pair` is not yet CDK v2 compatible
@@ -59,6 +68,9 @@ class UbHubEnvironmentStack extends cdk.Stack {
 
     const ec2Instance = new cdk.aws_ec2.Instance(this, "Instance", {
       vpc,
+      vpcSubnets: {
+        subnetType: cdk.aws_ec2.SubnetType.PUBLIC,
+      },
       instanceType: cdk.aws_ec2.InstanceType.of(
           cdk.aws_ec2.InstanceClass.T2,
           cdk.aws_ec2.InstanceSize.MICRO
