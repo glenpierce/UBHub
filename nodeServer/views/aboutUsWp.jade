@@ -1,0 +1,14 @@
+doctype html
+include mixins
+include mapMixins
+
+html
+    head
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel='stylesheet', href='/stylesheets/index.css')
+
+body
+    +header(true)
+    div(style="max-width:800px; margin:auto;")
+        div !{data}
+    +footer(true)
