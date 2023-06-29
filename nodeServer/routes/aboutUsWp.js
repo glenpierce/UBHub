@@ -18,7 +18,9 @@ router.get('/', function(req, res, next) {
         response.on('end', () => {
             try {
                 console.log(rawData);
-                res.render('aboutUsWp', {username: req.session.user, data: rawData});
+                const firstSection = rawData.split('<header')[0];
+                const secondSection = rawData.split('header>')[1];
+                res.render('aboutUsWp', {username: req.session.user, data: firstSection + secondSection});
             } catch (e) {
                 console.error(e.message);
             }
