@@ -19,8 +19,10 @@ router.get('/', function(req, res, next) {
             try {
                 console.log(rawData);
                 const firstSection = rawData.split('<header')[0];
-                const secondSection = rawData.split('header>')[1];
-                res.render('aboutUsWp', {username: req.session.user, data: firstSection + secondSection});
+                let secondSection = rawData.split('header>')[1];
+                secondSection = secondSection.split('<div class="wp-block-cover is-light"')[0]
+                const thirdSection = rawData.split('footer>')[1];
+                res.render('aboutUsWp', {username: req.session.user, data: firstSection + secondSection + thirdSection});
             } catch (e) {
                 console.error(e.message);
             }
