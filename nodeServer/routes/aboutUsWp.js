@@ -17,7 +17,6 @@ router.get('/', function(req, res, next) {
         response.on('data', (chunk) => { rawData += chunk; });
         response.on('end', () => {
             try {
-                console.log(rawData);
                 const firstSection = rawData.split('<header')[0];
                 let secondSection = rawData.split('header>')[1];
                 secondSection = secondSection.split('<div class="wp-block-cover is-light"')[0]
