@@ -1,36 +1,30 @@
 echo "HELLO CDK ---BEGINNING OF CONFIGURATION SCRIPT---"
 
-sudo yum update
+sleep 60
 
-#sudo yum install gcc-c++ make
-#
-#curl -O https://nodejs.org/dist/v19.5.0/node-v19.5.0-linux-x64.tar.xz
-#
-#tar -xf node-v19.5.0-linux-x64.tar.xz
-#
-#sudo mv node-v19.5.0-linux-x64 bin/node
-#
-#chmod +x ~/bin/node/bin/node
+sudo yum update
 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
 
 . ~/.nvm/nvm.sh
 
-#nvm install 19.5.0
-
 nvm install 16 # Amazon Linux 2 does not currently support the current LTS release (version 18.x) of Node.js. Use Node.js version 16.x with this command instead.
 
 node -v
-
-#sudo yum install -y npm
 
 nvm install-latest-npm
 
 npm -v
 
-echo "$1"
+sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3000 # our default port is 3000
+sudo service iptables save # this doesn't seem to be working...
 
-cd "$1" || (echo "cd failed" && exit)
+echo "$1" # this is the zip file the contains our source code
+
+sudo yum install unzip
+
+unzip "$1"
 
 npm ci
 
