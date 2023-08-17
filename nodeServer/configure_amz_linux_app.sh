@@ -16,10 +16,6 @@ nvm install-latest-npm
 
 npm -v
 
-sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3000 # our default port is 3000
-sudo service iptables save # this doesn't seem to be working...
-
 echo "$1" # this is the zip file the contains our source code
 
 sudo yum install unzip

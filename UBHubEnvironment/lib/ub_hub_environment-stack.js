@@ -1,6 +1,7 @@
 const path = require("path");
 const cdk = require('aws-cdk-lib');
 // const keypair = require("cdk-ec2-key-pair");
+const apigateway = require('aws-cdk-lib/aws-apigateway');
 
 class UbHubEnvironmentStack extends cdk.Stack {
   constructor(scope, id, props) {
@@ -81,6 +82,44 @@ class UbHubEnvironmentStack extends cdk.Stack {
       role: role,
     });
 
+    // Create an API Gateway
+    const ubhubApiGateway = new apigateway.RestApi(this, 'ubhubApiGateway', {
+      deployOptions: {
+        stageName: 'prod',
+      },
+      // 👇 enable CORS
+      defaultCorsPreflightOptions: {
+        allowHeaders: [
+          'Content-Type',
+          'X-Amz-Date',
+          'Authorization',
+          'X-Api-Key',
+        ],
+        allowMethods: ['OPTIONS', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        allowCredentials: true,
+        allowOrigins: ['http://localhost:3000'],
+      },
+    });
+
+    // Create an integration for the API Gateway to target the EC2 instance
+    const ec2Integration = new apigateway.HttpIntegration(
+        `http://${ec2Instance.instancePrivateIp}:80`
+    );
+
+    // Create a resource and method for the API Gateway
+    const apiResource = ubhubApiGateway.root.addResource('ec2');
+    apiResource.addMethod('GET', ec2Integration);
+
+    // Update security group to allow inbound traffic from API Gateway
+    securityGroup.addIngressRule(
+        new ec2.SecurityGroup(this, 'ApiGatewaySecurityGroupRule', {
+          vpc,
+          description: 'Allow HTTP traffic from API Gateway',
+        }),
+        ec2.Port.tcp(80),
+        'Allow API Gateway Access'
+    );
+
     // upload to s3
     const ubHubNodeJsSourceCode = new cdk.aws_s3_assets.Asset(this, "ubHubNodeJsSourceCode", {
       path: path.join(__dirname, "../../nodeServer"),
@@ -109,6 +148,8 @@ class UbHubEnvironmentStack extends cdk.Stack {
       arguments: ubHubNodeJsSourceCodeFilePath,
     });
 
+    // 👇 create an Output for the API URL
+    new cdk.CfnOutput(this, 'apiUrl', {value: ubhubApiGateway.url});
 
     // Output the public IP address of the EC2 instance
     new cdk.CfnOutput(this, "IP Address", {
