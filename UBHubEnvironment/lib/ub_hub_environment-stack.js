@@ -1,7 +1,8 @@
 const path = require("path");
 const cdk = require('aws-cdk-lib');
 // const keypair = require("cdk-ec2-key-pair");
-const apigateway = require('aws-cdk-lib/aws-apigateway');
+// const apigateway = require('aws-cdk-lib/aws-apigateway');
+const elbv2 = require('aws-cdk-lib/aws-elasticloadbalancingv2');
 
 class UbHubEnvironmentStack extends cdk.Stack {
   constructor(scope, id, props) {
@@ -68,7 +69,7 @@ class UbHubEnvironmentStack extends cdk.Stack {
     );
 
     const ec2Instance = new cdk.aws_ec2.Instance(this, "Instance", {
-      vpc,
+      vpc: vpc,
       vpcSubnets: {
         subnetType: cdk.aws_ec2.SubnetType.PUBLIC,
       },
@@ -82,23 +83,20 @@ class UbHubEnvironmentStack extends cdk.Stack {
       role: role,
     });
 
-    // Create an API Gateway
-    const ubhubApiGateway = new apigateway.RestApi(this, 'ubhubApiGateway', {
-      deployOptions: {
-        stageName: 'prod',
-      },
-      // 👇 enable CORS
-      defaultCorsPreflightOptions: {
-        allowHeaders: [
-          'Content-Type',
-          'X-Amz-Date',
-          'Authorization',
-          'X-Api-Key',
-        ],
-        allowMethods: ['OPTIONS', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-        allowCredentials: true,
-        allowOrigins: ['http://localhost:3000'],
-      },
+    const autoScalingGroup = new cdk.aws_applicationautoscaling.(this, "loadBalancer", {
+      vpc,
+      instanceType
+    });
+
+    const loadBalancer = new cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer(this, "loadBalancer", {
+          vpc,
+          internet_facing: true,
+        }
+    );
+
+    loadBalancer.add_target(autoScalingGroup);
+    loadBalancer.addListener("listener", {
+      port: 80
     });
 
     // Create an integration for the API Gateway to target the EC2 instance
@@ -110,19 +108,47 @@ class UbHubEnvironmentStack extends cdk.Stack {
     const apiResource = ubhubApiGateway.root.addResource('ec2');
     apiResource.addMethod('GET', ec2Integration);
 
-    // Update security group to allow inbound traffic from API Gateway
-    securityGroup.addIngressRule(
-        new ec2.SecurityGroup(this, 'ApiGatewaySecurityGroupRule', {
-          vpc,
-          description: 'Allow HTTP traffic from API Gateway',
-        }),
-        ec2.Port.tcp(80),
-        'Allow API Gateway Access'
-    );
+    // // Update security group to allow inbound traffic from API Gateway
+    // securityGroup.addIngressRule(
+    //     new ec2Instance.SecurityGroup(this, 'ApiGatewaySecurityGroupRule', {
+    //       vpc,
+    //       description: 'Allow HTTP traffic from API Gateway',
+    //     }),
+    //     ec2Instance.Port.tcp(80),
+    //     'Allow API Gateway Access'
+    // );
+
+    // This is interesting:
+
+    // const restapi = new apigw.RestApi(this, 'my-rest-api', {
+    //   description: `test`,
+    //   restApiName: `test-api`,
+    //   endpointTypes: [apigw.EndpointType.REGIONAL],
+    //   domainName: {
+    //     securityPolicy: apigw.SecurityPolicy.TLS_1_2,
+    //     domainName: `test-api.mydomain.com`,
+    //     certificate: acm.Certificate.fromCertificateArn(
+    //         this,'my-cert', myCertArn),
+    //     endpointType: apigw.EndpointType.REGIONAL,
+    //   },
+    //   deployOptions: {
+    //     stageName: 'qa'
+    //   },
+    // });
+    // const hostedZone = route53.HostedZone.fromLookup(this, 'hosted-zone-lookup', {
+    //   domainName: `mydomain.com`,
+    // });
+    // new route53.ARecord(this, 'api-gateway-route53', {
+    //   recordName: `test-api.mydomain.com`,
+    //   zone: hostedZone,
+    //   target: route53.RecordTarget.fromAlias(new route53Targets.ApiGateway(restApi)),
+    // });
+
+    const zipFileName = "ubhubSourceZip";
 
     // upload to s3
     const ubHubNodeJsSourceCode = new cdk.aws_s3_assets.Asset(this, "ubHubNodeJsSourceCode", {
-      path: path.join(__dirname, "../../nodeServer"),
+      path: path.join(__dirname, `../../nodeServer/${zipFileName}`),
     });
 
     ubHubNodeJsSourceCode.grantRead(role);
@@ -145,7 +171,7 @@ class UbHubEnvironmentStack extends cdk.Stack {
 
     ec2Instance.userData.addExecuteFileCommand({
       filePath: configScriptFilePath,
-      arguments: ubHubNodeJsSourceCodeFilePath,
+      arguments: zipFileName,
     });
 
     // 👇 create an Output for the API URL
