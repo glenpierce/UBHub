@@ -51,7 +51,16 @@ router.get('/', function(req, res, next) {
         })
         .catch((err) => {
             console.log(err);
-            connection.release();
+            if(connection) {
+                connection.release();
+            }
+            res.render('map', {
+                mapFilterParameters: mapFilterParameters,
+                mapData: {},
+                mapSummary: {},
+                mapButtons:{},
+                username: null
+            });
         })
     });
 });
@@ -76,34 +85,38 @@ router.post('/tableData', function(req, res, next){
     const query = buildLocationsQuery(filters, page, limit);
 
     pool.getConnection(function (error, connection) {
-        connection.query(query, function(err, rows, fields) {
-            if(rows != undefined && rows.length > 0){
-                attachProgramsToGivenInstitutions(connection, rows)
-                .then((rows) => {
+        if(connection) {
+            connection.query(query, function (err, rows, fields) {
+                if (rows != undefined && rows.length > 0) {
+                    attachProgramsToGivenInstitutions(connection, rows)
+                        .then((rows) => {
+                            connection.release();
+
+                            for (i = 0; i < rows.length; i++) {
+                                string += `<tr>`;
+                                string += `<td class="mvTitle">${rows[i].inst_title}</td>`;
+                                string += `<td>${rows[i].country}</td>`;
+                                string += `<td>${rows[i].scale}</td>`;
+                                string += `<td class="mvPrograms">${outputProgramsAndActivities(rows[i])}</td>`;
+                                string += `</tr>`;
+                            }
+                            res.send(string);
+                        }, function (error) {
+                            console.log(error);
+                            res.send("No data");
+                        })
+
+                } else if (rows != undefined && rows.length == 0) {
                     connection.release();
-
-                    for(i = 0; i < rows.length; i++){
-                        string += `<tr>`;
-                        string += `<td class="mvTitle">${rows[i].inst_title}</td>`;
-                        string += `<td>${rows[i].country}</td>`;
-                        string += `<td>${rows[i].scale}</td>`;
-                        string += `<td class="mvPrograms">${outputProgramsAndActivities(rows[i])}</td>`;
-                        string += `</tr>`;
-                    }
-                    res.send(string);
-                }, function(error) {
-                  console.log(error);
-                  res.send("No data");
-                })
-
-            } else if (rows != undefined && rows.length == 0) {
-              connection.release();
-              res.send("<p>No data for given parameters.</p>");
-            } else {
-                connection.release();
-                res.send("<p>Processing...</p>");
-            }
-        });
+                    res.send("<p>No data for given parameters.</p>");
+                } else {
+                    connection.release();
+                    res.send("<p>Processing...</p>");
+                }
+            });
+        } else {
+            res.send("<p>No data for given parameters.</p>");
+        }
     });
 });
 
@@ -112,22 +125,26 @@ router.post('/resultCounts', function(req, res, next){
     const query = buildLocationsQuery(filters, -1, -1);
 
     pool.getConnection(function (error, connection) {
-        connection.query(query, function (err, rows, fields) {
-            connection.release();
-            let counts;
-            if (rows != undefined) {
-                counts = {
-                    total: rows.length,
-                    municipalities: rows.filter(x => x.scale == "municipality").length,
-                    districts: rows.filter(x => x.scale == "district/county").length,
-                    campuses: rows.filter(x => x.scale == "campus").length
+        if(connection) {
+            connection.query(query, function (err, rows, fields) {
+                connection.release();
+                let counts;
+                if (rows != undefined) {
+                    counts = {
+                        total: rows.length,
+                        municipalities: rows.filter(x => x.scale == "municipality").length,
+                        districts: rows.filter(x => x.scale == "district/county").length,
+                        campuses: rows.filter(x => x.scale == "campus").length
+                    }
+                } else {
+                    counts = {};
                 }
-            } else {
-                counts = {};
-            }
 
-            res.send(JSON.stringify(counts));
-        });
+                res.send(JSON.stringify(counts));
+            });
+        } else {
+            res.send({});
+        }
     });
 });
 
@@ -247,6 +264,10 @@ function attachProgramsToGivenInstitutions(connection, locations) {
 
       })
     })
+    .catch((error) => {
+        console.log(error);
+        reject();
+    })
   })
 }
 
@@ -285,20 +306,27 @@ function getMapLocations(connection, query) {
           .then((documentData) => locations = mapDocumentDataToLocations(documentData, locations))
           .then((() => resolve(locations)));
       })
-    });
+    })
+        .catch((error) => {
+            reject();
+        });
   });
 }
 
 function getMapData(connection, query) {
   console.log(query);
   return new Promise((resolve, reject) => {
-    connection.query(query, function(err, rows, fields) {
-      if (!err) {
-        resolve(rows);
+      if(connection) {
+          connection.query(query, function (err, rows, fields) {
+              if (!err) {
+                  resolve(rows);
+              } else {
+                  reject(err);
+              }
+          })
       } else {
-        reject(err);
+          reject();
       }
-    })
   });
 }
 
