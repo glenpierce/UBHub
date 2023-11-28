@@ -22,10 +22,11 @@ let gis = require('./routes/gis');
 let yourUploads = require('./routes/yourUploads');
 let editUpload = require('./routes/editUpload');
 let createNewUpload = require('./routes/createNewUpload');
-let aboutUs = require('./routes/aboutUs');
+// let aboutUs = require('./routes/aboutUs');
 let aboutUsWp = require('./routes/aboutUsWp');
 let resources = require('./routes/resources');
-let home = require('./routes/home');
+// let home = require('./routes/home');
+let homeWp = require('./routes/homeWp');
 let account = require('./routes/account');
 let programs = require('./routes/programs');
 let program = require('./routes/program');
@@ -72,7 +73,7 @@ app.use(session({
     }
 }));
 
-app.use('/', home);
+app.use('/', homeWp);
 app.use('/getInvolved', index);
 app.use('/login', login);
 app.use('/users', users);
@@ -89,10 +90,11 @@ app.use('/gis', gis);
 app.use('/yourUploads', yourUploads);
 app.use('/editUpload', editUpload);
 app.use('/createNewUpload', createNewUpload);
-app.use('/aboutUs', aboutUs);
-app.use('/aboutUsWp', aboutUsWp);
+app.use('/aboutUs', aboutUsWp);
+// app.use('/aboutUsWp', aboutUsWp);
 app.use('/resources', resources);
-app.use('/home', home);
+// app.use('/home', home);
+app.use('/home', homeWp);
 app.use('/account', account);
 app.use('/programs', programs);
 app.use('/program', program);
