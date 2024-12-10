@@ -1,8 +1,6 @@
 FROM node:16
 
-RUN apt-get update || : && apt-get install -y \
-    python \
-    python-pip
+RUN apt-get update || : && apt-get install -y
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -18,7 +16,6 @@ COPY . .
 RUN chmod a+rx start.sh
 
 RUN cd nodeServer && npm install
-RUN cd pythonServer && pip install -r requirements.txt
 # If you are building your code for production
 # RUN npm ci --only=production
 
