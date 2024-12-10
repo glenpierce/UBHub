@@ -5,5 +5,3 @@ populateDBScript.js
 package-lock.json
 /.idea/
 /.vs/
-
-/pythonServer/config.py
