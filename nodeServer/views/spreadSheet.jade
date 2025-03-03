@@ -3,7 +3,6 @@ include mixins
 html
   head
     link(rel='stylesheet', href='/stylesheets/style.css')
-    link(rel='stylesheet', href='/stylesheets/bootstrap.css')
     style.
       .data-table {
         width: 100%;
@@ -56,11 +55,7 @@ html
             table.data-table#dataTable
               thead
                 tr#headerRow
-                  // Headers will be populated via JavaScript
-                tr.filter-row#filterRow
-                  // Filter inputs will be populated via JavaScript
               tbody#tableBody
-                // Data will be populated via JavaScript
 
     script.
       document.addEventListener('DOMContentLoaded', function() {
@@ -98,22 +93,16 @@ html
           }
 
           const headerRow = document.getElementById('headerRow');
-          const filterRow = document.getElementById('filterRow');
           const tableBody = document.getElementById('tableBody');
 
-          // Clear existing content
           headerRow.innerHTML = '';
-          filterRow.innerHTML = '';
           tableBody.innerHTML = '';
 
-          // Add headers
           const columns = Object.keys(data[0]);
           columns.forEach(column => {
             headerRow.innerHTML += `<th data-column="${column}">${column}</th>`;
-            filterRow.innerHTML += `<td><input type="text" data-column="${column}" placeholder="Filter ${column}..."></td>`;
           });
 
-          // Add data rows
           data.forEach(row => {
             let tr = document.createElement('tr');
             columns.forEach(column => {
@@ -123,32 +112,11 @@ html
             });
             tableBody.appendChild(tr);
           });
-
-          // Add sorting functionality
-          document.querySelectorAll('#headerRow th').forEach(th => {
-            th.addEventListener('click', () => {
-              sortTable(th.dataset.column);
-            });
-          });
-
-          // Add filtering functionality
-          document.querySelectorAll('#filterRow input').forEach(input => {
-            input.addEventListener('input', filterTable);
-          });
         }
 
         function clearTable() {
           document.getElementById('headerRow').innerHTML = '';
-          document.getElementById('filterRow').innerHTML = '';
           document.getElementById('tableBody').innerHTML = '';
-        }
-
-        function sortTable(column) {
-          // Implement sorting functionality
-        }
-
-        function filterTable() {
-          // Implement filtering functionality
         }
       });
 
