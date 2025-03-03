@@ -25,8 +25,7 @@ let createNewUpload = require('./routes/createNewUpload');
 // let aboutUs = require('./routes/aboutUs');
 let aboutUsWp = require('./routes/aboutUsWp');
 let resources = require('./routes/resources');
-// let home = require('./routes/home');
-let homeWp = require('./routes/homeWp');
+let home = require('./routes/home');
 let account = require('./routes/account');
 let programs = require('./routes/programs');
 let program = require('./routes/program');
@@ -34,7 +33,8 @@ let statusReport = require('./routes/statusReport');
 let createUserDataFromJSON = require('./routes/createUserDataFromJSON');
 let createCustomIndicatorValues = require('./routes/createCustomIndicatorValues');
 let news = require('./routes/news');
-let pythonInstanceManager = require('./routes/pythonInstanceManager');
+let spreadSheetAPI = require('./routes/spreadSheetAPI');
+let spreadSheet = require('./routes/spreadSheet');
 
 let config = require('./config.js');
 
@@ -73,7 +73,7 @@ app.use(session({
     }
 }));
 
-app.use('/', homeWp);
+app.use('/', home);
 app.use('/getInvolved', index);
 app.use('/login', login);
 app.use('/users', users);
@@ -91,10 +91,8 @@ app.use('/yourUploads', yourUploads);
 app.use('/editUpload', editUpload);
 app.use('/createNewUpload', createNewUpload);
 app.use('/aboutUs', aboutUsWp);
-// app.use('/aboutUsWp', aboutUsWp);
 app.use('/resources', resources);
-// app.use('/home', home);
-app.use('/home', homeWp);
+app.use('/home', home);
 app.use('/account', account);
 app.use('/programs', programs);
 app.use('/program', program);
@@ -102,7 +100,8 @@ app.use('/statusReport', statusReport);
 app.use('/createUserDataFromJSON', createUserDataFromJSON);
 app.use('/createCustomIndicatorValues', createCustomIndicatorValues);
 app.use('/news', news);
-app.use('/pythonInstanceManager', pythonInstanceManager);
+app.use('/api/admin', spreadSheetAPI);
+app.use('/spreadSheet', spreadSheet);
 
 app.use(logger('dev'));
 
