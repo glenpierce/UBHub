@@ -1,15 +1,14 @@
-var express = require('express');
-var router = express.Router();
-var mysql = require('mysql');
-var bcrypt = require('bcryptjs');
-var session = require('client-sessions');
-var path = require("path");
+import express from 'express';
+const router = express.Router();
+import mysql from 'mysql';
+import bcrypt from 'bcryptjs';
+import clientSessions from 'client-sessions';
 
-var app = express();
+const app = express();
 
-var config = require('../config.js');
+import config from '../config.js';
 
-app.use(session({
+app.use(clientSessions({
     cookieName: 'session',
     secret: config.secret,
     cookie: {
@@ -25,7 +24,7 @@ router.post('/', function(req, res){
 
     console.log('login request received');
 
-    var connection = mysql.createConnection({
+    const connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
         password: config.rdsPassword,
@@ -55,4 +54,4 @@ router.post('/', function(req, res){
     connection.end();
 });
 
-module.exports = router;
+export default router;

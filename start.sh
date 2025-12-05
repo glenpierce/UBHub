@@ -1,3 +1,5 @@
 #!/bin/bash
+set -e
 
-echo npm --prefix nodeServer/ start
+echo "Starting node server..."
+exec npm --prefix nodeServer start

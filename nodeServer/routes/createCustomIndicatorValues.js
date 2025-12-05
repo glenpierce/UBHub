@@ -1,13 +1,13 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const mysql = require('mysql');
-const session = require('client-sessions');
+import mysql from 'mysql';
+import clientSession from 'client-sessions';
 
 const app = express();
 
-const config = require('../config.js');
+import config from '../config.js';
 
-app.use(session({
+app.use(clientSession({
     cookieName: 'session',
     secret: config.secret,
     expires: new Date(Date.now() + (config.expires))
@@ -62,4 +62,4 @@ router.post('/', function(req, res) {
     }
 });
 
-module.exports = router;
+export default router;

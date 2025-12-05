@@ -1,14 +1,14 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const mysql = require('mysql');
-const session = require('client-sessions');
-const path = require("path");
+import mysql from 'mysql';
+import clientSession from 'client-sessions';
+import path from 'path';
 
 const app = express();
 
-const config = require('../config.js');
+import config from '../config.js';
 
-app.use(session({
+app.use(clientSession({
     cookieName: 'session',
     secret: config.secret,
     cookie: {
@@ -840,4 +840,4 @@ function canAccept(post, parentAcceptedId, currentUserId){
 }
 
 
-module.exports = router;
+export default router;

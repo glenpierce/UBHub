@@ -1,13 +1,13 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const session = require('client-sessions');
-const pool = require('../ConnectionPool.js').pool;
+import clientSession from 'client-sessions';
+import {pool} from '../ConnectionPool.js';
 
 const app = express();
 
-const config = require('../config.js');
+import config from '../config.js';
 
-app.use(session({
+app.use(clientSession({
     cookieName: 'session',
     secret: config.secret,
     cookie: {
@@ -710,4 +710,4 @@ const mapFilterParameters = [
       type: "select"
   }];
 
-module.exports = router;
+export default router;

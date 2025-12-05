@@ -1,13 +1,13 @@
-const express = require('express');
-const mysql = require('mysql');
+import express from 'express';
+import mysql from 'mysql';
 const router = express.Router();
-const path = require("path");
-const request = require('request');
-const config = require('../config.js');
+import path from 'path';
+import request from 'request';
+import config from '../config.js';
 
 router.get('/', function(req, res, next) {
     res.render('news', {username: req.session.user});
 });
 
 
-module.exports = router;
+export default router;

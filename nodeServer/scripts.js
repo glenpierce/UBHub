@@ -1,10 +1,10 @@
-const express = require('express');
-const mysql = require('mysql');
+import express from 'express';
+import mysql from 'mysql';
 const router = express.Router();
-const path = require("path");
-const https = require('https');
-const config = require('./config.js');
-const session = require('client-sessions');
+import path from 'path';
+import https from 'https';
+import config from './config.js';
+import clientSession from 'client-sessions';
 
 
 // config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address

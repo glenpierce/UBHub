@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {makeDbCallAsPromise} = require("../ConnectionPool");
+import {makeDbCallAsPromise} from '../ConnectionPool.js';
 
 router.get('/table-data/:tableName', isAuthenticated, isAdmin, async (req, res) => {
     try {
@@ -42,4 +42,4 @@ function isAdmin(req, res, next) {
     res.status(403).json({ error: 'Not authorized' });
 }
 
-module.exports = router;
+export default router;

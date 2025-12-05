@@ -17,10 +17,10 @@ services:
 
 secrets:
   rds_host:
-    file: rds_host.txt
+    file: secrets/rds_host.txt
   rds_database:
-    file: rds_database.txt
+    file: secrets/rds_database.txt
   rds_user:
-    file: rds_user.txt
+    file: secrets/rds_user.txt
   rds_password:
-    file: rds_password.txt
+    file: secrets/rds_password.txt

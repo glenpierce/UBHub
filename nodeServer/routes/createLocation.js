@@ -1,13 +1,13 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const session = require('client-sessions');
+import clientSession from 'client-sessions';
 
 const app = express();
 
-const config = require('../config.js');
-const {makeDbCallAsPromise} = require("../ConnectionPool");
+import config from '../config.js';
+import {makeDbCallAsPromise} from '../ConnectionPool.js';
 
-app.use(session({
+app.use(clientSession({
     cookieName: 'session',
     secret: config.secret,
     cookie: {
@@ -30,4 +30,4 @@ router.post('/', function(req, res){
         });
 });
 
-module.exports = router;
+export default router;

@@ -1,5 +1,5 @@
-const express = require('express');
-const {makeDbCallAsPromise} = require("../ConnectionPool");
+import express from 'express';
+import {makeDbCallAsPromise} from '../ConnectionPool.js';
 const router = express.Router();
 
 router.get('/', function(req, res, next) {
@@ -11,4 +11,4 @@ router.get('/', function(req, res, next) {
         });
 });
 
-module.exports = router;
+export default router;

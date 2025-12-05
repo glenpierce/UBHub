@@ -1,12 +1,12 @@
-var express = require('express');
-var mysql = require('mysql');
-var router = express.Router();
-var path = require("path");
-var request = require('request');
-var config = require('../config.js');
+import express from 'express';
+import mysql from 'mysql';
+const router = express.Router();
+import path from 'path';
+import request from 'request';
+import config from '../config.js';
 
 router.get('/', function(req, res, next) {
     res.render('statusReport', {username: req.session.user});
 });
 
-module.exports = router;
+export default router;

@@ -1,5 +1,5 @@
-const config = require('./config.js');
-const mysql = require('mysql');
+import config from './config.js';
+import mysql from 'mysql';
 
 const pool = mysql.createPool({
     host: config.rdsHost,
@@ -31,5 +31,4 @@ const makeDbCallAsPromise = function(queryString) {
     });
 };
 
-exports.pool = pool;
-exports.makeDbCallAsPromise = makeDbCallAsPromise;
+export { pool, makeDbCallAsPromise };

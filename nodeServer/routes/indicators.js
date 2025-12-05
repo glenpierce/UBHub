@@ -1,14 +1,14 @@
-var express = require('express');
-var router = express.Router();
-var mysql = require('mysql');
-var session = require('client-sessions');
-var path = require("path");
+import express from 'express';
+const router = express.Router();
+import mysql from 'mysql';
+import session from 'client-sessions';
+import path from 'path';
 
-var app = express();
+const app = express();
 
-var config = require('../config.js');
+import config from '../config.js';
 
-app.use(session({
+app.use(clientSession({
     cookieName: 'session',
     secret: config.secret,
     cookie: {
@@ -209,4 +209,4 @@ router.post('/', function(req, res){
     console.log(req.body);
 });
 
-module.exports = router;
+export default router;

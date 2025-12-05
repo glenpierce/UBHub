@@ -1,71 +1,56 @@
-let express = require('express');
-let path = require('path');
-let favicon = require('serve-favicon');
-let logger = require('morgan');
-let cookieParser = require('cookie-parser');
-let bodyParser = require('body-parser');
-let session = require('client-sessions');
+import express from 'express';
+import path from 'path';
+import favicon from 'serve-favicon';
+import logger from 'morgan';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import clientSessions from 'client-sessions';
 
-let index = require('./routes/index');
-let login = require('./routes/login');
-let users = require('./routes/users');
-let createUser = require('./routes/createUser');
-let dashboard = require('./routes/dashboard');
-let forum = require('./routes/forum');
-let indicators = require('./routes/indicators');
-let createCustomProgram = require('./routes/createCustomProgram');
-let createIndicator = require('./routes/createCustomIndicator');
-let changeLocation = require('./routes/changeLocation');
-let createLocation = require('./routes/createLocation');
-let map = require('./routes/map');
-let gis = require('./routes/gis');
-let yourUploads = require('./routes/yourUploads');
-let editUpload = require('./routes/editUpload');
-let createNewUpload = require('./routes/createNewUpload');
-// let aboutUs = require('./routes/aboutUs');
-let aboutUsWp = require('./routes/aboutUsWp');
-let resources = require('./routes/resources');
-let home = require('./routes/home');
-let account = require('./routes/account');
-let programs = require('./routes/programs');
-let program = require('./routes/program');
-let statusReport = require('./routes/statusReport');
-let createUserDataFromJSON = require('./routes/createUserDataFromJSON');
-let createCustomIndicatorValues = require('./routes/createCustomIndicatorValues');
-let news = require('./routes/news');
-let spreadSheetAPI = require('./routes/spreadSheetAPI');
-let spreadSheet = require('./routes/spreadSheet');
+import index from './routes/index.js';
+import login from './routes/login.js';
+import users from './routes/users.js';
+import createUser from './routes/createUser.js';
+import dashboard from './routes/dashboard.js';
+import forum from './routes/forum.js';
+import indicators from './routes/indicators.js';
+import createCustomProgram from './routes/createCustomProgram.js';
+import createIndicator from './routes/createCustomIndicator.js';
+import changeLocation from './routes/changeLocation.js';
+import createLocation from './routes/createLocation.js';
+import map from './routes/map.js';
+import gis from './routes/gis.js';
+import yourUploads from './routes/yourUploads.js';
+import editUpload from './routes/editUpload.js';
+import createNewUpload from './routes/createNewUpload.js';
+// import aboutUs from './routes/aboutUs.js';
+import aboutUsWp from './routes/aboutUsWp.js';
+import resources from './routes/resources.js';
+import home from './routes/home.js';
+import account from './routes/account.js';
+import programs from './routes/programs.js';
+import program from './routes/program.js';
+import statusReport from './routes/statusReport.js';
+import createUserDataFromJSON from './routes/createUserDataFromJSON.js';
+import createCustomIndicatorValues from './routes/createCustomIndicatorValues.js';
+import news from './routes/news.js';
+import spreadSheetAPI from './routes/spreadSheetAPI.js';
+import spreadSheet from './routes/spreadSheet.js';
 
-let config = require('./config.js');
+import config from './config.js';
 
-// var https = require('https');
-// var fs = require('fs');
-//
-// var sslkey = fs.readFileSync('ssl-key.pem');
-// var sslcert = fs.readFileSync('ssl-cert.pem');
-//
-// var options = {
-//     key: sslkey,
-//     cert: sslcert
-// };
-//
-// var app = express.createServer(options);
-let app = express();
+const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-// uncomment after placing your favicon in /public
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(session({
+app.use(clientSessions({
     cookieName: 'session',
     secret: config.secret,
     cookie: {
@@ -107,7 +92,7 @@ app.use(logger('dev'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
+  const err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
@@ -123,4 +108,4 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+export default app;
