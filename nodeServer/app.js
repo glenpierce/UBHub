@@ -36,6 +36,10 @@ import news from './routes/news.js';
 import spreadSheetAPI from './routes/spreadSheetAPI.js';
 import spreadSheet from './routes/spreadSheet.js';
 
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 import config from './config.js';
 
 const app = express();
@@ -50,13 +54,15 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(clientSessions({
-    cookieName: 'session',
-    secret: config.secret,
-    cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
-    }
-}));
+console.log(config.secret); // todo: determine why this is printing as `undefined`
+
+// app.use(clientSessions({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     cookie: {
+//         maxAge: new Date(Date.now() + (config.expires))
+//     }
+// }));
 
 app.use('/', home);
 app.use('/getInvolved', index);

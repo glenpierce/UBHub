@@ -6,13 +6,13 @@ import path from 'path';
 const app = express();
 import config from '../config.js';
 
-app.use(clientSession({
-    cookieName: 'session',
-    secret: config.secret,
-    cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
-    }
-}));
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     cookie: {
+//         maxAge: new Date(Date.now() + (config.expires))
+//     }
+// }));
 
 router.get('/', function(req, res, next) {
     let indicators = "";
@@ -82,7 +82,7 @@ function populateCategoryIndicators(category, categoryId) {
     }
 }
 
-makeDbCallAsPromise = function(queryString) {
+const makeDbCallAsPromise = function(queryString) {
     return new Promise((resolve, reject) => {
         pool.getConnection(function (error, connection) {
             connection.query(queryString, function (err, rows, fields) {

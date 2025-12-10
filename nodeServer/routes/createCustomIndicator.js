@@ -5,11 +5,11 @@ import config from '../config.js';
 const app = express();
 import {makeDbCallAsPromise} from '../ConnectionPool.js';
 
-app.use(clientSession({
-    cookieName: 'session',
-    secret: config.secret,
-    expires: new Date(Date.now() + (config.expires))
-}));
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     expires: new Date(Date.now() + (config.expires))
+// }));
 
 router.get('/', function(req, res, next) {
     res.render('createIndicator', {username:req.session.user});

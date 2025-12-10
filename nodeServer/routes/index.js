@@ -14,7 +14,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/', function(req, res, next) {
-    userEmail = "";
+    const userEmail = "";
     if(req.body.email){
         if(req.body.email.toString() === req.body['verify-email'].toString()){
             var string = "firstName: " + req.body.nameFirst + ", " + "lastName: " + req.body.nameLast + ", " + "Org: " + req.body.organization + ", " + "Email: " + req.body.email;

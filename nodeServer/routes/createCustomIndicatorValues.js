@@ -7,11 +7,11 @@ const app = express();
 
 import config from '../config.js';
 
-app.use(clientSession({
-    cookieName: 'session',
-    secret: config.secret,
-    expires: new Date(Date.now() + (config.expires))
-}));
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     expires: new Date(Date.now() + (config.expires))
+// }));
 
 router.post('/', function(req, res) {
     let id = JSON.parse(req.body.responseFromServer).id;

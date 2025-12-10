@@ -5,11 +5,11 @@ import config from '../config.js';
 import {makeDbCallAsPromise} from '../ConnectionPool.js';
 const app = express();
 
-app.use(clientSession({
-    cookieName: 'session',
-    secret: config.secret,
-    expires: new Date(Date.now() + (config.expires))
-}));
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     expires: new Date(Date.now() + (config.expires))
+// }));
 
 router.get('/', function(req, res, next) {
     let sites = "";

@@ -7,13 +7,13 @@ const app = express();
 import config from '../config.js';
 import {makeDbCallAsPromise} from '../ConnectionPool.js';
 
-app.use(clientSession({
-    cookieName: 'session',
-    secret: config.secret,
-    cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
-    }
-}));
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     cookie: {
+//         maxAge: new Date(Date.now() + (config.expires))
+//     }
+// }));
 
 router.get('/', function(req, res, next) {
     res.render('createLocation', {username:req.session.user});

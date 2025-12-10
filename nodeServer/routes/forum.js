@@ -8,13 +8,13 @@ const app = express();
 
 import config from '../config.js';
 
-app.use(clientSession({
-    cookieName: 'session',
-    secret: config.secret,
-    cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
-    }
-}));
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     cookie: {
+//         maxAge: new Date(Date.now() + (config.expires))
+//     }
+// }));
 
 /********/
 /*ROUTES*/
@@ -696,7 +696,7 @@ function insertIntoTree(lop, t, u, a){
     return t;
   }
 
-  p = lop.shift();
+  let p = lop.shift();
   if(p.id == a){
     p.acceptedAnswer = true;
   } else {
