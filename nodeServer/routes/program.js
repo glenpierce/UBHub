@@ -1,8 +1,8 @@
 import express from 'express';
 const router = express.Router();
 import clientSession from 'client-sessions';
-import service from '../services/dataService.js';
-import model from '../public/javascripts/model.js';
+// import service from '../services/dataService.js';
+// import model from '../public/javascripts/model.js';
 import bodyParser from 'body-parser';
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 

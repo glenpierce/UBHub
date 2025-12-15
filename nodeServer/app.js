@@ -46,7 +46,7 @@ const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(bodyParser.json({limit: '50mb'}));
@@ -54,15 +54,15 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-console.log(config.secret); // todo: determine why this is printing as `undefined`
+console.log(config.secret);
 
-// app.use(clientSessions({
-//     cookieName: 'session',
-//     secret: config.secret,
-//     cookie: {
-//         maxAge: new Date(Date.now() + (config.expires))
-//     }
-// }));
+app.use(clientSessions({
+    cookieName: 'session',
+    secret: config.secret,
+    cookie: {
+        maxAge: new Date(Date.now() + (config.expires))
+    }
+}));
 
 app.use('/', home);
 app.use('/getInvolved', index);
