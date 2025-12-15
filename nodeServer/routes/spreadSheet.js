@@ -2,7 +2,7 @@ import express from 'express';
 const router = express.Router();
 
 router.get('/', function(req, res) {
-    res.render('spreadsheet', {
+    res.render('spreadSheet', {
         tables: ['indicators', 'categories', 'indicatorValues']
     });
 });
