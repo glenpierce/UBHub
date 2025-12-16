@@ -1,0 +1,30 @@
+services:
+  db:
+    container_name: ubhub_db
+    image: mysql:8
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_here       # replace or use env_file/.env
+      MYSQL_DATABASE: ubhub_local
+      MYSQL_USER: ubhub_user
+      MYSQL_PASSWORD: ubhub_password_here           # replace or use env_file/.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - ubhub_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ubhub:
+    environment:
+      # Override production secrets to point at the local MySQL container
+      RDS_HOST: db
+      RDS_DATABASE: ubhub_local
+      RDS_USER: ubhub_user
+      RDS_PASSWORD: ubhub_password_here
+
+volumes:
+  ubhub_db_data:
