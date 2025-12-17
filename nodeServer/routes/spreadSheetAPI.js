@@ -67,9 +67,9 @@ const allowedTables = {
 
 function assertTableAllowed(tableName) {
     if (!allowedTables[tableName]) {
-        const err = new Error('Invalid table name');
-        err.code = 'INVALID_TABLE';
-        throw err;
+        const error = new Error('Invalid table name');
+        error.code = 'INVALID_TABLE';
+        throw error;
     }
 }
 
@@ -77,25 +77,25 @@ async function createPendingChange(pool, tableName, rowKeyObj, operation, dataOb
     assertTableAllowed(tableName);
     const pkJson = JSON.stringify(rowKeyObj || {});
     const dataJson = JSON.stringify(dataObj || {});
-    const conn = await pool.getConnection();
+    const connection = await pool.getConnection();
     try {
-        await conn.beginTransaction();
+        await connection.beginTransaction();
         // compute next version for this table+row_key
-        const [rowsBetter] = await conn.query(
+        const [rowsBetter] = await connection.query(
             "SELECT COALESCE(MAX(version),0) + 1 AS next_version FROM row_versions WHERE table_name = ? AND JSON_UNQUOTE(JSON_EXTRACT(row_key, '$')) = ?",
             [tableName, pkJson]
         );
         const nextVersion = (rows[0] && rows[0].next_version) || 1;
-        await conn.query(
+        await connection.query(
             'INSERT INTO row_versions (table_name, row_key, operation, data, version, created_by) VALUES (?, ?, ?, ?, ?, ?)',
             [tableName, pkJson, operation, dataJson, nextVersion, user]
         );
-        await conn.commit();
+        await connection.commit();
     } catch (error) {
-        await conn.rollback();
+        await connection.rollback();
         throw error;
     } finally {
-        conn.release();
+        connection.release();
     }
 }
 
