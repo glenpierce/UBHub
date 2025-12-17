@@ -85,3 +85,21 @@ CREATE TABLE participation (
     keywords VARCHAR(1024) CHARACTER SET utf8,
     link_verified VARCHAR(255) CHARACTER SET utf8
 );
+
+CREATE TABLE IF NOT EXISTS row_versions (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    table_name VARCHAR(255) NOT NULL,
+    row_key JSON DEFAULT NULL,
+    operation ENUM('insert','update','delete') NOT NULL,
+    status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+    version INT NOT NULL DEFAULT 1,
+    data JSON NOT NULL,
+    created_by VARCHAR(255) DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    approved_by VARCHAR(255) DEFAULT NULL,
+    approved_at DATETIME DEFAULT NULL,
+    notes VARCHAR(1024) DEFAULT NULL,
+    PRIMARY KEY (id),
+    KEY idx_row_versions_table_name (table_name),
+    KEY idx_row_versions_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
