@@ -7,21 +7,23 @@ import config from '../config.js';
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+    res.redirect("https://ubhuborg.wixsite.com/aboutus");
     // if(req.session && req.session.user)
     //     return res.redirect('indicators');
     // else
-        res.render('index', {username: req.session.user});
+    //     res.render('index', {username: req.session.user});
 });
 
 router.post('/', function(req, res, next) {
-    const userEmail = "";
-    if(req.body.email){
-        if(req.body.email.toString() === req.body['verify-email'].toString()){
-            var string = "firstName: " + req.body.nameFirst + ", " + "lastName: " + req.body.nameLast + ", " + "Org: " + req.body.organization + ", " + "Email: " + req.body.email;
-            sendRecaptchaToGoogle(req.body['g-recaptcha-response'], string);
-            res.render('index', {username: req.session.user});
-        }
-    }
+    res.redirect("https://ubhuborg.wixsite.com/aboutus");
+    // const userEmail = "";
+    // if(req.body.email){
+    //     if(req.body.email.toString() === req.body['verify-email'].toString()){
+    //         var string = "firstName: " + req.body.nameFirst + ", " + "lastName: " + req.body.nameLast + ", " + "Org: " + req.body.organization + ", " + "Email: " + req.body.email;
+    //         sendRecaptchaToGoogle(req.body['g-recaptcha-response'], string);
+    //         res.render('index', {username: req.session.user});
+    //     }
+    // }
 });
 
 function sendRecaptchaToGoogle(response, email){
