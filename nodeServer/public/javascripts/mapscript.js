@@ -42,7 +42,7 @@ function getPrograms(partName, markers, callback){
 function makeIconArray(colorLevels) {
   var levels = colorLevels.split(", ");
   var iconArray = [];
-  for (i = 0; i < levels.length; i++){
+  for (let i = 0; i < levels.length; i++) {
     var icon = getIconByIndex(i);
     var entry = {
       level: levels[i],
@@ -370,7 +370,7 @@ function highlightValues(filterBy, colorBy, colorLevels) {
           switch (colorBy) {
 
             case "part_level":
-              for (i = 0; i < iconArray.length; i++) {
+              for (let i = 0; i < iconArray.length; i++) {
                 if (iconArray[i].level == program.part_level && i > programLevel) {
                   programLevel = i;
                   icon = iconArray[i].icon;
@@ -413,7 +413,7 @@ function highlightValues(filterBy, colorBy, colorLevels) {
   function filterArrayNotNull(...filterBy) {
       markers.forEach(function (marker) {
           let toFilter = false;
-          for (i = 0; i < filterBy.length; i++) {
+          for (let i = 0; i < filterBy.length; i++) {
               if (marker.element[filterBy[i]] != null) {
                   toFilter = true;
               }
@@ -433,12 +433,12 @@ function highlightValues(filterBy, colorBy, colorLevels) {
       });
 
       var selectBoxes = document.getElementsByClassName("filterBox");
-      for(i = 0; i < selectBoxes.length; i++){
+      for (let i = 0; i < selectBoxes.length; i++) {
           selectBoxes.item(i).children[0].selectedIndex = 0;
       }
 
       var activityButtons = document.getElementsByClassName("activeButton");
-      for(i = 0; i < activityButtons.length; i++){
+      for (let i = 0; i < activityButtons.length; i++) {
           activityButtons[0].classList.remove("activeButton");
       }
 

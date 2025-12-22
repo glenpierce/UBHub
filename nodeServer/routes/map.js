@@ -92,7 +92,7 @@ router.post('/tableData', function(req, res, next){
                         .then((rows) => {
                             connection.release();
 
-                            for (i = 0; i < rows.length; i++) {
+                            for (let i = 0; i < rows.length; i++) {
                                 string += `<tr>`;
                                 string += `<td class="mvTitle">${rows[i].inst_title}</td>`;
                                 string += `<td>${rows[i].country}</td>`;
@@ -205,7 +205,7 @@ function buildLocationsQuery(filters, page, limit){
         }
 
         //then do JOINs:
-        for (i = 0; i < filters.length; i++){
+        for (let i = 0; i < filters.length; i++) {
           switch (filters[i].type) {
             case("document"):
                 joinClause += ` INNER JOIN (select inst_id, doc_type from documents d where d.doc_type = "${filters[i].val}" group by inst_id) as dq on dq.inst_id = l.id `;
@@ -395,7 +395,7 @@ function attachDocument(location, document) {
 
 function categorizeButtons(buttons) {
   let mapButtonCategories = [];
-  for (i = 0; i < buttons.length; i++) {
+  for (let i = 0; i < buttons.length; i++) {
 
     let found = false;
     let j = 0;
