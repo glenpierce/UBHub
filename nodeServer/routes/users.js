@@ -1,8 +1,9 @@
 import express from 'express';
 const router = express.Router();
-import mysql from 'mysql';
+import mysql from 'mysql2';
 import bcrypt from 'bcryptjs';
 import clientSessions from 'client-sessions';
+import { makeDbCallAsPromise } from '../ConnectionPool.js';
 
 const app = express();
 
@@ -20,38 +21,35 @@ router.get('/', function(req, res, next) {
   res.send('respond with req');
 });
 
-router.post('/', function(req, res){
+router.post('/', async function (req, res) {
 
-    console.log('login request received');
+    console.log('login request received :)');
 
-    const connection = mysql.createConnection({
-        host: config.rdsHost,
-        user: config.rdsUser,
-        password: config.rdsPassword,
-        database: config.rdsDatabase
-    });
+    try {
+        const rows = await makeDbCallAsPromise('CALL login(?)', [req.body.username]);
 
-    connection.connect();
-
-    connection.query('CALL login("' + req.body.username + '")', function(err, rows, fields) {
-        if (!err && rows[0][0] != undefined) {
-            // console.log(rows);
-            bcrypt.compare(req.body.password, rows[0][0].hashedPassword, function(err, response) {
-                // console.log(response);
-                if(response){
-                    req.session.user = req.body.username;
-                    return res.send('/dashboard');
-                } else {
-                    return res.send('/login');
-                }
-            });
-        } else {
-            console.log('Error while performing Query.');
+        if (!rows || !rows[0] || !rows[0][0]) {
             return res.send('/login');
         }
-    });
 
-    connection.end();
+        const hashedPassword = rows[0][0].hashedPassword;
+
+        bcrypt.compare(req.body.password, hashedPassword, function (error, result) {
+            if (error) {
+                return res.send('/login');
+            }
+            if (result) {
+                req.session.user = req.body.username;
+                return res.send('/spreadSheet');
+            } else {
+                return res.send('/login');
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.send('/login');
+    }
 });
 
 export default router;

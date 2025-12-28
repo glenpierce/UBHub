@@ -1,5 +1,5 @@
 import express from 'express';
-import mysql from 'mysql';
+import mysql from 'mysql2';
 const router = express.Router();
 import path from 'path';
 import https from 'https';
@@ -557,7 +557,7 @@ getRepByUserProcedure =
             WHERE posts.author = inUser;\n
         END\n;`;
 
-updateLocations = function(lower, upper) {
+const updateLocations = function(lower, upper) {
 
     for (let i = lower; i < upper; i++) {
         let connection = mysql.createConnection({
@@ -679,7 +679,7 @@ function updateLocation(id, lat, lng){
     connection.end();
 }
 
-update = function(existingDB = true) {
+const update = function(existingDB = true) {
     let query = [];
     query.push(createDb);
     query.push(useDb);
@@ -758,11 +758,11 @@ update = function(existingDB = true) {
     dbQuery(query, existingDB);
 };
 
-clearPrograms = function () {
+const clearPrograms = function () {
     dbQuery(dropProgramSchema);
 }
 
-rebuildPrograms = function () {
+const rebuildPrograms = function () {
     let query = [];
 
     query.push(programsTable);

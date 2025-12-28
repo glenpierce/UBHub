@@ -1,5 +1,5 @@
 import config from './config.js';
-import mysql from 'mysql';
+import mysql from 'mysql2';
 
 const pool = mysql.createPool({
     host: config.rdsHost,
@@ -8,25 +8,24 @@ const pool = mysql.createPool({
     database: config.rdsDatabase
 });
 
-const makeDbCallAsPromise = function(queryString) {
+const makeDbCallAsPromise = function(queryString, params = []) {
     return new Promise((resolve, reject) => {
         pool.getConnection(function (error, connection) {
-            if(connection) {
-                connection.query(queryString, function (err, rows, fields) {
-                    if (!err) {
-                        resolve(rows);
-                    } else {
-                        console.log('Error while performing Query.');
-                        console.log(err.code);
-                        console.log(err.message);
-                        reject(err);
-                    }
-                });
-                connection.release();
-            } else {
+            if (error) {
                 console.log("no DB connection");
-                reject();
+                return reject(error);
             }
+            connection.query(queryString, params, function (err, rows, fields) {
+                connection.release();
+                if (!err) {
+                    resolve(rows);
+                } else {
+                    console.log('Error while performing Query.');
+                    console.log(err.code);
+                    console.log(err.message);
+                    reject(err);
+                }
+            });
         });
     });
 };

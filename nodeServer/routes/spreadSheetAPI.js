@@ -24,8 +24,38 @@ router.get('/table-data/:tableName', isAuthenticated, isAdmin, async (req, res) 
     }
 });
 
+router.post('/pending-change', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const { tableName, rowKey, operation, data } = req.body;
+
+        // basic validation
+        if (!tableName || typeof tableName !== 'string') {
+            return res.status(400).json({ error: 'tableName required' });
+        }
+        if (!['insert', 'update', 'delete'].includes(operation)) {
+            return res.status(400).json({ error: 'invalid operation' });
+        }
+        // rowKey should be an object for update/delete; for insert it can be empty
+        if (rowKey && typeof rowKey !== 'object') {
+            return res.status(400).json({ error: 'rowKey must be an object' });
+        }
+        if (data && typeof data !== 'object') {
+            return res.status(400).json({ error: 'data must be an object' });
+        }
+
+        await createPendingChange(pool, tableName, rowKey || {}, operation, data || {}, req.session.user);
+
+        res.status(201).json({ success: true });
+    } catch (error) {
+        if (error.code === 'INVALID_TABLE') {
+            return res.status(400).json({ error: 'Invalid table' });
+        }
+        console.error('Error creating pending change:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 function isAuthenticated(req, res, next) {
-    // return next(); bypass authentication for... being awesome
 
     if (req.session && req.session.user) {
         return next();
@@ -34,8 +64,6 @@ function isAuthenticated(req, res, next) {
 }
 
 function isAdmin(req, res, next) {
-    // return next(); bypass authentication for... being awesome
-
     if (req.session.user && req.session.user.isAdmin) {
         return next();
     }

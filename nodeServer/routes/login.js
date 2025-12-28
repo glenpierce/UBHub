@@ -1,5 +1,5 @@
 import express from 'express';
-import mysql from 'mysql';
+import mysql from 'mysql2';
 const router = express.Router();
 import path from 'path';
 import config from '../config.js';

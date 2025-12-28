@@ -66,8 +66,8 @@ app.use(clientSessions({
 
 app.use('/', home);
 // app.use('/getInvolved', index);
-// app.use('/login', login);
-// app.use('/users', users);
+app.use('/login', login);
+app.use('/users', users);
 // app.use('/createUser', createUser);
 // app.use('/dashboard', dashboard);
 // app.use('/forum', forum);
@@ -91,8 +91,8 @@ app.use('/map', map);
 // app.use('/createUserDataFromJSON', createUserDataFromJSON);
 // app.use('/createCustomIndicatorValues', createCustomIndicatorValues);
 // app.use('/news', news);
-// app.use('/api/admin', spreadSheetAPI);
-// app.use('/spreadSheet', spreadSheet);
+app.use('/api/admin', spreadSheetAPI);
+app.use('/spreadSheet', spreadSheet);
 
 app.use(logger('dev'));
 

@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import mysql from 'mysql';
+import mysql from 'mysql2';
 import session from 'client-sessions';
 import path from 'path';
 
