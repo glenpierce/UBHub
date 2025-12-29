@@ -699,8 +699,17 @@ function highlightValues(filterBy, colorBy, colorLevels) {
           { "featureType": "water", "stylers": [ { "color": "#b6d5e3" } ] },
           { "featureType": "water", "elementType": "labels.text.fill", "stylers": [ { "color": "#4e6d70" } ] } ]});
       mapData.forEach(function (element) {
-          if(element.lat){
+          if(element.lat) {
               var contentString = getMapPopupContent(element);
+
+              // if element.lat is a string, convert it to a float
+              if (element.lat && typeof element.lat === 'string') {
+                  element.lat = parseFloat(element.lat);
+              }
+              // if element.lng is a string, convert it to a float
+              if (element.lng && typeof element.lng === 'string') {
+                  element.lng = parseFloat(element.lng);
+              }
 
               var position = {lat:element.lat, lng:element.lng};
               var marker = new google.maps.Marker({

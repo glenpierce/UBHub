@@ -9,13 +9,13 @@ const app = express();
 
 import config from '../config.js';
 
-// app.use(clientSessions({
-//     cookieName: 'session',
-//     secret: config.secret,
-//     cookie: {
-//         maxAge: new Date(Date.now() + (config.expires))
-//     }
-// }));
+app.use(clientSessions({
+    cookieName: 'session',
+    secret: config.secret,
+    cookie: {
+        maxAge: new Date(Date.now() + (config.expires))
+    }
+}));
 
 router.get('/', function(req, res, next) {
   res.send('respond with req');
@@ -28,20 +28,23 @@ router.post('/', async function (req, res) {
     try {
         const rows = await makeDbCallAsPromise('CALL login(?)', [req.body.username]);
 
-        if (!rows || !rows[0] || !rows[0][0]) {
+        if (!rows) {
+            console.log("no rows found for user");
             return res.send('/login');
         }
 
-        const hashedPassword = rows[0][0].hashedPassword;
+        const hashedPassword = rows[0].hashedPassword;
 
         bcrypt.compare(req.body.password, hashedPassword, function (error, result) {
             if (error) {
+                console.error('error occurred:', error);
                 return res.send('/login');
             }
             if (result) {
                 req.session.user = req.body.username;
                 return res.send('/spreadSheet');
             } else {
+                console.error('No result, error? :', error);
                 return res.send('/login');
             }
         });
