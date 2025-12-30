@@ -30,7 +30,8 @@ router.post('/', async function (req, res) {
                 return res.send('/login');
             }
             if (result) {
-                req.session.user = req.body.username;
+                req.session.user = rows[0].alias;
+                req.session.privileges = rows[0].privileges;
                 return res.send('/spreadSheet');
             } else {
                 console.error('No result, error? :', error);

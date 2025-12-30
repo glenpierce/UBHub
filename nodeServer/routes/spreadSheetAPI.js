@@ -55,8 +55,6 @@ router.post('/pending-change', isAuthenticated, isAdmin, async (req, res) => {
 
 function isAuthenticated(req, res, next) {
 
-    console.log(JSON.stringify(req.session));
-
     if (req.session && req.session.user) {
         return next();
     }
@@ -64,7 +62,7 @@ function isAuthenticated(req, res, next) {
 }
 
 function isAdmin(req, res, next) {
-    if (req.session.user && req.session.user.isAdmin) {
+    if (req.session.user && req.session.user.privileges === 1) {
         return next();
     }
     res.status(403).json({ error: 'Not authorized' });
