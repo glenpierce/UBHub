@@ -54,13 +54,15 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-console.log(config.secret);
-
 app.use(clientSessions({
     cookieName: 'session',
     secret: config.secret,
+    duration: config.expires,
     cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
+        maxAge: config.expires,
+        httpOnly: true,
+        secure: true,
+        sameSite: 'Lax',
     }
 }));
 

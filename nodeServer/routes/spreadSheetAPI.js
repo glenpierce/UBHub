@@ -15,8 +15,6 @@ router.get('/table-data/:tableName', isAuthenticated, isAdmin, async (req, res) 
         const queryString = `SELECT * FROM ${tableName} LIMIT 1000`;
         const result = await makeDbCallAsPromise(queryString);
 
-        // console.log(result);
-
         res.json(result);
     } catch (error) {
         console.error('Error fetching table data:', error);
@@ -56,6 +54,8 @@ router.post('/pending-change', isAuthenticated, isAdmin, async (req, res) => {
 });
 
 function isAuthenticated(req, res, next) {
+
+    console.log(JSON.stringify(req.session));
 
     if (req.session && req.session.user) {
         return next();
