@@ -5,6 +5,33 @@ html
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='/stylesheets/index.css')
     style.
+      .layout {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      .left-col {
+        flex: 0 0 240px; /* fixed sidebar width */
+        padding: 12px;
+        border-right: 1px solid #e5e5e5;
+        background: #fff;
+        height: calc(100vh - 140px);
+        position: sticky;
+        top: 60px;
+        overflow-y: auto;
+      }
+      .main-col {
+        flex: 1; /* take remaining space */
+        min-width: 0; /* prevents overflow with long content */
+      }
+
+      .nav-icon {
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+
       .data-table {
         width: 100%;
         border-collapse: collapse;
@@ -32,50 +59,45 @@ html
       }
 
   body
-    +header(true)
-    div(style="padding-top:40px;")
+    //+header(true)
+  div(style="padding-top:40px;")
 
-    div.container
-      h1 Database Admin View
+  div.layout
+    aside.left-col
+      nav
+        div
+          div
+            img.nav-icon(src='/icons/programIcon.svg', alt='Program icon')
+            | Programs
+          div
+            img.nav-icon(src='/icons/institutionIcon.svg', alt='Institutions icon')
+            | Institutions
+          div
+            img.nav-icon(src='/icons/participationIcon.svg', alt='Participations icon')
+            | Participations
+          div
+            img.nav-icon(src='/icons/submissionIcon.svg', alt='Submissions icon')
+            | Submissions
 
-      div.row
-        div.col-md-12
-          select#tableSelector.form-control
-            option(value="") Select a table...
-            each table in tables
-              option(value=table)= table
 
-      div.row.mt-3
-        div.col-md-12
-          div.table-container
-            table.data-table#dataTable
-              thead
-                tr#headerRow
-              tbody#tableBody
+    main.main-col
+      div.container
+        h1 Tables
 
-          div.row.mt-3
-              div.col-md-12
-                  h3 Create pending change
-                  form#pendingForm
-                      .form-group
-                          label(for="pendingTable") Table
-                          select#pendingTable.form-control
-                              option(value="") Select table...
-                              each t in tables
-                                  option(value=t)= t
-                      .form-group
-                          label(for="operationSelect") Operation
-                          select#operationSelect.form-control
-                              option(value="insert") insert
-                              option(value="update") update
-                              option(value="delete") delete
-                      .form-group
-                          label(for="rowKeyInput") Row key JSON (e.g. {"id":123})
-                          textarea#rowKeyInput.form-control(rows="3")
-                      .form-group
-                          label(for="dataInput") Data JSON (object with columns)
-                          textarea#dataInput.form-control(rows="5")
-                      button#submitPending.btn.btn-primary(type="button") Submit pending change
+        div.row
+          div
+            select#tableSelector.form-control
+              option(value="") Select a table...
+              each table in tables
+                option(value=table)= table
+
+        div
+          div
+            div.table-container
+              table.data-table#dataTable
+                thead
+                  tr#headerRow
+                tbody#tableBody
 
 
     script.
@@ -196,4 +218,4 @@ html
             }
         });
 
-    +footer()
+    //+footer()

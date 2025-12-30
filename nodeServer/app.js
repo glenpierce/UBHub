@@ -78,7 +78,7 @@ app.use('/', home);
 // app.use('/getInvolved', index);
 app.use('/login', login);
 app.use('/users', users);
-// app.use('/createUser', createUser);
+app.use('/createUser', createUser);
 // app.use('/dashboard', dashboard);
 // app.use('/forum', forum);
 // app.use('/indicators', indicators);
