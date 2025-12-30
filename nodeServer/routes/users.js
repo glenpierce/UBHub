@@ -2,20 +2,9 @@ import express from 'express';
 const router = express.Router();
 import mysql from 'mysql2';
 import bcrypt from 'bcryptjs';
-import clientSessions from 'client-sessions';
 import { makeDbCallAsPromise } from '../ConnectionPool.js';
 
 const app = express();
-
-import config from '../config.js';
-
-app.use(clientSessions({
-    cookieName: 'session',
-    secret: config.secret,
-    cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
-    }
-}));
 
 router.get('/', function(req, res, next) {
   res.send('respond with req');
