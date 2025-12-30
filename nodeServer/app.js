@@ -54,6 +54,14 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// We are behind a load balancer
+app.set('trust proxy', 1);
+
+app.use((req, res, next) => {
+  req.connection.proxySecure = true;
+  next();
+});
+
 app.use(clientSessions({
     cookieName: 'session',
     secret: config.secret,

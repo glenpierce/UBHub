@@ -45,6 +45,14 @@ html
             each table in tables
               option(value=table)= table
 
+      div.row.mt-3
+        div.col-md-12
+          div.table-container
+            table.data-table#dataTable
+              thead
+                tr#headerRow
+              tbody#tableBody
+
           div.row.mt-3
               div.col-md-12
                   h3 Create pending change

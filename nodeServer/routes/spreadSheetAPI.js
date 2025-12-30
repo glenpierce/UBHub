@@ -6,7 +6,7 @@ router.get('/table-data/:tableName', isAuthenticated, isAdmin, async (req, res) 
     try {
         const tableName = req.params.tableName;
         // Validate tableName to prevent SQL injection IMPORTANT!!
-        const validTableNames = ['indicators', 'categories', 'indicatorValues']; // Add your actual table names
+        const validTableNames = ['locations', 'documents', 'participation', 'mapButtons']; // mapButtons === programs
 
         if (!validTableNames.includes(tableName)) {
             return res.status(400).json({ error: 'Invalid table name' });
@@ -62,7 +62,7 @@ function isAuthenticated(req, res, next) {
 }
 
 function isAdmin(req, res, next) {
-    if (req.session.user && req.session.user.privileges === 1) {
+    if (req.session.user && req.session.privileges === 1) {
         return next();
     }
     res.status(403).json({ error: 'Not authorized' });
@@ -73,14 +73,6 @@ const allowedTables = {
         primaryKey: ['id'],
         columns: ['id','inst_address','lat','lng','inst_title','country','scale','population','density_km2','area_km2','area_ha','biodiversity_url','url_verifydate','wwf_biome','wwf_terrestrial_ecoregion','hotspot','conservation_status_wwf']
     },
-    programs: {
-        primaryKey: ['id'],
-        columns: ['id','programName','description','programType','private','author','creationDate','iconFileName']
-    },
-    indicators: {
-        primaryKey: ['id'],
-        columns: ['id','indicatorName','positionInCategory','categoryId','archetype','weight','required','description','descriptionOfCalculation','calculation','private','author','creationDate']
-    },
     documents: {
         primaryKey: ['id'],
         columns: ['id','inst_id','doc_type','doc_year','doc_title','doc_url','keywords','source_url','link_verified']
@@ -88,6 +80,10 @@ const allowedTables = {
     participation: {
         primaryKey: ['id'],
         columns: ['id','inst_id','part_category','part_name','part_year','part_data','part_units','part_level','part_link_label','part_link','part_link_label2','part_link2','part_link_label3','part_link3','keywords','link_verified']
+    },
+    mapButtons: {
+        primaryKey: ['id'],
+        columns: ['id','button_label','button_type','button_url','button_color','button_icon','button_order','open_in_new_tab']
     }
 };
 

@@ -3,7 +3,7 @@ const router = express.Router();
 
 router.get('/', function(req, res) {
     res.render('spreadSheet', {
-        tables: ['indicators', 'categories', 'indicatorValues']
+        tables: ['locations', 'documents', 'participation', 'mapButtons']
     });
 });
 
