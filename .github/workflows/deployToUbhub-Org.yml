@@ -26,13 +26,22 @@ jobs:
       - name: Build project
         run: |
           cd nodeServer
+          echo "${{ secrets.CONFIG }}" > config.js
+          zip -r "../deploy-files/${{github.run_id}}.zip" . -x "*.scripts.js" "*.configure_amz_linux_app.sh"
+          cat config.js
+          ls
+          cd ..
+          ls deploy-files
+          cd deploy-files
+          unzip -l "${{github.run_id}}.zip"
+          ls deploy-files
 
-      - name: Deploy via elastic beanstalk
-        env:
-          UBBHUB_API_KEY: ${{ secrets.UBBHUB_API_KEY }}
-        run: |
-          run: |
-            aws s3 cp "deploy-files/${{github.run_id}}.zip" s3://elasticbeanstalk-us-east-1-${{ secrets.AWS_ACCOUNT_ID }}/artifact/dotnet-mvc-app/
-            aws elasticbeanstalk create-application-version --application-name $ELASTIC_BEANSTALK_NAME --version-label ${{github.run_id}} --description ${{github.run_id}} --source-bundle S3Bucket="elasticbeanstalk-us-east-1-${{ secrets.AWS_ACCOUNT_ID }}",S3Key="artifact/dotnet-mvc-app/${{github.run_id}}.zip"
-            aws elasticbeanstalk update-environment --application-name $ELASTIC_BEANSTALK_NAME --environment-name $ELASTIC_BEANSTALK_ENV_NAME --version-label ${{github.run_id}}
-            aws elasticbeanstalk wait environment-updated --application-name $ELASTIC_BEANSTALK_NAME --environment-name $ELASTIC_BEANSTALK_ENV_NAME
+#      - name: Deploy via elastic beanstalk
+#        env:
+#          UBBHUB_API_KEY: ${{ secrets.UBBHUB_API_KEY }}
+#        run: |
+#          run: |
+#            aws s3 cp "deploy-files/${{github.run_id}}.zip" s3://elasticbeanstalk-us-east-1-${{ secrets.AWS_ACCOUNT_ID }}/artifact/dotnet-mvc-app/
+#            aws elasticbeanstalk create-application-version --application-name $ELASTIC_BEANSTALK_NAME --version-label ${{github.run_id}} --description ${{github.run_id}} --source-bundle S3Bucket="elasticbeanstalk-us-east-1-${{ secrets.AWS_ACCOUNT_ID }}",S3Key="artifact/dotnet-mvc-app/${{github.run_id}}.zip"
+#            aws elasticbeanstalk update-environment --application-name $ELASTIC_BEANSTALK_NAME --environment-name $ELASTIC_BEANSTALK_ENV_NAME --version-label ${{github.run_id}}
+#            aws elasticbeanstalk wait environment-updated --application-name $ELASTIC_BEANSTALK_NAME --environment-name $ELASTIC_BEANSTALK_ENV_NAME
