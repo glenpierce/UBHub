@@ -24,7 +24,6 @@ jobs:
           sudo tar -C /usr/local --strip-components 1 -xf node-v$NODE_VERSION-linux-x64.tar.xz
       - name: Install dependencies
         run: |
-          cd nodeServer
           cd tools
           npm ci --ignore-scripts
       - name: Decode session
