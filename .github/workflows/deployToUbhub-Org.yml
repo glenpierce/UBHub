@@ -25,7 +25,9 @@ jobs:
       - name: Install dependencies
         run: |
           cd tools
-          npm ci --ignore-scripts
+          node -v
+          npm -v
+          npm ci --ignore-scripts --loglevel verbose
       - name: Decode session
         env:
           SECRET: ${{ secrets.KEY }}
