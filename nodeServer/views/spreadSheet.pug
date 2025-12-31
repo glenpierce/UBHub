@@ -58,18 +58,26 @@ html
             {name: 'link_verified', label: 'Link Verified', visible: false}
           ]
         },
-        row_versions: { displayName: 'Submissions',
-        columns:[
+        row_versions: {
+          displayName: 'Submissions',
+          columns:[
 
-        ]
+          ]
         }
       };
+
+      let currentTable = null;
+
       function onTableSelected(selectedTable) {
         if (selectedTable) {
-          fetchTableData(selectedTable);
-          document.getElementById('tableTitle').textContent = tableDisplayConfig[selectedTable].displayName;
+          fetchTableData(selectedTable)
+            .then(() => {
+              document.getElementById('tableTitle').textContent = tableDisplayConfig[selectedTable].displayName;
+              currentTable = selectedTable;
+            });
         } else {
           clearTable();
+          currentTable = null;
         }
       }
 
@@ -126,9 +134,30 @@ html
         document.getElementById('headerRow').innerHTML = '';
         document.getElementById('tableBody').innerHTML = '';
       }
+
+      function addNewEntry() {
+        if (!currentTable) {
+          alert('Please select a table first.');
+          return;
+        }
+
+        document.getElementById('modalForm').reset();
+        document.getElementById('modalOverlay').style.display = 'flex';
+      }
+
+      function closeModal() {
+        document.getElementById('modalOverlay').style.display = 'none';
+      }
+
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='/stylesheets/index.css')
     style.
+      .horizontalFlex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
       .layout {
         display: flex;
         gap: 20px;
@@ -231,6 +260,50 @@ html
           -webkit-overflow-scrolling: touch;
       }
 
+      .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+      }
+
+      .modal {
+          background: #fff;
+          padding: 20px;
+          border-radius: 8px;
+          width: 100%;
+          max-width: 600px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .modal-title {
+          margin: 0 0 12px 0;
+          font-size: 18px;
+      }
+
+      .form-row {
+          margin-bottom: 10px;
+          display: flex;
+          flex-direction: column;
+      }
+
+      .form-row input {
+          padding: 8px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+      }
+
+      .modal-actions {
+          display: flex;
+          gap: 8px;
+          justify-content: flex-end;
+          margin-top: 12px;
+      }
+
+
   body
     //+header(true)
   div(style="padding-top:40px;")
@@ -255,7 +328,9 @@ html
 
     main.main-col
       div.container
-        h1#tableTitle
+        div.horizontalFlex
+          h1#tableTitle
+          button#addButton(onclick="addNewEntry()") Add New Entry
 
         div
           div
@@ -264,3 +339,18 @@ html
                 thead
                   tr#headerRow
                 tbody#tableBody
+
+// Modal overlay for adding a new entry
+.modal-overlay(id="modalOverlay", style="display:none;")
+  .modal
+    h2.modal-title Add New Entry
+    form#modalForm
+      .form-row
+        label(for="field1") Field 1
+        input#field1(type="text", name="field1", placeholder="Enter value")
+      .form-row
+        label(for="field2") Field 2
+        input#field2(type="text", name="field2", placeholder="Enter value")
+      .modal-actions
+        button(type="button", onclick="closeModal()") Cancel
+        button(type="submit") Submit
