@@ -1,15 +1,8 @@
-name: Decode Session
-
+name: Deploy to ubhub.org
 on:
-  workflow_dispatch:
-    inputs:
-      cookie:
-        description: 'Session cookie value (optional — falls back to secrets.COOKIE)'
-        required: false
-        default: ''
 
 jobs:
-  decode:
+  deploy:
     runs-on: ubuntu-latest
     environment:
       name: Production
@@ -26,21 +19,20 @@ jobs:
           sudo apt-get install -y nodejs
       - name: Install dependencies
         run: |
-          cd tools
+          cd nodeServer
           node -v
           npm -v
           npm ci --ignore-scripts --loglevel verbose
-      - name: Decode session
-        env:
-          SECRET: ${{ secrets.KEY }}
-          COOKIE: ${{ github.event.inputs.cookie || secrets.COOKIE }}
+      - name: Build project
         run: |
-          if [ -z "$SECRET" ]; then
-            echo "Missing secret: KEY"
-            exit 1
-          fi
-          if [ -z "$COOKIE" ]; then
-            echo "No cookie provided via input or secrets.COOKIE"
-            exit 1
-          fi
-          node tools/decodeSession.js "$COOKIE" "$SECRET"
+          cd nodeServer
+
+      - name: Deploy via elastic beanstalk
+        env:
+          UBBHUB_API_KEY: ${{ secrets.UBBHUB_API_KEY }}
+        run: |
+          run: |
+            aws s3 cp "deploy-files/${{github.run_id}}.zip" s3://elasticbeanstalk-us-east-1-${{ secrets.AWS_ACCOUNT_ID }}/artifact/dotnet-mvc-app/
+            aws elasticbeanstalk create-application-version --application-name $ELASTIC_BEANSTALK_NAME --version-label ${{github.run_id}} --description ${{github.run_id}} --source-bundle S3Bucket="elasticbeanstalk-us-east-1-${{ secrets.AWS_ACCOUNT_ID }}",S3Key="artifact/dotnet-mvc-app/${{github.run_id}}.zip"
+            aws elasticbeanstalk update-environment --application-name $ELASTIC_BEANSTALK_NAME --environment-name $ELASTIC_BEANSTALK_ENV_NAME --version-label ${{github.run_id}}
+            aws elasticbeanstalk wait environment-updated --application-name $ELASTIC_BEANSTALK_NAME --environment-name $ELASTIC_BEANSTALK_ENV_NAME
