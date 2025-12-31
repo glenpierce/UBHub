@@ -11,6 +11,8 @@ on:
 jobs:
   decode:
     runs-on: ubuntu-latest
+    environment:
+      name: Production
     steps:
       - name: Checkout repository
         env:
