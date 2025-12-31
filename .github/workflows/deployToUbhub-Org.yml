@@ -30,15 +30,15 @@ jobs:
         run: |
           cd nodeServer
           echo "${{ secrets.CONFIG }}" > config.js
+          ls -l config.js
           mkdir ../deploy-files
-          zip -r "../deploy-files/${{github.run_id}}.zip" . -x "*.scripts.js" "*.configure_amz_linux_app.sh"
-          cat config.js
-          ls
+          zip -r "../deploy-files/${{github.run_id}}.zip" . -x "scripts.js" "configure_amz_linux_app.sh"
           cd ..
           ls deploy-files
           cd deploy-files
           unzip -l "${{github.run_id}}.zip"
           ls deploy-files
+          ls -l config.js
 
 #      - name: Deploy via elastic beanstalk
 #        env:
