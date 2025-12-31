@@ -39,6 +39,7 @@ jobs:
           unzip -l "${{github.run_id}}.zip"
           ls deploy-files
           ls -l config.js
+          exit 0
 
 #      - name: Deploy via elastic beanstalk
 #        env:
