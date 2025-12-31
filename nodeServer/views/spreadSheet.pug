@@ -136,11 +136,54 @@ html
         document.getElementById('tableBody').innerHTML = '';
       }
 
+      function buildModalForTable(tableName) {
+        const form = document.getElementById('modalForm');
+        const fieldsContainer = document.getElementById('modalFields');
+        fieldsContainer.innerHTML = '';
+
+        if (!tableName || !tableDisplayConfig[tableName]) {
+          fieldsContainer.innerHTML = '<div class="form-row">No fields available</div>';
+          return;
+        }
+
+        const columns = tableDisplayConfig[tableName].columns || [];
+
+        const formColumns = columns.filter(c => c.name !== 'id');
+
+        if (formColumns.length === 0) {
+          fieldsContainer.innerHTML = '<div class="form-row">No editable fields for this table.</div>';
+          return;
+        }
+
+        formColumns.forEach(col => {
+          const labelText = col.label || col.name;
+          const row = document.createElement('div');
+          row.className = 'form-row';
+
+          const label = document.createElement('label');
+          label.setAttribute('for', `field_${col.name}`);
+          label.textContent = labelText;
+          row.appendChild(label);
+
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.id = `${col.name}`;
+          input.name = col.name;
+          input.setAttribute('data-col-name', col.name);
+          input.placeholder = `Enter ${labelText}`;
+          row.appendChild(input);
+
+          fieldsContainer.appendChild(row);
+        });
+      }
+
       function addNewEntry() {
         if (!currentTable) {
           alert('Please select a table first.');
           return;
         }
+
+        buildModalForTable(currentTable);
 
         document.getElementById('modalForm').reset();
         document.getElementById('modalOverlay').style.display = 'flex';
@@ -158,6 +201,7 @@ html
         justify-content: space-between;
         align-items: center;
         margin-bottom: 20px;
+        margin-right: 20px;
       }
       .layout {
         display: flex;
@@ -346,12 +390,7 @@ html
   .modal
     h2.modal-title Add New Entry
     form#modalForm
-      .form-row
-        label(for="field1") Field 1
-        input#field1(type="text", name="field1", placeholder="Enter value")
-      .form-row
-        label(for="field2") Field 2
-        input#field2(type="text", name="field2", placeholder="Enter value")
+      #modalFields
       .modal-actions
         button(type="button", onclick="closeModal()") Cancel
         button(type="submit") Submit
