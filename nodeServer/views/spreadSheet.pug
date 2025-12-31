@@ -191,6 +191,7 @@ html
 
       function closeModal() {
         document.getElementById('modalOverlay').style.display = 'none';
+        document.querySelector('.modal').scrollTop = 0;
       }
 
     link(rel='stylesheet', href='/stylesheets/style.css')
