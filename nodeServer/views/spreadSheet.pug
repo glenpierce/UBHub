@@ -30,7 +30,7 @@ html
             {name: 'area_km2', label: 'Area (km²)', visible: true},
             {name: 'area_ha', label: 'Area (ha)', visible: false},
             {name: 'biodiversity_url', visible: false},
-            {name: 'url_verifydate', label: 'Url verfied on', visible: false},
+            {name: 'url_verifydate', label: 'Url verified on', visible: false},
             {name: 'wwf_biome', label: 'WWF Biome', visible: false},
             {name: 'wwf_terrestrial_ecoregion', label: 'WWF Terrestrial Ecoregion', visible: false},
             {name: 'hotspot', label: 'Hotspot', visible: false},
@@ -70,7 +70,7 @@ html
 
       function onTableSelected(selectedTable) {
         if (selectedTable) {
-          fetchTableData(selectedTable)
+          return fetchTableData(selectedTable)
             .then(() => {
               document.getElementById('tableTitle').textContent = tableDisplayConfig[selectedTable].displayName;
               currentTable = selectedTable;
@@ -82,7 +82,7 @@ html
       }
 
       function fetchTableData(tableName) {
-        fetch(`/api/admin/table-data/${tableName}`)
+        return fetch(`/api/admin/table-data/${tableName}`)
           .then(response => {
             if (!response.ok) {
               throw new Error('Not authorized or table not found');
@@ -90,7 +90,7 @@ html
             return response.json();
           })
           .then(data => {
-            populateTable(data, tableName);
+            return populateTable(data, tableName);
           })
           .catch(error => {
             console.error('Error fetching data:', error);
@@ -128,6 +128,7 @@ html
           });
           tableBody.appendChild(tr);
         });
+        return Promise.resolve();
       }
 
       function clearTable() {
