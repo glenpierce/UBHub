@@ -24,7 +24,7 @@ jobs:
           cd nodeServer
           node -v
           npm -v
-          npm i --ignore-scripts
+#          npm i --ignore-scripts
 #          cat package-lock.json
       - name: Build project
         run: |
