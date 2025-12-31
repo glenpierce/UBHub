@@ -12,17 +12,18 @@ jobs:
   decode:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
+      - name: Checkout repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone --depth=1 https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} .
+      - name: Install Node 22.21.1
+        run: |
+          NODE_VERSION=22.21.1
+          curl -fsSLO https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz
+          sudo tar -C /usr/local --strip-components 1 -xf node-v$NODE_VERSION-linux-x64.tar.xz
       - name: Install dependencies
         run: npm ci
-
       - name: Decode session
         env:
           SECRET: ${{ secrets.KEY }}
