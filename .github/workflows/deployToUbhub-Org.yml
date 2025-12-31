@@ -23,7 +23,10 @@ jobs:
           curl -fsSLO https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz
           sudo tar -C /usr/local --strip-components 1 -xf node-v$NODE_VERSION-linux-x64.tar.xz
       - name: Install dependencies
-        run: npm ci
+        run: |
+          cd nodeServer
+          cd tools
+          npm ci --ignore-scripts
       - name: Decode session
         env:
           SECRET: ${{ secrets.KEY }}
