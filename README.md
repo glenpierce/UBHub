@@ -4,21 +4,17 @@ This is the main webapp for UB Hub. We are a group of volunteers working to impr
 
 To run this project, you will need to add a config.js file in the root directory of the project. Its contents should read:
 
-var config = {};
+const config = {
+    secret: "secret",
+    rdsHost: "127.0.0.1",
+    rdsUser: process.env.RDS_USER || "root",
+    rdsPassword: process.env.RDS_PASSWORD || "my-secret-pw",
+    rdsDatabase: process.env.RDS_DATABASE || "ubhub",
+    reCAPTCHASecret: "reCAPTCHASecret",
+    expires: 24 * 60 * 60 * 1000,
+}
 
-config.rdsHost = process.env.RDS_HOST || '127.0.0.1'; (the port forwarding of the docker command should go to your local host)
-
-config.rdsUser = process.env.RDS_USER || 'root';
-
-config.rdsPassword =  process.env.RDS_PASSWORD || 'my-secret-pw';
-
-config.rdsDatabase = process.env.RDS_DATABASE || 'ubhub';
-
-config.secret = 'In our dev environments, this doesn't really need to be a secret';
-
-config.reCAPTCHASecret = ''; //you don't need this right now reCAPTCHA doesn't seem to be working.
-
-module.exports = config;
+export default { config };
 
 You will also need to install and run Docker (here: https://docs.docker.com/get-docker/ ) and run the following command in Docker:
 

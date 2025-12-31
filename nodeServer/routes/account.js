@@ -1,10 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const path = require("path");
-const request = require('request');
-const pool = require('../ConnectionPool.js').pool;
-const bcrypt = require('bcryptjs');
-const config = require('../config.js');
+import {pool} from '../ConnectionPool.js';
+import bcrypt from 'bcryptjs';
+import config from '../config.js';
 
 router.get('/', function(req, res, next) {
 
@@ -68,4 +66,4 @@ router.get('/logout', function (req, res, next) {
     res.render('home');
 });
 
-module.exports = router;
+export default router;

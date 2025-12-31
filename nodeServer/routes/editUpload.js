@@ -1,5 +1,5 @@
-const express = require('express');
-const {makeDbCallAsPromise} = require("../ConnectionPool");
+import express from 'express';
+import {makeDbCallAsPromise} from '../ConnectionPool.js';
 const router = express.Router();
 
 let id;
@@ -50,4 +50,4 @@ function updateUpload(req, res) {
         });
 }
 
-module.exports = router;
+export default router;

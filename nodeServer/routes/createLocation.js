@@ -1,19 +1,19 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const session = require('client-sessions');
+import clientSession from 'client-sessions';
 
 const app = express();
 
-const config = require('../config.js');
-const {makeDbCallAsPromise} = require("../ConnectionPool");
+import config from '../config.js';
+import {makeDbCallAsPromise} from '../ConnectionPool.js';
 
-app.use(session({
-    cookieName: 'session',
-    secret: config.secret,
-    cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
-    }
-}));
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     cookie: {
+//         maxAge: new Date(Date.now() + (config.expires))
+//     }
+// }));
 
 router.get('/', function(req, res, next) {
     res.render('createLocation', {username:req.session.user});
@@ -30,4 +30,4 @@ router.post('/', function(req, res){
         });
 });
 
-module.exports = router;
+export default router;

@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const http = require('http');
+import http from 'http';
 
 router.get('/', function(req, res, next) {
     const options = {
@@ -30,4 +30,4 @@ router.get('/', function(req, res, next) {
     });
 });
 
-module.exports = router;
+export default router;

@@ -1,18 +1,18 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const pool = require('../ConnectionPool.js').pool;
-const session = require('client-sessions');
-const path = require("path");
+import {pool} from '../ConnectionPool.js';
+import clientSession from 'client-sessions';
+import path from 'path';
 const app = express();
-const config = require('../config.js');
+import config from '../config.js';
 
-app.use(session({
-    cookieName: 'session',
-    secret: config.secret,
-    cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
-    }
-}));
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     cookie: {
+//         maxAge: new Date(Date.now() + (config.expires))
+//     }
+// }));
 
 router.get('/', function(req, res, next) {
     let indicators = "";
@@ -82,7 +82,7 @@ function populateCategoryIndicators(category, categoryId) {
     }
 }
 
-makeDbCallAsPromise = function(queryString) {
+const makeDbCallAsPromise = function(queryString) {
     return new Promise((resolve, reject) => {
         pool.getConnection(function (error, connection) {
             connection.query(queryString, function (err, rows, fields) {
@@ -100,4 +100,4 @@ makeDbCallAsPromise = function(queryString) {
     });
 };
 
-module.exports = router;
+export default router;

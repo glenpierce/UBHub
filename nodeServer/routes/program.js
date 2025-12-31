@@ -1,23 +1,23 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const session = require('client-sessions');
-const service = require('../services/dataService');
-const model = require('../public/javascripts/model');
-const bodyParser = require('body-parser');
+import clientSession from 'client-sessions';
+// import service from '../services/dataService.js';
+// import model from '../public/javascripts/model.js';
+import bodyParser from 'body-parser';
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 const app = express();
 
-const config = require('../config.js');
-const {makeDbCallAsPromise} = require("../ConnectionPool");
+import config from '../config.js';
+import {makeDbCallAsPromise} from '../ConnectionPool.js';
 
-app.use(session({
-    cookieName: 'session',
-    secret: config.secret,
-    cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
-    }
-}));
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     cookie: {
+//         maxAge: new Date(Date.now() + (config.expires))
+//     }
+// }));
 
 //todo: create sub indicator description
 
@@ -168,4 +168,4 @@ router.get('/', function (req, res, next) {
     }
 });
 
-module.exports = router;
+export default router;

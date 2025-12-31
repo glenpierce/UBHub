@@ -1,17 +1,19 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {makeDbCallAsPromise} = require("../ConnectionPool");
+import {makeDbCallAsPromise} from '../ConnectionPool.js';
 
 router.get('/', function(req, res, next) {
 
-    const queryString = 'SELECT * from locations limit 100';
-    makeDbCallAsPromise(queryString)
-        .then(rows => {
-            res.render('home', {mapData:JSON.stringify(rows), username: req.session.user});
-        })
-        .catch(error => {
-            res.render('home', {mapData:null, username: req.session.user});
-        })
+    res.redirect("https://ubhuborg.wixsite.com/aboutus");
+
+    // const queryString = 'SELECT * from locations limit 100';
+    // makeDbCallAsPromise(queryString)
+    //     .then(rows => {
+    //         res.render('home', {mapData:JSON.stringify(rows), username: req.session.user});
+    //     })
+    //     .catch(error => {
+    //         res.render('home', {mapData:null, username: req.session.user});
+    //     })
 });
 
-module.exports = router;
+export default router;

@@ -42,7 +42,7 @@ function getPrograms(partName, markers, callback){
 function makeIconArray(colorLevels) {
   var levels = colorLevels.split(", ");
   var iconArray = [];
-  for (i = 0; i < levels.length; i++){
+  for (let i = 0; i < levels.length; i++) {
     var icon = getIconByIndex(i);
     var entry = {
       level: levels[i],
@@ -370,7 +370,7 @@ function highlightValues(filterBy, colorBy, colorLevels) {
           switch (colorBy) {
 
             case "part_level":
-              for (i = 0; i < iconArray.length; i++) {
+              for (let i = 0; i < iconArray.length; i++) {
                 if (iconArray[i].level == program.part_level && i > programLevel) {
                   programLevel = i;
                   icon = iconArray[i].icon;
@@ -413,7 +413,7 @@ function highlightValues(filterBy, colorBy, colorLevels) {
   function filterArrayNotNull(...filterBy) {
       markers.forEach(function (marker) {
           let toFilter = false;
-          for (i = 0; i < filterBy.length; i++) {
+          for (let i = 0; i < filterBy.length; i++) {
               if (marker.element[filterBy[i]] != null) {
                   toFilter = true;
               }
@@ -433,12 +433,12 @@ function highlightValues(filterBy, colorBy, colorLevels) {
       });
 
       var selectBoxes = document.getElementsByClassName("filterBox");
-      for(i = 0; i < selectBoxes.length; i++){
+      for (let i = 0; i < selectBoxes.length; i++) {
           selectBoxes.item(i).children[0].selectedIndex = 0;
       }
 
       var activityButtons = document.getElementsByClassName("activeButton");
-      for(i = 0; i < activityButtons.length; i++){
+      for (let i = 0; i < activityButtons.length; i++) {
           activityButtons[0].classList.remove("activeButton");
       }
 
@@ -699,8 +699,17 @@ function highlightValues(filterBy, colorBy, colorLevels) {
           { "featureType": "water", "stylers": [ { "color": "#b6d5e3" } ] },
           { "featureType": "water", "elementType": "labels.text.fill", "stylers": [ { "color": "#4e6d70" } ] } ]});
       mapData.forEach(function (element) {
-          if(element.lat){
+          if(element.lat) {
               var contentString = getMapPopupContent(element);
+
+              // if element.lat is a string, convert it to a float
+              if (element.lat && typeof element.lat === 'string') {
+                  element.lat = parseFloat(element.lat);
+              }
+              // if element.lng is a string, convert it to a float
+              if (element.lng && typeof element.lng === 'string') {
+                  element.lng = parseFloat(element.lng);
+              }
 
               var position = {lat:element.lat, lng:element.lng};
               var marker = new google.maps.Marker({

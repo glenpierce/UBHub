@@ -1,15 +1,15 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const session = require('client-sessions');
-const config = require('../config.js');
-const {makeDbCallAsPromise} = require("../ConnectionPool");
+import clientSession from 'client-sessions';
+import config from '../config.js';
+import {makeDbCallAsPromise} from '../ConnectionPool.js';
 const app = express();
 
-app.use(session({
-    cookieName: 'session',
-    secret: config.secret,
-    expires: new Date(Date.now() + (config.expires))
-}));
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     expires: new Date(Date.now() + (config.expires))
+// }));
 
 router.get('/', function(req, res, next) {
     let sites = "";
@@ -25,4 +25,4 @@ router.get('/', function(req, res, next) {
 router.post('/', function(req, res){
 });
 
-module.exports = router;
+export default router;

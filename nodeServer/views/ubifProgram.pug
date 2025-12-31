@@ -983,7 +983,7 @@ html
 
             updateMap = function () {
                 let minLat, maxLat, minLng, maxLng;
-                for (i = 0; i < markers.length; i++) {
+                for (let i = 0; i < markers.length; i++) {
                     if (minLat == null || markers[i].getPosition().lat() < minLat)
                         minLat = markers[i].getPosition().lat();
                     if (maxLat == null || markers[i].getPosition().lat() > maxLat)

@@ -1,10 +1,10 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
 router.get('/', function(req, res) {
-    res.render('spreadsheet', {
-        tables: ['indicators', 'categories', 'indicatorValues']
+    res.render('spreadSheet', {
+        tables: ['locations', 'documents', 'participation', 'mapButtons']
     });
 });
 
-module.exports = router;
+export default router;

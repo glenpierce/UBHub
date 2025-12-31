@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const {makeDbCallAsPromise} = require("../ConnectionPool");
+import bcrypt from 'bcryptjs';
+import {makeDbCallAsPromise} from '../ConnectionPool.js';
 
 router.get('/', function(req, res, next){
     res.render('createUser', {errorFromServer:false});
@@ -40,4 +40,4 @@ function createUser(req, res) {
         });
 }
 
-module.exports = router;
+export default router;

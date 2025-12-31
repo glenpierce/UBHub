@@ -1,20 +1,20 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const mysql = require('mysql');
-const session = require('client-sessions');
-const path = require("path");
+import mysql from 'mysql2';
+import clientSession from 'client-sessions';
+import path from 'path';
 
 const app = express();
 
-const config = require('../config.js');
+import config from '../config.js';
 
-app.use(session({
-    cookieName: 'session',
-    secret: config.secret,
-    cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
-    }
-}));
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     cookie: {
+//         maxAge: new Date(Date.now() + (config.expires))
+//     }
+// }));
 
 /********/
 /*ROUTES*/
@@ -696,7 +696,7 @@ function insertIntoTree(lop, t, u, a){
     return t;
   }
 
-  p = lop.shift();
+  let p = lop.shift();
   if(p.id == a){
     p.acceptedAnswer = true;
   } else {
@@ -840,4 +840,4 @@ function canAccept(post, parentAcceptedId, currentUserId){
 }
 
 
-module.exports = router;
+export default router;

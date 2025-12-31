@@ -1,17 +1,17 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const mysql = require('mysql');
-const session = require('client-sessions');
+import mysql from 'mysql2';
+import clientSession from 'client-sessions';
 
 const app = express();
 
-const config = require('../config.js');
+import config from '../config.js';
 
-app.use(session({
-    cookieName: 'session',
-    secret: config.secret,
-    expires: new Date(Date.now() + (config.expires))
-}));
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     expires: new Date(Date.now() + (config.expires))
+// }));
 
 router.post('/', function(req, res) {
     let id = JSON.parse(req.body.responseFromServer).id;
@@ -62,4 +62,4 @@ router.post('/', function(req, res) {
     }
 });
 
-module.exports = router;
+export default router;

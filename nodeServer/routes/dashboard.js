@@ -1,20 +1,28 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const mysql = require('mysql');
-const session = require('client-sessions');
-const path = require("path");
+import mysql from 'mysql2';
+import clientSession from 'client-sessions';
+import path from 'path';
 
 const app = express();
 
-const config = require('../config.js');
+import config from '../config.js';
 
-app.use(session({
-    cookieName: 'session',
-    secret: config.secret,
-    cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     cookie: {
+//         maxAge: new Date(Date.now() + (config.expires))
+//     }
+// }));
+
+function getQuery(req) {
+    if (req.query.id) {
+        return `Call selectSiteForUserAndReturnIt('${req.session.user}', '${req.query.id}')`;
+    } else {
+        return `Call getSelectedSiteByUserQuery('${req.session.user}')`;
     }
-}));
+}
 
 router.get('/', function (req, res, next) {
 
@@ -25,11 +33,7 @@ router.get('/', function (req, res, next) {
         function getSelectedSite() {
             return new Promise(function (resolve, reject) {
                 if (req.session && req.session.user) {
-                    if (req.query.id) {
-                        query = `Call selectSiteForUserAndReturnIt('${req.session.user}', '${req.query.id}')`;
-                    } else {
-                        query = `Call getSelectedSiteByUserQuery('${req.session.user}')`;
-                    }
+                    const query = getQuery(req);
                     let connection = mysql.createConnection({
                         host: config.rdsHost,
                         user: config.rdsUser,
@@ -59,9 +63,9 @@ router.get('/', function (req, res, next) {
 
         function getPrograms() {
             return new Promise(function (resolve, reject) {
-                query = "";
+                let query = "";
                 if (req.session && req.session.user) {
-                    connection = mysql.createConnection({
+                    const connection = mysql.createConnection({
                         host: config.rdsHost,
                         user: config.rdsUser,
                         password: config.rdsPassword,
@@ -90,9 +94,9 @@ router.get('/', function (req, res, next) {
 
         function getCategories() {
             return new Promise(function (resolve, reject) {
-                query = "";
+                const query = "";
                 if (req.session && req.session.user) {
-                    connection = mysql.createConnection({
+                    const connection = mysql.createConnection({
                         host: config.rdsHost,
                         user: config.rdsUser,
                         password: config.rdsPassword,
@@ -121,9 +125,9 @@ router.get('/', function (req, res, next) {
 
         function getIndicators() {
             return new Promise(function (resolve, reject) {
-                query = "";
+                const query = "";
                 if (req.session && req.session.user) {
-                    connection = mysql.createConnection({
+                    const connection = mysql.createConnection({
                         host: config.rdsHost,
                         user: config.rdsUser,
                         password: config.rdsPassword,
@@ -152,9 +156,9 @@ router.get('/', function (req, res, next) {
 
         function getUserData(siteId) {
             return new Promise(function (resolve, reject) {
-                query = "select * from userData where site = " + siteId;
+                const query = "select * from userData where site = " + siteId;
                 if (req.session && req.session.user) {
-                    connection = mysql.createConnection({
+                    const connection = mysql.createConnection({
                         host: config.rdsHost,
                         user: config.rdsUser,
                         password: config.rdsPassword,
@@ -234,9 +238,9 @@ router.get('/', function (req, res, next) {
 //     }
 // });
 
-makeDbCall = function (queryString, callback) {
+const makeDbCall = function (queryString, callback) {
     // console.log("making connection?");
-    connection = mysql.createConnection({
+    const connection = mysql.createConnection({
         host: config.rdsHost,
         user: config.rdsUser,
         password: config.rdsPassword,
@@ -244,7 +248,7 @@ makeDbCall = function (queryString, callback) {
     });
 
     connection.connect();
-    query = queryString;
+    const query = queryString;
     // console.log(query);
     connection.query(query, function (err, rows, fields) {
         if (!err) {
@@ -259,4 +263,4 @@ makeDbCall = function (queryString, callback) {
     connection.end();
 };
 
-module.exports = router;
+export default router;

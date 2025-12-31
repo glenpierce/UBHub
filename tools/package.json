@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "client-sessions": "^0.8.0"
+  }
+}

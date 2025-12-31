@@ -1,0 +1,266 @@
+doctype html
+html
+  head
+    script.
+      const tableDisplayConfig = {
+        mapButtons: {
+          displayName: 'Programs',
+          columns: [
+            {name: 'part_name', label: 'Program Name', visible: true},
+            {name: 'button_category', label: 'Category', visible: true},
+            {name: 'button_link', label: 'Website', visible: true},
+            {name: 'button_text', visible: false},
+            {name: 'image', visible: false},
+            {name: 'marker_colors_by', visible: false},
+            {name: 'marker_colors', visible: false}
+          ]
+        },
+        locations: {
+          displayName: 'Institutions',
+          columns: [
+            {name: 'id', visible: false},
+            {name: 'inst_address', visible: false},
+            {name: 'lat', visible: false},
+            {name: 'lng', visible: false},
+            {name: 'inst_title', label: 'Institution Name', visible: true},
+            {name: 'country', label: 'Country', visible: true},
+            {name: 'scale', label: 'Scale', visible: true},
+            {name: 'population', label: 'Population', visible: true},
+            {name: 'density_km2', visible: false},
+            {name: 'area_km2', label: 'Area (km²)', visible: true},
+            {name: 'area_ha', label: 'Area (ha)', visible: false},
+            {name: 'biodiversity_url', visible: false},
+            {name: 'url_verifydate', label: 'Url verfied on', visible: false},
+            {name: 'wwf_biome', label: 'WWF Biome', visible: false},
+            {name: 'wwf_terrestrial_ecoregion', label: 'WWF Terrestrial Ecoregion', visible: false},
+            {name: 'hotspot', label: 'Hotspot', visible: false},
+            {name: 'conservation_status_wwf', label: 'Conservation Status WWF', visible: false}
+          ]
+        },
+        participation: {
+          displayName: 'Program Participations',
+          columns: [
+            {name: 'id', visible: false},
+            {name: 'inst_id', visible: false},
+            {name: 'part_name', label: 'Program Name', visible: true},
+            {name: 'part_category', label: 'Category', visible: true},
+            {name: 'part_year', label: 'Year', visible: true},
+            {name: 'part_data', label: 'Data', visible: false},
+            {name: 'part_units', label: 'Units', visible: false},
+            {name: 'part_level', label: 'Level', visible: false},
+            {name: 'part_link_label', label: 'Link Label 1', visible: false},
+            {name: 'part_link', label: 'Link 1', visible: false},
+            {name: 'part_link_label2', label: 'Link Label 2', visible: false},
+            {name: 'part_link2', label: 'Link 2', visible: false},
+            {name: 'part_link_label3', label: 'Link Label 3', visible: false},
+            {name: 'part_link3', label: 'Link 3', visible: false},
+            {name: 'keywords', label: 'Keywords', visible: false},
+            {name: 'link_verified', label: 'Link Verified', visible: false}
+          ]
+        },
+        row_versions: { displayName: 'Submissions',
+        columns:[
+
+        ]
+        }
+      };
+      function onTableSelected(selectedTable) {
+        if (selectedTable) {
+          fetchTableData(selectedTable);
+          document.getElementById('tableTitle').textContent = tableDisplayConfig[selectedTable].displayName;
+        } else {
+          clearTable();
+        }
+      }
+
+      function fetchTableData(tableName) {
+        fetch(`/api/admin/table-data/${tableName}`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Not authorized or table not found');
+            }
+            return response.json();
+          })
+          .then(data => {
+            populateTable(data, tableName);
+          })
+          .catch(error => {
+            console.error('Error fetching data:', error);
+            alert('Error: ' + error.message);
+          });
+      }
+
+      function populateTable(data, tableName) {
+        if (!data || !data.length) {
+          clearTable();
+          return;
+        }
+
+        const headerRow = document.getElementById('headerRow');
+        const tableBody = document.getElementById('tableBody');
+
+        headerRow.innerHTML = '';
+        tableBody.innerHTML = '';
+
+        const columns = tableDisplayConfig[tableName].columns;
+        columns.forEach(column => {
+          if(column.visible) {
+            headerRow.innerHTML += `<th data-column="${column.label}">${column.label}</th>`;
+          }
+        });
+
+        data.forEach(row => {
+          let tr = document.createElement('tr');
+          columns.forEach(column => {
+            if(column.visible) {
+              let td = document.createElement('td');
+              td.textContent = row[column.name] !== null ? row[column.name] : '';
+              tr.appendChild(td);
+            }
+          });
+          tableBody.appendChild(tr);
+        });
+      }
+
+      function clearTable() {
+        document.getElementById('headerRow').innerHTML = '';
+        document.getElementById('tableBody').innerHTML = '';
+      }
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/stylesheets/index.css')
+    style.
+      .layout {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+      }
+      .left-col {
+        flex: 0 0 180px; /* fixed sidebar width */
+        border-right: 1px solid #e5e5e5;
+        background: #fff;
+        height: 100vh;
+        position: sticky;
+        top: 60px;
+        overflow-y: auto;
+      }
+      .main-col {
+        flex: 1; /* take remaining space */
+        min-width: 0; /* prevents overflow with long content */
+      }
+
+      .clickable {
+        cursor: pointer;
+        padding: 10px;
+      }
+      .clickable:hover {
+        background-color: #f3f7fb;
+        transform: translateY(-1px);
+      }
+      .nav-icon {
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+
+      /* Modern table styles: no vertical dividers, white header, dark grey headings, subtle hover lift */
+      .data-table {
+          width: 100%;
+          border-collapse: separate;
+          border-spacing: 0;
+          margin-top: 20px;
+          background: transparent;
+          border-radius: 10px;
+          overflow: hidden;
+          box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+      }
+
+      .data-table th,
+      .data-table td {
+          padding: 12px 16px;
+          text-align: left;
+          vertical-align: middle;
+          border: none; /* remove vertical dividers */
+      }
+
+      /* Header: white background, dark grey text, subtle bottom divider, sticky */
+      .data-table thead th {
+          position: sticky;
+          top: 0;
+          background-color: #ffffff;
+          color: #2f3438;
+          font-weight: 600;
+          font-size: 13px;
+          letter-spacing: 0.2px;
+          border-bottom: 1px solid rgba(31, 41, 55, 0.06);
+          z-index: 2;
+      }
+
+      /* Horizontal separators only between rows */
+      .data-table tbody tr + tr td {
+          border-top: 1px solid #f1f3f5;
+      }
+
+      /* Subtle alternating tint (very light) */
+      .data-table tbody tr:nth-child(even) td {
+          background-color: rgba(15, 23, 42, 0.01);
+      }
+
+      /* Hover effect for body rows (not header) */
+      .data-table tbody tr {
+          transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+          background-clip: padding-box;
+      }
+
+      .data-table tbody tr:hover {
+          transform: translateY(-4px);
+          background: linear-gradient(90deg, rgba(245, 250, 255, 0.9), rgba(255, 255, 255, 0.98));
+          box-shadow: 0 12px 30px rgba(31, 41, 55, 0.06);
+      }
+
+      /* Prevent header from getting hover transform */
+      .data-table thead tr:hover {
+          transform: none;
+          box-shadow: none;
+          background: none;
+      }
+
+      .table-container {
+          max-height: 70vh;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+      }
+
+  body
+    //+header(true)
+  div(style="padding-top:40px;")
+
+  div.layout
+    aside.left-col
+      nav
+        div
+          div.clickable(onclick="onTableSelected('mapButtons')")
+            img.nav-icon(src='/icons/programIcon.svg', alt='Program icon')
+            | Programs
+          div.clickable(onclick="onTableSelected('locations')" )
+            img.nav-icon(src='/icons/institutionIcon.svg', alt='Institutions icon')
+            | Institutions
+          div.clickable(onclick="onTableSelected('participation')")
+            img.nav-icon(src='/icons/participationIcon.svg', alt='Participations icon')
+            | Participations
+          div.clickable(onclick="onTableSelected('row_versions')")
+            img.nav-icon(src='/icons/submissionIcon.svg', alt='Submissions icon')
+            | Submissions
+
+
+    main.main-col
+      div.container
+        h1#tableTitle
+
+        div
+          div
+            div.table-container
+              table.data-table#dataTable
+                thead
+                  tr#headerRow
+                tbody#tableBody

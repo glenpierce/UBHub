@@ -1,15 +1,15 @@
-var express = require('express');
-var mysql = require('mysql');
-var router = express.Router();
-var path = require("path");
-var config = require('../config.js');
+import express from 'express';
+import mysql from 'mysql2';
+const router = express.Router();
+import path from 'path';
+import config from '../config.js';
 
 router.get('/', function(req, res, next) {
     console.log("get login");
     res.render('login');
 });
 
-module.exports = router;
+export default router;
 
 
 //todo: fix mapping of uploads to my uploads and map

@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const https = require('https');
-const {makeDbCallAsPromise} = require("../ConnectionPool");
+import https from 'https';
+import {makeDbCallAsPromise} from '../ConnectionPool.js';
 
 router.get('/', function(req, res, next) {
     res.render('createNewUpload', {username: req.session.user});
@@ -79,4 +79,4 @@ function updateLocation(id, lat, lng){
         .then(rows => console.log("location updated"));
 }
 
-module.exports = router;
+export default router;

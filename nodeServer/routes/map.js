@@ -1,19 +1,19 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const session = require('client-sessions');
-const pool = require('../ConnectionPool.js').pool;
+import clientSession from 'client-sessions';
+import {pool} from '../ConnectionPool.js';
 
 const app = express();
 
-const config = require('../config.js');
+import config from '../config.js';
 
-app.use(session({
-    cookieName: 'session',
-    secret: config.secret,
-    cookie: {
-        maxAge: new Date(Date.now() + (config.expires))
-    }
-}));
+// app.use(clientSession({
+//     cookieName: 'session',
+//     secret: config.secret,
+//     cookie: {
+//         maxAge: new Date(Date.now() + (config.expires))
+//     }
+// }));
 
 router.get('/', function(req, res, next) {
     //let mapData = "";
@@ -92,7 +92,7 @@ router.post('/tableData', function(req, res, next){
                         .then((rows) => {
                             connection.release();
 
-                            for (i = 0; i < rows.length; i++) {
+                            for (let i = 0; i < rows.length; i++) {
                                 string += `<tr>`;
                                 string += `<td class="mvTitle">${rows[i].inst_title}</td>`;
                                 string += `<td>${rows[i].country}</td>`;
@@ -205,7 +205,7 @@ function buildLocationsQuery(filters, page, limit){
         }
 
         //then do JOINs:
-        for (i = 0; i < filters.length; i++){
+        for (let i = 0; i < filters.length; i++) {
           switch (filters[i].type) {
             case("document"):
                 joinClause += ` INNER JOIN (select inst_id, doc_type from documents d where d.doc_type = "${filters[i].val}" group by inst_id) as dq on dq.inst_id = l.id `;
@@ -395,7 +395,7 @@ function attachDocument(location, document) {
 
 function categorizeButtons(buttons) {
   let mapButtonCategories = [];
-  for (i = 0; i < buttons.length; i++) {
+  for (let i = 0; i < buttons.length; i++) {
 
     let found = false;
     let j = 0;
@@ -710,4 +710,4 @@ const mapFilterParameters = [
       type: "select"
   }];
 
-module.exports = router;
+export default router;

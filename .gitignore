@@ -2,6 +2,6 @@
 .DS_Store
 config.js
 populateDBScript.js
-package-lock.json
 /.idea/
 /.vs/
+/secrets/
