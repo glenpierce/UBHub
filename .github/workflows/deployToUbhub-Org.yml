@@ -34,10 +34,8 @@ jobs:
           mkdir ../deploy-files
           zip -r "../deploy-files/${{github.run_id}}.zip" . -x "scripts.js" "configure_amz_linux_app.sh"
           cd ..
-          ls deploy-files
           cd deploy-files
           unzip -l "${{github.run_id}}.zip"
-          ls deploy-files
           ls -l config.js
           exit 0
 
