@@ -194,6 +194,44 @@ html
         document.querySelector('.modal').scrollTop = 0;
       }
 
+      document.addEventListener('DOMContentLoaded', () => {
+        const modalForm = document.getElementById('modalForm');
+        if (modalForm) {
+          modalForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!currentTable) {
+              alert('No table selected.');
+              return;
+            }
+            const payload = {
+              tableName: currentTable,
+              rowKey: {},
+              operation: 'insert',
+              data: {}
+            };
+            modalForm.querySelectorAll('[data-col-name]').forEach(inputValue => {
+              payload.data[inputValue.dataset.colName] = inputValue.value;
+            });
+
+            fetch(`/api/admin/pending-change`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            }).then(res => {
+              if (!res.ok) throw new Error('Submit failed');
+              return res.json();
+            }).then(() => {
+              closeModal();
+              // refresh table
+              fetchTableData(currentTable);
+            }).catch(err => {
+              console.error(err);
+              alert('Submit error: ' + err.message);
+            });
+          });
+        }
+      });
+
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='/stylesheets/index.css')
     style.

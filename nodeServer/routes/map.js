@@ -1,19 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import clientSession from 'client-sessions';
-import {pool} from '../ConnectionPool.js';
-
-const app = express();
-
-import config from '../config.js';
-
-// app.use(clientSession({
-//     cookieName: 'session',
-//     secret: config.secret,
-//     cookie: {
-//         maxAge: new Date(Date.now() + (config.expires))
-//     }
-// }));
+import { pool } from '../ConnectionPool.js';
 
 router.get('/', function(req, res, next) {
     //let mapData = "";
@@ -63,10 +50,6 @@ router.get('/', function(req, res, next) {
             });
         })
     });
-});
-
-router.get('/update', function(req, res, next) {
-    // update();
 });
 
 router.post('/tableData', function(req, res, next){
@@ -370,7 +353,6 @@ function mapDocumentDataToLocations(documentData, locations) {
 }
 
 function attachParticipation(location, part) {
-  //location.participation = [part];
 
   if(location.participation == undefined) {
     location.participation = [part];
@@ -489,166 +471,56 @@ function getSummary(data){
   return summary;
 }
 
-// function update(){
-//     mapData = "";
-//
-//     connection = mysql.createConnection({
-//         host: config.rdsHost,
-//         user: config.rdsUser,
-//         password: config.rdsPassword,
-//         database: config.rdsDatabase
-//     });
-//
-//     connection.connect();
-//     query = 'SELECT * from locations where lat is null';
-//     console.log(query);
-//     connection.query(query, function(err, rows, fields) {
-//         if (!err) {
-//             mapData = rows;
-//             rows.forEach(function (element){
-//                 console.log("updating id=" + element.id);
-//                 getLatLong(element.address, element.id);
-//             });
-//         } else {
-//             console.log('Error while performing Query.');
-//         }
-//     });
-//     connection.end();
-// }
-
-
 const mapActivities = [
-    {
-        name: "Biodiversity Data Portal"
-    },
-    {
-        name: "Biodiversity Online Map"
-    },
-    {
-        name: "Biodiversity Plan"
-    },
-    {
-        name: "Biodiversity Report"
-    },
-    {
-        name: "Comprehensive Plan"
-    },
-    {
-        name: "Developer Guide"
-    },
-    {
-        name: "Engagement Activity"
-    },
-    {
-        name: "Habitat Plan"
-    },
-    {
-        name: "Informational Handout"
-    },
-    {
-        name: "Local Program"
-    },
-    {
-        name: "Public Policy"
-    },
-    {
-        name: "Species Plan"
-    },
-    {
-        name: "Supporting Document"
-    },
-    {
-        name: "Sustainability Plan"
-    },
-    {
-        name: "Urban Forest Plan"
-    },
-    {
-        name: "Water Management Plan"
-    }
+    { name: "Biodiversity Data Portal" },
+    { name: "Biodiversity Online Map" },
+    { name: "Biodiversity Plan" },
+    { name: "Biodiversity Report" },
+    { name: "Comprehensive Plan" },
+    { name: "Developer Guide" },
+    { name: "Engagement Activity" },
+    { name: "Habitat Plan" },
+    { name: "Informational Handout" },
+    { name: "Local Program" },
+    { name: "Public Policy" },
+    { name: "Species Plan" },
+    { name: "Supporting Document" },
+    { name: "Sustainability Plan" },
+    { name: "Urban Forest Plan" },
+    { name: "Water Management Plan" }
 ];
 
 const mapIndices = [
-    {
-        name: "Biocapacity"
-    },
-    {
-        name: "Biodiversity Communication, Education and Public Awareness (CEPA)"
-    },
-    {
-        name: "Biophilic Cities"
-    },
-    {
-        name: "Capitale Francaise de la Biodiversite"
-    },
-    {
-        name: "Community Wildlife Habitat"
-    },
-    {
-        name: "Durban Commitment"
-    },
-    {
-        name: "European Capitals of Biodiversity"
-    },
-    {
-        name: "European Green Capital Award"
-    },
-    {
-        name: "Ecological Footprint"
-    },
-    {
-        name: "Green and Blue Space Adaptation for Urban Areas and Eco Towns (GRaBS)"
-    },
-    {
-        name: "INTERACT-Bio"
-    },
-    {
-        name: "LAB Pioneer Programme"
-    },
+    { name: "Biocapacity" },
+    { name: "Biodiversity Communication, Education and Public Awareness (CEPA)" },
+    { name: "Biophilic Cities" },
+    { name: "Capitale Francaise de la Biodiversite" },
+    { name: "Community Wildlife Habitat" },
+    { name: "Durban Commitment" },
+    { name: "European Capitals of Biodiversity" },
+    { name: "European Green Capital Award" },
+    { name: "Ecological Footprint" },
+    { name: "Green and Blue Space Adaptation for Urban Areas and Eco Towns (GRaBS)" },
+    { name: "INTERACT-Bio" },
+    { name: "LAB Pioneer Programme" },
     {
         name: "LAB Wetlands",
         id: "LAB Wetlands",
         image: "LabProgrammeLogo.jpg"
     },
-    {
-        name: "Mayors Monarch Pledge"
-    },
-    {
-        name: "One Planet Living"
-    },
-    {
-        name: "Singapore Index"
-    },
-    {
-        name: "Urban Biosphere Reserves"
-    },
-    {
-        name: "Urban Bird Treaty"
-    },
-    {
-        name: "Urban Protected Area"
-    },
-    {
-        name: "Urban Wildlife Refuge"
-    },
-    {
-        name: "URBIS"
-    },
-    {
-        name: "WILD Cities"
-    },
-    {
-        name: "City Nature Challenge"
-    },
-    {
-        name: "Treepedia"
-    },
-    {
-        name: "Cities With Nature"
-    },
-    {
-        name: "UNA Rivers for Life"
-    }
+    { name: "Mayors Monarch Pledge" },
+    { name: "One Planet Living" },
+    { name: "Singapore Index" },
+    { name: "Urban Biosphere Reserves" },
+    { name: "Urban Bird Treaty" },
+    { name: "Urban Protected Area" },
+    { name: "Urban Wildlife Refuge" },
+    { name: "URBIS" },
+    { name: "WILD Cities" },
+    { name: "City Nature Challenge" },
+    { name: "Treepedia" },
+    { name: "Cities With Nature" },
+    { name: "UNA Rivers for Life" }
 ];
 
 const mapFilterParameters = [

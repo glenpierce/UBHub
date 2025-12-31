@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import bcrypt from 'bcryptjs';
-import {makeDbCallAsPromise} from '../ConnectionPool.js';
+import { makeDbCallAsPromise } from '../ConnectionPool.js';
 
 router.get('/', function(req, res, next){
     res.render('createUser', {errorFromServer:false});

@@ -1,6 +1,5 @@
 import express from 'express';
 const router = express.Router();
-import mysql from 'mysql2';
 import bcrypt from 'bcryptjs';
 import { makeDbCallAsPromise } from '../ConnectionPool.js';
 

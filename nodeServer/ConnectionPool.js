@@ -37,4 +37,4 @@ const makeDbCallAsPromise = async function(queryString, params = []) {
     }
 };
 
-export { pool, makeDbCallAsPromise };
+export { pool, promisePool, makeDbCallAsPromise };

@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import {pool} from '../ConnectionPool.js';
+import { pool } from '../ConnectionPool.js';
 import bcrypt from 'bcryptjs';
 import config from '../config.js';
 
