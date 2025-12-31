@@ -82,8 +82,8 @@ const allowedTables = {
         columns: ['id','inst_id','part_category','part_name','part_year','part_data','part_units','part_level','part_link_label','part_link','part_link_label2','part_link2','part_link_label3','part_link3','keywords','link_verified']
     },
     mapButtons: {
-        primaryKey: ['id'],
-        columns: ['id','button_label','button_type','button_url','button_color','button_icon','button_order','open_in_new_tab']
+        primaryKey: ['part_name'],
+        columns: ['part_name', 'button_category',	'button_text',	'image',	'marker_colors_by',	'marker_colors',	'button_link']
     }
 };
 

@@ -1,0 +1,39 @@
+name: Decode Session
+
+on:
+  workflow_dispatch:
+    inputs:
+      cookie:
+        description: 'Session cookie value (optional — falls back to secrets.COOKIE)'
+        required: false
+        default: ''
+
+jobs:
+  decode:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Decode session
+        env:
+          SECRET: ${{ secrets.KEY }}
+          COOKIE: ${{ github.event.inputs.cookie || secrets.COOKIE }}
+        run: |
+          if [ -z "$SECRET" ]; then
+            echo "Missing secret: KEY"
+            exit 1
+          fi
+          if [ -z "$COOKIE" ]; then
+            echo "No cookie provided via input or secrets.COOKIE"
+            exit 1
+          fi
+          node tools/decodeSession.js "$COOKIE" "$SECRET"
