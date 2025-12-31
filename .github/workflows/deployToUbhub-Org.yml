@@ -14,12 +14,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git clone --depth=1 https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} .
-      - name: Install Node 22.x and zip utilities
+      - name: Install Node 22.x
         run: |
           curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
           sudo apt-get update
           sudo apt-get install -y nodejs
-          sudo apt-get install -y zip unzip
       - name: Install dependencies
         run: |
           cd nodeServer
@@ -31,6 +30,7 @@ jobs:
         run: |
           cd nodeServer
           echo "${{ secrets.CONFIG }}" > config.js
+          mkdir ../deploy-files
           zip -r "../deploy-files/${{github.run_id}}.zip" . -x "*.scripts.js" "*.configure_amz_linux_app.sh"
           cat config.js
           ls
