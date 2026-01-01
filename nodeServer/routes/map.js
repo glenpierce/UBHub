@@ -1,61 +1,35 @@
 import express from 'express';
 
 const router = express.Router();
-import {pool} from '../ConnectionPool.js';
+import { pool } from '../ConnectionPool.js';
 
-router.get('/', function (req, res, next) {
+router.get('/', async function (req, res, next) {
   console.log("Rendering map page");
+  let connection;
   try {
-    pool.getConnection(function (error, connection) {
+    connection = await pool.getConnection();
+    console.log("Acquired connection for map page");
 
-      console.log("Acquired connection for map page");
+    const locationsQuery = 'SELECT * from locations limit 2000';
+    const mapData = await getMapLocations(connection, locationsQuery);
 
-      const locationsQuery = 'SELECT * from locations limit 2000';
+    const mapSummary = getSummary(mapData);
+    console.log("mapSummary: ", mapSummary);
 
-      getMapLocations(connection, locationsQuery)
-        .then((mapData) => {
-          const mapSummary = getSummary(mapData);
-          console.log("mapSummary: ", mapSummary);
-          const buttonsQuery = 'SELECT * from mapButtons';
-          getMapData(connection, buttonsQuery)
-            .then((buttons) => {
-              console.log("Selected buttons for map page");
-              connection.release();
-              const mapButtons = categorizeButtons(buttons);
-              if (req.session && req.session.user) {
-                console.log("user logged in:", req.session.user);
-                res.render('map', {
-                  mapFilterParameters: mapFilterParameters,
-                  mapData: JSON.stringify(mapData),
-                  mapSummary: mapSummary,
-                  mapButtons: mapButtons,
-                  username: req.session.user
-                });
-              } else {
-                res.render('map', {
-                  mapFilterParameters: mapFilterParameters,
-                  mapData: JSON.stringify(mapData),
-                  mapSummary: mapSummary,
-                  mapButtons: mapButtons,
-                  username: null
-                });
-              }
-            })
-        })
-        .catch((err) => {
-          console.log(err);
-          if (connection) {
-            connection.release();
-          }
-          res.render('map', {
-            mapFilterParameters: mapFilterParameters,
-            mapData: {},
-            mapSummary: {},
-            mapButtons: {},
-            username: null
-          });
-        })
+    const buttonsQuery = 'SELECT * from mapButtons';
+    const buttons = await getMapData(connection, buttonsQuery);
+    console.log("Selected buttons for map page");
+
+    const mapButtons = categorizeButtons(buttons);
+
+    res.render('map', {
+      mapFilterParameters: mapFilterParameters,
+      mapData: JSON.stringify(mapData),
+      mapSummary: mapSummary,
+      mapButtons: mapButtons,
+      username: req.session && req.session.user ? req.session.user : null
     });
+
   } catch (error) {
     console.error("failed to load map page:", error);
     res.render('map', {
@@ -65,183 +39,131 @@ router.get('/', function (req, res, next) {
       mapButtons: {},
       username: null
     });
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (releaseErr) {
+        console.error("Error releasing connection:", releaseErr);
+      }
+    }
   }
 });
 
-router.post('/tableData', function (req, res, next) {
-
-  let mapData = "";
-  let string = "";
-  let page = req.body.page;
-  let filters = req.body.filters;
-
-  if (page == null) {
-    page = 1;
-  }
-
+router.post('/tableData', async function (req, res, next) {
+  const page = req.body.page == null ? 1 : req.body.page;
+  const filters = req.body.filters || [];
   const limit = 10;
-
   const query = buildLocationsQuery(filters, page, limit);
 
-  pool.getConnection(function (error, connection) {
-    if (connection) {
-      connection.query(query, function (err, rows, fields) {
-        if (rows != undefined && rows.length > 0) {
-          attachProgramsToGivenInstitutions(connection, rows)
-            .then((rows) => {
-              connection.release();
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    const rows = await connection.query(query);
 
-              for (let i = 0; i < rows.length; i++) {
-                string += `<tr>`;
-                string += `<td class="mvTitle">${rows[i].inst_title}</td>`;
-                string += `<td>${rows[i].country}</td>`;
-                string += `<td>${rows[i].scale}</td>`;
-                string += `<td class="mvPrograms">${outputProgramsAndActivities(rows[i])}</td>`;
-                string += `</tr>`;
-              }
-              res.send(string);
-            }, function (error) {
-              console.log(error);
-              res.send("No data");
-            })
+    if (rows && rows.length > 0) {
+      const attachedRows = await attachProgramsToGivenInstitutions(connection, rows);
 
-        } else if (rows != undefined && rows.length == 0) {
-          connection.release();
-          res.send("<p>No data for given parameters.</p>");
-        } else {
-          connection.release();
-          res.send("<p>Processing...</p>");
-        }
-      });
-    } else {
+      let string = "";
+      for (let i = 0; i < attachedRows.length; i++) {
+        string += `<tr>`;
+        string += `<td class="mvTitle">${attachedRows[i].inst_title}</td>`;
+        string += `<td>${attachedRows[i].country}</td>`;
+        string += `<td>${attachedRows[i].scale}</td>`;
+        string += `<td class="mvPrograms">${outputProgramsAndActivities(attachedRows[i])}</td>`;
+        string += `</tr>`;
+      }
+
+      res.send(string);
+    } else if (rows && rows.length === 0) {
       res.send("<p>No data for given parameters.</p>");
+    } else {
+      res.send("<p>Processing...</p>");
     }
-  });
+  } catch (err) {
+    console.error("tableData error:", err);
+    res.send("<p>No data for given parameters.</p>");
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (releaseError) {
+        console.error("Error releasing connection:", releaseError);
+      }
+    }
+  }
 });
 
-router.post('/resultCounts', function (req, res, next) {
-  const filters = req.body.filters;
+router.post('/resultCounts', async function (req, res, next) {
+  const filters = req.body.filters || [];
   const query = buildLocationsQuery(filters, -1, -1);
 
-  pool.getConnection(function (error, connection) {
-    if (connection) {
-      connection.query(query, function (err, rows, fields) {
-        connection.release();
-        let counts;
-        if (rows != undefined) {
-          counts = {
-            total: rows.length,
-            municipalities: rows.filter(x => x.scale == "municipality").length,
-            districts: rows.filter(x => x.scale == "district/county").length,
-            campuses: rows.filter(x => x.scale == "campus").length
-          }
-        } else {
-          counts = {};
-        }
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    const [rows] = await connection.query(query);
 
-        res.send(JSON.stringify(counts));
-      });
+    let counts;
+    if (rows) {
+      counts = {
+        total: rows.length,
+        municipalities: rows.filter(location => location.scale == "municipality").length,
+        districts: rows.filter(location => location.scale == "district/county").length,
+        campuses: rows.filter(location => location.scale == "campus").length
+      };
     } else {
-      res.send({});
+      counts = {};
     }
-  });
+
+    res.send(JSON.stringify(counts));
+  } catch (err) {
+    console.error("resultCounts error:", err);
+    res.send(JSON.stringify({}));
+  } finally {
+    if (connection) {
+      try { connection.release(); } catch (releaseErr) { console.error("Error releasing connection:", releaseErr); }
+    }
+  }
 });
 
-router.post('/getProgramMembers', function (req, res, next) {
+router.post('/getProgramMembers', async function (req, res, next) {
   const programName = req.body.programName;
   const query = "SELECT * FROM participation WHERE `part_name` = '" + programName + "'";
 
-  pool.getConnection(function (error, connection) {
-    connection.query(query, function (err, rows, fields) {
-      connection.release();
-      let members = [];
-      if (rows != undefined) {
-        members = rows;
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    const rows = await connection.query(query);
+    res.send(JSON.stringify(rows || []));
+  } catch (err) {
+    console.error("getProgramMembers error:", err);
+    res.send(JSON.stringify([]));
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (releaseError) {
+        console.error("Error releasing connection:", releaseError);
       }
-      res.send(JSON.stringify(rows));
-    });
-  });
+    }
+  }
 });
 
-function buildLocationsQuery(filters, page, limit) {
-  //PICK FIELDS
-  let query = `SELECT * from locations as l `;
-  let useWhere = false;
-
-  let whereClause = "";
-  let joinClause = "";
-  let firstWhere = true;
-
-  //DEAL WITH FILTERS
-  if (filters.length > 0) {
-
-    //do WHERE filters first
-    for (let i = 0; i < filters.length; i++) {
-
-      switch (filters[i].type) {
-        case("select"):
-          if (!firstWhere) {
-            whereClause += " AND ";
-          }
-          if (filters[i].val == "all") {
-            whereClause += ` l.${filters[i].key} IS NOT NULL`;
-          } else {
-            whereClause += ` l.${filters[i].key}="${filters[i].val}"`;
-          }
-          firstWhere = false;
-          break;
-
-        case("range"):
-          if (!firstWhere) {
-            whereClause += " AND ";
-          }
-          whereClause += ` l.${filters[i].key} BETWEEN ${filters[i].lower} AND ${filters[i].upper}`;
-          firstWhere = false;
-          break;
-
-        case("nullable"):
-          //TODO: fix this when new data is in db
-          whereClause += " true = true ";
-          useWhere = true;
-          break;
-      }
-    }
-
-    //then do JOINs:
-    for (let i = 0; i < filters.length; i++) {
-      switch (filters[i].type) {
-        case("document"):
-          joinClause += ` INNER JOIN (select inst_id, doc_type from documents d where d.doc_type = "${filters[i].val}" group by inst_id) as dq on dq.inst_id = l.id `;
-          break;
-        case("program"):
-          joinClause += ` INNER JOIN (select inst_id, part_name from participation p where p.part_name = "${filters[i].val}" group by inst_id) as pq on pq.inst_id = l.id `;
-          break;
-      }
-    }
-
-    if (whereClause != "") {
-      whereClause = " WHERE " + whereClause;
-    }
-
-    query += joinClause + " " + whereClause;
-
+async function getMapData(connection, query) {
+  console.log("getMapData", query);
+  if (!connection) {
+    throw new Error("No DB connection provided to getMapData");
   }
-
-  if (page > -1 && limit > -1) {
-    query += ` limit ${limit} offset ${limit * (page - 1)}`;
-  }
-
-  console.log(query);
-  return query;
+  const rows = await connection.query(query);
+  return rows;
 }
 
-
-function attachProgramsToGivenInstitutions(connection, locations) {
-
-  const institutionIds = locations.map((x) => {
-    return x.id;
-  });
-
+async function attachProgramsToGivenInstitutions(connection, locations) {
+  const institutionIds = locations
+    .map((location) => location.id)
+    .filter((id) => id !== null && id !== undefined && id !== '')
+    .map((id) => (typeof id === 'number' ? id : Number(id)))
+    .filter((id) => Number.isFinite(id));
   const institutionIdsString = institutionIds.join(", ");
 
   let partQuery = "SELECT * from participation";
@@ -250,87 +172,64 @@ function attachProgramsToGivenInstitutions(connection, locations) {
   } else {
     partQuery += ";";
   }
-  return new Promise((resolve, reject) => {
-    getMapData(connection, partQuery)
-      .then(partData => {
-        locations = mapParticipitationDataToLocations(partData, locations);
-        let documentQuery = "SELECT * FROM documents";
-        if (institutionIdsString.length > 0) {
-          documentQuery += " WHERE inst_id in (" + institutionIdsString + ")";
-        } else {
-          documentQuery += ";";
-        }
-        getMapData(connection, documentQuery)
-          .then((documentData) => {
-            locations = mapDocumentDataToLocations(documentData, locations);
-            resolve(locations);
 
-          })
-      })
-      .catch((error) => {
-        console.log(error);
-        reject();
-      })
-  })
-}
+  try {
+    const partData = await getMapData(connection, partQuery);
+    locations = mapParticipitationDataToLocations(partData, locations);
 
-
-function getMapLocations(connection, query) {
-  return new Promise((resolve, reject) => {
-    getMapData(connection, query)
-      .then((locations) => {
-
-        const partQueryIds = locations.map((x) => {
-          return x.id;
-        });
-
-        const partQueryStrings = partQueryIds.join(", "); // todo: rename this variable, it's not clear - be consistent with others like it from above
-
-
-        let partQuery = "SELECT * FROM participation"; // todo: rename this variable, it's not clear
-        if (partQueryStrings.length > 0) {
-          partQuery += " WHERE inst_id in (" + partQueryStrings + ")";
-        } else {
-          partQuery += ";";
-        }
-
-        getMapData(connection, partQuery)
-          .then((partData => {
-            locations = mapParticipitationDataToLocations(partData, locations);
-          }))
-          .then(() => {
-            let documentQuery = "SELECT * FROM documents";
-            if (partQueryStrings.length > 0) {
-              documentQuery += " WHERE inst_id in (" + partQueryStrings + ")"; // todo: we need to check the name of this variable
-            } else {
-              documentQuery += ";";
-            }
-            getMapData(connection, documentQuery)
-              .then((documentData) => locations = mapDocumentDataToLocations(documentData, locations))
-              .then((() => resolve(locations)));
-          })
-      })
-      .catch((error) => {
-        reject();
-      });
-  });
-}
-
-function getMapData(connection, query) {
-  console.log("getMapData", query);
-  return new Promise((resolve, reject) => {
-    if (connection) {
-      connection.query(query, function (err, rows, fields) {
-        if (!err) {
-          resolve(rows);
-        } else {
-          reject(err);
-        }
-      })
+    let documentQuery = "SELECT * FROM documents";
+    if (institutionIdsString.length > 0) {
+      documentQuery += " WHERE inst_id in (" + institutionIdsString + ")";
     } else {
-      reject();
+      documentQuery += ";";
     }
-  });
+
+    const documentData = await getMapData(connection, documentQuery);
+    locations = mapDocumentDataToLocations(documentData, locations);
+
+    return locations;
+  } catch (error) {
+    console.error("attachProgramsToGivenInstitutions error:", error);
+    throw error;
+  }
+}
+
+async function getMapLocations(connection, query) {
+  try {
+    const locations = await getMapData(connection, query);
+
+    const partQueryIds = locations
+      .map((location) => location.id)
+      .filter((id) => id !== null && id !== undefined && id !== '')
+      .map((id) => (typeof id === 'number' ? id : Number(id)))
+      .filter((id) => Number.isFinite(id));
+    const partQueryStrings = partQueryIds.join(", ");
+
+    let participationQuery = "SELECT * FROM participation";
+    if (partQueryStrings.length > 0) {
+      participationQuery += " WHERE inst_id in (" + partQueryStrings + ")";
+    } else {
+      participationQuery += ";";
+    }
+
+    const participationData = await getMapData(connection, participationQuery);
+    let locationsMappedParticipationData = mapParticipitationDataToLocations(participationData, locations);
+
+    let documentQuery = "SELECT * FROM documents";
+    if (partQueryStrings.length > 0) {
+      documentQuery += " WHERE inst_id in (" + partQueryStrings + ")";
+    } else {
+      documentQuery += ";";
+    }
+
+    const documentData = await getMapData(connection, documentQuery);
+    const locationsMappedParticipationMappedDocumentData = mapDocumentDataToLocations(documentData, locationsMappedParticipationData);
+
+    return locationsMappedParticipationMappedDocumentData;
+  } catch (err) {
+    console.error("getMapLocations error:", err);
+    throw err;
+  }
 }
 
 function mapParticipitationDataToLocations(participationData, locations) {
@@ -475,16 +374,16 @@ function getSummary(data) {
   let summary = {};
   summary.total = data.length;
 
-  summary.municipalities = data.filter((x) => {
-    return (x.scale == "municipality");
+  summary.municipalities = data.filter((location) => {
+    return (location.scale == "municipality");
   }).length;
 
-  summary.districts = data.filter((x) => {
-    return (x.scale == "district/county");
+  summary.districts = data.filter((location) => {
+    return (location.scale == "district/county");
   }).length;
 
-  summary.campuses = data.filter((x) => {
-    return (x.scale == "campus");
+  summary.campuses = data.filter((location) => {
+    return (location.scale == "campus");
   }).length;
 
 
