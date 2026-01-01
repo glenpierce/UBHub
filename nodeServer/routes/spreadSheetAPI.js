@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import { promisePool, makeDbCallAsPromise } from '../ConnectionPool.js';
+import { pool, makeDbCallAsPromise } from '../ConnectionPool.js';
 
 router.get('/table-data/:tableName', isAuthenticated, isAdmin, async (req, res) => {
     try {
@@ -41,7 +41,7 @@ router.post('/pending-change', isAuthenticated, isAdmin, async (req, res) => {
             return res.status(400).json({ error: 'data must be an object' });
         }
 
-        await createPendingChange(promisePool, tableName, rowKey || {}, operation, data || {}, req.session.user);
+        await createPendingChange(pool, tableName, rowKey || {}, operation, data || {}, req.session.user);
 
         res.status(201).json({ success: true });
     } catch (error) {
@@ -95,17 +95,17 @@ function assertTableAllowed(tableName) {
     }
 }
 
-async function createPendingChange(promisePool, tableName, rowKeyObj, operation, dataObj, user) {
+async function createPendingChange(pool, tableName, rowKeyObj, operation, dataObj, user) {
     console.log("creating pending change");
     assertTableAllowed(tableName);
     console.log("table allowed");
     const pkJson = JSON.stringify(rowKeyObj || {});
     const dataJson = JSON.stringify(dataObj || {});
-    const connection = await promisePool.getConnection();
+    const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
 
-        const [rows] = await conn.query(
+        const [rows] = await connection.query(
             "SELECT COALESCE(MAX(version),0) + 1 AS next_version FROM row_versions WHERE table_name = ? AND JSON_UNQUOTE(JSON_EXTRACT(row_key, '$')) = ?",
             [tableName, pkJson]
         );
@@ -128,12 +128,12 @@ async function createPendingChange(promisePool, tableName, rowKeyObj, operation,
         }
         throw error;
     } finally {
-        promisePool.release();
+        connection.release();
     }
 }
 
-async function approveVersion(promisePool, versionId, approver) {
-    const connection = await promisePool.getConnection();
+async function approveVersion(pool, versionId, approver) {
+    const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
         // lock the version row

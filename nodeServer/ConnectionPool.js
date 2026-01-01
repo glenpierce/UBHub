@@ -30,17 +30,19 @@ const getConnection = async () => {
  * fn receives the acquired connection and should use it for queries.
  */
 const withTransaction = async (fn) => {
-    const conn = await pool.getConnection();
+    const connection = await pool.getConnection();
     try {
-        await conn.beginTransaction();
-        const result = await fn(conn);
-        await conn.commit();
+        await connection.beginTransaction();
+        const result = await fn(connection);
+        connection.commit();
         return result;
     } catch (err) {
-        try { await conn.rollback(); } catch (_) {}
+        try { await connection.rollback(); } catch (error) {
+            console.error("Error connecting to the database:", err.code, err.message);
+        }
         throw err;
     } finally {
-        conn.release();
+        connection.release();
     }
 };
 
