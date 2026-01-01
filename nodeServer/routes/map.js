@@ -149,6 +149,78 @@ router.post('/getProgramMembers', async function (req, res, next) {
   }
 });
 
+function buildLocationsQuery(filters, page, limit) {
+  //PICK FIELDS
+  let query = `SELECT * from locations as l `;
+  let useWhere = false;
+
+  let whereClause = "";
+  let joinClause = "";
+  let firstWhere = true;
+
+  //DEAL WITH FILTERS
+  if (filters.length > 0) {
+
+    //do WHERE filters first
+    for (let i = 0; i < filters.length; i++) {
+
+      switch (filters[i].type) {
+        case("select"):
+          if (!firstWhere){
+            whereClause += " AND ";
+          }
+          if(filters[i].val == "all") {
+            whereClause += ` l.${filters[i].key} IS NOT NULL`;
+          } else {
+            whereClause += ` l.${filters[i].key}="${filters[i].val}"`;
+          }
+          firstWhere = false;
+          break;
+
+        case("range"):
+          if (!firstWhere){
+            whereClause += " AND ";
+          }
+          whereClause += ` l.${filters[i].key} BETWEEN ${filters[i].lower} AND ${filters[i].upper}`;
+          firstWhere = false;
+          break;
+
+        case("nullable"):
+          //TODO: fix this when new data is in db
+          whereClause += " true = true ";
+          useWhere = true;
+          break;
+      }
+    }
+
+    //then do JOINs:
+    for (let i = 0; i < filters.length; i++) {
+      switch (filters[i].type) {
+        case("document"):
+          joinClause += ` INNER JOIN (select inst_id, doc_type from documents d where d.doc_type = "${filters[i].val}" group by inst_id) as dq on dq.inst_id = l.id `;
+          break;
+        case("program"):
+          joinClause += ` INNER JOIN (select inst_id, part_name from participation p where p.part_name = "${filters[i].val}" group by inst_id) as pq on pq.inst_id = l.id `;
+          break;
+      }
+    }
+
+    if (whereClause != "") {
+      whereClause = " WHERE " + whereClause;
+    }
+
+    query += joinClause + " " + whereClause;
+
+  }
+
+  if(page > -1 && limit > -1){
+    query += ` limit ${limit} offset ${limit * (page - 1)}`;
+  }
+
+  console.log(query);
+  return query;
+}
+
 async function getMapData(connection, query) {
   console.log("getMapData", query);
   if (!connection) {
