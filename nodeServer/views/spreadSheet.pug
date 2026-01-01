@@ -60,9 +60,7 @@ html
         },
         row_versions: {
           displayName: 'Submissions',
-          columns:[
-
-          ]
+          columns: []
         }
       };
 
@@ -112,7 +110,7 @@ html
 
         const columns = tableDisplayConfig[tableName].columns;
         columns.forEach(column => {
-          if(column.visible) {
+          if (column.visible) {
             headerRow.innerHTML += `<th data-column="${column.label}">${column.label}</th>`;
           }
         });
@@ -120,7 +118,7 @@ html
         data.forEach(row => {
           let tr = document.createElement('tr');
           columns.forEach(column => {
-            if(column.visible) {
+            if (column.visible) {
               let td = document.createElement('td');
               td.textContent = row[column.name] !== null ? row[column.name] : '';
               tr.appendChild(td);
@@ -215,7 +213,7 @@ html
 
             fetch(`/api/admin/pending-change`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {'Content-Type': 'application/json'},
               body: JSON.stringify(payload)
             }).then(res => {
               if (!res.ok) throw new Error('Submit failed');
@@ -235,159 +233,164 @@ html
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='/stylesheets/index.css')
     style.
-      .horizontalFlex {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        margin-right: 20px;
-      }
-      .layout {
-        display: flex;
-        gap: 20px;
-        align-items: flex-start;
-      }
-      .left-col {
-        flex: 0 0 180px; /* fixed sidebar width */
-        border-right: 1px solid #e5e5e5;
-        background: #fff;
-        height: 100vh;
-        position: sticky;
-        top: 60px;
-        overflow-y: auto;
-      }
-      .main-col {
-        flex: 1; /* take remaining space */
-        min-width: 0; /* prevents overflow with long content */
-      }
+        .horizontalFlex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            margin-right: 20px;
+        }
 
-      .clickable {
-        cursor: pointer;
-        padding: 10px;
-      }
-      .clickable:hover {
-        background-color: #f3f7fb;
-        transform: translateY(-1px);
-      }
-      .nav-icon {
-        width: 18px;
-        height: 18px;
-        margin-right: 8px;
-        vertical-align: middle;
-      }
+        .layout {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
 
-      /* Modern table styles: no vertical dividers, white header, dark grey headings, subtle hover lift */
-      .data-table {
-          width: 100%;
-          border-collapse: separate;
-          border-spacing: 0;
-          margin-top: 20px;
-          background: transparent;
-          border-radius: 10px;
-          overflow: hidden;
-          box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
-      }
+        .left-col {
+            flex: 0 0 180px; /* fixed sidebar width */
+            border-right: 1px solid #e5e5e5;
+            background: #fff;
+            height: 100vh;
+            position: sticky;
+            top: 60px;
+            overflow-y: auto;
+        }
 
-      .data-table th,
-      .data-table td {
-          padding: 12px 16px;
-          text-align: left;
-          vertical-align: middle;
-          border: none; /* remove vertical dividers */
-      }
+        .main-col {
+            flex: 1; /* take remaining space */
+            min-width: 0; /* prevents overflow with long content */
+        }
 
-      /* Header: white background, dark grey text, subtle bottom divider, sticky */
-      .data-table thead th {
-          position: sticky;
-          top: 0;
-          background-color: #ffffff;
-          color: #2f3438;
-          font-weight: 600;
-          font-size: 13px;
-          letter-spacing: 0.2px;
-          border-bottom: 1px solid rgba(31, 41, 55, 0.06);
-          z-index: 2;
-      }
+        .clickable {
+            cursor: pointer;
+            padding: 10px;
+        }
 
-      /* Horizontal separators only between rows */
-      .data-table tbody tr + tr td {
-          border-top: 1px solid #f1f3f5;
-      }
+        .clickable:hover {
+            background-color: #f3f7fb;
+            transform: translateY(-1px);
+        }
 
-      /* Subtle alternating tint (very light) */
-      .data-table tbody tr:nth-child(even) td {
-          background-color: rgba(15, 23, 42, 0.01);
-      }
+        .nav-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
 
-      /* Hover effect for body rows (not header) */
-      .data-table tbody tr {
-          transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
-          background-clip: padding-box;
-      }
+        /* Modern table styles: no vertical dividers, white header, dark grey headings, subtle hover lift */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            background: transparent;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+        }
 
-      .data-table tbody tr:hover {
-          transform: translateY(-4px);
-          background: linear-gradient(90deg, rgba(245, 250, 255, 0.9), rgba(255, 255, 255, 0.98));
-          box-shadow: 0 12px 30px rgba(31, 41, 55, 0.06);
-      }
+        .data-table th,
+        .data-table td {
+            padding: 12px 16px;
+            text-align: left;
+            vertical-align: middle;
+            border: none; /* remove vertical dividers */
+        }
 
-      /* Prevent header from getting hover transform */
-      .data-table thead tr:hover {
-          transform: none;
-          box-shadow: none;
-          background: none;
-      }
+        /* Header: white background, dark grey text, subtle bottom divider, sticky */
+        .data-table thead th {
+            position: sticky;
+            top: 0;
+            background-color: #ffffff;
+            color: #2f3438;
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.2px;
+            border-bottom: 1px solid rgba(31, 41, 55, 0.06);
+            z-index: 2;
+        }
 
-      .table-container {
-          max-height: 70vh;
-          overflow-y: auto;
-          -webkit-overflow-scrolling: touch;
-      }
+        /* Horizontal separators only between rows */
+        .data-table tbody tr + tr td {
+            border-top: 1px solid #f1f3f5;
+        }
 
-      .modal-overlay {
-          position: fixed;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 9999;
-      }
+        /* Subtle alternating tint (very light) */
+        .data-table tbody tr:nth-child(even) td {
+            background-color: rgba(15, 23, 42, 0.01);
+        }
 
-      .modal {
-          background: #fff;
-          padding: 20px;
-          border-radius: 8px;
-          width: 100%;
-          max-width: 600px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-          overflow-y: scroll;
-          height: 80vh;
-      }
+        /* Hover effect for body rows (not header) */
+        .data-table tbody tr {
+            transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+            background-clip: padding-box;
+        }
 
-      .modal-title {
-          margin: 0 0 12px 0;
-          font-size: 18px;
-      }
+        .data-table tbody tr:hover {
+            transform: translateY(-4px);
+            background: linear-gradient(90deg, rgba(245, 250, 255, 0.9), rgba(255, 255, 255, 0.98));
+            box-shadow: 0 12px 30px rgba(31, 41, 55, 0.06);
+        }
 
-      .form-row {
-          margin-bottom: 10px;
-          display: flex;
-          flex-direction: column;
-      }
+        /* Prevent header from getting hover transform */
+        .data-table thead tr:hover {
+            transform: none;
+            box-shadow: none;
+            background: none;
+        }
 
-      .form-row input {
-          padding: 8px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-      }
+        .table-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
 
-      .modal-actions {
-          display: flex;
-          gap: 8px;
-          justify-content: flex-end;
-          margin-top: 12px;
-      }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow-y: scroll;
+            height: 80vh;
+        }
+
+        .modal-title {
+            margin: 0 0 12px 0;
+            font-size: 18px;
+        }
+
+        .form-row {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-row input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
 
 
   body
@@ -416,6 +419,8 @@ html
       div.container
         div.horizontalFlex
           h1#tableTitle
+          if user
+            span#userAlias(style="margin-left:12px; font-size:14px; color:#555") Hello, #{user}
           button.primary#addButton(onclick="addNewEntry()") Add New Entry
 
         div

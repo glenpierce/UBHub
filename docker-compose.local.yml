@@ -4,10 +4,10 @@ services:
     image: mysql:8
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root_password_here       # replace or use env_file/.env
-      MYSQL_DATABASE: ubhub_local
-      MYSQL_USER: ubhub_user
-      MYSQL_PASSWORD: ubhub_password_here           # replace or use env_file/.env
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: ubhub
+      MYSQL_USER: root
+      MYSQL_PASSWORD: my-secret-pw
     ports:
       - "3306:3306"
     volumes:
@@ -21,10 +21,11 @@ services:
   ubhub:
     environment:
       # Override production secrets to point at the local MySQL container
-      RDS_HOST: db
-      RDS_DATABASE: ubhub_local
-      RDS_USER: ubhub_user
-      RDS_PASSWORD: ubhub_password_here
+      RDS_HOST: 127.0.0.1
+      RDS_PORT: 3306
+      RDS_DATABASE: ubhub
+      RDS_USER: root
+      RDS_PASSWORD: my-secret-pw
 
 volumes:
   ubhub_db_data:
