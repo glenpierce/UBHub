@@ -101,22 +101,31 @@ async function createPendingChange(promisePool, tableName, rowKeyObj, operation,
     console.log("table allowed");
     const pkJson = JSON.stringify(rowKeyObj || {});
     const dataJson = JSON.stringify(dataObj || {});
+    const connection = await promisePool.getConnection();
     try {
-        await promisePool.beginTransaction();
-        // compute next version for this table+row_key
-        const rows = await promisePool.query(
+        await connection.beginTransaction();
+
+        const [rows] = await conn.query(
             "SELECT COALESCE(MAX(version),0) + 1 AS next_version FROM row_versions WHERE table_name = ? AND JSON_UNQUOTE(JSON_EXTRACT(row_key, '$')) = ?",
             [tableName, pkJson]
         );
         const nextVersion = (rows[0] && rows[0].next_version) || 1;
-        await promisePool.query(
+
+        await connection.query(
             'INSERT INTO row_versions (table_name, row_key, operation, data, version, created_by) VALUES (?, ?, ?, ?, ?, ?)',
             [tableName, pkJson, operation, dataJson, nextVersion, user]
         );
-        await promisePool.commit();
+        await connection.commit();
     } catch (error) {
         console.error('Error creating pending change:', error);
-        await promisePool.rollback();
+        if(connection) {
+            try {
+                console.log("rolling back");
+                await connection.rollback();
+            } catch (error) {
+                console.error("Failed to rollback: ", error);
+            }
+        }
         throw error;
     } finally {
         promisePool.release();
@@ -124,10 +133,11 @@ async function createPendingChange(promisePool, tableName, rowKeyObj, operation,
 }
 
 async function approveVersion(promisePool, versionId, approver) {
+    const connection = await promisePool.getConnection();
     try {
-        await promisePool.beginTransaction();
+        await connection.beginTransaction();
         // lock the version row
-        const [rowVersions] = await promisePool.query('SELECT * FROM row_versions WHERE id = ? FOR UPDATE', [versionId]);
+        const [rowVersions] = await connection.query('SELECT * FROM row_versions WHERE id = ? FOR UPDATE', [versionId]);
         if (!rowVersions[0]) {
             throw new Error('Version not found');
         }
@@ -161,7 +171,7 @@ async function approveVersion(promisePool, versionId, approver) {
             const placeholders = columns.map(() => '?').join(', ');
             const statement = `INSERT INTO \`${tableName}\` (${columns.map(c => `\`${c}\``).join(', ')}) VALUES (${placeholders})`;
             const values = columns.map(c => validData[c]);
-            await promisePool.query(statement, values);
+            await connection.query(statement, values);
         } else if (rowVersion.operation === 'update') {
             // Build SET from validData excluding primaryKey keys
             const pkKeys = meta.primaryKey;
@@ -179,7 +189,7 @@ async function approveVersion(promisePool, versionId, approver) {
                 const whereClause = whereKeys.map(k => `\`${k}\` = ?`).join(' AND ');
                 const whereValues = whereKeys.map(k => rowKeyObject[k]);
                 const statement = `UPDATE \`${tableName}\` SET ${setClause} WHERE ${whereClause} LIMIT 1`;
-                await promisePool.query(statement, [...setValues, ...whereValues]);
+                await connection.query(statement, [...setValues, ...whereValues]);
             }
         } else if (rowVersion.operation === 'delete') {
             const whereKeys = Object.keys(rowKeyObject);
@@ -189,20 +199,33 @@ async function approveVersion(promisePool, versionId, approver) {
             const whereClause = whereKeys.map(k => `\`${k}\` = ?`).join(' AND ');
             const whereValues = whereKeys.map(k => rowKeyObject[k]);
             const statement = `DELETE FROM \`${tableName}\` WHERE ${whereClause} LIMIT 1`;
-            await promisePool.query(statement, whereValues);
+            await connection.query(statement, whereValues);
         } else {
             throw new Error('Unknown operation');
         }
 
         // mark version approved
-        await promisePool.query('UPDATE row_versions SET status = ?, approved_by = ?, approved_at = NOW() WHERE id = ?', ['approved', approver, versionId]);
+        await connection.query('UPDATE row_versions SET status = ?, approved_by = ?, approved_at = NOW() WHERE id = ?', ['approved', approver, versionId]);
 
-        await promisePool.commit();
+        await connection.commit();
     } catch (error) {
-        await promisePool.rollback();
+        if(connection) {
+            try {
+                console.log("rolling back");
+                await connection.rollback();
+            } catch (rollbackError) {
+                console.error("Failed to rollback: ", rollbackError);
+            }
+        }
         throw error;
     } finally {
-        promisePool.release();
+        if (connection) {
+            try {
+                connection.release();
+            } catch (releaseError) {
+                console.error("Failed to release connection: ", releaseError);
+            }
+        }
     }
 }
 
