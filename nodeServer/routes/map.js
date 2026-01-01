@@ -59,7 +59,7 @@ router.post('/tableData', async function (req, res, next) {
   let connection;
   try {
     connection = await pool.getConnection();
-    const rows = await connection.query(query);
+    const [rows] = await connection.query(query);
 
     if (rows && rows.length > 0) {
       const attachedRows = await attachProgramsToGivenInstitutions(connection, rows);
@@ -133,7 +133,7 @@ router.post('/getProgramMembers', async function (req, res, next) {
   let connection;
   try {
     connection = await pool.getConnection();
-    const rows = await connection.query(query);
+    const [rows] = await connection.query(query);
     res.send(JSON.stringify(rows || []));
   } catch (err) {
     console.error("getProgramMembers error:", err);
@@ -222,11 +222,10 @@ function buildLocationsQuery(filters, page, limit) {
 }
 
 async function getMapData(connection, query) {
-  console.log("getMapData", query);
   if (!connection) {
     throw new Error("No DB connection provided to getMapData");
   }
-  const rows = await connection.query(query);
+  const [rows] = await connection.query(query);
   return rows;
 }
 
