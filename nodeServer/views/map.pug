@@ -2,53 +2,53 @@ doctype html
 include mixins
 include mapMixins
 html
-    +mapHead
-    link(rel='stylesheet', href='/stylesheets/style.css')
-    link(rel='stylesheet', href='/stylesheets/bootstrap.css')
-    link(rel='stylesheet', href='/stylesheets/index.css')
-    script.
-        function searchMap(){
-            filterBySearch(document.getElementById("searchBox").value);
-        }
-        function triggerSearch(event) {
-            if(event.keyCode == 13){
-                searchMap();
-            }
-        }
+  +mapHead
+  link(rel='stylesheet', href='/stylesheets/style.css')
+  link(rel='stylesheet', href='/stylesheets/bootstrap.css')
+  link(rel='stylesheet', href='/stylesheets/index.css')
+  script.
+    function searchMap() {
+      filterBySearch(document.getElementById("searchBox").value);
+    }
+    function triggerSearch(event) {
+      if (event.keyCode == 13) {
+        searchMap();
+      }
+    }
 body
-    +header(true)
+  +header(true)
 
-    div(class="contentContainer noBorder")
-        div.mapIntro
-            //strong Welcome to the pre-Alpha Website for CBI Coalition. <br> Thank you for your contribution to the site.
-            //p CBI Coalition is compiling a database of urban biodiversity programs, data, and activities around the world. Below is a map of our current data.
-            //p You may view your data or submit more data on
-              //a.genericLink(onclick="window.location='/yourUploads'")  your uploads manager.
+  div(class="contentContainer noBorder")
+    div.mapIntro
+      //strong Welcome to the pre-Alpha Website for CBI Coalition. <br> Thank you for your contribution to the site.
+      //p CBI Coalition is compiling a database of urban biodiversity programs, data, and activities around the world. Below is a map of our current data.
+      //p You may view your data or submit more data on
+        //a.genericLink(onclick="window.location='/yourUploads'")  your uploads manager.
 
-        div(style="display:flex; justify-content:space-between;")
-            h2.mapLabel Map
-            div(style="display:flex; align-items:center; justify-content:flex-end;")
-                input(type="text" id="searchBox" style="width: 150px; align-self:center; margin-right:5px; padding: 5px 5px 5px 10px; font-weight: 400; border-style:solid; border-radius: 30px; outline: 0; border-color:#eaeaea; background:#eaeaea;" onkeydown="triggerSearch(event)")
-                div(style="cursor:pointer; color: #4490ba; font-weight: bold; font-size: 14px;" onclick="searchMap()") search
-        div(style="display:flex; justify-content:space-between;")
-            if(username)
-                div Is something missing? Go to to our <a href="/forum">forum</a> to suggest additions.
-            else
-                div <a href="/login">Login</a> or <a href="/createUser">sign up</a> to make suggestions on our forum.
-            div(style="display:flex; align-items:center; justify-content:flex-end;")
-                div(style="color: #4490ba; font-weight: bold; font-size: 14px;") Show biodiversity hotspots
-                input(type="checkbox" oninput="toggleKmlLayers()" checked=false style="width:20px; height:20px;")
+    div(style="display:flex; justify-content:space-between;")
+      h2.mapLabel Map
+      div(style="display:flex; align-items:center; justify-content:flex-end;")
+        input(type="text" id="searchBox" style="width: 150px; align-self:center; margin-right:5px; padding: 5px 5px 5px 10px; font-weight: 400; border-style:solid; border-radius: 30px; outline: 0; border-color:#eaeaea; background:#eaeaea;" onkeydown="triggerSearch(event)")
+        div(style="cursor:pointer; color: #4490ba; font-weight: bold; font-size: 14px;" onclick="searchMap()") search
+    div(style="display:flex; justify-content:space-between;")
+      if(username)
+        div Is something missing? Go to to our <a href="/forum">forum</a> to suggest additions.
+      else
+        div <a href="/login">Login</a> or <a href="/createUser">sign up</a> to make suggestions on our forum.
+      div(style="display:flex; align-items:center; justify-content:flex-end;")
+        div(style="color: #4490ba; font-weight: bold; font-size: 14px;") Show biodiversity hotspots
+        input(type="checkbox" oninput="toggleKmlLayers()" checked=false style="width:20px; height:20px;")
 
-        div#map
+    div#map
 
-        +mapInfoTab("Results Summary", "mapInfoSummary", "#b2b2b2", false)
-        +mapInfoSummary(mapSummary)
+    +mapInfoTab("Results Summary", "mapInfoSummary", "#b2b2b2", false)
+    +mapInfoSummary(mapSummary)
 
-        +mapInfoTab("Highlight Results", "highlightSettings", "#f69056", true)
-        +mapInfoHighlights(mapButtons)
+    +mapInfoTab("Highlight Results", "highlightSettings", "#f69056", true)
+    +mapInfoHighlights(mapButtons)
 
-        +mapInfoTab("Filter Results", "filterSettings", "#6da4c7", true)
-        +mapInfoFilters(mapFilterParameters)
+    +mapInfoTab("Filter Results", "filterSettings", "#6da4c7", true)
+    +mapInfoFilters(mapFilterParameters)
 
-        +mapInfoTab("Table of Results", "mapInfoResults", "#98d2bd", false)
-        +mapInfoResults(mapData)
+    +mapInfoTab("Table of Results", "mapInfoResults", "#98d2bd", false)
+    +mapInfoResults(mapData)

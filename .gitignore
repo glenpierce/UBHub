@@ -1,8 +1,7 @@
-*/node_modules/
-*/.appArchives/
 .DS_Store
-config.js
-populateDBScript.js
 /.idea/
 /.vs/
+*/node_modules/
+*/.appArchives/
+config.js
 /secrets/

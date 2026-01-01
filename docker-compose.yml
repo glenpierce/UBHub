@@ -1,7 +1,0 @@
-services:
-  ubhub:
-    container_name: ubhub
-    restart: on-failure
-    build: ./
-    ports:
-      - "3000:3000"
