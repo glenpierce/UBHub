@@ -3,8 +3,6 @@ const router = express.Router();
 import { pool } from '../ConnectionPool.js';
 
 router.get('/', function(req, res, next) {
-    //let mapData = "";
-
     pool.getConnection(function (error, connection) {
 
         const locationsQuery = 'SELECT * from locations limit 2000';

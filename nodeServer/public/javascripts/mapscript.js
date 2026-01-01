@@ -91,52 +91,6 @@ function closeAllPanels() {
   }
 }
 
-//FILTER
-/*function filter(value, filterBy, type){
-  console.log(activeFilters);
-    if(value == "none"){
-        return;
-    }
-
-  if(type == "select"){
-
-    filterValues(value, filterBy);
-
-  } else if (type == "range") {
-
-    filterRange(value, filterBy);
-
-  } else if (type == "program") {
-    console.log("p");
-    filterHasProgram(value, "part_name");
-
-  } else if (type == "nullable") {
-        switch (value) {
-            case "Biodiversity Website":
-                nullableValue = "biodiversity_url";
-                break;
-            case "Biodiversity in a Comprehensive Plan":
-                nullableValue = "intplan_title";
-                break;
-            case "Biodiversity Plan":
-                nullableValue = "plan1_title";
-                break;
-            case "Biodiversity Report":
-                nullableValue = "report_title";
-                break;
-            case "Local Action for Biodiversity":
-                nullableValue = "LAB_joined";
-                break;
-            default:
-                return;
-        }
-        filterNotNull(nullableValue);
-  } else {
-    console.log("Unexpected filter type: " + type);
-  }
-
-};*/
-
 function runFilters() {
   markers.forEach((marker) => {
     var retain = true;
@@ -147,8 +101,6 @@ function runFilters() {
     });
     marker.setVisible(retain);
   });
-
-  //Also update the table of results
 }
 
 function filterValues(value, filterBy) {
@@ -185,8 +137,6 @@ function filterBySearch(searchTerm) {
       });
     }
     marker.setVisible(found);
-    // if(found)
-    //     console.log(marker);
   });
 }
 
