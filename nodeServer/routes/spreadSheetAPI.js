@@ -8,6 +8,8 @@ router.get('/table-data/:tableName', isAuthenticated, isAdmin, async (req, res) 
     const tableName = req.params.tableName;
     // Validate tableName to prevent SQL injection IMPORTANT!!
     const validTableNames = ['locations', 'documents', 'participation', 'mapButtons']; // mapButtons === programs
+    const versionControlTable = 'row_versions';
+    validTableNames.push(versionControlTable);
 
     if (!validTableNames.includes(tableName)) {
       return res.status(400).json({error: 'Invalid table name'});

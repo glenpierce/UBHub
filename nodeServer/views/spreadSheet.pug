@@ -60,7 +60,21 @@ html
         },
         row_versions: {
           displayName: 'Submissions',
-          columns: []
+          columns: [
+            {name: 'id', visible: false},
+            {name: 'table_name', label: 'Table Name', visible: true},
+            {name: 'row_key', label: 'Row ID', visible: false},
+            {name: 'operation', label: 'Operation', visible: true},
+            {name: 'status', label: 'Status', visible: true},
+            {name: 'version', label: 'Version', visible: false},
+            {name: 'data', label: 'Data', visible: true},
+            {name: 'created_by', label: 'Submitted By', visible: true},
+            {name: 'created_at', label: 'Submitted At', visible: true},
+            {name: 'approved_by', label: 'Approved By', visible: true},
+            {name: 'approved_at', label: 'Approved At', visible: true, type: 'date'},
+            {name: 'notes', label: 'Review Comments', visible: true},
+            {button: 'review', label: 'Review', visible: true}
+          ]
         }
       };
 
@@ -120,7 +134,7 @@ html
           columns.forEach(column => {
             if (column.visible) {
               let td = document.createElement('td');
-              td.textContent = row[column.name] !== null ? row[column.name] : '';
+              populateCell(row, column, td);
               tr.appendChild(td);
             }
           });
@@ -129,9 +143,79 @@ html
         return Promise.resolve();
       }
 
+      function populateCell(row, column, td) {
+        if (column.button) {
+          const button = document.createElement('button');
+          button.textContent = column.label || column.button;
+          button.onclick = () => {
+            document.getElementById('modalForm').reset();
+            buildModalForReview(row);
+            document.getElementById('modalOverlay').style.display = 'flex';
+          };
+          td.appendChild(button);
+          return;
+        }
+        const cellData = row[column.name];
+        if (cellData === null || cellData === undefined) {
+          td.textContent = '';
+        }
+        if (typeof cellData === 'object') {
+          td.textContent = JSON.stringify(cellData);
+        }
+        if (column.type === 'date') {
+          const date = new Date(cellData);
+          td.textContent = isNaN(date.getTime()) ? cellData : date.toLocaleDateString();
+        }
+        td.textContent = cellData;
+      }
+
       function clearTable() {
         document.getElementById('headerRow').innerHTML = '';
         document.getElementById('tableBody').innerHTML = '';
+      }
+
+      function buildModalForReview(row) {
+        const form = document.getElementById('modalForm');
+        const fieldsContainer = document.getElementById('modalFields');
+        fieldsContainer.innerHTML = '';
+
+        let dataObj = {};
+        if (row && row.data) {
+          try {
+            dataObj = (typeof row.data === 'string') ? JSON.parse(row.data) : row.data;
+          } catch (err) {
+            console.warn('Failed to parse row.data:', err);
+            // fall back to raw string so user can see it
+            dataObj = {data: row.data};
+          }
+        }
+
+        if (!dataObj || Object.keys(dataObj).length === 0) {
+          fieldsContainer.innerHTML = '<div class="form-row">No data fields available</div>';
+        } else {
+          for (const [key, value] of Object.entries(dataObj)) {
+            const labelText = key;
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'form-row';
+
+            const label = document.createElement('label');
+            label.setAttribute('for', `field_${key}`);
+            label.textContent = labelText;
+            rowDiv.appendChild(label);
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = `${key}`;
+            input.name = key;
+            input.value = (value === null || value === undefined) ? '' : (typeof value === 'object' ? JSON.stringify(value) : value);
+            input.setAttribute('data-col-name', key);
+            input.placeholder = `Enter ${labelText}`;
+            input.disabled = true; // make read-only
+            rowDiv.appendChild(input);
+
+            fieldsContainer.appendChild(rowDiv);
+          }
+        }
       }
 
       function buildModalForTable(tableName) {
@@ -175,23 +259,6 @@ html
         });
       }
 
-      function addNewEntry() {
-        if (!currentTable) {
-          alert('Please select a table first.');
-          return;
-        }
-
-        buildModalForTable(currentTable);
-
-        document.getElementById('modalForm').reset();
-        document.getElementById('modalOverlay').style.display = 'flex';
-      }
-
-      function closeModal() {
-        document.getElementById('modalOverlay').style.display = 'none';
-        document.querySelector('.modal').scrollTop = 0;
-      }
-
       document.addEventListener('DOMContentLoaded', () => {
         const modalForm = document.getElementById('modalForm');
         if (modalForm) {
@@ -229,6 +296,23 @@ html
           });
         }
       });
+
+      function addNewEntry() {
+        if (!currentTable) {
+          alert('Please select a table first.');
+          return;
+        }
+
+        buildModalForTable(currentTable);
+
+        document.getElementById('modalForm').reset();
+        document.getElementById('modalOverlay').style.display = 'flex';
+      }
+
+      function closeModal() {
+        document.getElementById('modalOverlay').style.display = 'none';
+        document.querySelector('.modal').scrollTop = 0;
+      }
 
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='/stylesheets/index.css')
