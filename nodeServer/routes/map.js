@@ -1,151 +1,169 @@
 import express from 'express';
-const router = express.Router();
-import { pool } from '../ConnectionPool.js';
 
-router.get('/', function(req, res, next) {
+const router = express.Router();
+import {pool} from '../ConnectionPool.js';
+
+router.get('/', function (req, res, next) {
+  console.log("Rendering map page");
+  try {
     pool.getConnection(function (error, connection) {
 
-        const locationsQuery = 'SELECT * from locations limit 2000';
+      console.log("Acquired connection for map page");
 
-        getMapLocations(connection, locationsQuery)
+      const locationsQuery = 'SELECT * from locations limit 2000';
+
+      getMapLocations(connection, locationsQuery)
         .then((mapData) => {
-            const mapSummary = getSummary(mapData);
-            const buttonsQuery = 'SELECT * from mapButtons';
-            getMapData(connection, buttonsQuery)
-                .then((buttons) => {
-                    connection.release();
-                    const mapButtons = categorizeButtons(buttons);
-                    if (req.session && req.session.user) {
-                        res.render('map', {
-                            mapFilterParameters: mapFilterParameters,
-                            mapData: JSON.stringify(mapData),
-                            mapSummary: mapSummary,
-                            mapButtons: mapButtons,
-                            username: req.session.user
-                        });
-                    } else {
-                        res.render('map', {
-                            mapFilterParameters: mapFilterParameters,
-                            mapData: JSON.stringify(mapData),
-                            mapSummary: mapSummary,
-                            mapButtons: mapButtons,
-                            username: null
-                        });
-                    }
-                })
+          const mapSummary = getSummary(mapData);
+          console.log("mapSummary: ", mapSummary);
+          const buttonsQuery = 'SELECT * from mapButtons';
+          getMapData(connection, buttonsQuery)
+            .then((buttons) => {
+              console.log("Selected buttons for map page");
+              connection.release();
+              const mapButtons = categorizeButtons(buttons);
+              if (req.session && req.session.user) {
+                console.log("user logged in:", req.session.user);
+                res.render('map', {
+                  mapFilterParameters: mapFilterParameters,
+                  mapData: JSON.stringify(mapData),
+                  mapSummary: mapSummary,
+                  mapButtons: mapButtons,
+                  username: req.session.user
+                });
+              } else {
+                res.render('map', {
+                  mapFilterParameters: mapFilterParameters,
+                  mapData: JSON.stringify(mapData),
+                  mapSummary: mapSummary,
+                  mapButtons: mapButtons,
+                  username: null
+                });
+              }
+            })
         })
         .catch((err) => {
-            console.log(err);
-            if(connection) {
-                connection.release();
-            }
-            res.render('map', {
-                mapFilterParameters: mapFilterParameters,
-                mapData: {},
-                mapSummary: {},
-                mapButtons:{},
-                username: null
-            });
+          console.log(err);
+          if (connection) {
+            connection.release();
+          }
+          res.render('map', {
+            mapFilterParameters: mapFilterParameters,
+            mapData: {},
+            mapSummary: {},
+            mapButtons: {},
+            username: null
+          });
         })
     });
+  } catch (error) {
+    console.error("failed to load map page:", error);
+    res.render('map', {
+      mapFilterParameters: mapFilterParameters,
+      mapData: {},
+      mapSummary: {},
+      mapButtons: {},
+      username: null
+    });
+  }
 });
 
-router.post('/tableData', function(req, res, next){
+router.post('/tableData', function (req, res, next) {
 
-    let mapData = "";
-    let string = "";
-    let page = req.body.page;
-    let filters = req.body.filters;
+  let mapData = "";
+  let string = "";
+  let page = req.body.page;
+  let filters = req.body.filters;
 
-    if(page == null){
-        page = 1;
+  if (page == null) {
+    page = 1;
+  }
+
+  const limit = 10;
+
+  const query = buildLocationsQuery(filters, page, limit);
+
+  pool.getConnection(function (error, connection) {
+    if (connection) {
+      connection.query(query, function (err, rows, fields) {
+        if (rows != undefined && rows.length > 0) {
+          attachProgramsToGivenInstitutions(connection, rows)
+            .then((rows) => {
+              connection.release();
+
+              for (let i = 0; i < rows.length; i++) {
+                string += `<tr>`;
+                string += `<td class="mvTitle">${rows[i].inst_title}</td>`;
+                string += `<td>${rows[i].country}</td>`;
+                string += `<td>${rows[i].scale}</td>`;
+                string += `<td class="mvPrograms">${outputProgramsAndActivities(rows[i])}</td>`;
+                string += `</tr>`;
+              }
+              res.send(string);
+            }, function (error) {
+              console.log(error);
+              res.send("No data");
+            })
+
+        } else if (rows != undefined && rows.length == 0) {
+          connection.release();
+          res.send("<p>No data for given parameters.</p>");
+        } else {
+          connection.release();
+          res.send("<p>Processing...</p>");
+        }
+      });
+    } else {
+      res.send("<p>No data for given parameters.</p>");
     }
+  });
+});
 
-    const limit = 10;
+router.post('/resultCounts', function (req, res, next) {
+  const filters = req.body.filters;
+  const query = buildLocationsQuery(filters, -1, -1);
 
-    const query = buildLocationsQuery(filters, page, limit);
-
-    pool.getConnection(function (error, connection) {
-        if(connection) {
-            connection.query(query, function (err, rows, fields) {
-                if (rows != undefined && rows.length > 0) {
-                    attachProgramsToGivenInstitutions(connection, rows)
-                        .then((rows) => {
-                            connection.release();
-
-                            for (let i = 0; i < rows.length; i++) {
-                                string += `<tr>`;
-                                string += `<td class="mvTitle">${rows[i].inst_title}</td>`;
-                                string += `<td>${rows[i].country}</td>`;
-                                string += `<td>${rows[i].scale}</td>`;
-                                string += `<td class="mvPrograms">${outputProgramsAndActivities(rows[i])}</td>`;
-                                string += `</tr>`;
-                            }
-                            res.send(string);
-                        }, function (error) {
-                            console.log(error);
-                            res.send("No data");
-                        })
-
-                } else if (rows != undefined && rows.length == 0) {
-                    connection.release();
-                    res.send("<p>No data for given parameters.</p>");
-                } else {
-                    connection.release();
-                    res.send("<p>Processing...</p>");
-                }
-            });
+  pool.getConnection(function (error, connection) {
+    if (connection) {
+      connection.query(query, function (err, rows, fields) {
+        connection.release();
+        let counts;
+        if (rows != undefined) {
+          counts = {
+            total: rows.length,
+            municipalities: rows.filter(x => x.scale == "municipality").length,
+            districts: rows.filter(x => x.scale == "district/county").length,
+            campuses: rows.filter(x => x.scale == "campus").length
+          }
         } else {
-            res.send("<p>No data for given parameters.</p>");
+          counts = {};
         }
-    });
+
+        res.send(JSON.stringify(counts));
+      });
+    } else {
+      res.send({});
+    }
+  });
 });
 
-router.post('/resultCounts', function(req, res, next){
-    const filters = req.body.filters;
-    const query = buildLocationsQuery(filters, -1, -1);
+router.post('/getProgramMembers', function (req, res, next) {
+  const programName = req.body.programName;
+  const query = "SELECT * FROM participation WHERE `part_name` = '" + programName + "'";
 
-    pool.getConnection(function (error, connection) {
-        if(connection) {
-            connection.query(query, function (err, rows, fields) {
-                connection.release();
-                let counts;
-                if (rows != undefined) {
-                    counts = {
-                        total: rows.length,
-                        municipalities: rows.filter(x => x.scale == "municipality").length,
-                        districts: rows.filter(x => x.scale == "district/county").length,
-                        campuses: rows.filter(x => x.scale == "campus").length
-                    }
-                } else {
-                    counts = {};
-                }
-
-                res.send(JSON.stringify(counts));
-            });
-        } else {
-            res.send({});
-        }
+  pool.getConnection(function (error, connection) {
+    connection.query(query, function (err, rows, fields) {
+      connection.release();
+      let members = [];
+      if (rows != undefined) {
+        members = rows;
+      }
+      res.send(JSON.stringify(rows));
     });
+  });
 });
 
-router.post('/getProgramMembers', function(req, res, next) {
-    const programName = req.body.programName;
-    const query = "SELECT * FROM participation WHERE `part_name` = '" + programName + "'";
-
-    pool.getConnection(function (error, connection) {
-        connection.query(query, function (err, rows, fields) {
-            connection.release();
-            let members = [];
-            if (rows != undefined) {
-                members = rows;
-            }
-            res.send(JSON.stringify(rows));
-        });
-    });
-});
-
-function buildLocationsQuery(filters, page, limit){
+function buildLocationsQuery(filters, page, limit) {
   //PICK FIELDS
   let query = `SELECT * from locations as l `;
   let useWhere = false;
@@ -155,57 +173,61 @@ function buildLocationsQuery(filters, page, limit){
   let firstWhere = true;
 
   //DEAL WITH FILTERS
-    if (filters.length > 0) {
+  if (filters.length > 0) {
 
-        //do WHERE filters first
-        for (let i = 0; i < filters.length; i++) {
+    //do WHERE filters first
+    for (let i = 0; i < filters.length; i++) {
 
-            switch (filters[i].type) {
-                case("select"):
-                  if (!firstWhere){ whereClause += " AND "; }
-                  if(filters[i].val == "all"){
-                    whereClause += ` l.${filters[i].key} IS NOT NULL`;
-                  } else {
-                    whereClause += ` l.${filters[i].key}="${filters[i].val}"`;
-                  }
-                    firstWhere = false;
-                    break;
-
-                case("range"):
-                    if (!firstWhere){ whereClause += " AND "; }
-                    whereClause += ` l.${filters[i].key} BETWEEN ${filters[i].lower} AND ${filters[i].upper}`;
-                    firstWhere = false;
-                    break;
-
-                case("nullable"):
-                    //TODO: fix this when new data is in db
-                    whereClause += " true = true ";
-                    useWhere = true;
-                    break;
-            }
-        }
-
-        //then do JOINs:
-        for (let i = 0; i < filters.length; i++) {
-          switch (filters[i].type) {
-            case("document"):
-                joinClause += ` INNER JOIN (select inst_id, doc_type from documents d where d.doc_type = "${filters[i].val}" group by inst_id) as dq on dq.inst_id = l.id `;
-                break;
-            case("program"):
-                joinClause += ` INNER JOIN (select inst_id, part_name from participation p where p.part_name = "${filters[i].val}" group by inst_id) as pq on pq.inst_id = l.id `;
-                break;
+      switch (filters[i].type) {
+        case("select"):
+          if (!firstWhere) {
+            whereClause += " AND ";
           }
-        }
+          if (filters[i].val == "all") {
+            whereClause += ` l.${filters[i].key} IS NOT NULL`;
+          } else {
+            whereClause += ` l.${filters[i].key}="${filters[i].val}"`;
+          }
+          firstWhere = false;
+          break;
 
-        if (whereClause != ""){
-          whereClause = " WHERE " + whereClause;
-        }
+        case("range"):
+          if (!firstWhere) {
+            whereClause += " AND ";
+          }
+          whereClause += ` l.${filters[i].key} BETWEEN ${filters[i].lower} AND ${filters[i].upper}`;
+          firstWhere = false;
+          break;
 
-        query += joinClause + " " + whereClause;
-
+        case("nullable"):
+          //TODO: fix this when new data is in db
+          whereClause += " true = true ";
+          useWhere = true;
+          break;
+      }
     }
 
-  if(page > -1 && limit > -1){
+    //then do JOINs:
+    for (let i = 0; i < filters.length; i++) {
+      switch (filters[i].type) {
+        case("document"):
+          joinClause += ` INNER JOIN (select inst_id, doc_type from documents d where d.doc_type = "${filters[i].val}" group by inst_id) as dq on dq.inst_id = l.id `;
+          break;
+        case("program"):
+          joinClause += ` INNER JOIN (select inst_id, part_name from participation p where p.part_name = "${filters[i].val}" group by inst_id) as pq on pq.inst_id = l.id `;
+          break;
+      }
+    }
+
+    if (whereClause != "") {
+      whereClause = " WHERE " + whereClause;
+    }
+
+    query += joinClause + " " + whereClause;
+
+  }
+
+  if (page > -1 && limit > -1) {
     query += ` limit ${limit} offset ${limit * (page - 1)}`;
   }
 
@@ -223,32 +245,32 @@ function attachProgramsToGivenInstitutions(connection, locations) {
   const institutionIdsString = institutionIds.join(", ");
 
   let partQuery = "SELECT * from participation";
-  if(institutionIdsString.length > 0) {
-      partQuery += " WHERE inst_id in (" + institutionIdsString + ")";
+  if (institutionIdsString.length > 0) {
+    partQuery += " WHERE inst_id in (" + institutionIdsString + ")";
   } else {
-      partQuery += ";";
+    partQuery += ";";
   }
   return new Promise((resolve, reject) => {
     getMapData(connection, partQuery)
-    .then(partData => {
-      locations = mapParticipitationDataToLocations(partData, locations);
-      let documentQuery = "SELECT * FROM documents";
-      if(institutionIdsString.length > 0) {
+      .then(partData => {
+        locations = mapParticipitationDataToLocations(partData, locations);
+        let documentQuery = "SELECT * FROM documents";
+        if (institutionIdsString.length > 0) {
           documentQuery += " WHERE inst_id in (" + institutionIdsString + ")";
-      } else {
+        } else {
           documentQuery += ";";
-      }
-      getMapData(connection, documentQuery)
-      .then((documentData) => {
-        locations = mapDocumentDataToLocations(documentData, locations);
-        resolve(locations);
+        }
+        getMapData(connection, documentQuery)
+          .then((documentData) => {
+            locations = mapDocumentDataToLocations(documentData, locations);
+            resolve(locations);
 
+          })
       })
-    })
-    .catch((error) => {
+      .catch((error) => {
         console.log(error);
         reject();
-    })
+      })
   })
 }
 
@@ -256,58 +278,58 @@ function attachProgramsToGivenInstitutions(connection, locations) {
 function getMapLocations(connection, query) {
   return new Promise((resolve, reject) => {
     getMapData(connection, query)
-    .then ((locations) => {
+      .then((locations) => {
 
-      const partQueryIds = locations.map((x) => {
-        return x.id;
-      });
-
-      const partQueryStrings = partQueryIds.join(", "); // todo: rename this variable, it's not clear - be consistent with others like it from above
-
-
-      let partQuery = "SELECT * FROM participation"; // todo: rename this variable, it's not clear
-      if(partQueryStrings.length > 0) {
-          partQuery += " WHERE inst_id in (" + partQueryStrings + ")";
-      } else {
-          partQuery += ";";
-      }
-
-      getMapData(connection, partQuery)
-      .then((partData => {
-        locations = mapParticipitationDataToLocations(partData, locations);
-      }))
-      .then(() => {
-          let documentQuery = "SELECT * FROM documents";
-           if(partQueryStrings.length > 0) {
-               documentQuery += " WHERE inst_id in (" + partQueryStrings + ")"; // todo: we need to check the name of this variable
-           } else {
-               documentQuery += ";";
-           }
-          getMapData(connection, documentQuery)
-          .then((documentData) => locations = mapDocumentDataToLocations(documentData, locations))
-          .then((() => resolve(locations)));
-      })
-    })
-        .catch((error) => {
-            reject();
+        const partQueryIds = locations.map((x) => {
+          return x.id;
         });
+
+        const partQueryStrings = partQueryIds.join(", "); // todo: rename this variable, it's not clear - be consistent with others like it from above
+
+
+        let partQuery = "SELECT * FROM participation"; // todo: rename this variable, it's not clear
+        if (partQueryStrings.length > 0) {
+          partQuery += " WHERE inst_id in (" + partQueryStrings + ")";
+        } else {
+          partQuery += ";";
+        }
+
+        getMapData(connection, partQuery)
+          .then((partData => {
+            locations = mapParticipitationDataToLocations(partData, locations);
+          }))
+          .then(() => {
+            let documentQuery = "SELECT * FROM documents";
+            if (partQueryStrings.length > 0) {
+              documentQuery += " WHERE inst_id in (" + partQueryStrings + ")"; // todo: we need to check the name of this variable
+            } else {
+              documentQuery += ";";
+            }
+            getMapData(connection, documentQuery)
+              .then((documentData) => locations = mapDocumentDataToLocations(documentData, locations))
+              .then((() => resolve(locations)));
+          })
+      })
+      .catch((error) => {
+        reject();
+      });
   });
 }
 
 function getMapData(connection, query) {
-  console.log(query);
+  console.log("getMapData", query);
   return new Promise((resolve, reject) => {
-      if(connection) {
-          connection.query(query, function (err, rows, fields) {
-              if (!err) {
-                  resolve(rows);
-              } else {
-                  reject(err);
-              }
-          })
-      } else {
-          reject();
-      }
+    if (connection) {
+      connection.query(query, function (err, rows, fields) {
+        if (!err) {
+          resolve(rows);
+        } else {
+          reject(err);
+        }
+      })
+    } else {
+      reject();
+    }
   });
 }
 
@@ -319,7 +341,7 @@ function mapParticipitationDataToLocations(participationData, locations) {
 
     while (!found && i < locations.length) {
 
-      if(locations[i].id == part.inst_id) {
+      if (locations[i].id == part.inst_id) {
         locations[i] = attachParticipation(locations[i], part);
         found = true;
       }
@@ -332,27 +354,27 @@ function mapParticipitationDataToLocations(participationData, locations) {
 }
 
 function mapDocumentDataToLocations(documentData, locations) {
-    documentData.forEach((document) => {
-        let found = false;
-        let i = 0;
+  documentData.forEach((document) => {
+    let found = false;
+    let i = 0;
 
-        while (!found && i < locations.length) {
+    while (!found && i < locations.length) {
 
-            if(locations[i].id == document.inst_id) {
-                locations[i] = attachDocument(locations[i], document);
-                found = true;
-            }
-            i++;
-        }
+      if (locations[i].id == document.inst_id) {
+        locations[i] = attachDocument(locations[i], document);
+        found = true;
+      }
+      i++;
+    }
 
-    });
+  });
 
-    return locations;
+  return locations;
 }
 
 function attachParticipation(location, part) {
 
-  if(location.participation == undefined) {
+  if (location.participation == undefined) {
     location.participation = [part];
   } else {
     location.participation.push(part);
@@ -362,15 +384,15 @@ function attachParticipation(location, part) {
 }
 
 function attachDocument(location, document) {
-    //location.participation = [part];
+  //location.participation = [part];
 
-    if(location.document == undefined) {
-        location.document = [document];
-    } else {
-        location.document.push(document);
-    }
+  if (location.document == undefined) {
+    location.document = [document];
+  } else {
+    location.document.push(document);
+  }
 
-    return location;
+  return location;
 }
 
 function categorizeButtons(buttons) {
@@ -381,14 +403,14 @@ function categorizeButtons(buttons) {
     let j = 0;
 
     while (j < mapButtonCategories.length && !found) {
-      if (buttons[i].button_category == mapButtonCategories[j].categoryName){
+      if (buttons[i].button_category == mapButtonCategories[j].categoryName) {
         mapButtonCategories[j].buttons.push(buttons[i]);
         found = true;
       }
       j++
     }
 
-    if(!found) {
+    if (!found) {
       const newCategory = {
         categoryName: buttons[i].button_category,
         buttons: [buttons[i]]
@@ -414,7 +436,7 @@ function outputProgramsAndActivities(entry) {
       if (part.part_year != null) {
         contentString += part.part_year + " ";
       }
-      contentString += '<a href="' + part.part_link + '" target="_blank">' + part.part_name +'</a>';
+      contentString += '<a href="' + part.part_link + '" target="_blank">' + part.part_name + '</a>';
 
       if (part.part_level != null) {
         contentString += ' (' + part.part_level + ')';
@@ -424,32 +446,32 @@ function outputProgramsAndActivities(entry) {
   }
 
   if (entry.document != undefined) {
-      contentString += '<h4>Activities</h4>';
-      entry.document.forEach((document) => {
-          contentString += '<p>';
-          if (document.doc_year != null) {
-              contentString += document.doc_year + " ";
-          }
-          if(document.doc_url != null) {
-              if (document.doc_url.startsWith('/pdf')) {
-                  contentString += '<a href="' + 'https://s3.ca-central-1.amazonaws.com/ubhubpdfstorage/public' + document.doc_url + '" target="_blank">' + document.doc_title + '</a>';
-              } else {
-                  contentString += '<a href="' + document.doc_url + '" target="_blank">' + document.doc_title + '</a>';
-              }
-          }
+    contentString += '<h4>Activities</h4>';
+    entry.document.forEach((document) => {
+      contentString += '<p>';
+      if (document.doc_year != null) {
+        contentString += document.doc_year + " ";
+      }
+      if (document.doc_url != null) {
+        if (document.doc_url.startsWith('/pdf')) {
+          contentString += '<a href="' + 'https://s3.ca-central-1.amazonaws.com/ubhubpdfstorage/public' + document.doc_url + '" target="_blank">' + document.doc_title + '</a>';
+        } else {
+          contentString += '<a href="' + document.doc_url + '" target="_blank">' + document.doc_title + '</a>';
+        }
+      }
 
-          if (document.doc_type != null) {
-              contentString += ' (' + document.doc_type + ')';
-          }
-          contentString += '</p>';
-      });
+      if (document.doc_type != null) {
+        contentString += ' (' + document.doc_type + ')';
+      }
+      contentString += '</p>';
+    });
   }
 
   return contentString;
 }
 
 
-function getSummary(data){
+function getSummary(data) {
   let summary = {};
   summary.total = data.length;
 
@@ -470,55 +492,55 @@ function getSummary(data){
 }
 
 const mapActivities = [
-    { name: "Biodiversity Data Portal" },
-    { name: "Biodiversity Online Map" },
-    { name: "Biodiversity Plan" },
-    { name: "Biodiversity Report" },
-    { name: "Comprehensive Plan" },
-    { name: "Developer Guide" },
-    { name: "Engagement Activity" },
-    { name: "Habitat Plan" },
-    { name: "Informational Handout" },
-    { name: "Local Program" },
-    { name: "Public Policy" },
-    { name: "Species Plan" },
-    { name: "Supporting Document" },
-    { name: "Sustainability Plan" },
-    { name: "Urban Forest Plan" },
-    { name: "Water Management Plan" }
+  {name: "Biodiversity Data Portal"},
+  {name: "Biodiversity Online Map"},
+  {name: "Biodiversity Plan"},
+  {name: "Biodiversity Report"},
+  {name: "Comprehensive Plan"},
+  {name: "Developer Guide"},
+  {name: "Engagement Activity"},
+  {name: "Habitat Plan"},
+  {name: "Informational Handout"},
+  {name: "Local Program"},
+  {name: "Public Policy"},
+  {name: "Species Plan"},
+  {name: "Supporting Document"},
+  {name: "Sustainability Plan"},
+  {name: "Urban Forest Plan"},
+  {name: "Water Management Plan"}
 ];
 
 const mapIndices = [
-    { name: "Biocapacity" },
-    { name: "Biodiversity Communication, Education and Public Awareness (CEPA)" },
-    { name: "Biophilic Cities" },
-    { name: "Capitale Francaise de la Biodiversite" },
-    { name: "Community Wildlife Habitat" },
-    { name: "Durban Commitment" },
-    { name: "European Capitals of Biodiversity" },
-    { name: "European Green Capital Award" },
-    { name: "Ecological Footprint" },
-    { name: "Green and Blue Space Adaptation for Urban Areas and Eco Towns (GRaBS)" },
-    { name: "INTERACT-Bio" },
-    { name: "LAB Pioneer Programme" },
-    {
-        name: "LAB Wetlands",
-        id: "LAB Wetlands",
-        image: "LabProgrammeLogo.jpg"
-    },
-    { name: "Mayors Monarch Pledge" },
-    { name: "One Planet Living" },
-    { name: "Singapore Index" },
-    { name: "Urban Biosphere Reserves" },
-    { name: "Urban Bird Treaty" },
-    { name: "Urban Protected Area" },
-    { name: "Urban Wildlife Refuge" },
-    { name: "URBIS" },
-    { name: "WILD Cities" },
-    { name: "City Nature Challenge" },
-    { name: "Treepedia" },
-    { name: "Cities With Nature" },
-    { name: "UNA Rivers for Life" }
+  {name: "Biocapacity"},
+  {name: "Biodiversity Communication, Education and Public Awareness (CEPA)"},
+  {name: "Biophilic Cities"},
+  {name: "Capitale Francaise de la Biodiversite"},
+  {name: "Community Wildlife Habitat"},
+  {name: "Durban Commitment"},
+  {name: "European Capitals of Biodiversity"},
+  {name: "European Green Capital Award"},
+  {name: "Ecological Footprint"},
+  {name: "Green and Blue Space Adaptation for Urban Areas and Eco Towns (GRaBS)"},
+  {name: "INTERACT-Bio"},
+  {name: "LAB Pioneer Programme"},
+  {
+    name: "LAB Wetlands",
+    id: "LAB Wetlands",
+    image: "LabProgrammeLogo.jpg"
+  },
+  {name: "Mayors Monarch Pledge"},
+  {name: "One Planet Living"},
+  {name: "Singapore Index"},
+  {name: "Urban Biosphere Reserves"},
+  {name: "Urban Bird Treaty"},
+  {name: "Urban Protected Area"},
+  {name: "Urban Wildlife Refuge"},
+  {name: "URBIS"},
+  {name: "WILD Cities"},
+  {name: "City Nature Challenge"},
+  {name: "Treepedia"},
+  {name: "Cities With Nature"},
+  {name: "UNA Rivers for Life"}
 ];
 
 const mapFilterParameters = [
@@ -538,7 +560,7 @@ const mapFilterParameters = [
     name: "Biodiversity Activity",
     id: "doc_type",
     options: [mapActivities[0].name, mapActivities[1].name, mapActivities[2].name, mapActivities[3].name, mapActivities[4].name, mapActivities[5].name, mapActivities[6].name, mapActivities[7].name, mapActivities[8].name, mapActivities[9].name, mapActivities[10].name,
-            mapActivities[11].name, mapActivities[12].name, mapActivities[13].name, mapActivities[14].name, mapActivities[15].name],
+      mapActivities[11].name, mapActivities[12].name, mapActivities[13].name, mapActivities[14].name, mapActivities[15].name],
     type: "document"
   },
   {
@@ -557,27 +579,27 @@ const mapFilterParameters = [
     name: "Program or Index",
     id: "part_name",
     options: [mapIndices[0].name, mapIndices[1].name, mapIndices[2].name, mapIndices[3].name, mapIndices[4].name, mapIndices[5].name, mapIndices[6].name, mapIndices[7].name, mapIndices[8].name, mapIndices[9].name, mapIndices[10].name,
-            mapIndices[11].name, mapIndices[12].name, mapIndices[13].name, mapIndices[14].name, mapIndices[15].name, mapIndices[16].name, mapIndices[17].name, mapIndices[18].name, mapIndices[19].name, mapIndices[20].name,
-            mapIndices[21].name],
+      mapIndices[11].name, mapIndices[12].name, mapIndices[13].name, mapIndices[14].name, mapIndices[15].name, mapIndices[16].name, mapIndices[17].name, mapIndices[18].name, mapIndices[19].name, mapIndices[20].name,
+      mapIndices[21].name],
     type: "program"
   },
   {
-      name: "Biodiversity Hotspot",
-      id: "hotspot",
-      options: ['all', 'Atlantic Forest', 'California Floristic Province', 'Cape Floristic Region', 'Caribbean Islands', 'Chilean Winter Rainfall and Valdivian Forests', 'Coastal Forests of Eastern Africa', 'Caucasus', 'Cerrado', 'Eastern Afromontane', 'Forests of East Australia', 'Guinean Forests of West Africa', 'Indo-Burma', 'Irano-Anatolian', 'Himalaya', 'Japan', 'Madagascar and the Indian Ocean Islands', 'Maputaland-Pondoland-Albany', 'Mediterranean Basin', 'Mesoamerica', 'Mountains of Southwest China', 'New Zealand', 'North American Coastal Plain', 'Philippines', 'Polynesia-Micronesia', 'Southwest Australia', 'Sundaland', 'Tropical Andes', 'Western Ghats and Sri Lanka'],
-      type: "select"
+    name: "Biodiversity Hotspot",
+    id: "hotspot",
+    options: ['all', 'Atlantic Forest', 'California Floristic Province', 'Cape Floristic Region', 'Caribbean Islands', 'Chilean Winter Rainfall and Valdivian Forests', 'Coastal Forests of Eastern Africa', 'Caucasus', 'Cerrado', 'Eastern Afromontane', 'Forests of East Australia', 'Guinean Forests of West Africa', 'Indo-Burma', 'Irano-Anatolian', 'Himalaya', 'Japan', 'Madagascar and the Indian Ocean Islands', 'Maputaland-Pondoland-Albany', 'Mediterranean Basin', 'Mesoamerica', 'Mountains of Southwest China', 'New Zealand', 'North American Coastal Plain', 'Philippines', 'Polynesia-Micronesia', 'Southwest Australia', 'Sundaland', 'Tropical Andes', 'Western Ghats and Sri Lanka'],
+    type: "select"
   },
   {
-      name: "Biome (WWF)",
-      id: "wwf_biome",
-      options: ['Boreal Forests/Taiga', 'Deserts & Xeric Shrublands', 'Flooded Grasslands & Savannas', 'Mangroves', 'Mediterranean Forests, Woodlands & Scrub', 'Montane Grasslands & Shrublands', 'Temperate Broadleaf & Mixed Forests', 'Temperate Conifer Forests', 'Temperate Grasslands, Savannas & Shrublands', 'Tropical & Subtropical Grasslands, Savannas & Shrublands', 'Tropical & Subtropical Dry Broadleaf Forests', 'Tropical & Subtropical Moist Broadleaf Forests', 'Tundra'],
-      type: "select"
+    name: "Biome (WWF)",
+    id: "wwf_biome",
+    options: ['Boreal Forests/Taiga', 'Deserts & Xeric Shrublands', 'Flooded Grasslands & Savannas', 'Mangroves', 'Mediterranean Forests, Woodlands & Scrub', 'Montane Grasslands & Shrublands', 'Temperate Broadleaf & Mixed Forests', 'Temperate Conifer Forests', 'Temperate Grasslands, Savannas & Shrublands', 'Tropical & Subtropical Grasslands, Savannas & Shrublands', 'Tropical & Subtropical Dry Broadleaf Forests', 'Tropical & Subtropical Moist Broadleaf Forests', 'Tundra'],
+    type: "select"
   },
   {
-      name: "Conservation Status (WWF)",
-      id: "conservation_status_wwf",
-      options: ['critical or endangered', 'vulnerable', 'relatively stable or intact'],
-      type: "select"
+    name: "Conservation Status (WWF)",
+    id: "conservation_status_wwf",
+    options: ['critical or endangered', 'vulnerable', 'relatively stable or intact'],
+    type: "select"
   }];
 
 export default router;

@@ -1,11 +1,8 @@
 import express from 'express';
 import mysql from 'mysql2';
 const router = express.Router();
-import path from 'path';
 import https from 'https';
-import config from './config.js';
-import clientSession from 'client-sessions';
-
+import config from '../nodeServer/config.js';
 
 // config.rdsHost="192.168.99.100"; //this should be your Docker container's IP address
 config.rdsHost="127.0.0.1"; //this should be your Docker container's IP address

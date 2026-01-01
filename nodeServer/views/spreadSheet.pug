@@ -419,6 +419,8 @@ html
       div.container
         div.horizontalFlex
           h1#tableTitle
+          if user
+            span#userAlias(style="margin-left:12px; font-size:14px; color:#555") Hello, #{user}
           button.primary#addButton(onclick="addNewEntry()") Add New Entry
 
         div

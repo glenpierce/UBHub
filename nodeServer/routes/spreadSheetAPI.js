@@ -58,6 +58,9 @@ router.post('/pending-change', isAuthenticated, isAdmin, async (req, res) => {
 
 function isAuthenticated(req, res, next) {
 
+  console.log("isAuthenticated check");
+  console.log(req.session);
+
   if (req.session && req.session.user) {
     return next();
   }
