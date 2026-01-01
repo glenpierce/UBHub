@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import { makeDbCallAsPromise } from '../ConnectionPool.js';
+import { pool, makeDbCallAsPromise } from '../ConnectionPool.js';
 
 router.get('/table-data/:tableName', isAuthenticated, isAdmin, async (req, res) => {
     try {
@@ -96,25 +96,36 @@ function assertTableAllowed(tableName) {
 }
 
 async function createPendingChange(pool, tableName, rowKeyObj, operation, dataObj, user) {
+    console.log("creating pending change");
     assertTableAllowed(tableName);
+    console.log("table allowed");
     const pkJson = JSON.stringify(rowKeyObj || {});
     const dataJson = JSON.stringify(dataObj || {});
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
-        // compute next version for this table+row_key
-        const [rowsBetter] = await connection.query(
+
+        const [rows] = await connection.query(
             "SELECT COALESCE(MAX(version),0) + 1 AS next_version FROM row_versions WHERE table_name = ? AND JSON_UNQUOTE(JSON_EXTRACT(row_key, '$')) = ?",
             [tableName, pkJson]
         );
         const nextVersion = (rows[0] && rows[0].next_version) || 1;
+
         await connection.query(
             'INSERT INTO row_versions (table_name, row_key, operation, data, version, created_by) VALUES (?, ?, ?, ?, ?, ?)',
             [tableName, pkJson, operation, dataJson, nextVersion, user]
         );
         await connection.commit();
     } catch (error) {
-        await connection.rollback();
+        console.error('Error creating pending change:', error);
+        if(connection) {
+            try {
+                console.log("rolling back");
+                await connection.rollback();
+            } catch (error) {
+                console.error("Failed to rollback: ", error);
+            }
+        }
         throw error;
     } finally {
         connection.release();
@@ -198,10 +209,23 @@ async function approveVersion(pool, versionId, approver) {
 
         await connection.commit();
     } catch (error) {
-        await connection.rollback();
+        if(connection) {
+            try {
+                console.log("rolling back");
+                await connection.rollback();
+            } catch (rollbackError) {
+                console.error("Failed to rollback: ", rollbackError);
+            }
+        }
         throw error;
     } finally {
-        connection.release();
+        if (connection) {
+            try {
+                connection.release();
+            } catch (releaseError) {
+                console.error("Failed to release connection: ", releaseError);
+            }
+        }
     }
 }
 

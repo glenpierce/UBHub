@@ -59,16 +59,76 @@ a.genericLink {
 }
 
 button {
-  background-color: #daecf1;
-  border-style: solid;
-  border-color: black;
-  border-width: 1px;
-  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px; /* space between icon and label */
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: #ffffff;
+  color: #222222;
+  box-shadow: 0 1px 2px rgba(16,24,40,0.06);
   cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease, filter 120ms ease;
+  text-decoration: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button.primary {
+  background: #8a8a8a;
+  color: #ffffff;
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: none;
+}
+
+button.secondary {
+  background: #ffffff;
+  color: #222222;
+  border-color: rgba(0,0,0,0.08);
 }
 
 button:hover {
-  background-color: #e9f6f9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(16,24,40,0.08);
+}
+button.primary:hover {
+  filter: brightness(0.95);
+}
+
+/* Focus (keyboard) */
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(66,133,244,0.12); /* subtle focus ring */
+}
+
+button:disabled,
+button[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+/* Icon support inside buttons */
+button .icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Small variant (optional) */
+button.small {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 6px;
 }
 
 .bold {
@@ -494,7 +554,7 @@ p.postBody {
   margin-left: -24px;
   border-radius: 0 5px 5px 0;
   width: 180px;
-  font-weight: thin;
+  font-weight: 700;
   font-style: italic;
   text-transform: uppercase;
 }

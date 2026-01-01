@@ -1,5 +1,5 @@
 import config from './config.js';
-import mysql from 'mysql2';
+import mysql from 'mysql2/promise';
 
 const pool = mysql.createPool({
     host: config.rdsHost,
@@ -7,24 +7,48 @@ const pool = mysql.createPool({
     password: config.rdsPassword,
     database: config.rdsDatabase,
     decimalNumbers: true,
+    waitForConnections: true,
+    connectionLimit: 10,
 });
 
-const promisePool = pool.promise();
-
-promisePool.getConnection()
-    .then((connection) => {
-        console.log('Successfully connected to the database.');
-        connection.release();
-    })
-    .catch((err) => {
-        console.error('Error connecting to the database:', err.code, err.message);
-    });
-
-const makeDbCallAsPromise = async function(queryString, params = []) {
+(async () => {
     try {
-        const [rows] = await promisePool.query(queryString, params);
-        // If a stored procedure returned multiple result sets, rows can be an array of arrays.
-        // Return the first result set for compatibility with existing callers.
+        const connection = await pool.getConnection();
+        console.log("Successfully connected to the database.");
+        connection.release();
+    } catch (err) {
+        console.error("Error connecting to the database:", err.code, err.message);
+    }
+})();
+
+const getConnection = async () => {
+    return pool.getConnection();
+};
+
+/**
+ * Runs the provided async function inside a transaction.
+ * fn receives the acquired connection and should use it for queries.
+ */
+const withTransaction = async (fn) => {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+        const result = await fn(connection);
+        connection.commit();
+        return result;
+    } catch (err) {
+        try { await connection.rollback(); } catch (error) {
+            console.error("Error connecting to the database:", err.code, err.message);
+        }
+        throw err;
+    } finally {
+        connection.release();
+    }
+};
+
+const makeDbCallAsPromise = async function (queryString, params = []) {
+    try {
+        const [rows] = await pool.query(queryString, params);
         if (Array.isArray(rows) && rows.length > 0 && Array.isArray(rows[0])) {
             return rows[0];
         }
@@ -37,4 +61,4 @@ const makeDbCallAsPromise = async function(queryString, params = []) {
     }
 };
 
-export { pool, makeDbCallAsPromise };
+export { pool, getConnection, withTransaction, makeDbCallAsPromise };
