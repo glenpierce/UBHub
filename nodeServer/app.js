@@ -53,7 +53,7 @@ app.use(clientSessions({
   }
 }));
 
-// app.use('/account', account);
+app.use('/account', account);
 app.use('/createUser', createUser);
 app.use('/', home);
 app.use('/login', login);
