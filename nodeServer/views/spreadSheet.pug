@@ -581,6 +581,18 @@ html
           div.clickable(onclick="onTableSelected('row_versions')")
             img.nav-icon(src='/icons/submissionIcon.svg', alt='Submissions icon')
             | Submissions
+          div.clickable(onclick="onTableSelected('users')")
+            img.nav-icon(src='/icons/usersIcon.svg', alt='Users icon')
+            | Users
+          div.clickable(onclick='window.location="/account"')
+            img.nav-icon(src='/icons/profileIcon.svg', alt='My Profile icon')
+            | My Profile
+          div.clickable(onclick="onTableSelected('row_versions')")
+            img.nav-icon(src='/icons/approveIcon.svg', alt='Approvals icon')
+            | Approvals
+          div.clickable(onclick="onTableSelected('users')")
+            img.nav-icon(src='/icons/usersIcon.svg', alt='Manage Users icon')
+            | Manage Users
 
 
     main.main-col
