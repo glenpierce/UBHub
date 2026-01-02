@@ -12,39 +12,60 @@ router.get('/', function(req, res, next) {
   }
 });
 
-router.post('/', function(req, res) {
-
-  console.log("received change password post");
-
-  pool.getConnection(function (error, connection) {
-    connection.query('CALL login("' + req.session.user + '")', function (err, rows, fields) {
+router.post('/', async function (req, res) {
+  try {
+    const connection = await pool.getConnection();
+    try {
+      const [rows] = await connection.query('CALL login(?)', [req.session.user]);
       connection.release();
-      if (!err && rows[0][0] != undefined) {
-        bcrypt.compare(req.body.oldPassword, rows[0][0].hashedPassword, function (err, response) {
-          if (response) {
-            const salt = bcrypt.genSaltSync(10) + req.session.user.toLowerCase() + config.salt;
-            const hash = bcrypt.hashSync(req.body.newPassword, salt);
 
-            const query = "update users set hashedPassword = \"" + hash + "\" where email = \"" + req.session.user + "\";";
+      if (rows && rows[0] && rows[0][0]) {
+        const storedHash = rows[0][0].hashedPassword;
 
-            console.log(query);
+        const match = await new Promise((resolve, reject) => {
+          bcrypt.compare(req.body.oldPassword, storedHash, (err, result) => {
+            if (err) return reject(err);
+            resolve(result);
+          });
+        });
 
-            pool.getConnection(function (error, connection) {
-              connection.query(query, function (err, rows, fields) {
-                connection.release();
-                res.send(true);
-              });
-            });
-          } else {
+        if (match) {
+          const salt = bcrypt.genSaltSync(10) + req.session.user.toLowerCase() + config.salt;
+          const hash = bcrypt.hashSync(req.body.newPassword, salt);
+
+          const updateQuery = 'UPDATE users SET hashedPassword = ? WHERE email = ?';
+          console.log(updateQuery);
+
+          const updateConnection = await pool.getConnection();
+          try {
+            await updateConnection.query(updateQuery, [hash, req.session.user]);
+            updateConnection.release();
+            return res.send(true);
+          } catch (updateErr) {
+            updateConnection.release();
+            console.error(updateErr);
             return res.send(false);
           }
-        });
+        } else {
+          return res.send(false);
+        }
       } else {
         console.log('Error while performing password reset login Query.');
         return res.send(false);
       }
-    });
-  });
+    } catch (queryError) {
+      try {
+        connection.release();
+      } catch (connectionReleaseError) {
+        console.error(connectionReleaseError);
+      }
+      console.error(queryError);
+      return res.send(false);
+    }
+  } catch (connectionError) {
+    console.error(connectionError);
+    return res.send(false);
+  }
 });
 
 router.get('/logout', function (req, res, next) {

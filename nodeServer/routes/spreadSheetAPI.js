@@ -3,11 +3,13 @@ import express from 'express';
 const router = express.Router();
 import { pool, makeDbCallAsPromise } from '../ConnectionPool.js';
 
-router.get('/table-data/:tableName', isAuthenticated, isAdmin, async (req, res) => {
+router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req, res) => {
   try {
     const tableName = req.params.tableName;
     // Validate tableName to prevent SQL injection IMPORTANT!!
     const validTableNames = ['locations', 'documents', 'participation', 'mapButtons']; // mapButtons === programs
+    const versionControlTable = 'row_versions';
+    validTableNames.push(versionControlTable);
 
     if (!validTableNames.includes(tableName)) {
       return res.status(400).json({error: 'Invalid table name'});
@@ -25,7 +27,7 @@ router.get('/table-data/:tableName', isAuthenticated, isAdmin, async (req, res) 
   }
 });
 
-router.post('/pending-change', isAuthenticated, isAdmin, async (req, res) => {
+router.post('/pending-change', isAuthenticated, isContributor, async (req, res) => {
   try {
     const {tableName, rowKey, operation, data} = req.body;
 
@@ -57,18 +59,21 @@ router.post('/pending-change', isAuthenticated, isAdmin, async (req, res) => {
 });
 
 function isAuthenticated(req, res, next) {
-
-  console.log("isAuthenticated check");
-  console.log(req.session);
-
   if (req.session && req.session.user) {
     return next();
   }
   res.status(401).json({error: 'Not authenticated'});
 }
 
-function isAdmin(req, res, next) {
-  if (req.session.user && req.session.privileges === 1) {
+function isContributor(req, res, next) {
+  if (req.session.user && req.session.privileges >= 1) {
+    return next();
+  }
+  res.status(403).json({error: 'Not authorized'});
+}
+
+function isApprover(req, res, next) {
+  if (req.session.user && req.session.privileges >= 2) {
     return next();
   }
   res.status(403).json({error: 'Not authorized'});
@@ -138,6 +143,68 @@ async function createPendingChange(pool, tableName, rowKeyObj, operation, dataOb
   }
 }
 
+
+router.post('/pending-change/review', isAuthenticated, isApprover, async (req, res) => {
+  const {id, decision, comments} = req.body;
+  try {
+    if (!id || typeof id !== 'number') {
+      return res.status(400).json({error: 'Invalid id'});
+    }
+    if (!['Approve', 'Reject'].includes(decision)) {
+      return res.status(400).json({error: 'Invalid decision'});
+    }
+    if (decision === 'Reject') {
+      await rejectVersion(pool, id, req);
+      res.status(200).json({Status: 'Rejected'});
+    }
+    if (decision === 'Approve') {
+      await approveVersion(pool, id, req.session.user);
+      res.status(200).json({Status: 'Approved'});
+    }
+    return res.status(400).json({error: 'Invalid decision'});
+  } catch (error) {
+    console.error('Error reviewing pending change:', error);
+    res.status(500).json({error: 'Server error'});
+  }
+});
+
+async function rejectVersion(pool, id, req) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    // lock the version row
+    const [rowVersions] = await connection.query('SELECT * FROM row_versions WHERE id = ? FOR UPDATE', [id]);
+    if (!rowVersions[0]) {
+      throw new Error('Version not found');
+    }
+    const rowVersion = rowVersions[0];
+    if (rowVersion.status !== 'pending') {
+      throw new Error('Version not pending');
+    }
+
+    await connection.query('UPDATE row_versions SET status = ?, approved_by = ?, approved_at = NOW() WHERE id = ?', ['rejected', req.session.user, id]);
+    await connection.commit();
+  } catch (error) {
+    if (connection) {
+      try {
+        console.log("rolling back");
+        await connection.rollback();
+      } catch (rollbackError) {
+        console.error("Failed to rollback: ", rollbackError);
+      }
+    }
+    throw error;
+  } finally {
+    if (connection) {
+      try {
+        connection.release();
+      } catch (releaseError) {
+        console.error("Failed to release connection: ", releaseError);
+      }
+    }
+  }
+}
+
 async function approveVersion(pool, versionId, approver) {
   const connection = await pool.getConnection();
   try {
@@ -148,8 +215,8 @@ async function approveVersion(pool, versionId, approver) {
       throw new Error('Version not found');
     }
     const rowVersion = rowVersions[0];
-    if (rowVersion.status !== 'pending') {
-      throw new Error('Version not pending');
+    if (rowVersion.status !== 'pending' || rowVersion.status !== 'rejected') {
+      throw new Error('Version not pending or rejected');
     }
 
     const tableName = rowVersion.table_name;
