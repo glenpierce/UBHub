@@ -186,6 +186,7 @@ html
 
         modalMode = 'review';
         currentReviewRow = row || null;
+        console.log(row);
 
         let dataObj = {};
         if (row && row.data) {
@@ -236,7 +237,7 @@ html
         decisionSelect.name = 'reviewDecision';
         ['Approve', 'Reject'].forEach(optionValue => {
           const optionElement = document.createElement('option');
-          optionElement.value = optionValue.toLowerCase();
+          optionElement.value = optionValue;
           optionElement.text = optionValue;
           decisionSelect.appendChild(optionElement);
         });
@@ -309,18 +310,17 @@ html
             e.preventDefault();
 
             if (modalMode === 'review') {
-              // prepare review payload
               if (!currentReviewRow) {
                 alert('No review row specified.');
                 return;
               }
-              const decision = document.getElementById('reviewDecision')?.value || 'approve';
+              const decision = document.getElementById('reviewDecision')?.value || '';
               const comments = document.getElementById('reviewComments')?.value || '';
 
               const payload = {
-                rowKey: currentReviewRow.row_key,
-                decision,
-                comments
+                id: currentReviewRow.id,
+                decision: decision,
+                comments: comments
               };
 
               fetch(`/api/admin/pending-change/review`, {
@@ -328,11 +328,15 @@ html
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
               }).then(res => {
-                if (!res.ok) throw new Error('Review submit failed');
+                if (!res.ok) {
+                  throw new Error('Review submit failed');
+                }
                 return res.json();
               }).then(() => {
                 closeModal();
-                if (currentTable) fetchTableData(currentTable);
+                if (currentTable) {
+                  fetchTableData(currentTable);
+                }
               }).catch(err => {
                 console.error(err);
                 alert('Review submit error: ' + err.message);
