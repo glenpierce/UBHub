@@ -174,10 +174,18 @@ html
         document.getElementById('tableBody').innerHTML = '';
       }
 
+      let modalMode = null; // 'add' or 'review'
+      let currentReviewRow = null;
+
       function buildModalForReview(row) {
+        const modalTitle = document.getElementById('modalTitle');
+        modalTitle.textContent = `Review Submission - ${row.operation.charAt(0).toUpperCase() + row.operation.slice(1)}`;
         const form = document.getElementById('modalForm');
         const fieldsContainer = document.getElementById('modalFields');
         fieldsContainer.innerHTML = '';
+
+        modalMode = 'review';
+        currentReviewRow = row || null;
 
         let dataObj = {};
         if (row && row.data) {
@@ -185,7 +193,6 @@ html
             dataObj = (typeof row.data === 'string') ? JSON.parse(row.data) : row.data;
           } catch (err) {
             console.warn('Failed to parse row.data:', err);
-            // fall back to raw string so user can see it
             dataObj = {data: row.data};
           }
         }
@@ -210,18 +217,55 @@ html
             input.value = (value === null || value === undefined) ? '' : (typeof value === 'object' ? JSON.stringify(value) : value);
             input.setAttribute('data-col-name', key);
             input.placeholder = `Enter ${labelText}`;
-            input.disabled = true; // make read-only
+            input.disabled = true; // read-only for review display
             rowDiv.appendChild(input);
 
             fieldsContainer.appendChild(rowDiv);
           }
         }
+
+        // Add simple review controls (decision + comments)
+        const decisionRow = document.createElement('div');
+        decisionRow.className = 'form-row';
+        const decisionLabel = document.createElement('label');
+        decisionLabel.textContent = 'Decision';
+        decisionLabel.setAttribute('for', 'reviewDecision');
+        decisionRow.appendChild(decisionLabel);
+        const decisionSelect = document.createElement('select');
+        decisionSelect.id = 'reviewDecision';
+        decisionSelect.name = 'reviewDecision';
+        ['Approve', 'Reject'].forEach(optionValue => {
+          const optionElement = document.createElement('option');
+          optionElement.value = optionValue.toLowerCase();
+          optionElement.text = optionValue;
+          decisionSelect.appendChild(optionElement);
+        });
+        decisionRow.appendChild(decisionSelect);
+        fieldsContainer.appendChild(decisionRow);
+
+        const commentsRow = document.createElement('div');
+        commentsRow.className = 'form-row';
+        const commentsLabel = document.createElement('label');
+        commentsLabel.textContent = 'Comments';
+        commentsLabel.setAttribute('for', 'reviewComments');
+        commentsRow.appendChild(commentsLabel);
+        const comments = document.createElement('textarea');
+        comments.id = 'reviewComments';
+        comments.name = 'reviewComments';
+        comments.placeholder = 'Enter review comments (optional)';
+        commentsRow.appendChild(comments);
+        fieldsContainer.appendChild(commentsRow);
       }
 
       function buildModalForTable(tableName) {
+        const modalTitle = document.getElementById('modalTitle');
+        modalTitle.textContent = `Add New Entry to ${tableDisplayConfig[tableName]?.displayName || tableName}`;
         const form = document.getElementById('modalForm');
         const fieldsContainer = document.getElementById('modalFields');
         fieldsContainer.innerHTML = '';
+
+        modalMode = 'add';
+        currentReviewRow = null;
 
         if (!tableName || !tableDisplayConfig[tableName]) {
           fieldsContainer.innerHTML = '<div class="form-row">No fields available</div>';
@@ -229,7 +273,6 @@ html
         }
 
         const columns = tableDisplayConfig[tableName].columns || [];
-
         const formColumns = columns.filter(c => c.name !== 'id');
 
         if (formColumns.length === 0) {
@@ -264,35 +307,72 @@ html
         if (modalForm) {
           modalForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            if (!currentTable) {
-              alert('No table selected.');
+
+            if (modalMode === 'review') {
+              // prepare review payload
+              if (!currentReviewRow) {
+                alert('No review row specified.');
+                return;
+              }
+              const decision = document.getElementById('reviewDecision')?.value || 'approve';
+              const comments = document.getElementById('reviewComments')?.value || '';
+
+              const payload = {
+                rowKey: currentReviewRow.row_key,
+                decision,
+                comments
+              };
+
+              fetch(`/api/admin/pending-change/review`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+              }).then(res => {
+                if (!res.ok) throw new Error('Review submit failed');
+                return res.json();
+              }).then(() => {
+                closeModal();
+                if (currentTable) fetchTableData(currentTable);
+              }).catch(err => {
+                console.error(err);
+                alert('Review submit error: ' + err.message);
+              });
+
               return;
             }
-            const payload = {
-              tableName: currentTable,
-              rowKey: {},
-              operation: 'insert',
-              data: {}
-            };
-            modalForm.querySelectorAll('[data-col-name]').forEach(inputValue => {
-              payload.data[inputValue.dataset.colName] = inputValue.value;
-            });
 
-            fetch(`/api/admin/pending-change`, {
-              method: 'POST',
-              headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify(payload)
-            }).then(res => {
-              if (!res.ok) throw new Error('Submit failed');
-              return res.json();
-            }).then(() => {
-              closeModal();
-              // refresh table
-              fetchTableData(currentTable);
-            }).catch(err => {
-              console.error(err);
-              alert('Submit error: ' + err.message);
-            });
+            // default/add mode
+            if (modalMode === 'add' || !modalMode) {
+              if (!currentTable) {
+                alert('No table selected.');
+                return;
+              }
+              const payload = {
+                tableName: currentTable,
+                rowKey: {},
+                operation: 'insert',
+                data: {}
+              };
+              modalForm.querySelectorAll('[data-col-name]').forEach(inputValue => {
+                payload.data[inputValue.dataset.colName] = inputValue.value;
+              });
+
+              fetch(`/api/admin/pending-change`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+              }).then(res => {
+                if (!res.ok) throw new Error('Submit failed');
+                return res.json();
+              }).then(() => {
+                closeModal();
+                // refresh table
+                fetchTableData(currentTable);
+              }).catch(err => {
+                console.error(err);
+                alert('Submit error: ' + err.message);
+              });
+            }
           });
         }
       });
@@ -518,7 +598,7 @@ html
 // Modal overlay for adding a new entry
 .modal-overlay(id="modalOverlay", style="display:none;")
   .modal
-    h2.modal-title Add New Entry
+    h2.modal-title#modalTitle
     form#modalForm
       #modalFields
       .modal-actions

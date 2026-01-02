@@ -3,7 +3,7 @@ import express from 'express';
 const router = express.Router();
 import { pool, makeDbCallAsPromise } from '../ConnectionPool.js';
 
-router.get('/table-data/:tableName', isAuthenticated, isAdmin, async (req, res) => {
+router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req, res) => {
   try {
     const tableName = req.params.tableName;
     // Validate tableName to prevent SQL injection IMPORTANT!!
@@ -27,7 +27,7 @@ router.get('/table-data/:tableName', isAuthenticated, isAdmin, async (req, res) 
   }
 });
 
-router.post('/pending-change', isAuthenticated, isAdmin, async (req, res) => {
+router.post('/pending-change', isAuthenticated, isContributor, async (req, res) => {
   try {
     const {tableName, rowKey, operation, data} = req.body;
 
@@ -59,18 +59,21 @@ router.post('/pending-change', isAuthenticated, isAdmin, async (req, res) => {
 });
 
 function isAuthenticated(req, res, next) {
-
-  console.log("isAuthenticated check");
-  console.log(req.session);
-
   if (req.session && req.session.user) {
     return next();
   }
   res.status(401).json({error: 'Not authenticated'});
 }
 
-function isAdmin(req, res, next) {
-  if (req.session.user && req.session.privileges === 1) {
+function isContributor(req, res, next) {
+  if (req.session.user && req.session.privileges >= 1) {
+    return next();
+  }
+  res.status(403).json({error: 'Not authorized'});
+}
+
+function isApprover(req, res, next) {
+  if (req.session.user && req.session.privileges >= 2) {
     return next();
   }
   res.status(403).json({error: 'Not authorized'});
@@ -139,6 +142,30 @@ async function createPendingChange(pool, tableName, rowKeyObj, operation, dataOb
     connection.release();
   }
 }
+
+
+router.post('/pending-change/review', isAuthenticated, isApprover, async (req, res) => {
+  const {rowKey, decision, comments} = req.body;
+  try {
+    if (!rowKey || typeof rowKey !== 'object' || !rowKey.id) {
+      return res.status(400).json({error: 'Invalid rowKey'});
+    }
+    if (!['Approve', 'Reject'].includes(decision)) {
+      return res.status(400).json({error: 'Invalid decision'});
+    }
+    if (decision === 'Reject') {
+      return res.status(400).json({error: 'Reject not implemented yet'});
+    }
+    if (decision === 'Approve') {
+      await approveVersion(pool, rowKey, req.session.user);
+      res.json({success: true});
+    }
+    return res.status(400).json({error: 'Invalid decision'});
+  } catch (error) {
+    console.error('Error reviewing pending change:', error);
+    res.status(500).json({error: 'Server error'});
+  }
+});
 
 async function approveVersion(pool, versionId, approver) {
   const connection = await pool.getConnection();
