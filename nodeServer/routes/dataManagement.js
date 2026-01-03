@@ -1,23 +1,169 @@
 import express from 'express';
-
 const router = express.Router();
-import { pool, makeDbCallAsPromise } from '../ConnectionPool.js';
+import { makeDbCallAsPromise, pool } from '../ConnectionPool.js';
+
+router.get('/', function(req, res) {
+  const dataManagementConfig = {
+    tablesForUser: getTablesForUser(req),
+    navMenu: getNavMenuForUser(req),
+    user: req.user,
+  }
+  res.render('dataManagement', {dataManagementConfig: JSON.stringify(dataManagementConfig)});
+});
+
+function getTablesForUser(req) {
+  const tablesForUser = {};
+  if (req.session.user && req.session.privileges >= 1) {
+    tablesForUser.locations = tables.locations;
+    tablesForUser.documents = tables.documents;
+    tablesForUser.participation = tables.participation;
+    tablesForUser.mapButtons = tables.mapButtons;
+    tablesForUser.row_versions = tables.row_versions;
+    tablesForUser.users = tables.users;
+  }
+  return tablesForUser;
+}
+
+const tables = {
+  mapButtons: {
+    displayName: 'Programs',
+    columns: [
+      {name: 'part_name', label: 'Program Name', visible: true},
+      {name: 'button_category', label: 'Category', visible: true},
+      {name: 'button_link', label: 'Website', visible: true},
+      {name: 'button_text', visible: false},
+      {name: 'image', visible: false},
+      {name: 'marker_colors_by', visible: false},
+      {name: 'marker_colors', visible: false}
+    ]
+  },
+  locations: {
+    displayName: 'Institutions',
+    columns: [
+      {name: 'id', visible: false},
+      {name: 'inst_address', visible: false},
+      {name: 'lat', visible: false},
+      {name: 'lng', visible: false},
+      {name: 'inst_title', label: 'Institution Name', visible: true},
+      {name: 'country', label: 'Country', visible: true},
+      {name: 'scale', label: 'Scale', visible: true},
+      {name: 'population', label: 'Population', visible: true},
+      {name: 'density_km2', visible: false},
+      {name: 'area_km2', label: 'Area (km²)', visible: true},
+      {name: 'area_ha', label: 'Area (ha)', visible: false},
+      {name: 'biodiversity_url', visible: false},
+      {name: 'url_verifydate', label: 'Url verified on', visible: false},
+      {name: 'wwf_biome', label: 'WWF Biome', visible: false},
+      {name: 'wwf_terrestrial_ecoregion', label: 'WWF Terrestrial Ecoregion', visible: false},
+      {name: 'hotspot', label: 'Hotspot', visible: false},
+      {name: 'conservation_status_wwf', label: 'Conservation Status WWF', visible: false}
+    ]
+  },
+  participation: {
+    displayName: 'Program Participations',
+    columns: [
+      {name: 'id', visible: false},
+      {name: 'inst_id', visible: false},
+      {name: 'part_name', label: 'Program Name', visible: true},
+      {name: 'part_category', label: 'Category', visible: true},
+      {name: 'part_year', label: 'Year', visible: true},
+      {name: 'part_data', label: 'Data', visible: false},
+      {name: 'part_units', label: 'Units', visible: false},
+      {name: 'part_level', label: 'Level', visible: false},
+      {name: 'part_link_label', label: 'Link Label 1', visible: false},
+      {name: 'part_link', label: 'Link 1', visible: false},
+      {name: 'part_link_label2', label: 'Link Label 2', visible: false},
+      {name: 'part_link2', label: 'Link 2', visible: false},
+      {name: 'part_link_label3', label: 'Link Label 3', visible: false},
+      {name: 'part_link3', label: 'Link 3', visible: false},
+      {name: 'keywords', label: 'Keywords', visible: false},
+      {name: 'link_verified', label: 'Link Verified', visible: false}
+    ]
+  },
+  row_versions: {
+    displayName: 'Submissions',
+    columns: [
+      {name: 'id', visible: false},
+      {name: 'table_name', label: 'Table Name', visible: true},
+      {name: 'row_key', label: 'Row ID', visible: false},
+      {name: 'operation', label: 'Operation', visible: true},
+      {name: 'status', label: 'Status', visible: true},
+      {name: 'version', label: 'Version', visible: false},
+      {name: 'data', label: 'Data', visible: true},
+      {name: 'created_by', label: 'Submitted By', visible: true},
+      {name: 'created_at', label: 'Submitted At', visible: true},
+      {name: 'approved_by', label: 'Approved By', visible: true},
+      {name: 'approved_at', label: 'Approved At', visible: true, type: 'date'},
+      {name: 'notes', label: 'Review Comments', visible: true},
+      {button: 'review', label: 'Review', visible: true}
+    ]
+  },
+  users: {
+    displayName: 'Users',
+    columns: [
+      {name: 'alias', label: 'Username', visible: true},
+      {name: 'privileges', label: 'Privileges', visible: true},
+    ]
+  }
+};
+
+function getNavMenuForUser(req) {
+  const navigationMenu = [];
+  if (req.session.user && req.session.privileges >= 1) {
+    navigationMenu.push(menuCandidates[0]); // Programs
+    navigationMenu.push(menuCandidates[1]); // Institutions
+    navigationMenu.push(menuCandidates[2]); // Participations
+    navigationMenu.push(menuCandidates[3]); // Submissions
+    navigationMenu.push(menuCandidates[4]); // Users
+  }
+
+  if (req.session.user) {
+    navigationMenu.push(menuCandidates[5]); // My Profile
+  }
+
+  if (req.session.user && req.session.privileges >= 2) {
+    navigationMenu.push(menuCandidates[6]); // Approvals
+  }
+
+  if (req.session.user && req.session.privileges >= 3) {
+    navigationMenu.push(menuCandidates[7]); // Manage Users
+  }
+
+  return navigationMenu;
+}
+
+const menuCandidates = [
+  {tableKey: 'mapButtons', icon: '/icons/programIcon.svg', label: 'Programs'},
+  {tableKey: 'locations', icon: '/icons/institutionIcon.svg', label: 'Institutions'},
+  {tableKey: 'participation', icon: '/icons/participationIcon.svg', label: 'Participations'},
+  {tableKey: 'row_versions', icon: '/icons/submissionIcon.svg', label: 'Submissions'},
+  {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Users'},
+  {href: '/account', icon: '/icons/profileIcon.svg', label: 'My Profile'},
+  {tableKey: 'row_versions', icon: '/icons/approveIcon.svg', label: 'Approvals'},
+  {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Manage Users'}
+];
 
 router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req, res) => {
   try {
     const tableName = req.params.tableName;
     // Validate tableName to prevent SQL injection IMPORTANT!!
-    const validTableNames = ['locations', 'documents', 'participation', 'mapButtons']; // mapButtons === programs
-    const versionControlTable = 'row_versions';
-    validTableNames.push(versionControlTable);
+    const validTableNames = Object.keys(getTablesForUser(req));
 
     if (!validTableNames.includes(tableName)) {
       return res.status(400).json({error: 'Invalid table name'});
     }
 
-    const queryString = `SELECT *
+    const tableMeta = getTablesForUser(req)[tableName];
+    if (!tableMeta) {
+      return res.status(400).json({error: 'Invalid table name'});
+    }
+    const columnNames = tableMeta.columns.map(col => col.name).filter(name => name);
+    const columnList = columnNames.map(name => `\`${name}\``).join(', ');
+
+    const queryString = `SELECT ${columnList}
                          FROM ${tableName}
                          LIMIT 1000`;
+
     const result = await makeDbCallAsPromise(queryString);
 
     res.json(result);
@@ -79,7 +225,14 @@ function isApprover(req, res, next) {
   res.status(403).json({error: 'Not authorized'});
 }
 
-const allowedTables = {
+function isAdmin(req, res, next) {
+  if (req.session.user && req.session.privileges >= 3) {
+    return next();
+  }
+  res.status(403).json({error: 'Not authorized'});
+}
+
+const editableTables = {
   locations: {
     primaryKey: ['id'],
     columns: ['id', 'inst_address', 'lat', 'lng', 'inst_title', 'country', 'scale', 'population', 'density_km2', 'area_km2', 'area_ha', 'biodiversity_url', 'url_verifydate', 'wwf_biome', 'wwf_terrestrial_ecoregion', 'hotspot', 'conservation_status_wwf']
@@ -99,7 +252,7 @@ const allowedTables = {
 };
 
 function assertTableAllowed(tableName) {
-  if (!allowedTables[tableName]) {
+  if (!editableTables[tableName]) {
     const error = new Error('Invalid table name');
     error.code = 'INVALID_TABLE';
     throw error;
@@ -221,7 +374,7 @@ async function approveVersion(pool, versionId, approver) {
 
     const tableName = rowVersion.table_name;
     assertTableAllowed(tableName);
-    const meta = allowedTables[tableName];
+    const meta = editableTables[tableName];
 
     const rowKeyObject = JSON.parse(rowVersion.row_key || '{}');
     const dataObject = JSON.parse(rowVersion.data);

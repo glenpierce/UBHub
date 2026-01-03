@@ -2,81 +2,42 @@ doctype html
 html
   head
     script.
-      const tableDisplayConfig = {
-        mapButtons: {
-          displayName: 'Programs',
-          columns: [
-            {name: 'part_name', label: 'Program Name', visible: true},
-            {name: 'button_category', label: 'Category', visible: true},
-            {name: 'button_link', label: 'Website', visible: true},
-            {name: 'button_text', visible: false},
-            {name: 'image', visible: false},
-            {name: 'marker_colors_by', visible: false},
-            {name: 'marker_colors', visible: false}
-          ]
-        },
-        locations: {
-          displayName: 'Institutions',
-          columns: [
-            {name: 'id', visible: false},
-            {name: 'inst_address', visible: false},
-            {name: 'lat', visible: false},
-            {name: 'lng', visible: false},
-            {name: 'inst_title', label: 'Institution Name', visible: true},
-            {name: 'country', label: 'Country', visible: true},
-            {name: 'scale', label: 'Scale', visible: true},
-            {name: 'population', label: 'Population', visible: true},
-            {name: 'density_km2', visible: false},
-            {name: 'area_km2', label: 'Area (km²)', visible: true},
-            {name: 'area_ha', label: 'Area (ha)', visible: false},
-            {name: 'biodiversity_url', visible: false},
-            {name: 'url_verifydate', label: 'Url verified on', visible: false},
-            {name: 'wwf_biome', label: 'WWF Biome', visible: false},
-            {name: 'wwf_terrestrial_ecoregion', label: 'WWF Terrestrial Ecoregion', visible: false},
-            {name: 'hotspot', label: 'Hotspot', visible: false},
-            {name: 'conservation_status_wwf', label: 'Conservation Status WWF', visible: false}
-          ]
-        },
-        participation: {
-          displayName: 'Program Participations',
-          columns: [
-            {name: 'id', visible: false},
-            {name: 'inst_id', visible: false},
-            {name: 'part_name', label: 'Program Name', visible: true},
-            {name: 'part_category', label: 'Category', visible: true},
-            {name: 'part_year', label: 'Year', visible: true},
-            {name: 'part_data', label: 'Data', visible: false},
-            {name: 'part_units', label: 'Units', visible: false},
-            {name: 'part_level', label: 'Level', visible: false},
-            {name: 'part_link_label', label: 'Link Label 1', visible: false},
-            {name: 'part_link', label: 'Link 1', visible: false},
-            {name: 'part_link_label2', label: 'Link Label 2', visible: false},
-            {name: 'part_link2', label: 'Link 2', visible: false},
-            {name: 'part_link_label3', label: 'Link Label 3', visible: false},
-            {name: 'part_link3', label: 'Link 3', visible: false},
-            {name: 'keywords', label: 'Keywords', visible: false},
-            {name: 'link_verified', label: 'Link Verified', visible: false}
-          ]
-        },
-        row_versions: {
-          displayName: 'Submissions',
-          columns: [
-            {name: 'id', visible: false},
-            {name: 'table_name', label: 'Table Name', visible: true},
-            {name: 'row_key', label: 'Row ID', visible: false},
-            {name: 'operation', label: 'Operation', visible: true},
-            {name: 'status', label: 'Status', visible: true},
-            {name: 'version', label: 'Version', visible: false},
-            {name: 'data', label: 'Data', visible: true},
-            {name: 'created_by', label: 'Submitted By', visible: true},
-            {name: 'created_at', label: 'Submitted At', visible: true},
-            {name: 'approved_by', label: 'Approved By', visible: true},
-            {name: 'approved_at', label: 'Approved At', visible: true, type: 'date'},
-            {name: 'notes', label: 'Review Comments', visible: true},
-            {button: 'review', label: 'Review', visible: true}
-          ]
+      const dataManagementConfigFromServer = !{dataManagementConfig};
+
+      const tables = dataManagementConfigFromServer.tablesForUser || {};
+      const navMenu = dataManagementConfigFromServer.navMenu || [];
+      const currentUser = dataManagementConfigFromServer.user || null;
+
+      function renderNavMenu() {
+        const container = document.getElementById('navigationMenu');
+        if (!container) {
+          return;
         }
-      };
+        container.innerHTML = '';
+        navMenu.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'clickable';
+          if (item.href) {
+            div.onclick = () => {
+              window.location = item.href;
+            };
+          } else if (item.tableKey) {
+            div.onclick = () => {
+              onTableSelected(item.tableKey);
+            };
+          }
+          if (item.icon) {
+            const img = document.createElement('img');
+            img.className = 'nav-icon';
+            img.src = item.icon;
+            img.alt = item.label + ' icon';
+            div.appendChild(img);
+          }
+          const text = document.createTextNode(' ' + (item.label || item.tableKey));
+          div.appendChild(text);
+          container.appendChild(div);
+        });
+      }
 
       let currentTable = null;
 
@@ -84,7 +45,7 @@ html
         if (selectedTable) {
           return fetchTableData(selectedTable)
             .then(() => {
-              document.getElementById('tableTitle').textContent = tableDisplayConfig[selectedTable].displayName;
+              document.getElementById('tableTitle').textContent = tables[selectedTable].displayName;
               currentTable = selectedTable;
             });
         } else {
@@ -94,7 +55,7 @@ html
       }
 
       function fetchTableData(tableName) {
-        return fetch(`/api/admin/table-data/${tableName}`)
+        return fetch(`/dataManagement/table-data/${tableName}`)
           .then(response => {
             if (!response.ok) {
               throw new Error('Not authorized or table not found');
@@ -122,7 +83,7 @@ html
         headerRow.innerHTML = '';
         tableBody.innerHTML = '';
 
-        const columns = tableDisplayConfig[tableName].columns;
+        const columns = tables[tableName].columns;
         columns.forEach(column => {
           if (column.visible) {
             headerRow.innerHTML += `<th data-column="${column.label}">${column.label}</th>`;
@@ -260,7 +221,7 @@ html
 
       function buildModalForTable(tableName) {
         const modalTitle = document.getElementById('modalTitle');
-        modalTitle.textContent = `Add New Entry to ${tableDisplayConfig[tableName]?.displayName || tableName}`;
+        modalTitle.textContent = `Add New Entry to ${tables[tableName]?.displayName || tableName}`;
         const form = document.getElementById('modalForm');
         const fieldsContainer = document.getElementById('modalFields');
         fieldsContainer.innerHTML = '';
@@ -268,12 +229,12 @@ html
         modalMode = 'add';
         currentReviewRow = null;
 
-        if (!tableName || !tableDisplayConfig[tableName]) {
+        if (!tableName || !tables[tableName]) {
           fieldsContainer.innerHTML = '<div class="form-row">No fields available</div>';
           return;
         }
 
-        const columns = tableDisplayConfig[tableName].columns || [];
+        const columns = tables[tableName].columns || [];
         const formColumns = columns.filter(c => c.name !== 'id');
 
         if (formColumns.length === 0) {
@@ -304,6 +265,7 @@ html
       }
 
       document.addEventListener('DOMContentLoaded', () => {
+        renderNavMenu();
         const modalForm = document.getElementById('modalForm');
         if (modalForm) {
           modalForm.addEventListener('submit', (e) => {
@@ -323,7 +285,7 @@ html
                 comments: comments
               };
 
-              fetch(`/api/admin/pending-change/review`, {
+              fetch(`/dataManagement/pending-change/review`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
@@ -361,7 +323,7 @@ html
                 payload.data[inputValue.dataset.colName] = inputValue.value;
               });
 
-              fetch(`/api/admin/pending-change`, {
+              fetch(`/dataManagement/pending-change`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
@@ -568,20 +530,7 @@ html
   div.layout
     aside.left-col
       nav
-        div
-          div.clickable(onclick="onTableSelected('mapButtons')")
-            img.nav-icon(src='/icons/programIcon.svg', alt='Program icon')
-            | Programs
-          div.clickable(onclick="onTableSelected('locations')" )
-            img.nav-icon(src='/icons/institutionIcon.svg', alt='Institutions icon')
-            | Institutions
-          div.clickable(onclick="onTableSelected('participation')")
-            img.nav-icon(src='/icons/participationIcon.svg', alt='Participations icon')
-            | Participations
-          div.clickable(onclick="onTableSelected('row_versions')")
-            img.nav-icon(src='/icons/submissionIcon.svg', alt='Submissions icon')
-            | Submissions
-
+        div#navigationMenu
 
     main.main-col
       div.container
