@@ -2,14 +2,14 @@ CREATE TABLE users(
     email VARCHAR(255) NOT NULL,
     userAddress TEXT,
     hashedPassword CHAR(255) not null,
-    alias VARCHAR(255) NOT NULL,
+    alias VARCHAR(255) NOT NULL, #name
     privileges INT,
     lastActive DATE,
     region VARCHAR(255),
     title VARCHAR(255),
     institution VARCHAR(255),
     status VARCHAR(255),
-    assignedSite VARCHAR(255),
+    assignedSite VARCHAR(255), # assignedSites
     whatsAppNumber VARCHAR(20),
     primaryContact VARCHAR(255),
     notes TEXT,

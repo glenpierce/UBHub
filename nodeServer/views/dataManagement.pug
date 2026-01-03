@@ -9,7 +9,74 @@ html
       const currentUser = dataManagementConfigFromServer.user || null;
 
       const renderers = {
-        privilegeRenderer: (row, container) => { container.innerText = row.privileges === 4 ? 'Executive' : row.privileges === 3 ? 'Lead' : row.privileges === 2 ? 'Contributor' : 'User'; },
+        nameRenderer: renderNameFunction,
+        privilegeRenderer: renderPrivilegeFunction,
+        statusRenderer: statusRendererFunction,
+        assignRenderer: assignRendererFunction,
+        lastActiveRenderer: lastActiveRendererFunction
+      }
+
+      function renderNameFunction(row, td) {
+        td.textContent = row.alias || '';
+        td.style.fontWeight = 'bold';
+      }
+
+      function renderPrivilegeFunction(row, td) {
+        const privilegeLevel = row.privileges;
+        let styleClass = '';
+        let displayText = '';
+        switch (privilegeLevel) {
+          case 0:
+            displayText = 'User';
+            styleClass = 'userRole';
+            break;
+          case 1:
+            displayText = 'Contributor';
+            styleClass = 'contributorRole';
+            break;
+          case 2:
+            displayText = 'Lead';
+            styleClass = 'leadRole';
+            break;
+          case 3:
+            displayText = 'Executive';
+            styleClass = 'executiveRole';
+            break;
+          default:
+            displayText = 'User';
+            styleClass = 'userRole';
+        }
+        const label = document.createElement("div");
+        label.className = styleClass;
+        label.textContent = displayText;
+        td.appendChild(label);
+      }
+
+      function lastActiveRendererFunction(row, td) {
+        const lastActive = row.lastActive;
+        if (lastActive) {
+          const date = new Date(lastActive);
+          td.textContent = isNaN(date.getTime()) ? lastActive : date.toLocaleDateString();
+        } else {
+          td.textContent = 'Never';
+        }
+      }
+
+      function statusRendererFunction(row, td) {
+        const status = row.status;
+        td.textContent = status || 'Unknown';
+        if (status === 'Active') {
+          td.style.color = 'green';
+        } else if (status === 'Inactive') {
+          td.style.color = 'red';
+        } else {
+          td.style.color = 'black';
+        }
+      }
+
+      function assignRendererFunction(row, td) {
+        const assignedTo = row.assignedTo;
+        td.textContent = assignedTo || 'Unassigned';
       }
 
       function renderNavMenu() {
@@ -372,6 +439,20 @@ html
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='/stylesheets/index.css')
     style.
+        :root {
+            --contributor-color: #49B692;
+            --contributor-hover-color: #69C3A5;
+            --contributor-background-color: #CCEBE0;
+            --lead-color: #4992B6;
+            --lead-hover-color: #69A5C3;
+            --lead-background-color: #CCE5F1;
+            --executive-color: #F54927;
+            --executive-hover-color: #F87C63;
+            --executive-background-color: #FDDDD4;
+        }
+
+
+
         .horizontalFlex {
             display: flex;
             justify-content: space-between;
@@ -471,6 +552,58 @@ html
             transform: translateY(-4px);
             background: linear-gradient(90deg, rgba(245, 250, 255, 0.9), rgba(255, 255, 255, 0.98));
             box-shadow: 0 12px 30px rgba(31, 41, 55, 0.06);
+        }
+
+        .baseRole,
+        .userRole,
+        .contributorRole,
+        .leadRole,
+        .executiveRole {
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            display: inline-block;
+            text-align: center;
+            padding: 2px 4px;
+        }
+
+        .userRole {
+          background: #e2e2e2;
+          color: black;
+          border-color: black;
+        }
+
+        .contributorRole {
+          background: var(--contributor-background-color);
+          color: var(--contributor-color);
+          border-color: var(--contributor-color);
+        }
+
+        .contributorRole:hover {
+          background: var(--contributor-hover-color);
+          color: white;
+        }
+
+        .leadRole {
+          background: var(--lead-background-color);
+          color: var(--lead-color);
+          border-color: var(--lead-color);
+        }
+
+        .leadRole:hover {
+          background: var(--lead-hover-color);
+          color: white;
+        }
+
+        .executiveRole {
+          background: var(--executive-background-color);
+          color: var(--executive-color);
+          border-color: var(--executive-color);
+        }
+
+        .executiveRole:hover {
+          background: var(--executive-hover-color);
+          color: white;
         }
 
         /* Prevent header from getting hover transform */

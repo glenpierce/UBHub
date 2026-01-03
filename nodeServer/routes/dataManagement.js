@@ -117,8 +117,11 @@ const tables = {
   users: {
     displayName: 'Users',
     columns: [
-      {name: 'alias', label: 'Username', visible: true},
+      {name: 'alias', label: 'Name', visible: true, renderFunction: 'nameRenderer'},
       {name: 'privileges', label: 'Role', visible: true, renderFunction: 'privilegeRenderer'},
+      {name: 'status', label: 'Status', visible: true, renderFunction: 'statusRenderer'},
+      {name: 'assignedSite', label: 'Assigned Sites', visible: true, renderFunction: 'assignRenderer'},
+      {name: 'lastActive', label: 'Last Active', visible: true, renderFunction: 'lastActiveRenderer'},
     ]
   }
 };
