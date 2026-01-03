@@ -22,23 +22,25 @@ html
       }
 
       function renderPrivilegeFunction(row, td) {
-        const privilegeLevel = row.privileges;
+        let privilegeLevel = Number(row.privileges);
+
         let styleClass = '';
         let displayText = '';
         switch (privilegeLevel) {
           case 0:
+          case 1:
             displayText = 'User';
             styleClass = 'userRole';
             break;
-          case 1:
+          case 2:
             displayText = 'Contributor';
             styleClass = 'contributorRole';
             break;
-          case 2:
+          case 3:
             displayText = 'Lead';
             styleClass = 'leadRole';
             break;
-          case 3:
+          case 4:
             displayText = 'Executive';
             styleClass = 'executiveRole';
             break;
