@@ -5,7 +5,39 @@ html
       const dataManagementConfigFromServer = !{dataManagementConfig};
 
       const tables = dataManagementConfigFromServer.tablesForUser || {};
+      const navMenu = dataManagementConfigFromServer.navMenu || [];
       const currentUser = dataManagementConfigFromServer.user || null;
+
+      function renderNavMenu() {
+        const container = document.getElementById('navigationMenu');
+        if (!container) {
+          return;
+        }
+        container.innerHTML = '';
+        navMenu.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'clickable';
+          if (item.href) {
+            div.onclick = () => {
+              window.location = item.href;
+            };
+          } else if (item.tableKey) {
+            div.onclick = () => {
+              onTableSelected(item.tableKey);
+            };
+          }
+          if (item.icon) {
+            const img = document.createElement('img');
+            img.className = 'nav-icon';
+            img.src = item.icon;
+            img.alt = item.label + ' icon';
+            div.appendChild(img);
+          }
+          const text = document.createTextNode(' ' + (item.label || item.tableKey));
+          div.appendChild(text);
+          container.appendChild(div);
+        });
+      }
 
       let currentTable = null;
 
@@ -233,6 +265,7 @@ html
       }
 
       document.addEventListener('DOMContentLoaded', () => {
+        renderNavMenu();
         const modalForm = document.getElementById('modalForm');
         if (modalForm) {
           modalForm.addEventListener('submit', (e) => {
@@ -497,32 +530,7 @@ html
   div.layout
     aside.left-col
       nav
-        div
-          div.clickable(onclick="onTableSelected('mapButtons')")
-            img.nav-icon(src='/icons/programIcon.svg', alt='Program icon')
-            | Programs
-          div.clickable(onclick="onTableSelected('locations')" )
-            img.nav-icon(src='/icons/institutionIcon.svg', alt='Institutions icon')
-            | Institutions
-          div.clickable(onclick="onTableSelected('participation')")
-            img.nav-icon(src='/icons/participationIcon.svg', alt='Participations icon')
-            | Participations
-          div.clickable(onclick="onTableSelected('row_versions')")
-            img.nav-icon(src='/icons/submissionIcon.svg', alt='Submissions icon')
-            | Submissions
-          div.clickable(onclick="onTableSelected('users')")
-            img.nav-icon(src='/icons/usersIcon.svg', alt='Users icon')
-            | Users
-          div.clickable(onclick='window.location="/account"')
-            img.nav-icon(src='/icons/profileIcon.svg', alt='My Profile icon')
-            | My Profile
-          div.clickable(onclick="onTableSelected('row_versions')")
-            img.nav-icon(src='/icons/approveIcon.svg', alt='Approvals icon')
-            | Approvals
-          div.clickable(onclick="onTableSelected('users')")
-            img.nav-icon(src='/icons/usersIcon.svg', alt='Manage Users icon')
-            | Manage Users
-
+        div#navigationMenu
 
     main.main-col
       div.container

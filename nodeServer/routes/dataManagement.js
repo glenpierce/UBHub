@@ -5,6 +5,7 @@ import { makeDbCallAsPromise, pool } from '../ConnectionPool.js';
 router.get('/', function(req, res) {
   const dataManagementConfig = {
     tablesForUser: getTablesForUser(req),
+    navMenu: getNavMenuForUser(req),
     user: req.user,
   }
   res.render('dataManagement', {dataManagementConfig: JSON.stringify(dataManagementConfig)});
@@ -100,16 +101,52 @@ const tables = {
       {name: 'notes', label: 'Review Comments', visible: true},
       {button: 'review', label: 'Review', visible: true}
     ]
+  },
+  users: {
+    displayName: 'Users',
+    columns: [
+      {name: 'alias', label: 'Username', visible: true},
+    ]
   }
 };
+
+function getNavMenuForUser(req) {
+  const navigationMenu = [];
+  if (req.session.user && req.session.privileges >= 1) {
+    navigationMenu.push(menuCandidates[0]); // Programs
+    navigationMenu.push(menuCandidates[1]); // Institutions
+    navigationMenu.push(menuCandidates[2]); // Participations
+    navigationMenu.push(menuCandidates[3]); // Submissions
+    navigationMenu.push(menuCandidates[4]); // Users
+  }
+
+  if (req.session.user) {
+    navigationMenu.push(menuCandidates[5]); // My Profile
+  }
+
+  if (req.session.user && req.session.privileges >= 2) {
+    navigationMenu.push(menuCandidates[6]); // Approvals
+    navigationMenu.push(menuCandidates[7]); // Manage Users
+  }
+  return navigationMenu;
+}
+
+const menuCandidates = [
+  {tableKey: 'mapButtons', icon: '/icons/programIcon.svg', label: 'Programs'},
+  {tableKey: 'locations', icon: '/icons/institutionIcon.svg', label: 'Institutions'},
+  {tableKey: 'participation', icon: '/icons/participationIcon.svg', label: 'Participations'},
+  {tableKey: 'row_versions', icon: '/icons/submissionIcon.svg', label: 'Submissions'},
+  {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Users'},
+  {href: '/account', icon: '/icons/profileIcon.svg', label: 'My Profile'},
+  {tableKey: 'row_versions', icon: '/icons/approveIcon.svg', label: 'Approvals'},
+  {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Manage Users'}
+];
 
 router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req, res) => {
   try {
     const tableName = req.params.tableName;
     // Validate tableName to prevent SQL injection IMPORTANT!!
-    const validTableNames = ['locations', 'documents', 'participation', 'mapButtons']; // mapButtons === programs
-    const versionControlTable = 'row_versions';
-    validTableNames.push(versionControlTable);
+    const validTableNames = getValidTableNames(req);
 
     if (!validTableNames.includes(tableName)) {
       return res.status(400).json({error: 'Invalid table name'});
@@ -126,6 +163,20 @@ router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req,
     res.status(500).json({error: 'Database error'});
   }
 });
+
+function getValidTableNames(req) {
+  const validTableNames = [];
+  if (req.session.user && req.session.privileges >= 1) {
+    validTableNames.push('locations', 'documents', 'participation', 'mapButtons');
+  }
+  if (req.session.user && req.session.privileges >= 2) {
+    validTableNames.push('row_versions');
+  }
+  if (req.session.user && req.session.privileges >= 3) {
+    validTableNames.push('users');
+  }
+  return validTableNames;
+}
 
 router.post('/pending-change', isAuthenticated, isContributor, async (req, res) => {
   try {
