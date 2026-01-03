@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import { makeDbCallAsPromise, pool } from '../ConnectionPool.js';
+import { pool, makeDbCallAsPromise } from '../ConnectionPool.js';
 
 router.get('/', function(req, res) {
   const dataManagementConfig = {
@@ -13,38 +13,40 @@ router.get('/', function(req, res) {
 
 function getTablesForUser(req) {
   const tablesForUser = {};
-  if (req.session.user && req.session.privileges >= 1) {
+  if (req.session.user && req.session.privileges >= 2) {
     tablesForUser.locations = tables.locations;
     tablesForUser.documents = tables.documents;
     tablesForUser.participation = tables.participation;
     tablesForUser.mapButtons = tables.mapButtons;
     tablesForUser.row_versions = tables.row_versions;
+  }
+  if (req.session.user && req.session.privileges >= 3) {
     tablesForUser.users = tables.users;
   }
   return tablesForUser;
 }
 
 const tables = {
-  mapButtons: {
-    displayName: 'Programs',
-    columns: [
-      {name: 'part_name', label: 'Program Name', visible: true},
-      {name: 'button_category', label: 'Category', visible: true},
-      {name: 'button_link', label: 'Website', visible: true},
-      {name: 'button_text', visible: false},
-      {name: 'image', visible: false},
-      {name: 'marker_colors_by', visible: false},
-      {name: 'marker_colors', visible: false}
-    ]
-  },
   locations: {
-    displayName: 'Institutions',
+    mapButtons: {
+      displayName: 'Programs',
+      columns: [
+        {name: 'part_name', label: 'Program Name', visible: true},
+        {name: 'button_category', label: 'Category', visible: true},
+        {name: 'button_link', label: 'Website', visible: true},
+        {name: 'button_text', visible: false},
+        {name: 'image', visible: false},
+        {name: 'marker_colors_by', visible: false},
+        {name: 'marker_colors', visible: false}
+      ]
+    },
+    displayName: 'Locations',
     columns: [
       {name: 'id', visible: false},
       {name: 'inst_address', visible: false},
       {name: 'lat', visible: false},
       {name: 'lng', visible: false},
-      {name: 'inst_title', label: 'Institution Name', visible: true},
+      {name: 'inst_title', label: 'Location Name', visible: true},
       {name: 'country', label: 'Country', visible: true},
       {name: 'scale', label: 'Scale', visible: true},
       {name: 'population', label: 'Population', visible: true},
@@ -57,6 +59,20 @@ const tables = {
       {name: 'wwf_terrestrial_ecoregion', label: 'WWF Terrestrial Ecoregion', visible: false},
       {name: 'hotspot', label: 'Hotspot', visible: false},
       {name: 'conservation_status_wwf', label: 'Conservation Status WWF', visible: false}
+    ]
+  },
+  documents: {
+    displayName: 'Documents',
+    columns: [
+      {name: 'id', visible: false},
+      {name: 'inst_id', visible: false},
+      {name: 'doc_type', label: 'Document Type', visible: true},
+      {name: 'doc_year', label: 'Year', visible: true},
+      {name: 'doc_title', label: 'Title', visible: true},
+      {name: 'doc_url', label: 'Document URL', visible: true},
+      {name: 'keywords', label: 'Keywords', visible: false},
+      {name: 'source_url', label: 'Source URL', visible: false},
+      {name: 'link_verified', label: 'Link Verified', visible: false}
     ]
   },
   participation: {
@@ -92,8 +108,8 @@ const tables = {
       {name: 'data', label: 'Data', visible: true},
       {name: 'created_by', label: 'Submitted By', visible: true},
       {name: 'created_at', label: 'Submitted At', visible: true},
-      {name: 'approved_by', label: 'Approved By', visible: true},
-      {name: 'approved_at', label: 'Approved At', visible: true, type: 'date'},
+      {name: 'approved_by', label: 'Reviewed By', visible: true},
+      {name: 'approved_at', label: 'Reviewed At', visible: true, type: 'date'},
       {name: 'notes', label: 'Review Comments', visible: true},
       {button: 'review', label: 'Review', visible: true}
     ]
@@ -109,24 +125,28 @@ const tables = {
 
 function getNavMenuForUser(req) {
   const navigationMenu = [];
-  if (req.session.user && req.session.privileges >= 1) {
+  if (req.session.user && req.session.privileges >= 2) {
     navigationMenu.push(menuCandidates[0]); // Programs
     navigationMenu.push(menuCandidates[1]); // Institutions
-    navigationMenu.push(menuCandidates[2]); // Participations
-    navigationMenu.push(menuCandidates[3]); // Submissions
-    navigationMenu.push(menuCandidates[4]); // Users
-  }
-
-  if (req.session.user) {
-    navigationMenu.push(menuCandidates[5]); // My Profile
-  }
-
-  if (req.session.user && req.session.privileges >= 2) {
-    navigationMenu.push(menuCandidates[6]); // Approvals
+    navigationMenu.push(menuCandidates[2]); // Documents
+    navigationMenu.push(menuCandidates[3]); // Participations
+    navigationMenu.push(menuCandidates[4]); // Submissions
   }
 
   if (req.session.user && req.session.privileges >= 3) {
-    navigationMenu.push(menuCandidates[7]); // Manage Users
+    navigationMenu.push(menuCandidates[5]); // Users
+  }
+
+  if (req.session.user) {
+    navigationMenu.push(menuCandidates[6]); // My Profile
+  }
+
+  if (req.session.user && req.session.privileges >= 3) {
+    navigationMenu.push(menuCandidates[7]); // Approvals
+  }
+
+  if (req.session.user && req.session.privileges >= 4) {
+    navigationMenu.push(menuCandidates[8]); // Manage Users
   }
 
   return navigationMenu;
@@ -135,6 +155,7 @@ function getNavMenuForUser(req) {
 const menuCandidates = [
   {tableKey: 'mapButtons', icon: '/icons/programIcon.svg', label: 'Programs'},
   {tableKey: 'locations', icon: '/icons/institutionIcon.svg', label: 'Institutions'},
+  {tableKey: 'documents', icon: '/icons/documentIcon.svg', label: 'Documents'},
   {tableKey: 'participation', icon: '/icons/participationIcon.svg', label: 'Participations'},
   {tableKey: 'row_versions', icon: '/icons/submissionIcon.svg', label: 'Submissions'},
   {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Users'},
@@ -212,27 +233,31 @@ function isAuthenticated(req, res, next) {
 }
 
 function isContributor(req, res, next) {
-  if (req.session.user && req.session.privileges >= 1) {
-    return next();
-  }
-  res.status(403).json({error: 'Not authorized'});
-}
-
-function isApprover(req, res, next) {
   if (req.session.user && req.session.privileges >= 2) {
     return next();
   }
   res.status(403).json({error: 'Not authorized'});
 }
 
-function isAdmin(req, res, next) {
+function isApprover(req, res, next) {
   if (req.session.user && req.session.privileges >= 3) {
     return next();
   }
   res.status(403).json({error: 'Not authorized'});
 }
 
+function isExec(req, res, next) {
+  if (req.session.user && req.session.privileges >= 4) {
+    return next();
+  }
+  res.status(403).json({error: 'Not authorized'});
+}
+
 const editableTables = {
+  mapButtons: {
+    primaryKey: ['part_name'],
+    columns: ['part_name', 'button_category', 'button_text', 'image', 'marker_colors_by', 'marker_colors', 'button_link']
+  },
   locations: {
     primaryKey: ['id'],
     columns: ['id', 'inst_address', 'lat', 'lng', 'inst_title', 'country', 'scale', 'population', 'density_km2', 'area_km2', 'area_ha', 'biodiversity_url', 'url_verifydate', 'wwf_biome', 'wwf_terrestrial_ecoregion', 'hotspot', 'conservation_status_wwf']
@@ -244,10 +269,6 @@ const editableTables = {
   participation: {
     primaryKey: ['id'],
     columns: ['id', 'inst_id', 'part_category', 'part_name', 'part_year', 'part_data', 'part_units', 'part_level', 'part_link_label', 'part_link', 'part_link_label2', 'part_link2', 'part_link_label3', 'part_link3', 'keywords', 'link_verified']
-  },
-  mapButtons: {
-    primaryKey: ['part_name'],
-    columns: ['part_name', 'button_category', 'button_text', 'image', 'marker_colors_by', 'marker_colors', 'button_link']
   }
 };
 
