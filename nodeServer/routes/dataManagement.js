@@ -18,11 +18,7 @@ function getTablesForUser(req) {
     tablesForUser.documents = tables.documents;
     tablesForUser.participation = tables.participation;
     tablesForUser.mapButtons = tables.mapButtons;
-  }
-  if (req.session.user && req.session.privileges >= 2) {
     tablesForUser.row_versions = tables.row_versions;
-  }
-  if (req.session.user && req.session.privileges >= 3) {
     tablesForUser.users = tables.users;
   }
   return tablesForUser;
@@ -106,6 +102,7 @@ const tables = {
     displayName: 'Users',
     columns: [
       {name: 'alias', label: 'Username', visible: true},
+      {name: 'privileges', label: 'Privileges', visible: true},
     ]
   }
 };
@@ -126,8 +123,12 @@ function getNavMenuForUser(req) {
 
   if (req.session.user && req.session.privileges >= 2) {
     navigationMenu.push(menuCandidates[6]); // Approvals
+  }
+
+  if (req.session.user && req.session.privileges >= 3) {
     navigationMenu.push(menuCandidates[7]); // Manage Users
   }
+
   return navigationMenu;
 }
 
@@ -146,15 +147,23 @@ router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req,
   try {
     const tableName = req.params.tableName;
     // Validate tableName to prevent SQL injection IMPORTANT!!
-    const validTableNames = getValidTableNames(req);
+    const validTableNames = Object.keys(getTablesForUser(req));
 
     if (!validTableNames.includes(tableName)) {
       return res.status(400).json({error: 'Invalid table name'});
     }
 
-    const queryString = `SELECT *
+    const tableMeta = getTablesForUser(req)[tableName];
+    if (!tableMeta) {
+      return res.status(400).json({error: 'Invalid table name'});
+    }
+    const columnNames = tableMeta.columns.map(col => col.name).filter(name => name);
+    const columnList = columnNames.map(name => `\`${name}\``).join(', ');
+
+    const queryString = `SELECT ${columnList}
                          FROM ${tableName}
                          LIMIT 1000`;
+
     const result = await makeDbCallAsPromise(queryString);
 
     res.json(result);
@@ -163,20 +172,6 @@ router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req,
     res.status(500).json({error: 'Database error'});
   }
 });
-
-function getValidTableNames(req) {
-  const validTableNames = [];
-  if (req.session.user && req.session.privileges >= 1) {
-    validTableNames.push('locations', 'documents', 'participation', 'mapButtons');
-  }
-  if (req.session.user && req.session.privileges >= 2) {
-    validTableNames.push('row_versions');
-  }
-  if (req.session.user && req.session.privileges >= 3) {
-    validTableNames.push('users');
-  }
-  return validTableNames;
-}
 
 router.post('/pending-change', isAuthenticated, isContributor, async (req, res) => {
   try {
@@ -230,7 +225,14 @@ function isApprover(req, res, next) {
   res.status(403).json({error: 'Not authorized'});
 }
 
-const allowedTables = {
+function isAdmin(req, res, next) {
+  if (req.session.user && req.session.privileges >= 3) {
+    return next();
+  }
+  res.status(403).json({error: 'Not authorized'});
+}
+
+const editableTables = {
   locations: {
     primaryKey: ['id'],
     columns: ['id', 'inst_address', 'lat', 'lng', 'inst_title', 'country', 'scale', 'population', 'density_km2', 'area_km2', 'area_ha', 'biodiversity_url', 'url_verifydate', 'wwf_biome', 'wwf_terrestrial_ecoregion', 'hotspot', 'conservation_status_wwf']
@@ -250,7 +252,7 @@ const allowedTables = {
 };
 
 function assertTableAllowed(tableName) {
-  if (!allowedTables[tableName]) {
+  if (!editableTables[tableName]) {
     const error = new Error('Invalid table name');
     error.code = 'INVALID_TABLE';
     throw error;
@@ -372,7 +374,7 @@ async function approveVersion(pool, versionId, approver) {
 
     const tableName = rowVersion.table_name;
     assertTableAllowed(tableName);
-    const meta = allowedTables[tableName];
+    const meta = editableTables[tableName];
 
     const rowKeyObject = JSON.parse(rowVersion.row_key || '{}');
     const dataObject = JSON.parse(rowVersion.data);
