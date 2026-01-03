@@ -27,19 +27,19 @@ function getTablesForUser(req) {
 }
 
 const tables = {
+  mapButtons: {
+    displayName: 'Programs',
+    columns: [
+      {name: 'part_name', label: 'Program Name', visible: true},
+      {name: 'button_category', label: 'Category', visible: true},
+      {name: 'button_link', label: 'Website', visible: true},
+      {name: 'button_text', visible: false},
+      {name: 'image', visible: false},
+      {name: 'marker_colors_by', visible: false},
+      {name: 'marker_colors', visible: false}
+    ]
+  },
   locations: {
-    mapButtons: {
-      displayName: 'Programs',
-      columns: [
-        {name: 'part_name', label: 'Program Name', visible: true},
-        {name: 'button_category', label: 'Category', visible: true},
-        {name: 'button_link', label: 'Website', visible: true},
-        {name: 'button_text', visible: false},
-        {name: 'image', visible: false},
-        {name: 'marker_colors_by', visible: false},
-        {name: 'marker_colors', visible: false}
-      ]
-    },
     displayName: 'Locations',
     columns: [
       {name: 'id', visible: false},
@@ -118,7 +118,7 @@ const tables = {
     displayName: 'Users',
     columns: [
       {name: 'alias', label: 'Username', visible: true},
-      {name: 'privileges', label: 'Privileges', visible: true},
+      {name: 'privileges', label: 'Role', visible: true, renderFunction: 'privilegeRenderer'},
     ]
   }
 };

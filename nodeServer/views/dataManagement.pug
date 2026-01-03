@@ -8,6 +8,10 @@ html
       const navMenu = dataManagementConfigFromServer.navMenu || [];
       const currentUser = dataManagementConfigFromServer.user || null;
 
+      const renderers = {
+        privilegeRenderer: (row, container) => { container.innerText = row.privileges === 4 ? 'Executive' : row.privileges === 3 ? 'Lead' : row.privileges === 2 ? 'Contributor' : 'User'; },
+      }
+
       function renderNavMenu() {
         const container = document.getElementById('navigationMenu');
         if (!container) {
@@ -114,6 +118,11 @@ html
             document.getElementById('modalOverlay').style.display = 'flex';
           };
           td.appendChild(button);
+          return;
+        }
+        if (column.renderFunction && typeof column.renderFunction === 'string') {
+          const renderFunctionName = column.renderFunction;
+          renderers[renderFunctionName](row, td);
           return;
         }
         const cellData = row[column.name];
@@ -524,7 +533,6 @@ html
 
 
   body
-    //+header(true)
   div(style="padding-top:40px;")
 
   div.layout
