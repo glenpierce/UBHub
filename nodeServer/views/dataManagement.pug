@@ -94,7 +94,7 @@ html
       }
 
       function fetchTableData(tableName) {
-        return fetch(`/api/admin/table-data/${tableName}`)
+        return fetch(`/dataManagement/table-data/${tableName}`)
           .then(response => {
             if (!response.ok) {
               throw new Error('Not authorized or table not found');
@@ -323,7 +323,7 @@ html
                 comments: comments
               };
 
-              fetch(`/api/admin/pending-change/review`, {
+              fetch(`/dataManagement/pending-change/review`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)
@@ -361,7 +361,7 @@ html
                 payload.data[inputValue.dataset.colName] = inputValue.value;
               });
 
-              fetch(`/api/admin/pending-change`, {
+              fetch(`/dataManagement/pending-change`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload)

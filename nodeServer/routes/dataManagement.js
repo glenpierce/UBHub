@@ -1,7 +1,10 @@
 import express from 'express';
-
 const router = express.Router();
-import { pool, makeDbCallAsPromise } from '../ConnectionPool.js';
+import { makeDbCallAsPromise, pool } from '../ConnectionPool.js';
+
+router.get('/', function(req, res) {
+  res.render('dataManagement');
+});
 
 router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req, res) => {
   try {

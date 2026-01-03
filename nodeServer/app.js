@@ -11,8 +11,7 @@ import createUser from './routes/createUser.js';
 import home from './routes/home.js';
 import login from './routes/login.js';
 import map from './routes/map.js';
-import spreadSheet from './routes/spreadSheet.js';
-import spreadSheetAPI from './routes/spreadSheetAPI.js';
+import dataManagement from './routes/dataManagement.js';
 import users from './routes/users.js';
 
 import { fileURLToPath } from 'url';
@@ -58,8 +57,7 @@ app.use('/createUser', createUser);
 app.use('/', home);
 app.use('/login', login);
 app.use('/map', map);
-app.use('/spreadSheet', spreadSheet);
-app.use('/api/admin', spreadSheetAPI);
+app.use('/dataManagement', dataManagement);
 app.use('/users', users);
 
 app.use(logger('dev'));
