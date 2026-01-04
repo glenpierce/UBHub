@@ -123,6 +123,7 @@ const tables = {
       {name: 'alias', label: 'Name', visible: true, renderFunction: 'nameRenderer'},
       {name: 'privileges', label: 'Role', visible: true, renderFunction: 'privilegeRenderer'},
       {name: 'status', label: 'Status', visible: true, renderFunction: 'statusRenderer'},
+      {name: 'region', label: 'Region', visible: true},
       {name: 'assignedSite', label: 'Assigned Sites', visible: true, renderFunction: 'assignRenderer'},
       {name: 'lastActive', label: 'Last Active', visible: true, renderFunction: 'lastActiveRenderer'},
     ]
@@ -130,6 +131,13 @@ const tables = {
 };
 
 function addExecutiveFunctions(tablesForUser) {
+  tablesForUser.users.columns.push({name: 'email', label: 'Email', visible: true});
+  tablesForUser.users.columns.push({name: 'userAddress', label: 'Address', visible: false});
+  tablesForUser.users.columns.push({name: 'title', label: 'Title', visible: true});
+  tablesForUser.users.columns.push({name: 'institution', label: 'Institution', visible: true});
+  tablesForUser.users.columns.push({name: 'whatsAppNumber', label: 'WhatsApp Number', visible: true});
+  tablesForUser.users.columns.push({name: 'primaryContact', label: 'Primary Contact', visible: true});
+  tablesForUser.users.columns.push({name: 'notes', label: 'Notes', visible: false});
   tablesForUser.users.columns.push({button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditUserModal' });
 
 }
