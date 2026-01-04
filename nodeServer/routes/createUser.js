@@ -1,6 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import bcrypt from 'bcryptjs';
+import config from '../config.js';
 import { makeDbCallAsPromise } from '../ConnectionPool.js';
 
 router.get('/', function(req, res, next){
