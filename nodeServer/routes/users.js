@@ -14,7 +14,7 @@ router.post('/', async function (req, res) {
   console.log('login request received');
 
   try {
-    const rows = await makeDbCallAsPromise('CALL login(?)', [req.body.username]);
+    const rows = await makeDbCallAsPromise('CALL login(?)', [req.body.email]);
 
     if (!rows) {
       console.log("no rows found for user");

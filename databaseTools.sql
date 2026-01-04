@@ -96,3 +96,19 @@ CREATE TABLE IF NOT EXISTS row_versions (
     KEY idx_row_versions_table_name (table_name),
     KEY idx_row_versions_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+#createUser procedure
+create
+    definer = root@`%` procedure createUser(IN emailInput varchar(255), IN passwordHash varchar(255), IN alias varchar(255), IN userAddress varchar(2000), IN title varchar(255), IN institution varchar(255), whatsAppNumber varchar(20))
+BEGIN
+    insert into users (email, hashedPassword, alias, userAddress, title, institution, whatsAppNumber) values(emailInput, passwordHash, alias, userAddress, title, institution, whatsAppNumber);
+END;
+
+#login procedure
+create
+    definer = root@`%` procedure login(IN emailInput varchar(255))
+BEGIN
+    SELECT email, hashedPassword, privileges, alias
+    FROM users
+    WHERE email = emailInput;
+END;

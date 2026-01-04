@@ -23,6 +23,9 @@ function getTablesForUser(req) {
   if (req.session.user && req.session.privileges >= 3) {
     tablesForUser.users = tables.users;
   }
+  if (req.session.user && req.session.privileges >= 4) {
+    addExecutiveFunctions(tablesForUser);
+  }
   return tablesForUser;
 }
 
@@ -111,7 +114,7 @@ const tables = {
       {name: 'approved_by', label: 'Reviewed By', visible: true},
       {name: 'approved_at', label: 'Reviewed At', visible: true, type: 'date'},
       {name: 'notes', label: 'Review Comments', visible: true},
-      {button: 'review', label: 'Review', visible: true}
+      {button: 'review', label: 'Review', visible: true, onClickFunction: 'openReviewModal' }
     ]
   },
   users: {
@@ -125,6 +128,11 @@ const tables = {
     ]
   }
 };
+
+function addExecutiveFunctions(tablesForUser) {
+  tablesForUser.users.columns.push({button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditUserModal' });
+
+}
 
 function getNavMenuForUser(req) {
   const navigationMenu = [];

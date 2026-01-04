@@ -12,7 +12,13 @@ router.get('/', function(req, res, next) {
   }
 });
 
-router.post('/', async function (req, res) {
+router.post('/update', function(req, res, next) {
+  if(req.session.user) {
+
+  }
+})
+
+router.post('/resetPassword', async function (req, res) {
   try {
     const connection = await pool.getConnection();
     try {
