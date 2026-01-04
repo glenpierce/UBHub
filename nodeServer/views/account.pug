@@ -7,7 +7,7 @@ html
     link(rel='stylesheet', href='/stylesheets/index.css')
     script.
       function changePassword() {
-        httpPostAsync('/resetPassword', passwordChanged);
+        httpPostAsync('/account/resetPassword', passwordChanged);
       }
 
       function passwordChanged(response) {
