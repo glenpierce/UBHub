@@ -44,8 +44,27 @@ html
             }
           });
           openModal();
-        }
+        },
+        openEditProgramModal: openEditModalFunction('mapButtons'),
+        openEditLocationModal: openEditModalFunction('locations'),
+        openEditDocumentModal: openEditModalFunction('documents'),
+        openEditProgramParticipationModal: openEditModalFunction('participation')
       };
+
+      function openEditModalFunction(tableName) {
+        return function(row) {
+          buildModalForTable(tableName);
+          const form = document.getElementById('modalForm');
+          form.querySelectorAll('[data-col-name]').forEach(inputValue => {
+            if (row.hasOwnProperty(inputValue.dataset.colName)) {
+              inputValue.value = row[inputValue.dataset.colName];
+            } else {
+              inputValue.value = '';
+            }
+          });
+          openModal();
+        }
+      }
 
       function renderNameFunction(row, td) {
         td.textContent = row.alias || '';

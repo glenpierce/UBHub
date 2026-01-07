@@ -39,7 +39,8 @@ const tables = {
       {name: 'button_text', visible: false},
       {name: 'image', visible: false},
       {name: 'marker_colors_by', visible: false},
-      {name: 'marker_colors', visible: false}
+      {name: 'marker_colors', visible: false},
+      {button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditProgramModal' }
     ]
   },
   locations: {
@@ -61,7 +62,8 @@ const tables = {
       {name: 'wwf_biome', label: 'WWF Biome', visible: false},
       {name: 'wwf_terrestrial_ecoregion', label: 'WWF Terrestrial Ecoregion', visible: false},
       {name: 'hotspot', label: 'Hotspot', visible: false},
-      {name: 'conservation_status_wwf', label: 'Conservation Status WWF', visible: false}
+      {name: 'conservation_status_wwf', label: 'Conservation Status WWF', visible: false},
+      {button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditLocationModal' }
     ]
   },
   documents: {
@@ -75,7 +77,8 @@ const tables = {
       {name: 'doc_url', label: 'Document URL', visible: true},
       {name: 'keywords', label: 'Keywords', visible: false},
       {name: 'source_url', label: 'Source URL', visible: false},
-      {name: 'link_verified', label: 'Link Verified', visible: false}
+      {name: 'link_verified', label: 'Link Verified', visible: false},
+      {button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditDocumentModal' }
     ]
   },
   participation: {
@@ -96,7 +99,8 @@ const tables = {
       {name: 'part_link_label3', label: 'Link Label 3', visible: false},
       {name: 'part_link3', label: 'Link 3', visible: false},
       {name: 'keywords', label: 'Keywords', visible: false},
-      {name: 'link_verified', label: 'Link Verified', visible: false}
+      {name: 'link_verified', label: 'Link Verified', visible: false},
+      {button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditProgramParticipationModal' }
     ]
   },
   row_versions: {
@@ -108,7 +112,7 @@ const tables = {
       {name: 'operation', label: 'Operation', visible: true},
       {name: 'status', label: 'Status', visible: true},
       {name: 'version', label: 'Version', visible: false},
-      {name: 'data', label: 'Data', visible: true},
+      {name: 'data', label: 'Data', visible: false},
       {name: 'created_by', label: 'Submitted By', visible: true},
       {name: 'created_at', label: 'Submitted At', visible: true},
       {name: 'approved_by', label: 'Reviewed By', visible: true},
