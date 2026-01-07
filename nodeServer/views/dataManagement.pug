@@ -16,6 +16,18 @@ html
         lastActiveRenderer: lastActiveRendererFunction
       }
 
+      const navMenuOnClickHandlers = {
+        openMyProfileModal: openMyProfileModalFunction
+      };
+
+      function openMyProfileModalFunction() {
+        document.getElementById('modalOverlayMyProfile').style.display = 'flex';
+      }
+
+      function closeMyProfileModalFunction() {
+        document.getElementById('modalOverlayMyProfile').style.display = 'none';
+      }
+
       const clickHandlers = {
         openReviewModal: function(row) {
           buildModalForReview(row);
@@ -109,9 +121,12 @@ html
         navMenu.forEach(item => {
           const div = document.createElement('div');
           div.className = 'clickable';
-          if (item.href) {
+          if (item.onClick) {
             div.onclick = () => {
-              window.location = item.href;
+              const handlerFunction = navMenuOnClickHandlers[item.onClick];
+              if (handlerFunction && typeof handlerFunction === 'function') {
+                handlerFunction();
+              }
             };
           } else if (item.tableKey) {
             div.onclick = () => {
@@ -461,19 +476,73 @@ html
         document.getElementById('modalOverlay').style.display = 'none';
       }
 
+      function changePassword() {
+        httpPostAsync('/account/resetPassword', passwordChanged);
+      }
+
+      function passwordChanged(response) {
+        clearFields();
+        if (response === "true") {
+          showPasswordChangedPopup();
+        } else {
+          showPasswordChangeFailedPopup();
+        }
+      }
+
+      function showPasswordChangedPopup() {
+        window.alert("Password changed")
+      }
+
+      function showPasswordChangeFailedPopup() {
+        window.alert("Password changed failed")
+      }
+
+      function showForgotPasswordPopup() {
+        window.alert("You can start the password recovery process by emailing us at ubhub.org@gmail.com Please include the email associated with your account, your username, full name, and address in the message.");
+      }
+
+      function clearFields() {
+        document.getElementById('oldPassword').value = "";
+        document.getElementById('newPassword').value = "";
+        document.getElementById('confirmNewPassword').value = "";
+      }
+
+      function httpPostAsync(theUrl, callback) {
+        let oldPassword = document.getElementById('oldPassword').value;
+        let newPassword = document.getElementById('newPassword').value;
+        let confirmNewPassword = document.getElementById('confirmNewPassword').value;
+        if (newPassword !== confirmNewPassword) {
+          window.alert("New password must match confirm password");
+          return;
+        }
+        let data = {
+          "oldPassword": oldPassword,
+          "newPassword": newPassword
+        }
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function () {
+          if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+        }
+        xmlHttp.open("POST", theUrl, true); // true for asynchronous
+        xmlHttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+        var dataAsJson = JSON.stringify(data);
+        xmlHttp.send(dataAsJson);
+      }
+
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='/stylesheets/index.css')
     style.
         :root {
-            --contributor-color: #49B692;
-            --contributor-hover-color: #69C3A5;
-            --contributor-background-color: #CCEBE0;
-            --lead-color: #4992B6;
-            --lead-hover-color: #69A5C3;
-            --lead-background-color: #CCE5F1;
-            --executive-color: #F54927;
-            --executive-hover-color: #F87C63;
-            --executive-background-color: #FDDDD4;
+            --contributor-color: #3f7a5e;
+            --contributor-hover-color: #3f7a5e;
+            --contributor-background-color: #dfe6e1;
+            --lead-color: #dc7824;
+            --lead-hover-color: #dc7824;
+            --lead-background-color: #f4e7db;
+            --executive-color: #204161;
+            --executive-hover-color: #204161;
+            --executive-background-color: #dae8f5;
         }
 
 
@@ -534,6 +603,7 @@ html
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+            cursor: default;
         }
 
         .data-table th,
@@ -590,6 +660,7 @@ html
             display: inline-block;
             text-align: center;
             padding: 2px 4px;
+            cursor: default;
         }
 
         .userRole {
@@ -723,3 +794,23 @@ html
       .modal-actions
         button(type="button", onclick="closeModal()") Cancel
         button(type="submit") Submit
+
+.modal-overlay(id="modalOverlayMyProfile", style="display:none;")
+  .modal(id="modalContainerMyProfile")
+    div
+      div(style="margin: 50px 0px 50px 0px;") #{username}
+      div
+        div(style="margin-bottom:10px;") <b>Account details</b>
+        div
+        div(style="margin-bottom:10px;") <b>Change password</b>
+        div Current password
+        input(type="password" id="oldPassword" style="border-radius:4px; border-style:solid; border-width:1px;")
+        div(style="color:blue; font-size:10px; cursor:pointer; margin-bottom:10px;" onclick="showForgotPasswordPopup()") Forgot password
+        div New password
+        input(type="password" id="newPassword" style="border-radius:4px; border-style:solid; border-width:1px; margin-bottom:10px;")
+        div Confirm new password
+        input(type="password" id="confirmNewPassword" style="border-radius:4px; border-style:solid; border-width:1px;")
+        div
+          button(onclick="changePassword()" style="margin-top:10px; margin-bottom:10px;") Change password
+    div(style="margin-bottom:200px;")
+      button(onclick="closeMyProfileModalFunction()" style="margin:auto;") Close

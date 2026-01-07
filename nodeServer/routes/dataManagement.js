@@ -8,7 +8,7 @@ router.get('/', function(req, res) {
     navMenu: getNavMenuForUser(req),
     user: req.user,
   }
-  res.render('dataManagement', {dataManagementConfig: JSON.stringify(dataManagementConfig)});
+  res.render('dataManagement', {dataManagementConfig: JSON.stringify(dataManagementConfig), user: req.session.user});
 });
 
 function getTablesForUser(req) {
@@ -139,7 +139,6 @@ function addExecutiveFunctions(tablesForUser) {
   tablesForUser.users.columns.push({name: 'primaryContact', label: 'Primary Contact', visible: true});
   tablesForUser.users.columns.push({name: 'notes', label: 'Notes', visible: false});
   tablesForUser.users.columns.push({button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditUserModal' });
-
 }
 
 function getNavMenuForUser(req) {
@@ -178,7 +177,7 @@ const menuCandidates = [
   {tableKey: 'participation', icon: '/icons/participationIcon.svg', label: 'Participations'},
   {tableKey: 'row_versions', icon: '/icons/submissionIcon.svg', label: 'Submissions'},
   {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Users'},
-  {href: '/account', icon: '/icons/profileIcon.svg', label: 'My Profile'},
+  {onClick: 'openMyProfileModal', icon: '/icons/profileIcon.svg', label: 'My Profile'},
   {tableKey: 'row_versions', icon: '/icons/approveIcon.svg', label: 'Approvals'},
   {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Manage Users'}
 ];
