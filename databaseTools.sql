@@ -1,9 +1,18 @@
 CREATE TABLE users(
     email VARCHAR(255) NOT NULL,
-    userAddress VARCHAR(2000),
+    userAddress TEXT,
     hashedPassword CHAR(255) not null,
-    alias VARCHAR(255) NOT NULL,
+    alias VARCHAR(255) NOT NULL, #name
     privileges INT,
+    lastActive DATE,
+    region VARCHAR(255),
+    title VARCHAR(255),
+    institution VARCHAR(255),
+    status VARCHAR(255),
+    assignedSite VARCHAR(255), # assignedSites
+    whatsAppNumber VARCHAR(20),
+    primaryContact VARCHAR(255),
+    notes TEXT,
     PRIMARY KEY (email),
     UNIQUE INDEX (email)
 );
@@ -37,22 +46,6 @@ CREATE TABLE programs(
     author VARCHAR(255),
     creationDate DATE,
     iconFileName VARCHAR(255)
-);
-
-CREATE TABLE indicators(
-    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    indicatorName VARCHAR(2048) CHARACTER SET utf8,
-    positionInCategory INT,
-    categoryId INT,
-    archetype VARCHAR(255),
-    weight FLOAT(10, 2),
-    required BIT,
-    description VARCHAR(2048) CHARACTER SET utf8,
-    descriptionOfCalculation VARCHAR(2048) CHARACTER SET utf8,
-    calculation VARCHAR(2048),
-    private BIT,
-    author VARCHAR(255),
-    creationDate DATE
 );
 
 CREATE TABLE documents (
@@ -98,8 +91,24 @@ CREATE TABLE IF NOT EXISTS row_versions (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     approved_by VARCHAR(255) DEFAULT NULL,
     approved_at DATETIME DEFAULT NULL,
-    notes VARCHAR(1024) DEFAULT NULL,
+    notes TEXT DEFAULT NULL,
     PRIMARY KEY (id),
     KEY idx_row_versions_table_name (table_name),
     KEY idx_row_versions_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+#createUser procedure
+create
+    definer = root@`%` procedure createUser(IN emailInput varchar(255), IN passwordHash varchar(255), IN alias varchar(255), IN userAddress varchar(2000), IN title varchar(255), IN institution varchar(255), whatsAppNumber varchar(20))
+BEGIN
+    insert into users (email, hashedPassword, alias, userAddress, title, institution, whatsAppNumber) values(emailInput, passwordHash, alias, userAddress, title, institution, whatsAppNumber);
+END;
+
+#login procedure
+create
+    definer = root@`%` procedure login(IN emailInput varchar(255))
+BEGIN
+    SELECT email, hashedPassword, privileges, alias
+    FROM users
+    WHERE email = emailInput;
+END;

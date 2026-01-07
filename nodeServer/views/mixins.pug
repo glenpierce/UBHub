@@ -7,19 +7,6 @@ mixin textInShape(textValue, colorValue, percentFill, radius)
     div(style="height:100px; width:100px; position:absolute; border:solid; border-radius:#{radius};")
     div(style="height:100px; width:100px; position:absolute; align-items:center; display:flex; justify-content:center;") #{textValue}
 
-mixin indicator(indicatorName, indicatorDescription, descriptionOfCalculation, id)
-  div(style="display:flex;" id=id draggable="true" ondragstart="drag(event)")
-    div(class="customProgramItem")
-      div #{indicatorName}
-      div #{indicatorDescription}
-      div #{descriptionOfCalculation}
-
-mixin site(siteName, siteDescription)
-  button(class="flex spaceAbove" onclick="selectSite(#{siteName})" style="cursor:pointer;")
-    div #{siteName}
-    div(style="padding-left:10px;")
-    div #{siteDescription}
-
 mixin header(displayLoginInfo)
   header
     div(class="nav-container")
@@ -31,9 +18,6 @@ mixin header(displayLoginInfo)
           if(displayLoginInfo)
             if(username)
               div(style="padding:0px 100px 0px 50px; display:flex; justify-content:space-around; flex-grow:1;")
-                div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/dashboard'") myHub
-                div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/indicators'") myIndicators
-                div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/forum'") Forum
                 div(style="padding:10px; cursor:pointer; color:#316b59; font-weight:700;" onclick="window.location='/account'") Account
             else
               div(style="padding:0px 100px 0px 50px; display:flex; justify-content:flex-end; flex-grow:1;")
@@ -72,23 +56,6 @@ script.
     });
 
   };
-
-mixin footer()
-  div(style="margin:auto; max-width:1200px; display:flex; justify-content:space-between; padding-top:10px;")
-    div
-      img(src="/images/UBHub_logo_horizwebsite.svg" style="height:60px; margin-bottom:10px;")
-    div(style="width:200px;" class="smallText") The Urban Biodiversity Hub (UBHub) helps cities around the world to choose a biodiversity strategy, then measure and improve their Biodiversity Strategy and Action Plans (BSAPs).
-    div
-      div(class="smallText" style="cursor:pointer;" onclick="window.location='/home'") Home
-      div(class="smallText" style="cursor:pointer;" onclick="window.location='/dashboard'") myHub
-      div(class="smallText" style="cursor:pointer;" onclick="window.location='/resources'") Guide
-      div(class="smallText" style="cursor:pointer;" onclick="window.location='/aboutUs'") About Us
-      div(class="smallText" style="cursor:pointer;" onclick="window.location='/forum'") Forum
-      div(class="smallText" style="cursor:pointer;" onclick="window.location='/account'") Account
-    div
-      div(class="smallText") Contact us
-      div(class="smallText") ubhub.org@gmail.com
-      div(class="smallText") Copyright info
 
 script.
 

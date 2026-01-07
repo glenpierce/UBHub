@@ -4,7 +4,52 @@ html
   head
     link(rel='stylesheet', href='/stylesheets/cbiindicators.css')
     link(rel='stylesheet', href='/stylesheets/index.css')
-    script(src='https://www.google.com/recaptcha/api.js')
+    style.
+        .createUserContainer {
+            max-width: 400px;
+            text-align: center;
+            padding-bottom: 20px;
+            margin: auto;
+            margin-top: 50px;
+        }
+
+        .entryLine {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding-bottom: 5px;
+        }
+
+        .entryLineItem {
+            margin: auto;
+            width: 300px;
+        }
+
+        .entryLabel {
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        .entryInput {
+            display: inline;
+            float: right;
+            border: solid;
+            border-color: #4c90b6;
+            border-radius: 5px;
+            border-width: 1px;
+            padding: 4px;
+        }
+
+        .createAccountSubmitButton {
+            background-color: #4c90b6;
+            border-radius:4px;
+            border:none;
+            font-weight: 700;
+            padding:5px;
+            color: white;
+            cursor:pointer;
+            margin:auto;
+        }
 
 body
   +header(true)
@@ -33,39 +78,43 @@ body
       window.location = res;
     }
 
-  div(style="max-width:400px; text-align:center; padding-bottom:20px; margin:auto; margin-top:50px;")
+  div.createUsercontainer
     div(style="display:inline;") Please create a new user below. Note that only pre-approved users are permitted to register during  our alpha development phase.
 
   form(id="emailForm" name="emailForm", method="post" onsubmit="submitForm()" style="display:flex; flex-direction:column; align-items:center; width:100%; padding-bottom:20px; margin-bottom:50px;")
-    div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
-      div(style="margin:auto; width:300px;")
-        div(style="display:inline-block; margin-top:4px;") Username
-        input(name="username" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
-    div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
-      div(style="margin:auto; width:300px;")
-        div(style="display:inline-block; margin-top:4px;") Mailing Address
-        input(name="userAddress" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
-    div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
-      div(style="margin:auto; width:300px;")
-        div(style="display:inline-block; margin-top:4px;") Organization
-        input(name="organization" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
-    div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
-      div(style="margin:auto; width:300px;")
-        div(style="display:inline-block; margin-top:4px;") Email
-        input(name="alias" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
-    div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
-      div(style="margin:auto; width:300px;")
-        div(style="display:inline-block; margin-top:4px;") Password
-        input(name="password" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="password")
-    div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
-      div(style="margin:auto; width:300px;")
-        div(style="display:inline-block; margin-top:4px;") Verify Password
-        input(name="verifyPassword" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="password")
-    div(style="display:flex; align-items:center; width:100%; margin-bottom:20px;")
-      div(class="g-recaptcha" data-sitekey="6LfgLSMUAAAAABRJzT1aYJTLTKHEc7zorV0nRPxm" style="margin:auto;")
-    input(type="submit" value="Create User" style="background-color:#4490ba; border-radius:5px; border:none; padding:5px; color: white; cursor:pointer; margin:auto;")
-
-  +footer()
+    div.entryLine
+      div.entryLineItem
+        div.entryLabel Name
+        input.entryInput(name="alias" type="text")
+    div.entryLine
+      div.entryLineItem
+        div.entryLabel Title
+        input.entryInput(name="title" type="text")
+    div.entryLine
+      div.entryLineItem
+        div.entryLabel Institution
+        input.entryInput(name="institution" type="text")
+    div.entryLine
+      div.entryLineItem
+        div.entryLabel Mailing Address
+        input.entryInput(name="userAddress" type="text")
+    div.entryLine
+      div.entryLineItem
+        div.entryLabel Email
+        input.entryInput(name="email" type="text")
+    div.entryLine
+      div.entryLineItem
+        div.entryLabel WhatsApp
+        input.entryInput(name="whatsAppNumber" type="text")
+    div.entryLine
+      div.entryLineItem
+        div.entryLabel Password
+        input.entryInput(name="password" type="password")
+    div.entryLine
+      div.entryLineItem
+        div.entryLabel Verify Password
+        input.entryInput(name="verifyPassword" type="password")
+    input.createAccountSubmitButton(type="submit" value="Create User")
 
   script.
     function submitForm() {

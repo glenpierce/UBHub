@@ -8,7 +8,7 @@ router.get('/', function(req, res) {
     navMenu: getNavMenuForUser(req),
     user: req.user,
   }
-  res.render('dataManagement', {dataManagementConfig: JSON.stringify(dataManagementConfig)});
+  res.render('dataManagement', {dataManagementConfig: JSON.stringify(dataManagementConfig), user: req.session.user});
 });
 
 function getTablesForUser(req) {
@@ -23,23 +23,26 @@ function getTablesForUser(req) {
   if (req.session.user && req.session.privileges >= 3) {
     tablesForUser.users = tables.users;
   }
+  if (req.session.user && req.session.privileges >= 4) {
+    addExecutiveFunctions(tablesForUser);
+  }
   return tablesForUser;
 }
 
 const tables = {
+  mapButtons: {
+    displayName: 'Programs',
+    columns: [
+      {name: 'part_name', label: 'Program Name', visible: true},
+      {name: 'button_category', label: 'Category', visible: true},
+      {name: 'button_link', label: 'Website', visible: true},
+      {name: 'button_text', visible: false},
+      {name: 'image', visible: false},
+      {name: 'marker_colors_by', visible: false},
+      {name: 'marker_colors', visible: false}
+    ]
+  },
   locations: {
-    mapButtons: {
-      displayName: 'Programs',
-      columns: [
-        {name: 'part_name', label: 'Program Name', visible: true},
-        {name: 'button_category', label: 'Category', visible: true},
-        {name: 'button_link', label: 'Website', visible: true},
-        {name: 'button_text', visible: false},
-        {name: 'image', visible: false},
-        {name: 'marker_colors_by', visible: false},
-        {name: 'marker_colors', visible: false}
-      ]
-    },
     displayName: 'Locations',
     columns: [
       {name: 'id', visible: false},
@@ -111,17 +114,32 @@ const tables = {
       {name: 'approved_by', label: 'Reviewed By', visible: true},
       {name: 'approved_at', label: 'Reviewed At', visible: true, type: 'date'},
       {name: 'notes', label: 'Review Comments', visible: true},
-      {button: 'review', label: 'Review', visible: true}
+      {button: 'review', label: 'Review', visible: true, onClickFunction: 'openReviewModal' }
     ]
   },
   users: {
     displayName: 'Users',
     columns: [
-      {name: 'alias', label: 'Username', visible: true},
-      {name: 'privileges', label: 'Privileges', visible: true},
+      {name: 'alias', label: 'Name', visible: true, renderFunction: 'nameRenderer'},
+      {name: 'privileges', label: 'Role', visible: true, renderFunction: 'privilegeRenderer'},
+      {name: 'status', label: 'Status', visible: true, renderFunction: 'statusRenderer'},
+      {name: 'region', label: 'Region', visible: true},
+      {name: 'assignedSite', label: 'Assigned Sites', visible: true, renderFunction: 'assignRenderer'},
+      {name: 'lastActive', label: 'Last Active', visible: true, renderFunction: 'lastActiveRenderer'},
     ]
   }
 };
+
+function addExecutiveFunctions(tablesForUser) {
+  tablesForUser.users.columns.push({name: 'email', label: 'Email', visible: true});
+  tablesForUser.users.columns.push({name: 'userAddress', label: 'Address', visible: false});
+  tablesForUser.users.columns.push({name: 'title', label: 'Title', visible: true});
+  tablesForUser.users.columns.push({name: 'institution', label: 'Institution', visible: true});
+  tablesForUser.users.columns.push({name: 'whatsAppNumber', label: 'WhatsApp Number', visible: true});
+  tablesForUser.users.columns.push({name: 'primaryContact', label: 'Primary Contact', visible: true});
+  tablesForUser.users.columns.push({name: 'notes', label: 'Notes', visible: false});
+  tablesForUser.users.columns.push({button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditUserModal' });
+}
 
 function getNavMenuForUser(req) {
   const navigationMenu = [];
@@ -159,7 +177,7 @@ const menuCandidates = [
   {tableKey: 'participation', icon: '/icons/participationIcon.svg', label: 'Participations'},
   {tableKey: 'row_versions', icon: '/icons/submissionIcon.svg', label: 'Submissions'},
   {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Users'},
-  {href: '/account', icon: '/icons/profileIcon.svg', label: 'My Profile'},
+  {onClick: 'openMyProfileModal', icon: '/icons/profileIcon.svg', label: 'My Profile'},
   {tableKey: 'row_versions', icon: '/icons/approveIcon.svg', label: 'Approvals'},
   {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Manage Users'}
 ];

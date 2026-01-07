@@ -14,7 +14,7 @@ router.post('/', async function (req, res) {
   console.log('login request received');
 
   try {
-    const rows = await makeDbCallAsPromise('CALL login(?)', [req.body.username]);
+    const rows = await makeDbCallAsPromise('CALL login(?)', [req.body.email]);
 
     if (!rows) {
       console.log("no rows found for user");
@@ -30,6 +30,8 @@ router.post('/', async function (req, res) {
       }
       if (result) {
         req.session.user = rows[0].alias;
+        req.session.email = rows[0].email;
+        // req.session.email = rows[0].email; // todo: update the login function to return email
         req.session.privileges = rows[0].privileges;
         return res.send('/dataManagement', { user: req.session.user });
       } else {
