@@ -243,7 +243,7 @@ router.post('/pending-change', isAuthenticated, isContributor, async (req, res) 
       return res.status(400).json({error: 'Invalid table'});
     }
     console.error('Error creating pending change:', error);
-    res.status(500).json({error: 'Server error'});
+    res.status(500).json({error: 'Error creating pending change' + error.message});
   }
 });
 
@@ -360,7 +360,7 @@ router.post('/pending-change/review', isAuthenticated, isApprover, async (req, r
     return res.status(400).json({error: 'Invalid decision'});
   } catch (error) {
     console.error('Error reviewing pending change:', error);
-    res.status(500).json({error: 'Server error'});
+    res.status(500).json({error: 'Error reviewing pending change' + error.message});
   }
 });
 
@@ -407,12 +407,14 @@ async function approveVersion(pool, versionId, approver) {
     await connection.beginTransaction();
     // lock the version row
     const [rowVersions] = await connection.query('SELECT * FROM row_versions WHERE id = ? FOR UPDATE', [versionId]);
+    console.log(rowVersions);
     if (!rowVersions[0]) {
       throw new Error('Version not found');
     }
     const rowVersion = rowVersions[0];
-    if (rowVersion.status !== 'pending' || rowVersion.status !== 'rejected') {
-      throw new Error('Version not pending or rejected');
+    const status = String(rowVersion.status || '').trim().toLowerCase();
+    if (status !== 'pending' && status !== 'rejected') {
+      throw new Error('Version not pending or rejected', rowVersion.status);
     }
 
     const tableName = rowVersion.table_name;
