@@ -8,6 +8,9 @@ html
       const navMenu = dataManagementConfigFromServer.navMenu || [];
       const currentUser = dataManagementConfigFromServer.user || null;
 
+      let modalMode = null; // 'add', 'edit, or 'review'
+      let currentRow = null;
+
       const renderers = {
         nameRenderer: renderNameFunction,
         privilegeRenderer: renderPrivilegeFunction,
@@ -31,7 +34,7 @@ html
       const clickHandlers = {
         openReviewModal: function(row) {
           buildModalForReview(row);
-          openModal();
+          openModal(false);
         },
         openEditUserModal: function(row) {
           buildModalForTable('users');
@@ -43,9 +46,27 @@ html
               inputValue.value = '';
             }
           });
-          openModal();
-        }
+          openModal(false);
+        },
+        openEditProgramModal: openEditModalFunction('mapButtons'),
+        openEditLocationModal: openEditModalFunction('locations'),
+        openEditDocumentModal: openEditModalFunction('documents'),
+        openEditProgramParticipationModal: openEditModalFunction('participation')
       };
+
+      function openEditModalFunction(tableName) {
+        return function(row) {
+          buildModalForTable(tableName);
+          modalMode = 'edit';
+          currentRow = row;
+          const form = document.getElementById('modalForm');
+          form.querySelectorAll('[data-col-name]').forEach(inputElement => {
+            const inputElementId = inputElement.getAttribute("id");
+            inputElement.value = row[inputElementId];
+          });
+          openModal(false);
+        }
+      }
 
       function renderNameFunction(row, td) {
         td.textContent = row.alias || '';
@@ -197,6 +218,17 @@ html
           }
         });
 
+        const firstVisibleColumn = columns.find(col => col.visible);
+        if (firstVisibleColumn) {
+          data.sort((a, b) => {
+            const valueA = a[firstVisibleColumn.name];
+            const valueB = b[firstVisibleColumn.name];
+            if (valueA < valueB) return -1;
+            if (valueA > valueB) return 1;
+            return 0;
+          });
+        }
+
         data.forEach(row => {
           let tr = document.createElement('tr');
           columns.forEach(column => {
@@ -246,9 +278,6 @@ html
         document.getElementById('tableBody').innerHTML = '';
       }
 
-      let modalMode = null; // 'add' or 'review'
-      let currentReviewRow = null;
-
       function buildModalForReview(row) {
         const modalTitle = document.getElementById('modalTitle');
         modalTitle.textContent = `Review Submission - ${row.operation.charAt(0).toUpperCase() + row.operation.slice(1)}`;
@@ -256,7 +285,7 @@ html
         fieldsContainer.innerHTML = '';
 
         modalMode = 'review';
-        currentReviewRow = row || null;
+        currentRow = row;
         console.log(row);
 
         let dataObj = {};
@@ -336,7 +365,6 @@ html
         fieldsContainer.innerHTML = '';
 
         modalMode = 'add';
-        currentReviewRow = null;
 
         if (!tableName || !tables[tableName]) {
           fieldsContainer.innerHTML = '<div class="form-row">No fields available</div>';
@@ -344,7 +372,9 @@ html
         }
 
         const columns = tables[tableName].columns || [];
-        const formColumns = columns.filter(c => c.name !== 'id');
+        const formColumns = columns.filter(c => {
+          return c.name !== 'id' && c.name !== undefined;
+        });
 
         if (formColumns.length === 0) {
           fieldsContainer.innerHTML = '<div class="form-row">No editable fields for this table.</div>';
@@ -381,7 +411,7 @@ html
             e.preventDefault();
 
             if (modalMode === 'review') {
-              if (!currentReviewRow) {
+              if (!currentRow) {
                 alert('No review row specified.');
                 return;
               }
@@ -389,7 +419,7 @@ html
               const comments = document.getElementById('reviewComments')?.value || '';
 
               const payload = {
-                id: currentReviewRow.id,
+                id: currentRow.id,
                 decision: decision,
                 comments: comments
               };
@@ -416,16 +446,16 @@ html
               return;
             }
 
-            // default/add mode
-            if (modalMode === 'add' || !modalMode) {
+            // add or edit mode
+            if (modalMode === 'add' || modalMode === 'edit') {
               if (!currentTable) {
                 alert('No table selected.');
                 return;
               }
               const payload = {
                 tableName: currentTable,
-                rowKey: {},
-                operation: 'insert',
+                rowKey: modalMode === 'add' ? {} : getRowKey(currentRow),
+                operation: modalMode === 'add' ? 'insert' : 'update',
                 data: {}
               };
               modalForm.querySelectorAll('[data-col-name]').forEach(inputValue => {
@@ -447,10 +477,28 @@ html
                 console.error(err);
                 alert('Submit error: ' + err.message);
               });
+            } else {
+              alert('Unknown modal mode: ' + modalMode);
             }
           });
         }
       });
+
+      function getRowKey(currentRow) {
+        const rowKeyMap = {
+          mapButtons: 'part_name',
+          locations: 'id',
+          documents: 'id',
+          participation: 'id',
+          users: 'email'
+        };
+
+        const key = rowKeyMap[currentTable];
+        const value = currentRow[key];
+        const result = {[key]: value};
+        console.log(result);
+        return result;
+      }
 
       function addNewEntry() {
         if (!currentTable) {
@@ -463,9 +511,10 @@ html
         openModal();
       }
 
-      function openModal() {
-        console.log("openModal called");
-        document.getElementById('modalForm').reset();
+      function openModal(reset=true) {
+        if(reset) {
+          document.getElementById('modalForm').reset();
+        }
         document.getElementById('modalOverlay').style.display = 'flex';
         setTimeout(() => {
           document.getElementById('modalOverlay').scrollTop = 0;

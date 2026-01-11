@@ -39,7 +39,8 @@ const tables = {
       {name: 'button_text', visible: false},
       {name: 'image', visible: false},
       {name: 'marker_colors_by', visible: false},
-      {name: 'marker_colors', visible: false}
+      {name: 'marker_colors', visible: false},
+      {button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditProgramModal' }
     ]
   },
   locations: {
@@ -61,7 +62,8 @@ const tables = {
       {name: 'wwf_biome', label: 'WWF Biome', visible: false},
       {name: 'wwf_terrestrial_ecoregion', label: 'WWF Terrestrial Ecoregion', visible: false},
       {name: 'hotspot', label: 'Hotspot', visible: false},
-      {name: 'conservation_status_wwf', label: 'Conservation Status WWF', visible: false}
+      {name: 'conservation_status_wwf', label: 'Conservation Status WWF', visible: false},
+      {button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditLocationModal' }
     ]
   },
   documents: {
@@ -75,11 +77,12 @@ const tables = {
       {name: 'doc_url', label: 'Document URL', visible: true},
       {name: 'keywords', label: 'Keywords', visible: false},
       {name: 'source_url', label: 'Source URL', visible: false},
-      {name: 'link_verified', label: 'Link Verified', visible: false}
+      {name: 'link_verified', label: 'Link Verified', visible: false},
+      {button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditDocumentModal' }
     ]
   },
   participation: {
-    displayName: 'Program Participations',
+    displayName: 'Participations in Programs',
     columns: [
       {name: 'id', visible: false},
       {name: 'inst_id', visible: false},
@@ -96,7 +99,8 @@ const tables = {
       {name: 'part_link_label3', label: 'Link Label 3', visible: false},
       {name: 'part_link3', label: 'Link 3', visible: false},
       {name: 'keywords', label: 'Keywords', visible: false},
-      {name: 'link_verified', label: 'Link Verified', visible: false}
+      {name: 'link_verified', label: 'Link Verified', visible: false},
+      {button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditProgramParticipationModal' }
     ]
   },
   row_versions: {
@@ -108,7 +112,7 @@ const tables = {
       {name: 'operation', label: 'Operation', visible: true},
       {name: 'status', label: 'Status', visible: true},
       {name: 'version', label: 'Version', visible: false},
-      {name: 'data', label: 'Data', visible: true},
+      {name: 'data', label: 'Data', visible: false},
       {name: 'created_by', label: 'Submitted By', visible: true},
       {name: 'created_at', label: 'Submitted At', visible: true},
       {name: 'approved_by', label: 'Reviewed By', visible: true},
@@ -172,7 +176,7 @@ function getNavMenuForUser(req) {
 
 const menuCandidates = [
   {tableKey: 'mapButtons', icon: '/icons/programIcon.svg', label: 'Programs'},
-  {tableKey: 'locations', icon: '/icons/institutionIcon.svg', label: 'Institutions'},
+  {tableKey: 'locations', icon: '/icons/institutionIcon.svg', label: 'Locations'},
   {tableKey: 'documents', icon: '/icons/documentIcon.svg', label: 'Documents'},
   {tableKey: 'participation', icon: '/icons/participationIcon.svg', label: 'Participations'},
   {tableKey: 'row_versions', icon: '/icons/submissionIcon.svg', label: 'Submissions'},
@@ -201,7 +205,7 @@ router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req,
 
     const queryString = `SELECT ${columnList}
                          FROM ${tableName}
-                         LIMIT 1000`;
+                         LIMIT 2000`;
 
     const result = await makeDbCallAsPromise(queryString);
 
@@ -239,7 +243,7 @@ router.post('/pending-change', isAuthenticated, isContributor, async (req, res) 
       return res.status(400).json({error: 'Invalid table'});
     }
     console.error('Error creating pending change:', error);
-    res.status(500).json({error: 'Server error'});
+    res.status(500).json({error: 'Error creating pending change' + error.message});
   }
 });
 
@@ -356,7 +360,7 @@ router.post('/pending-change/review', isAuthenticated, isApprover, async (req, r
     return res.status(400).json({error: 'Invalid decision'});
   } catch (error) {
     console.error('Error reviewing pending change:', error);
-    res.status(500).json({error: 'Server error'});
+    res.status(500).json({error: 'Error reviewing pending change' + error.message});
   }
 });
 
@@ -403,20 +407,40 @@ async function approveVersion(pool, versionId, approver) {
     await connection.beginTransaction();
     // lock the version row
     const [rowVersions] = await connection.query('SELECT * FROM row_versions WHERE id = ? FOR UPDATE', [versionId]);
+    console.log(rowVersions);
     if (!rowVersions[0]) {
       throw new Error('Version not found');
     }
     const rowVersion = rowVersions[0];
-    if (rowVersion.status !== 'pending' || rowVersion.status !== 'rejected') {
-      throw new Error('Version not pending or rejected');
+    const status = String(rowVersion.status || '').trim().toLowerCase();
+    if (status !== 'pending' && status !== 'rejected') {
+      throw new Error('Version not pending or rejected', rowVersion.status);
     }
 
     const tableName = rowVersion.table_name;
     assertTableAllowed(tableName);
     const meta = editableTables[tableName];
 
-    const rowKeyObject = JSON.parse(rowVersion.row_key || '{}');
-    const dataObject = JSON.parse(rowVersion.data);
+    let rowKeyObject = {};
+    try {
+      rowKeyObject = JSON.parse(rowVersion.row_key);
+    } catch (error) {
+      rowKeyObject = rowVersion.row_key;
+      console.log(rowKeyObject);
+      console.error('Error parsing rowKeyObject', error);
+    }
+
+    console.log(rowKeyObject);
+
+    let dataObject = {};
+    try {
+      dataObject = JSON.parse(rowVersion.data);
+    } catch (error) {
+      dataObject = rowVersion.data;
+      console.error('Error parsing dataObject', error);
+    }
+
+    console.log(dataObject);
 
     // sanitize: restrict dataObject keys to allowed columns only
     const validData = {};
@@ -428,6 +452,7 @@ async function approveVersion(pool, versionId, approver) {
 
     // Build and run appropriate SQL
     if (rowVersion.operation === 'insert') {
+      console.log(`Inserting into ${tableName}`);
       // Insert only allowed columns
       const columns = Object.keys(validData);
       if (columns.length === 0) {
@@ -436,9 +461,12 @@ async function approveVersion(pool, versionId, approver) {
       const placeholders = columns.map(() => '?').join(', ');
       const statement = `INSERT INTO \`${tableName}\` (${columns.map(c => `\`${c}\``).join(', ')})
                          VALUES (${placeholders})`;
+      console.log(`insert statement: ${statement}`);
       const values = columns.map(c => validData[c]);
+      console.log(`values: ${JSON.stringify(values)}`);
       await connection.query(statement, values);
     } else if (rowVersion.operation === 'update') {
+      console.log(`Updating ${tableName}`);
       // Build SET from validData excluding primaryKey keys
       const pkKeys = meta.primaryKey;
       const setCols = Object.keys(validData).filter(k => !pkKeys.includes(k));
@@ -458,6 +486,7 @@ async function approveVersion(pool, versionId, approver) {
                            SET ${setClause}
                            WHERE ${whereClause}
                            LIMIT 1`;
+        console.log(`update statement: ${statement}`);
         await connection.query(statement, [...setValues, ...whereValues]);
       }
     } else if (rowVersion.operation === 'delete') {
