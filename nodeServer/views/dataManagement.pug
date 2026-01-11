@@ -218,6 +218,17 @@ html
           }
         });
 
+        const firstVisibleColumn = columns.find(col => col.visible);
+        if (firstVisibleColumn) {
+          data.sort((a, b) => {
+            const valueA = a[firstVisibleColumn.name];
+            const valueB = b[firstVisibleColumn.name];
+            if (valueA < valueB) return -1;
+            if (valueA > valueB) return 1;
+            return 0;
+          });
+        }
+
         data.forEach(row => {
           let tr = document.createElement('tr');
           columns.forEach(column => {

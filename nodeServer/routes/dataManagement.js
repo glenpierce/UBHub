@@ -82,7 +82,7 @@ const tables = {
     ]
   },
   participation: {
-    displayName: 'Program Participations',
+    displayName: 'Participations in Programs',
     columns: [
       {name: 'id', visible: false},
       {name: 'inst_id', visible: false},
@@ -176,7 +176,7 @@ function getNavMenuForUser(req) {
 
 const menuCandidates = [
   {tableKey: 'mapButtons', icon: '/icons/programIcon.svg', label: 'Programs'},
-  {tableKey: 'locations', icon: '/icons/institutionIcon.svg', label: 'Institutions'},
+  {tableKey: 'locations', icon: '/icons/institutionIcon.svg', label: 'Locations'},
   {tableKey: 'documents', icon: '/icons/documentIcon.svg', label: 'Documents'},
   {tableKey: 'participation', icon: '/icons/participationIcon.svg', label: 'Participations'},
   {tableKey: 'row_versions', icon: '/icons/submissionIcon.svg', label: 'Submissions'},
@@ -205,7 +205,7 @@ router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req,
 
     const queryString = `SELECT ${columnList}
                          FROM ${tableName}
-                         LIMIT 1000`;
+                         LIMIT 2000`;
 
     const result = await makeDbCallAsPromise(queryString);
 
