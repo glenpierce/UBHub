@@ -9,7 +9,7 @@ html
       const currentUser = dataManagementConfigFromServer.user || null;
 
       let modalMode = null; // 'add', 'edit, or 'review'
-      let currentReviewRow = null;
+      let currentRow = null;
 
       const renderers = {
         nameRenderer: renderNameFunction,
@@ -58,6 +58,7 @@ html
         return function(row) {
           buildModalForTable(tableName);
           modalMode = 'edit';
+          currentRow = row;
           const form = document.getElementById('modalForm');
           form.querySelectorAll('[data-col-name]').forEach(inputElement => {
             const inputElementId = inputElement.getAttribute("id");
@@ -273,7 +274,7 @@ html
         fieldsContainer.innerHTML = '';
 
         modalMode = 'review';
-        currentReviewRow = row || null;
+        currentRow = row;
         console.log(row);
 
         let dataObj = {};
@@ -353,7 +354,6 @@ html
         fieldsContainer.innerHTML = '';
 
         modalMode = 'add';
-        currentReviewRow = null;
 
         if (!tableName || !tables[tableName]) {
           fieldsContainer.innerHTML = '<div class="form-row">No fields available</div>';
@@ -400,7 +400,7 @@ html
             e.preventDefault();
 
             if (modalMode === 'review') {
-              if (!currentReviewRow) {
+              if (!currentRow) {
                 alert('No review row specified.');
                 return;
               }
@@ -408,7 +408,7 @@ html
               const comments = document.getElementById('reviewComments')?.value || '';
 
               const payload = {
-                id: currentReviewRow.id,
+                id: currentRow.id,
                 decision: decision,
                 comments: comments
               };
@@ -443,8 +443,8 @@ html
               }
               const payload = {
                 tableName: currentTable,
-                rowKey: {},
-                operation: modalMode === 'add' ? 'insert' : modalMode === 'edit' ? 'update' : 'insert',
+                rowKey: modalMode === 'add' ? {} : getRowKey(currentRow),
+                operation: modalMode === 'add' ? 'insert' : 'update',
                 data: {}
               };
               modalForm.querySelectorAll('[data-col-name]').forEach(inputValue => {
@@ -472,6 +472,22 @@ html
           });
         }
       });
+
+      function getRowKey(currentRow) {
+        const rowKeyMap = {
+          mapButtons: 'part_name',
+          locations: 'id',
+          documents: 'id',
+          participation: 'id',
+          users: 'email'
+        };
+
+        const key = rowKeyMap[currentTable];
+        const value = currentRow[key];
+        const result = {[key]: value};
+        console.log(result);
+        return result;
+      }
 
       function addNewEntry() {
         if (!currentTable) {

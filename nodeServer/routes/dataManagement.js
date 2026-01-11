@@ -421,8 +421,26 @@ async function approveVersion(pool, versionId, approver) {
     assertTableAllowed(tableName);
     const meta = editableTables[tableName];
 
-    const rowKeyObject = JSON.parse(rowVersion.row_key || '{}');
-    const dataObject = JSON.parse(rowVersion.data);
+    let rowKeyObject = {};
+    try {
+      rowKeyObject = JSON.parse(rowVersion.row_key);
+    } catch (error) {
+      rowKeyObject = rowVersion.row_key;
+      console.log(rowKeyObject);
+      console.error('Error parsing rowKeyObject', error);
+    }
+
+    console.log(rowKeyObject);
+
+    let dataObject = {};
+    try {
+      dataObject = JSON.parse(rowVersion.data);
+    } catch (error) {
+      dataObject = rowVersion.data;
+      console.error('Error parsing dataObject', error);
+    }
+
+    console.log(dataObject);
 
     // sanitize: restrict dataObject keys to allowed columns only
     const validData = {};
@@ -434,6 +452,7 @@ async function approveVersion(pool, versionId, approver) {
 
     // Build and run appropriate SQL
     if (rowVersion.operation === 'insert') {
+      console.log(`Inserting into ${tableName}`);
       // Insert only allowed columns
       const columns = Object.keys(validData);
       if (columns.length === 0) {
@@ -442,9 +461,12 @@ async function approveVersion(pool, versionId, approver) {
       const placeholders = columns.map(() => '?').join(', ');
       const statement = `INSERT INTO \`${tableName}\` (${columns.map(c => `\`${c}\``).join(', ')})
                          VALUES (${placeholders})`;
+      console.log(`insert statement: ${statement}`);
       const values = columns.map(c => validData[c]);
+      console.log(`values: ${JSON.stringify(values)}`);
       await connection.query(statement, values);
     } else if (rowVersion.operation === 'update') {
+      console.log(`Updating ${tableName}`);
       // Build SET from validData excluding primaryKey keys
       const pkKeys = meta.primaryKey;
       const setCols = Object.keys(validData).filter(k => !pkKeys.includes(k));
@@ -464,6 +486,7 @@ async function approveVersion(pool, versionId, approver) {
                            SET ${setClause}
                            WHERE ${whereClause}
                            LIMIT 1`;
+        console.log(`update statement: ${statement}`);
         await connection.query(statement, [...setValues, ...whereValues]);
       }
     } else if (rowVersion.operation === 'delete') {
