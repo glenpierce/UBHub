@@ -18,7 +18,7 @@ CREATE TABLE users(
 );
 
 CREATE TABLE locations (
-    id INT,
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     inst_address VARCHAR(255) CHARACTER SET utf8,
     lat NUMERIC(10, 7),
     lng NUMERIC(10, 7),
