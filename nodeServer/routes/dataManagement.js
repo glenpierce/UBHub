@@ -129,7 +129,7 @@ const tables = {
       {name: 'table_name', label: 'Table Name', visible: true},
       {name: 'row_key', label: 'Row ID', visible: false},
       {name: 'operation', label: 'Operation', visible: true},
-      {name: 'status', label: 'Status', visible: true},
+      {name: 'status', label: 'Status', visible: true, renderFunction: 'submissionStatusRenderer'},
       {name: 'version', label: 'Version', visible: false},
       {name: 'data', label: 'Data', visible: false},
       {name: 'created_by', label: 'Submitted By', visible: true},

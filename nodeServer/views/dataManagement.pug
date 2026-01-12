@@ -15,6 +15,7 @@ html
         nameRenderer: renderNameFunction,
         privilegeRenderer: renderPrivilegeFunction,
         statusRenderer: statusRendererFunction,
+        submissionStatusRenderer: submissionStatusRendererFunction,
         assignRenderer: assignRendererFunction,
         lastActiveRenderer: lastActiveRendererFunction
       }
@@ -152,6 +153,32 @@ html
         } else {
           td.style.color = 'black';
         }
+      }
+
+      function submissionStatusRendererFunction(row, td) {
+        const statusRaw = (row.status || '').toString();
+        const status = statusRaw.trim();
+        let styleClass = 'unknownStatus';
+        let displayText = status || 'Unknown';
+
+        const lower = status.toLowerCase();
+        if (lower === 'approved' || lower === 'approve') {
+          styleClass = 'approvedStatus';
+          displayText = 'Approved';
+        } else if (lower === 'rejected' || lower === 'reject') {
+          styleClass = 'rejectedStatus';
+          displayText = 'Rejected';
+        } else if (lower === 'pending' || lower === 'submitted' || lower === 'awaiting') {
+          styleClass = 'pendingStatus';
+          displayText = 'Pending';
+        } else if (status) {
+          displayText = status.charAt(0).toUpperCase() + status.slice(1);
+        }
+
+        const label = document.createElement('div');
+        label.className = styleClass;
+        label.textContent = displayText;
+        td.appendChild(label);
       }
 
       function assignRendererFunction(row, td) {
@@ -694,6 +721,17 @@ html
             --executive-color: #204161;
             --executive-hover-color: #204161;
             --executive-background-color: #dae8f5;
+
+            --approved-color: #1f7a3a;
+            --approved-hover-color: #1f7a3a;
+            --approved-background-color: #e6f4ea;
+            --rejected-color: #a61a1a;
+            --rejected-hover-color: #a61a1a;
+            --rejected-background-color: #fdecea;
+            --pending-color: #b36b00;
+            --pending-hover-color: #b36b00;
+            --pending-background-color: #fff3d6;
+            --unknown-background-color: #e2e2e2;
         }
 
 
@@ -798,6 +836,54 @@ html
             transform: translateY(-4px);
             background: linear-gradient(90deg, rgba(245, 250, 255, 0.9), rgba(255, 255, 255, 0.98));
             box-shadow: 0 12px 30px rgba(31, 41, 55, 0.06);
+        }
+
+        /* Status label styles */
+        .baseStatus,
+        .approvedStatus,
+        .rejectedStatus,
+        .pendingStatus
+        {
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            display: inline-block;
+            text-align: center;
+            padding: 2px 4px;
+            cursor: default;
+        }
+
+        .approvedStatus {
+          background: var(--approved-background-color);
+          color: var(--approved-color);
+          border-color: var(--approved-color);
+        }
+
+        .approvedStatus:hover {
+          background: var(--approved-hover-color);
+          color: white;
+        }
+
+        .rejectedStatus {
+          background: var(--rejected-background-color);
+          color: var(--rejected-color);
+          border-color: var(--rejected-color);
+        }
+
+        .rejectedStatus:hover {
+          background: var(--rejected-hover-color);
+          color: white;
+        }
+
+        .pendingStatus {
+          background: var(--pending-background-color);
+          color: var(--pending-color);
+          border-color: var(--pending-color);
+        }
+
+        .pendingStatus:hover {
+          background: var(--pending-hover-color);
+          color: white;
         }
 
         .baseRole,
