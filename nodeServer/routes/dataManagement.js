@@ -587,4 +587,21 @@ async function approveVersion(pool, versionId, approver) {
   }
 }
 
+router.get('/location-search', isAuthenticated, isContributor, async (req, res) => {
+  try {
+    const query = (req.query.query || '').trim();
+    if (!query) {
+      return res.json([]);
+    }
+    // search locations by inst_title (case-insensitive)
+    const sql = `SELECT id, inst_title FROM \`locations\` WHERE inst_title LIKE ? LIMIT 50`;
+    const params = [`%${query}%`];
+    const rows = await makeDbCallAsPromise(sql, params);
+    res.json(rows || []);
+  } catch (error) {
+    console.error('Error searching locations:', error);
+    res.status(500).json({error: 'Search error'});
+  }
+});
+
 export default router;

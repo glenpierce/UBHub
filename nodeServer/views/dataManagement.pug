@@ -60,10 +60,36 @@ html
           modalMode = 'edit';
           currentRow = row;
           const form = document.getElementById('modalForm');
+          // populate hidden/normal inputs that have data-col-name set
           form.querySelectorAll('[data-col-name]').forEach(inputElement => {
             const inputElementId = inputElement.getAttribute("id");
-            inputElement.value = row[inputElementId];
+            // for hidden inputs (lookupColumn), the id equals the column name (e.g. inst_id) so set value from row
+            if (row.hasOwnProperty(inputElementId)) {
+              inputElement.value = row[inputElementId];
+            } else {
+              inputElement.value = '';
+            }
           });
+
+          // populate any search inputs for cross-reference columns (e.g. search_inst_id)
+          const columns = tables[tableName].columns || [];
+          columns.forEach(col => {
+            if (col.crossReferenceTable && col.lookupColumn && col.joinedColumn) {
+              const searchInput = document.getElementById(`search_${col.lookupColumn}`);
+              const hiddenInput = document.getElementById(col.lookupColumn);
+              if (hiddenInput && hiddenInput.value) {
+                // prefer inst_title from row if present
+                const titleValue = row[col.joinedColumn] || '';
+                if (searchInput) searchInput.value = titleValue;
+              } else if (row[col.lookupColumn]) {
+                // fallback: set hidden from row and try to set search to joinedColumn
+                if (hiddenInput) hiddenInput.value = row[col.lookupColumn];
+                const titleValue = row[col.joinedColumn] || '';
+                if (searchInput) searchInput.value = titleValue;
+              }
+            }
+          });
+
           openModal(false);
         }
       }
@@ -373,7 +399,7 @@ html
 
         const columns = tables[tableName].columns || [];
         const formColumns = columns.filter(c => {
-          return c.name !== 'id' && c.name !== undefined && !c.crossReferenceTable;
+          return c.name !== 'id' && c.name !== undefined;
         });
 
         if (formColumns.length === 0) {
@@ -386,18 +412,94 @@ html
           const row = document.createElement('div');
           row.className = 'form-row';
 
+          // decide input ids first so label can reference the correct input
+          let inputId = `field_${col.name}`;
+          if (col.crossReferenceTable) {
+            inputId = `search_${col.lookupColumn}`; // search input id for crossRef
+          }
           const label = document.createElement('label');
-          label.setAttribute('for', `field_${col.name}`);
+          label.setAttribute('for', inputId);
           label.textContent = labelText;
           row.appendChild(label);
 
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.id = `${col.name}`;
-          input.name = col.name;
-          input.setAttribute('data-col-name', col.name);
-          input.placeholder = `Enter ${labelText}`;
-          row.appendChild(input);
+          if (col.crossReferenceTable) {
+            // create a typeahead input for cross-referenced locations
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.id = `search_${col.lookupColumn}`; // e.g. search_inst_id
+            searchInput.placeholder = `Search ${labelText}`;
+            searchInput.autocomplete = 'off';
+
+            // hidden input that will store the actual id to submit
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.id = `${col.lookupColumn}`; // e.g. inst_id
+            hiddenInput.name = col.lookupColumn;
+            hiddenInput.setAttribute('data-col-name', col.lookupColumn);
+
+            const resultsDiv = document.createElement('div');
+            resultsDiv.className = 'typeahead-results';
+            resultsDiv.id = `results_${col.lookupColumn}`;
+            resultsDiv.style.position = 'absolute';
+            resultsDiv.style.background = 'white';
+            resultsDiv.style.border = '1px solid #ccc';
+            resultsDiv.style.zIndex = 10000;
+            resultsDiv.style.maxHeight = '200px';
+            resultsDiv.style.overflowY = 'auto';
+            resultsDiv.style.display = 'none';
+
+            // hook up typing -> search
+            let searchTimeout = null;
+            searchInput.addEventListener('input', function(e) {
+              const v = e.target.value;
+              hiddenInput.value = ''; // clear selection when typing
+              if (searchTimeout) clearTimeout(searchTimeout);
+              if (!v || v.length < 2) {
+                resultsDiv.style.display = 'none';
+                resultsDiv.innerHTML = '';
+                return;
+              }
+              searchTimeout = setTimeout(() => {
+                fetch(`/dataManagement/location-search?query=${encodeURIComponent(v)}`)
+                  .then(r => r.json())
+                  .then(list => {
+                    resultsDiv.innerHTML = '';
+                    if (!list || !list.length) {
+                      resultsDiv.style.display = 'none';
+                      return;
+                    }
+                    list.forEach(item => {
+                      const itemDiv = document.createElement('div');
+                      itemDiv.className = 'typeahead-item';
+                      itemDiv.style.padding = '6px';
+                      itemDiv.style.cursor = 'pointer';
+                      itemDiv.textContent = item.inst_title;
+                      itemDiv.addEventListener('click', () => {
+                        searchInput.value = item.inst_title;
+                        hiddenInput.value = item.id;
+                        resultsDiv.style.display = 'none';
+                      });
+                      resultsDiv.appendChild(itemDiv);
+                    });
+                    resultsDiv.style.display = 'block';
+                  }).catch(err => {
+                    console.error('Location search failed', err);
+                  });
+              }, 200);
+            });
+
+            row.appendChild(searchInput);
+            row.appendChild(hiddenInput);
+            row.appendChild(resultsDiv);
+          } else {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = `${col.name}`;
+            input.name = col.name;
+            input.setAttribute('data-col-name', col.name);
+            input.placeholder = `Enter ${labelText}`;
+            row.appendChild(input);
+          }
 
           fieldsContainer.appendChild(row);
         });
