@@ -14,19 +14,36 @@ router.get('/', function(req, res) {
 function getTablesForUser(req) {
   const tablesForUser = {};
   if (req.session.user && req.session.privileges >= 2) {
-    tablesForUser.locations = tables.locations;
-    tablesForUser.documents = tables.documents;
-    tablesForUser.participation = tables.participation;
-    tablesForUser.mapButtons = tables.mapButtons;
-    tablesForUser.row_versions = tables.row_versions;
+    // clone table definitions before exposing to client so we can normalize cross-reference columns
+    tablesForUser.locations = transformTableForClient(tables.locations);
+    tablesForUser.documents = transformTableForClient(tables.documents);
+    tablesForUser.participation = transformTableForClient(tables.participation);
+    tablesForUser.mapButtons = transformTableForClient(tables.mapButtons);
+    tablesForUser.row_versions = transformTableForClient(tables.row_versions);
   }
   if (req.session.user && req.session.privileges >= 3) {
-    tablesForUser.users = tables.users;
+    tablesForUser.users = transformTableForClient(tables.users);
   }
   if (req.session.user && req.session.privileges >= 4) {
     addExecutiveFunctions(tablesForUser);
   }
   return tablesForUser;
+}
+
+// Create a shallow deep-clone of a table definition and normalize cross-reference columns
+function transformTableForClient(tableDef) {
+  if (!tableDef) return tableDef;
+  const clone = JSON.parse(JSON.stringify(tableDef));
+  if (Array.isArray(clone.columns)) {
+    clone.columns = clone.columns.map(col => {
+      // if a column references another table, ensure it has a `name` the client can use to read the joined value
+      if (col && col.crossReferenceTable && col.joinedColumn && !col.name) {
+        return Object.assign({}, col, { name: col.joinedColumn });
+      }
+      return col;
+    });
+  }
+  return clone;
 }
 
 const tables = {
@@ -71,6 +88,7 @@ const tables = {
     columns: [
       {name: 'id', visible: false},
       {name: 'inst_id', visible: false},
+      {crossReferenceTable: 'locations', lookupColumn: 'inst_id', joinedColumn: 'inst_title', label: 'Institution Title', visible: true},
       {name: 'doc_type', label: 'Document Type', visible: true},
       {name: 'doc_year', label: 'Year', visible: true},
       {name: 'doc_title', label: 'Title', visible: true},
@@ -86,6 +104,7 @@ const tables = {
     columns: [
       {name: 'id', visible: false},
       {name: 'inst_id', visible: false},
+      {crossReferenceTable: 'locations', lookupColumn: 'inst_id', joinedColumn: 'inst_title', label: 'Institution Title', visible: true},
       {name: 'part_name', label: 'Program Name', visible: true},
       {name: 'part_category', label: 'Category', visible: true},
       {name: 'part_year', label: 'Year', visible: true},
@@ -196,16 +215,54 @@ router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req,
       return res.status(400).json({error: 'Invalid table name'});
     }
 
-    const tableMeta = getTablesForUser(req)[tableName];
-    if (!tableMeta) {
+    // client-facing metadata (normalized)
+    const clientMeta = getTablesForUser(req)[tableName];
+    if (!clientMeta) {
       return res.status(400).json({error: 'Invalid table name'});
     }
-    const columnNames = tableMeta.columns.map(col => col.name).filter(name => name);
-    const columnList = columnNames.map(name => `\`${name}\``).join(', ');
 
-    const queryString = `SELECT ${columnList}
-                         FROM ${tableName}
-                         LIMIT 2000`;
+    // server-side original meta (used to construct joins)
+    const serverMeta = tables[tableName];
+    if (!serverMeta) {
+      return res.status(500).json({error: 'Server table metadata not found'});
+    }
+
+    // Build SELECT list and LEFT JOINs for cross-reference columns
+    const selectParts = [];
+    const joinClauses = [];
+    const joinAliases = {}; // reuse alias when same cross table + lookup used
+
+    for (const col of serverMeta.columns) {
+      if (col.crossReferenceTable && col.lookupColumn && col.joinedColumn) {
+        const crossTable = col.crossReferenceTable;
+        const lookupColumn = col.lookupColumn; // e.g. inst_id on this table
+        const joinedColumn = col.joinedColumn; // e.g. inst_title on the cross table
+        const aliasKey = `${crossTable}__${lookupColumn}`;
+        let alias = joinAliases[aliasKey];
+        if (!alias) {
+          // create a safe alias
+          alias = `${crossTable}_x`;
+          let i = 1;
+          while (Object.values(joinAliases).includes(alias)) {
+            alias = `${crossTable}_x${i++}`;
+          }
+          joinAliases[aliasKey] = alias;
+          // assume referenced table primary key is `id`
+          joinClauses.push(`LEFT JOIN \`${crossTable}\` AS \`${alias}\` ON \`${tableName}\`.\`${lookupColumn}\` = \`${alias}\`.\`id\``);
+        }
+        // select the joined column and alias it to the joinedColumn name so client can read row[joinedColumn]
+        selectParts.push(`\`${alias}\`.\`${joinedColumn}\` AS \`${joinedColumn}\``);
+      } else if (col.name) {
+        // select the local column; qualify with table name to be explicit
+        selectParts.push(`\`${tableName}\`.\`${col.name}\` AS \`${col.name}\``);
+      }
+    }
+
+    if (selectParts.length === 0) {
+      return res.json([]);
+    }
+
+    const queryString = `SELECT ${selectParts.join(', ')} FROM \`${tableName}\` ${joinClauses.join(' ')} LIMIT 2000`;
 
     const result = await makeDbCallAsPromise(queryString);
 

@@ -373,7 +373,7 @@ html
 
         const columns = tables[tableName].columns || [];
         const formColumns = columns.filter(c => {
-          return c.name !== 'id' && c.name !== undefined;
+          return c.name !== 'id' && c.name !== undefined && !c.crossReferenceTable;
         });
 
         if (formColumns.length === 0) {
