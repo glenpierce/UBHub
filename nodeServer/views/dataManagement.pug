@@ -1214,24 +1214,25 @@ html
     main.main-col
       div.container
         div.horizontalFlex
-          div.globalSearchContainer
-            input#globalSearch.dataManagementInput(type="text", placeholder="Global search...")
-          div.row-controls
-            select#columnPicker.dataManagementInput.flex-1
-            input#columnFilter.dataManagementInput.flex-2(type="text", placeholder="Column value filter...")
-            button#clearFilters.clearFilters(type="button") Clear Filters
           h1#tableTitle
           if user
             span#userAlias.userAlias Hello, #{user}
           button.primary#addButton(onclick="addNewEntry()") Add New Entry
 
+      div.globalSearchContainer
+        input#globalSearch.dataManagementInput(type="text", placeholder="Global search...")
+      div.row-controls
+        select#columnPicker.dataManagementInput.flex-1
+        input#columnFilter.dataManagementInput.flex-2(type="text", placeholder="Column value filter...")
+        button#clearFilters.clearFilters(type="button") Clear Filters
+
+      div
         div
-          div
-            div.table-container
-              table.data-table#dataTable
-                thead
-                  tr#headerRow
-                tbody#tableBody
+          div.table-container
+            table.data-table#dataTable
+              thead
+                tr#headerRow
+              tbody#tableBody
 
 // Modal overlay for adding a new entry
 .modal-overlay#modalOverlay.hidden

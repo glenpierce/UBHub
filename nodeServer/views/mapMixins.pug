@@ -46,23 +46,12 @@ mixin textBoxMixin(value, label)
 
 
 mixin mapInfoTab(label, contentId, color, reset)
-  div.mapInfoTab(style="background-color: #{color}" onclick="togglePanelOpenOrClosed(this, '#{contentId}')")
+  div.mapInfoTab(style={ 'background-color': color } onclick=`togglePanelOpenOrClosed(this, ${contentId});`)
     div #{label}
     div.reset
       if reset
         div.resetButton(onclick="event.stopPropagation(); resetFilter();") reset
       img(class="tabArrow" src="/images/arrow-right3.svg" style="")
-
-mixin stickyInfoTab(label, contentId, color, reset, stickyClass)
-  div(class="sticky " + stickyClass)
-    div(class="centerContentsViaFlex")
-      div.mapInfoTab(style="background-color: #{color}" onclick="togglePanelOpenOrClosed(this, '#{contentId}')")
-        div
-        div #{label}
-        div(style="padding-right:10px;").reset
-          if reset
-            div.resetButton(onclick="event.stopPropagation(); resetFilter();") reset
-          img(class="tabArrow" src="/images/arrow-right3.svg" style="")
 
 mixin mapInfoFilters(mapFilterParameters)
   div.mapInfoContent(class="hide" id="filterSettings" style="background-color: #e9f6f9")
@@ -82,9 +71,6 @@ mixin mapInfoHighlights(mapButtons)
                 img(src="#{btn.image}")
               if(btn.button_link != null)
                 img(src="/images/infoIcon.svg" style="height:20px; width:20px; position:absolute; right:3px; bottom:3px;" onMouseOver="this.src='/images/infoIconHover.svg'" onMouseOut="this.src='/images/infoIcon.svg'" onClick="openTab(arguments[0], '#{btn.button_link}');")
-
-
-
 
 
 
