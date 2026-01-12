@@ -222,6 +222,102 @@ html
 
       let currentTable = null;
 
+      // New client-side state for search, column filter and sorting
+      const currentTableData = {}; // raw fetched rows per tableName
+      let currentSearch = '';
+      const currentColumnFilter = { columnName: null, filterValue: '' };
+      const currentSort = { columnName: null, direction: 'asc' }; // direction: 'asc' or 'desc'
+
+      function getRowValueForColumn(row, colName) {
+        if (!row) return '';
+        // return primitive or stringify objects; ignore undefined/null as empty string
+        const v = row[colName];
+        if (v === null || v === undefined) return '';
+        if (typeof v === 'object') return JSON.stringify(v);
+        return String(v);
+      }
+
+      function applyFiltersAndSort(tableName) {
+        const raw = (currentTableData[tableName] || []).slice();
+        if (!raw || !raw.length) {
+          populateTable([], tableName);
+          return;
+        }
+
+        const columns = (tables[tableName] && tables[tableName].columns) || [];
+        const searchableCols = columns.filter(c => c.visible && c.name && c.type !== 'date');
+
+        // Filter: global search (across visible, named, non-date columns)
+        let filtered = raw.filter(row => {
+          // global search
+          if (currentSearch && currentSearch.trim()) {
+            const q = currentSearch.trim().toLowerCase();
+            const hit = searchableCols.some(col => {
+              const val = getRowValueForColumn(row, col.name).toLowerCase();
+              return val.indexOf(q) !== -1;
+            });
+            if (!hit) return false;
+          }
+
+          // column-value filter
+          if (currentColumnFilter.columnName && currentColumnFilter.filterValue && currentColumnFilter.filterValue.trim()) {
+            const q = currentColumnFilter.filterValue.trim().toLowerCase();
+            const val = getRowValueForColumn(row, currentColumnFilter.columnName).toLowerCase();
+            if (val.indexOf(q) === -1) return false;
+          }
+
+          return true;
+        });
+
+        // Sort
+        if (currentSort.columnName) {
+          const col = currentSort.columnName;
+          const dir = currentSort.direction === 'desc' ? -1 : 1;
+          filtered.sort((a, b) => {
+            const va = getRowValueForColumn(a, col);
+            const vb = getRowValueForColumn(b, col);
+            const na = Number(va);
+            const nb = Number(vb);
+            // treat empty as greater (so they go to end)
+            const aEmpty = va === '';
+            const bEmpty = vb === '';
+            if (aEmpty && bEmpty) return 0;
+            if (aEmpty) return 1;
+            if (bEmpty) return -1;
+            if (!Number.isNaN(na) && !Number.isNaN(nb)) {
+              return (na - nb) * dir;
+            }
+            // string compare case-insensitive
+            const sa = va.toLowerCase();
+            const sb = vb.toLowerCase();
+            if (sa < sb) return -1 * dir;
+            if (sa > sb) return 1 * dir;
+            return 0;
+          });
+        }
+
+        populateTable(filtered, tableName);
+      }
+
+      function populateColumnPicker(tableName) {
+        const picker = document.getElementById('columnPicker');
+        if (!picker) return;
+        picker.innerHTML = '';
+        const emptyOpt = document.createElement('option');
+        emptyOpt.value = '';
+        emptyOpt.textContent = '-- Column filter --';
+        picker.appendChild(emptyOpt);
+        const columns = (tables[tableName] && tables[tableName].columns) || [];
+        columns.forEach(col => {
+          if (col.visible && col.name && col.type !== 'date') {
+            const opt = document.createElement('option');
+            opt.value = col.name;
+            opt.textContent = col.label || col.name;
+            picker.appendChild(opt);
+          }
+        });
+      }
+
       function onTableSelected(selectedTable) {
         if (selectedTable) {
           return fetchTableData(selectedTable)
@@ -244,7 +340,19 @@ html
             return response.json();
           })
           .then(data => {
-            return populateTable(data, tableName);
+            // store raw data for this table and populate controls
+            currentTableData[tableName] = Array.isArray(data) ? data : [];
+            populateColumnPicker(tableName);
+            // reset column filter selections when switching tables
+            currentColumnFilter.columnName = null;
+            currentColumnFilter.filterValue = '';
+            const picker = document.getElementById('columnPicker');
+            if (picker) picker.value = '';
+            const columnFilterInput = document.getElementById('columnFilter');
+            if (columnFilterInput) columnFilterInput.value = '';
+            // apply filters and sorting (initial render)
+            applyFiltersAndSort(tableName);
+            return Promise.resolve();
           })
           .catch(error => {
             console.error('Error fetching data:', error);
@@ -253,9 +361,10 @@ html
       }
 
       function populateTable(data, tableName) {
+        // data is already filtered and sorted
         if (!data || !data.length) {
           clearTable();
-          return;
+          return Promise.resolve();
         }
 
         const headerRow = document.getElementById('headerRow');
@@ -267,23 +376,37 @@ html
         const columns = tables[tableName].columns;
         columns.forEach(column => {
           if (column.visible) {
-            headerRow.innerHTML += `<th data-column="${column.label}">${column.label}</th>`;
+            const th = document.createElement('th');
+            th.textContent = column.label || column.name || '';
+            if (column.name) {
+              th.setAttribute('data-col-name', column.name);
+              th.style.cursor = 'pointer';
+              th.className = 'sortable';
+              // sort indicator
+              const indicator = document.createElement('span');
+              indicator.className = 'sortIndicator';
+              indicator.style.marginLeft = '8px';
+              if (currentSort.columnName === column.name) {
+                indicator.textContent = currentSort.direction === 'asc' ? ' ▲' : ' ▼';
+              }
+              th.appendChild(indicator);
+
+              th.onclick = () => {
+                if (currentSort.columnName === column.name) {
+                  currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                  currentSort.columnName = column.name;
+                  currentSort.direction = 'asc';
+                }
+                applyFiltersAndSort(tableName);
+              };
+            }
+            headerRow.appendChild(th);
           }
         });
 
-        const firstVisibleColumn = columns.find(col => col.visible);
-        if (firstVisibleColumn) {
-          data.sort((a, b) => {
-            const valueA = a[firstVisibleColumn.name];
-            const valueB = b[firstVisibleColumn.name];
-            if (valueA < valueB) return -1;
-            if (valueA > valueB) return 1;
-            return 0;
-          });
-        }
-
         data.forEach(row => {
-          let tr = document.createElement('tr');
+          const tr = document.createElement('tr');
           columns.forEach(column => {
             if (column.visible) {
               let td = document.createElement('td');
@@ -608,6 +731,66 @@ html
               });
             } else {
               alert('Unknown modal mode: ' + modalMode);
+            }
+          });
+        }
+
+        // Global search input
+        const globalSearchInput = document.getElementById('globalSearch');
+        if (globalSearchInput) {
+          globalSearchInput.addEventListener('input', function() {
+            const value = this.value;
+            currentSearch = value;
+            if (currentTable) {
+              applyFiltersAndSort(currentTable);
+            }
+          });
+        }
+
+        // Column picker change
+        const columnPicker = document.getElementById('columnPicker');
+        if (columnPicker) {
+          columnPicker.addEventListener('change', function() {
+            const columnName = this.value;
+            currentColumnFilter.columnName = columnName;
+            const columnFilterInput = document.getElementById('columnFilter');
+            if (columnFilterInput) {
+              columnFilterInput.value = '';
+              currentColumnFilter.filterValue = '';
+            }
+            if (currentTable) {
+              applyFiltersAndSort(currentTable);
+            }
+          });
+        }
+
+        // Column value filter input
+        const columnFilterInput = document.getElementById('columnFilter');
+        if (columnFilterInput) {
+          columnFilterInput.addEventListener('input', function() {
+            const value = this.value;
+            currentColumnFilter.filterValue = value;
+            if (currentTable) {
+              applyFiltersAndSort(currentTable);
+            }
+          });
+        }
+
+        // Clear filters button
+        const clearFiltersButton = document.getElementById('clearFilters');
+        if (clearFiltersButton) {
+          clearFiltersButton.addEventListener('click', function() {
+            currentSearch = '';
+            currentColumnFilter.columnName = null;
+            currentColumnFilter.filterValue = '';
+            const globalSearchInput = document.getElementById('globalSearch');
+            if (globalSearchInput) globalSearchInput.value = '';
+            const columnPicker = document.getElementById('columnPicker');
+            if (columnPicker) columnPicker.value = '';
+            const columnFilterInput = document.getElementById('columnFilter');
+            if (columnFilterInput) columnFilterInput.value = '';
+            if (currentTable) {
+              applyFiltersAndSort(currentTable);
             }
           });
         }
@@ -1008,6 +1191,14 @@ html
 
     main.main-col
       div.container
+
+        div(style="margin-top:10px; margin-bottom:10px;")
+          input#globalSearch(type="text", placeholder="Global search...", style="padding:8px; border:1px solid #ddd; border-radius:4px; width:100%;")
+        div(style="display:flex; gap:10px; margin-bottom:10px;")
+          select#columnPicker(style="padding:8px; border:1px solid #ddd; border-radius:4px; flex:1")
+          input#columnFilter(type="text", placeholder="Column value filter...", style="padding:8px; border:1px solid #ddd; border-radius:4px; flex:2")
+          button#clearFilters(type="button", style="padding:8px 12px; border:1px solid #ddd; border-radius:4px; background-color:#f44336; color:white;") Clear Filters
+
         div.horizontalFlex
           h1#tableTitle
           if user
