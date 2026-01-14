@@ -7,6 +7,23 @@ mixin textInShape(textValue, colorValue, percentFill, radius)
     div(style="height:100px; width:100px; position:absolute; border:solid; border-radius:#{radius};")
     div(style="height:100px; width:100px; position:absolute; align-items:center; display:flex; justify-content:center;") #{textValue}
 
+mixin dataManagementHeader()
+  header
+    div(class="nav-container")
+      div(class="logo-container")
+        img(src="/images/UBHub_logo_mainwebsite.svg")
+      div
+        div(class="login-container")
+          button(class="menu-toggle")
+      nav(role='navigation' aria-label="main navigation")
+        ul()
+          li(onclick="window.location='/'") Home
+  div(style="background:white; flex-grow:1;")
+
+    div(style="width:100%;")
+
+  div(style="width=100%; height: 110px;")
+
 mixin header(displayLoginInfo)
   header
     div(class="nav-container")

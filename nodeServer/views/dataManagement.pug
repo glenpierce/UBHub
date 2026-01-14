@@ -1,4 +1,5 @@
 doctype html
+include mixins
 html
   head
     script.
@@ -1120,7 +1121,7 @@ html
         }
 
         .table-container {
-            max-height: 70vh;
+            max-height: 60vh;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
@@ -1171,14 +1172,13 @@ html
         }
 
         /* New scoped helpers for this view */
-        .pageTopPadding { padding-top: 40px; }
         .globalSearchContainer { margin-top: 10px; margin-bottom: 10px; }
         .row-controls { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .dataManagementInput { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
         #globalSearch { width: 100%; }
         .flex-1 { flex: 1; }
         .flex-2 { flex: 2; }
-        .clearFilters { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: #2962b0; color: white; cursor: pointer; }
+        .clearFilters { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: #0c6082; color: white; cursor: pointer; }
         .userAlias { margin-left: 12px; font-size: 14px; color: #555; }
         .hidden { display: none !important; }
         .userNameContainer { margin: 50px 0px; }
@@ -1204,7 +1204,8 @@ html
 
 
   body
-  div.pageTopPadding
+  +dataManagementHeader
+  div
 
   div.layout
     aside.left-col

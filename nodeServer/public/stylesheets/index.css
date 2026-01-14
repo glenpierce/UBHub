@@ -1,5 +1,4 @@
 header {
-  max-width: 900px;
   margin: auto;
   position: fixed;
   right: 0;
@@ -7,7 +6,7 @@ header {
   z-index: 2;
 }
 header .login-container {
-  background: #b8ddc3;
+  background: #0c6082;;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -37,11 +36,11 @@ header img {
 header nav {
   display: flex;
   justify-content: space-between;
-  background: #eff6e8;
+  background: #0c6082;
 }
 @media (min-width: 930px) {
   header nav {
-    width: 80%;
+    width: 100%;
     float: right;
     position: static;
     align-self: end;
@@ -62,7 +61,7 @@ header nav ul {
 header nav li {
   padding: 10px;
   cursor: pointer;
-  color: #316b59;
+  color: white;
   font-weight: 700;
   list-style: none;
 }
