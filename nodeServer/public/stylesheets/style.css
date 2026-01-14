@@ -23,26 +23,122 @@
   }
 }
 
-.sticky {
-  position: sticky;
+header {
+  margin: auto;
+  position: fixed;
+  right: 0;
+  left: 0;
+  z-index: 2;
+}
+header .login-container {
+  background: #0c6082;;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1em;
+}
+@media (min-width: 930px) {
+  header .logo-container {
+    position: absolute;
+  }
+}
+header .nav-container {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column-reverse;
+}
+@media (min-width: 930px) {
+  header .nav-container {
+    flex-direction: column;
+  }
+}
+header img {
+  max-width: 100%;
+  height: auto;
+  width: 200px;
+}
+header nav {
+  display: flex;
+  justify-content: space-between;
+  background: #0c6082;
+}
+@media (min-width: 930px) {
+  header nav {
+    width: 100%;
+    float: right;
+    position: static;
+    align-self: end;
+  }
+}
+header nav ul {
+  display: none;
+}
+@media (min-width: 930px) {
+  header nav ul {
+    display: flex;
+    justify-content: space-around;
+    flex-grow: 1;
+    padding-left: 0;
+    margin: 0;
+  }
+}
+header nav li {
+  padding: 10px;
+  cursor: pointer;
+  color: white;
+  font-weight: 700;
+  list-style: none;
+}
+@media (min-width: 930px) {
+  header {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.menu-toggle {
+  background: transparent;
+  width: 40px;
+  height: 23px;
+  border: 3px solid #141414;
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+  position: relative;
+  z-index: 999999999;
+}
+@media (min-width: 930px) {
+  .menu-toggle {
+    display: none;
+  }
+}
+
+.menu-toggle::before {
+  content: " ";
+  width: 40px;
+  border-top: 3px solid #141414;
+  position: absolute;
+  left: 0;
+  top: 7px;
+}
+
+button.menu-toggle:hover {
+  background-color: transparent;
+}
+
+button.menu-toggle:active {
+  background-color: transparent;
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+}
+
+.active-nav {
+  display: block;
   width: 100%;
 }
 
-.sticky > .mapInfoTab {
-  max-width: 800px !important;
-}
-
-.stickyFirst {
-  top: 65px;
-}
-
-.stickySecond {
-  top: 85px;
-}
-
-.stickyThird {
-  top: 105px;
-}
 
 body {
   margin: 0px;
@@ -246,14 +342,6 @@ button.small {
   border:solid; border-width:1px; border-color:grey; display:table-cell; padding: 5px;
 }
 
-.record{
-  padding-bottom: 20px; cursor: pointer; display:table-row;
-}
-
-.record:hover{
-  border:solid; border-color: #00B7FF;
-}
-
 .select{
   flex-grow: 1; margin-left:5px;
 }
@@ -268,30 +356,6 @@ button.small {
 
 .bigLabel{
   font-size:18px; font-weight:700;
-}
-
-.homePageWhiteBox{
-  background-color:white; border-radius:10px; height: 40px; width: 120px; padding:20px; margin:10px; color:#326f90; font-weight:700; display:flex; justify-content:center; align-items:center; text-align:center;
-}
-
-.homePageWhiteBoxWide{
-  background-color:white; border-radius:10px; height: 40px; width: 160px; padding:20px; margin:10px; color:#326f90; font-weight:700; display:flex; justify-content:center; align-items:center; text-align:center;
-}
-
-.indexBox{
-  border:solid; border-radius:10px; border-color:#326f90; height:80px; width:140px; border-width:1px; margin:10px; text-align:center; color:#326f90; display:flex; align-items:center; justify-content:center; font-size:13px;
-}
-
-.smallText{
-  font-size: 10px; padding-bottom: 10px;
-}
-
-.keyFlexbox{
-  display: flex; align-items: center;
-}
-
-.keyFlexboxLine{
-  display: flex; height:40px; width:40px; align-items: center; justify-content: center;
 }
 
 .button{
@@ -315,264 +379,6 @@ button.small {
   border: 1px solid #aaa;
   border-radius: 5px;
   padding: 12px;
-}
-
-/**Forum**/
-
-.spacer {
-  height: 48px;
-}
-
-.forumHeader {
-  display: flex;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #aaa;
-}
-
-.forumHeader>div {
-  display: flex;
-  flex-grow: 1;
-}
-
-.forumHeader .searchOption input {
-  padding: 6px;
-  width: 300px;
-  border-radius: 5px 0 0 5px;
-  border: 1px solid #aaa;
-}
-
-.forumHeader .searchOption button {
-  height: 100%;
-  border-radius: 0 5px 5px 0;
-  border: 1px solid #aaa;
-  border-width: 1px 1px 1px 0;
-  cursor: pointer;
-
-}
-
-.forumHeader .sortOption {
-  padding: 6px;
-}
-
-.forumHeader .sortOption span {
-  margin-left: 4px;
-  cursor:pointer;
-
-}
-
-.forumHeader .sortOption span.active {
-  font-weight: bold;
-  cursor: default;
-}
-
-.forumHeader .askOption{
-  justify-content: flex-end;
-}
-
-.forumHeader .askOption button {
-  height: 100%;
-  border-radius: 5px;
-  border: 1px solid #aaa;
-  cursor: pointer;
-
-}
-
-.forumAsker {
-    font-size: 12px;
-    line-height: 1;
-    margin-bottom: 4px;
-}
-
-h2.forumTitle {
-  margin-top: 4px;
-}
-
-h3.forumTitle {
-  margin-top: 4px;
-}
-
-p.postBody {
-  white-space: pre-wrap;
-  line-height: 1.4;
-}
-
-.CodeMirror, .CodeMirror-scroll {
-  height: 100%;
-  max-height: 300px;
-  min-height: 100px;
-}
-
-.forumPostVotes {
-  display: inline-block;
-  width: 36px;
-}
-
-.forumPostVotes>span {
-  display: block;
-  color: #333;
-
-}
-
-.forumPostVotes>span.votesDelta {
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.forumPostVotes>span.upvotes, .forumPostVotes>span.downvotes {
-  font-size: 12px;
-  color: #666;
-}
-
-
-.postLinkContent {
-  display: inline-block;
-}
-
-.postLinkStatus {
-  font-size: 12px;
-}
-
-.postLinkStatus a{
-  font-weight: bold;
-}
-
-.forumPostMeta {
-  padding: 12px 0;
-}
-
-.forumPostMeta>span{
-  background: #d3e9d5;
-  padding: 4px 8px;
-  margin-right: 4px;
-  border-radius: 16px;
-  font-weight: 700;
-}
-
-.forumPostMeta span span.number {
-  background-color: #d3e9d5;
-  padding: 2px;
-  margin-left: 4px;
-  font-weight: 400;
-}
-
-.forumPostMeta>span.upvotes, .forumPostMeta>span.downvotes {
-  cursor: pointer;
-}
-
-.forumPostMeta .replyButton {
-  float: right;
-  padding: 4px 8px;
-}
-
-.singleComment {
-  border-top: 1px solid #aaa;
-  margin-top: 12px;
-}
-
-.comments {
-  padding-left: 40px;
-}
-
-.responseBox.hide {
-  display: none;
-}
-
-.responseBox label{
-  display: block;
-  font-weight: 700;
-}
-
-.responseBox textarea {
-  height: 200px;
-  width: 480px;
-  resize: none;
-
-}
-
-.responseBox input {
-  display: block;
-}
-
-#askForm {
-  margin-top: 24px;
-}
-
-#askForm.highlighted label {
-  background-color: #ffef94;
-}
-
-#askForm label {
-  font-weight: bold;
-  margin-bottom: 8px;
-  display: block;
-  transition: all 0.5s;
-}
-
-#askForm input {
-  width: 100%;
-  max-width:480px;
-  display: block;
-  padding: 4px;
-  margin-bottom: 12px;
-}
-
-#askForm textarea {
-  width: 100%;
-  display: block;
-  margin-bottom: 12px;
-  resize: none;
-  padding: 4px;
-  height: 320px;
-}
-
-.indexPostLinks .singlePostLink {
-  padding: 10px 10px 10px 40px;
-  background-color: #fff;
-  border: 1px #36806a solid;
-  border-radius: 5px;
-  margin-top: 5px;
-}
-
-.singlePostLink h3 {transition: all 0.5s;}
-.singlePostLink h3:hover {color:#36806a;}
-
-.singlePostLink.focused {
-  background-color: #d8ecd4;
-}
-
-
-.singlePostLink.accepted {
-  background-color: #d8ecd4;
-}
-
-
-.singlePostLink .acceptedBadge {
-  display: block;
-  background-color: #269973;
-  color: #fff;
-  padding: 12px;
-  margin-left: -24px;
-  border-radius: 0 5px 5px 0;
-  width: 180px;
-  font-weight: 700;
-  font-style: italic;
-  text-transform: uppercase;
-}
-
-.forumPager {
-  text-align: center;
-}
-
-.forumPager .pager {
-  margin-top: 12px;
-  margin-bottom: 12px;
-  font-size: 24px;
-}
-
-.forumPager .pageButton {
-  text-decoration: none;
-  margin: 12px;
-  cursor:pointer;
 }
 
 /*Map*/
@@ -850,73 +656,3 @@ div.mapValuesControl span.disabled {
   color: #b6d5e3;
   cursor: default;
 }
-
-.bioBackground {
-  background:#daecf1; padding:10px 7px 10px 13px; height:280px; border-radius:0px 20px 20px 0px; width:100%;
-}
-
-.aboutUsHeader {
-  background:var(--blue1, #07456b); color:white; text-align:center; padding:5px; font-size:22px;
-}
-
-
-/*
-UBHUBCOLORS
-Blue
-1  07456b
-2  326f90 dark blue
-4  4490ba
-5  71afd1
-6  93c2d9
-7  b6d5e3 medium blue
-9  daecf1
-10 e9f6f9 light blue
-
-Orange
-E3965C
-
-Green
-1  235449
-2  3b7e6a
-3  269973 dark green
-4  2fb585
-5  70ba8f
-6  91cfa8
-7  acd9bb medium green
-8  c1e3cd
-9  d8ecd4
-10 eff6e8 light green
-
-Yellow
-1  683d1a
-2  8c5222
-3  c58c2b dark yellow
-5  e7b627
-6  fcd350
-7  ffe57b medium yellow
-8  ffef94
-9  fff1b6
-10 fffceb
-
-Red
-1  742109
-2  a63720
-3  d82d27
-4  f2613a
-5  f69056
-6  fab279
-
-Black
-1  000000
-2  10% gradient
-3
-4
-5
-6
-7
-8
-9
-10
-11 5% black
-
-*/
