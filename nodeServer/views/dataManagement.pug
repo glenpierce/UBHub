@@ -22,11 +22,16 @@ html
       }
 
       const navMenuOnClickHandlers = {
-        openMyProfileModal: openMyProfileModalFunction
+        openMyProfileModal: openMyProfileModalFunction,
+        openMap: openMapFunction
       };
 
       function openMyProfileModalFunction() {
         document.getElementById('modalOverlayMyProfile').classList.remove('hidden');
+      }
+
+      function openMapFunction() {
+        window.location = '/map';
       }
 
       function closeMyProfileModalFunction() {
@@ -406,10 +411,16 @@ html
         data.forEach(row => {
           const tr = document.createElement('tr');
           columns.forEach(column => {
-            if (column.visible) {
+            if (column.name === 'data') {
               let td = document.createElement('td');
               populateCell(row, column, td);
               tr.appendChild(td);
+            } else {
+              if (column.visible) {
+                let td = document.createElement('td');
+                populateCell(row, column, td);
+                tr.appendChild(td);
+              }
             }
           });
           tableBody.appendChild(tr);
@@ -418,6 +429,11 @@ html
       }
 
       function populateCell(row, column, td) {
+        if(column.name === 'data') {
+
+          td.textContent = JSON.stringify(row.data.part_name || row.data.inst_title || row.data.doc_title || '');
+          return;
+        }
         if (column.button) {
           const button = document.createElement('button');
           button.textContent = column.label || column.button;
@@ -927,7 +943,6 @@ html
             flex: 0 0 180px; /* fixed sidebar width */
             border-right: 1px solid #e5e5e5;
             background: #fff;
-            height: 100vh;
             position: sticky;
             top: 60px;
             overflow-y: auto;
@@ -1177,7 +1192,7 @@ html
         #globalSearch { width: 100%; }
         .flex-1 { flex: 1; }
         .flex-2 { flex: 2; }
-        .clearFilters { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: #0c6082; color: white; cursor: pointer; }
+        .clearFilters { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; background-color: var(--dataHubBlue); color: white; cursor: pointer; }
         .userAlias { margin-left: 12px; font-size: 14px; color: #555; }
         .hidden { display: none !important; }
         .userNameContainer { margin: 50px 0px; }

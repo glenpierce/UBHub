@@ -131,7 +131,7 @@ const tables = {
       {name: 'operation', label: 'Operation', visible: true},
       {name: 'status', label: 'Status', visible: true, renderFunction: 'submissionStatusRenderer'},
       {name: 'version', label: 'Version', visible: false},
-      {name: 'data', label: 'Data', visible: false},
+      {name: 'data', label: 'Data', visible: true},
       {name: 'created_by', label: 'Submitted By', visible: true},
       {name: 'created_at', label: 'Submitted At', visible: true},
       {name: 'approved_by', label: 'Reviewed By', visible: true},
@@ -166,6 +166,7 @@ function addExecutiveFunctions(tablesForUser) {
 
 function getNavMenuForUser(req) {
   const navigationMenu = [];
+  navigationMenu.push(menuCandidates[9]); // Map
   if (req.session.user && req.session.privileges >= 2) {
     navigationMenu.push(menuCandidates[0]); // Programs
     navigationMenu.push(menuCandidates[1]); // Institutions
@@ -180,7 +181,10 @@ function getNavMenuForUser(req) {
 
   if (req.session.user) {
     navigationMenu.push(menuCandidates[6]); // My Profile
+    navigationMenu.push(menuCandidates[11]); // UBHubber Resources
   }
+
+  navigationMenu.push(menuCandidates[10]); // Resources
 
   if (req.session.user && req.session.privileges >= 3) {
     navigationMenu.push(menuCandidates[7]); // Approvals
@@ -202,7 +206,10 @@ const menuCandidates = [
   {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Users'},
   {onClick: 'openMyProfileModal', icon: '/icons/profileIcon.svg', label: 'My Profile'},
   {tableKey: 'row_versions', icon: '/icons/approveIcon.svg', label: 'Approvals'},
-  {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Manage Users'}
+  {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Manage Users'},
+  {onClick: 'openMap', icon: '/icons/mapIcon.svg', label: 'Map'},
+  {onClick: '', icon: '/icons/resourcesIcon.svg', label: 'Resources'},
+  {onClick: '', icon: '/icons/resourcesIcon.svg', label: 'UBHubber Resources'},
 ];
 
 router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req, res) => {

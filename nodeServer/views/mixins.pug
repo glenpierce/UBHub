@@ -11,18 +11,15 @@ mixin dataManagementHeader()
   header
     div(class="nav-container")
       div(class="logo-container")
-        img(src="/images/UBHub_logo_mainwebsite.svg")
-      div
-        div(class="login-container")
-          button(class="menu-toggle")
+        img(src="/images/UBHub_logo_for_dark_background.png" style="width:120px;")
+        img(src="/images/dataHubLogo.png" style="width:170px;")
       nav(role='navigation' aria-label="main navigation")
         ul()
           li(onclick="window.location='/'") Home
+          li Logout
   div(style="background:white; flex-grow:1;")
 
     div(style="width:100%;")
-
-  div(style="width=100%; height: 110px;")
 
 mixin header(displayLoginInfo)
   header
