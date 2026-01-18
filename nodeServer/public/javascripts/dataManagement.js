@@ -357,7 +357,20 @@ class TableView {
     this.columnFilterInputElement = document.querySelector(this.selectors.columnFilter);
     this.clearFiltersButtonElement = document.querySelector(this.selectors.clearFilters);
 
+    // Only these table keys are allowed to show the Add New Entry button.
+    // Programs -> mapButtons, Locations -> locations, Documents -> documents, Participations -> participation
+    this.allowedAddTables = new Set(['mapButtons', 'locations', 'documents', 'participation']);
+
     this._wireGlobalControls();
+
+    // Ensure initial visibility is correct (no table selected yet).
+    this.updateAddButtonVisibility(null);
+  }
+
+  updateAddButtonVisibility(tableName) {
+    if (!this.addButtonElement) return;
+    const shouldShow = tableName && this.allowedAddTables.has(tableName);
+    this.addButtonElement.style.display = shouldShow ? '' : 'none';
   }
 
   renderNavMenu() {
@@ -439,6 +452,7 @@ class TableView {
     if (!selectedTable) {
       this.clearTable();
       this.manager.selectedTable = null;
+      this.updateAddButtonVisibility(null);
       return Promise.resolve();
     }
     return this.manager.fetchTableData(selectedTable)
@@ -446,6 +460,8 @@ class TableView {
         this.tableTitleElement.textContent = this.manager.tables[selectedTable].displayName;
         this.manager.selectedTable = selectedTable;
         this.populateColumnPicker(selectedTable);
+        // Update add button visibility based on selected table
+        this.updateAddButtonVisibility(selectedTable);
         this.manager.applyFiltersAndSort(selectedTable);
       })
       .catch(err => { console.error('Error fetching data', err); alert('Error: ' + err.message); });
@@ -573,6 +589,8 @@ class TableView {
   clearTable() {
     if (this.headerRowElement) this.headerRowElement.innerHTML = '';
     if (this.tableBodyElement) this.tableBodyElement.innerHTML = '';
+    // hide Add New Entry button when no table selected
+    this.updateAddButtonVisibility(null);
   }
 }
 
