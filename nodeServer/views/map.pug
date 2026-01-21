@@ -4,7 +4,6 @@ include mapMixins
 html
   +mapHead
   link(rel='stylesheet', href='/stylesheets/style.css')
-  link(rel='stylesheet', href='/stylesheets/index.css')
   script.
     function searchMap() {
       filterBySearch(document.getElementById("searchBox").value);
@@ -29,14 +28,14 @@ body
 
     div#map
 
-    +mapInfoTab("Results Summary", "mapInfoSummary", "#b2b2b2", false)
+    +mapInfoTab("Results Summary", `"mapInfoSummary"`, "#b2b2b2", false)
     +mapInfoSummary(mapSummary)
 
-    +mapInfoTab("Highlight Results", "highlightSettings", "#f69056", true)
+    +mapInfoTab("Highlight Results", `"highlightSettings"`, "#f69056", true)
     +mapInfoHighlights(mapButtons)
 
-    +mapInfoTab("Filter Results", "filterSettings", "#6da4c7", true)
+    +mapInfoTab("Filter Results", `"filterSettings"`, "#6da4c7", true)
     +mapInfoFilters(mapFilterParameters)
 
-    +mapInfoTab("Table of Results", "mapInfoResults", "#98d2bd", false)
+    +mapInfoTab("Table of Results", `"mapInfoResults"`, "#98d2bd", false)
     +mapInfoResults(mapData)
