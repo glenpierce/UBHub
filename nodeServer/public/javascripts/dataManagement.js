@@ -681,6 +681,11 @@ class ModalManager {
     this.modalTitleElement = document.getElementById('modalTitle');
     this.profileOverlayElement = document.getElementById('modalOverlayMyProfile');
 
+    // Focus management state
+    this._previouslyFocusedElement = null;
+    this._focusableSelectors = 'a[href], area[href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, [tabindex]:not([tabindex="-1"]), [contenteditable]';
+    this._focusableElements = [];
+
     if (this.modalFormElement) {
       this.modalFormElement.addEventListener('submit', (e) => this._onSubmit(e));
     }
@@ -700,15 +705,52 @@ class ModalManager {
       } catch (err) { /* ignore */ }
     };
 
+    // single keydown handler handles Escape and Tab focus trapping
     this._boundOnKeyDown = (event) => {
       try {
         if (!event) return;
+
+        // ESC closes any visible modal
         const key = event.key || event.keyIdentifier || '';
         if (key === 'Escape' || key === 'Esc') {
           const modalVisible = this.modalOverlayElement && !this.modalOverlayElement.classList.contains('hidden');
           const profileVisible = this.profileOverlayElement && !this.profileOverlayElement.classList.contains('hidden');
           if (modalVisible || profileVisible) {
+            event.preventDefault();
             this.close();
+          }
+          return;
+        }
+
+        // Tab/Shift+Tab trapping
+        if (key === 'Tab') {
+          const activeOverlay = (this.modalOverlayElement && !this.modalOverlayElement.classList.contains('hidden')) ? this.modalOverlayElement
+                                : (this.profileOverlayElement && !this.profileOverlayElement.classList.contains('hidden')) ? this.profileOverlayElement
+                                : null;
+          if (!activeOverlay) return;
+
+          const modalElement = activeOverlay.querySelector('.modal');
+          if (!modalElement) return;
+
+          this._updateFocusableElements(modalElement);
+          if (this._focusableElements.length === 0) {
+            // if nothing focusable, keep focus on modal container
+            event.preventDefault();
+            if (!modalElement.hasAttribute('tabindex')) modalElement.setAttribute('tabindex', '-1');
+            modalElement.focus();
+            return;
+          }
+
+          const first = this._focusableElements[0];
+          const last = this._focusableElements[this._focusableElements.length - 1];
+          const active = document.activeElement;
+
+          if (!event.shiftKey && active === last) {
+            event.preventDefault();
+            first.focus();
+          } else if (event.shiftKey && active === first) {
+            event.preventDefault();
+            last.focus();
           }
         }
       } catch (err) { /* ignore */ }
@@ -716,13 +758,68 @@ class ModalManager {
 
     if (this.modalOverlayElement) {
       this.modalOverlayElement.addEventListener('click', this._boundOnOverlayClick);
+      // Make modal container accessible
+      const modalContainer = this.modalOverlayElement.querySelector('.modal');
+      if (modalContainer) {
+        modalContainer.setAttribute('role', 'dialog');
+        modalContainer.setAttribute('aria-modal', 'true');
+        if (this.modalTitleElement && this.modalTitleElement.id) {
+          modalContainer.setAttribute('aria-labelledby', this.modalTitleElement.id);
+        }
+      }
     }
     if (this.profileOverlayElement) {
       this.profileOverlayElement.addEventListener('click', this._boundOnOverlayClick);
+      const profileModalContainer = this.profileOverlayElement.querySelector('.modal');
+      if (profileModalContainer) {
+        profileModalContainer.setAttribute('role', 'dialog');
+        profileModalContainer.setAttribute('aria-modal', 'true');
+        // profile overlay may not have a dedicated title element; use aria-label fallback
+        profileModalContainer.setAttribute('aria-label', 'My profile');
+      }
     }
 
-    // Listen for Escape key to close modals
+    // Listen for Escape and Tab to close/trap focus
     document.addEventListener('keydown', this._boundOnKeyDown);
+  }
+
+  // Helper: update list of focusable elements within a modal element
+  _updateFocusableElements(modalElement) {
+    if (!modalElement) { this._focusableElements = []; return; }
+    const nodeList = modalElement.querySelectorAll(this._focusableSelectors);
+    this._focusableElements = Array.from(nodeList).filter(el => {
+      // filter out elements that are not visible
+      try {
+        return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+      } catch (err) { return false; }
+    });
+  }
+
+  _savePreviouslyFocused() {
+    try { this._previouslyFocusedElement = document.activeElement; } catch (err) { this._previouslyFocusedElement = null; }
+  }
+
+  _restoreFocus() {
+    try {
+      if (this._previouslyFocusedElement && document.contains(this._previouslyFocusedElement)) {
+        this._previouslyFocusedElement.focus();
+      } else {
+        // fallback: focus body
+        document.body && document.body.focus && document.body.focus();
+      }
+    } catch (err) { /* ignore */ }
+    this._previouslyFocusedElement = null;
+  }
+
+  _focusFirstElementIn(modalElement) {
+    if (!modalElement) return;
+    this._updateFocusableElements(modalElement);
+    if (this._focusableElements.length > 0) {
+      try { this._focusableElements[0].focus(); } catch (err) { /* ignore */ }
+    } else {
+      if (!modalElement.hasAttribute('tabindex')) modalElement.setAttribute('tabindex', '-1');
+      try { modalElement.focus(); } catch (err) { /* ignore */ }
+    }
   }
 
   open(mode = 'add', tableName = null, rowData = null) {
@@ -733,24 +830,42 @@ class ModalManager {
     this._currentTable = tableName;
     this._currentRow = rowData;
 
+    // Save focus before opening
+    this._savePreviouslyFocused();
+
     if (mode === 'profile') {
       this.profileOverlayElement && this.profileOverlayElement.classList.remove('hidden');
+      const profileModal = this.profileOverlayElement && this.profileOverlayElement.querySelector('.modal');
+      // set ARIA labelledby if possible
+      if (profileModal && !profileModal.hasAttribute('aria-labelledby')) {
+        const userNameEl = profileModal.querySelector('.userNameContainer');
+        if (userNameEl && userNameEl.id) profileModal.setAttribute('aria-labelledby', userNameEl.id);
+      }
+      this._focusFirstElementIn(profileModal || this.profileOverlayElement);
     } else if (mode === 'review') {
       this.buildModalForReview(rowData);
       this.modalOverlayElement && this.modalOverlayElement.classList.remove('hidden');
+      const mainModal = this.modalOverlayElement && this.modalOverlayElement.querySelector('.modal');
+      this._focusFirstElementIn(mainModal || this.modalOverlayElement);
     } else if (mode === 'add') {
       this.buildModalForTable(tableName);
       this.modalOverlayElement && this.modalOverlayElement.classList.remove('hidden');
+      const mainModal = this.modalOverlayElement && this.modalOverlayElement.querySelector('.modal');
+      this._focusFirstElementIn(mainModal || this.modalOverlayElement);
     } else if (mode === 'edit') {
       this.buildModalForTable(tableName);
       this._populateEditValues(rowData);
       this.modalOverlayElement && this.modalOverlayElement.classList.remove('hidden');
+      const mainModal = this.modalOverlayElement && this.modalOverlayElement.querySelector('.modal');
+      this._focusFirstElementIn(mainModal || this.modalOverlayElement);
     }
   }
 
   close() {
     this.modalOverlayElement && this.modalOverlayElement.classList.add('hidden');
     this.profileOverlayElement && this.profileOverlayElement.classList.add('hidden');
+    // restore focus after closing
+    this._restoreFocus();
   }
 
   _populateEditValues(rowData) {
