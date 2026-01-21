@@ -684,6 +684,45 @@ class ModalManager {
     if (this.modalFormElement) {
       this.modalFormElement.addEventListener('submit', (e) => this._onSubmit(e));
     }
+
+    // Dismiss modal when clicking on the overlay (outside the modal content)
+    // and when pressing the Escape key.
+    // Use bound handlers so they can be removed later if needed.
+    this._boundOnOverlayClick = (event) => {
+      try {
+        if (event && event.target) {
+          if (this.modalOverlayElement && event.target === this.modalOverlayElement) {
+            this.close();
+          } else if (this.profileOverlayElement && event.target === this.profileOverlayElement) {
+            this.close();
+          }
+        }
+      } catch (err) { /* ignore */ }
+    };
+
+    this._boundOnKeyDown = (event) => {
+      try {
+        if (!event) return;
+        const key = event.key || event.keyIdentifier || '';
+        if (key === 'Escape' || key === 'Esc') {
+          const modalVisible = this.modalOverlayElement && !this.modalOverlayElement.classList.contains('hidden');
+          const profileVisible = this.profileOverlayElement && !this.profileOverlayElement.classList.contains('hidden');
+          if (modalVisible || profileVisible) {
+            this.close();
+          }
+        }
+      } catch (err) { /* ignore */ }
+    };
+
+    if (this.modalOverlayElement) {
+      this.modalOverlayElement.addEventListener('click', this._boundOnOverlayClick);
+    }
+    if (this.profileOverlayElement) {
+      this.profileOverlayElement.addEventListener('click', this._boundOnOverlayClick);
+    }
+
+    // Listen for Escape key to close modals
+    document.addEventListener('keydown', this._boundOnKeyDown);
   }
 
   open(mode = 'add', tableName = null, rowData = null) {
