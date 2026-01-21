@@ -34,11 +34,20 @@ html
 
       div
         div
-          div.table-container
-            table.data-table#dataTable
-              thead
-                tr#headerRow
-              tbody#tableBody
+          div.table-and-map
+            div.table-container
+              table.data-table#dataTable
+                thead
+                  tr#headerRow
+                tbody#tableBody
+
+            // Inline map container (hidden by default). The map iframe will be shown here
+            div.map-container.hidden#mapContainer
+              .map-header
+                h2 Map
+                button.map-close(type="button" onclick="closeMapOverlay()") Close
+              .map-body
+                iframe#mapIframe(src="about:blank" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" style="width:100%;height:70vh;")
 
 // Modal overlay for adding a new entry
 .modal-overlay#modalOverlay.hidden

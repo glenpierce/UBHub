@@ -132,7 +132,17 @@ class TableManager {
       openEditLocationModal: (rowData) => this.modalManager && this.modalManager.open('edit', 'locations', rowData),
       openEditDocumentModal: (rowData) => this.modalManager && this.modalManager.open('edit', 'documents', rowData),
       openEditProgramParticipationModal: (rowData) => this.modalManager && this.modalManager.open('edit', 'participation', rowData),
-      openMyProfileModal: () => this.modalManager && this.modalManager.open('profile')
+      openMyProfileModal: () => this.modalManager && this.modalManager.open('profile'),
+      // open the map overlay iframe so users remain on the data-management page
+      openMap: () => {
+        const mapContainer = document.getElementById('mapContainer');
+        const mapIframe = document.getElementById('mapIframe');
+        if (mapIframe) {
+          // set src only when opening to avoid unnecessary loads
+          mapIframe.src = '/map';
+        }
+        if (mapContainer) mapContainer.classList.remove('hidden');
+      }
     };
   }
 
@@ -361,10 +371,39 @@ class TableView {
     // Programs -> mapButtons, Locations -> locations, Documents -> documents, Participations -> participation
     this.allowedAddTables = new Set(['mapButtons', 'locations', 'documents', 'participation']);
 
+    // filter containers (toggled based on whether a table is selected)
+    this.filterContainers = {
+      globalSearchContainer: document.querySelector('.globalSearchContainer'),
+      rowControlsContainer: document.querySelector('.row-controls')
+    };
+
+    // ensure filters are hidden when no table selected initially
+    this._setFilterVisibility(false);
+
     this._wireGlobalControls();
 
     // Ensure initial visibility is correct (no table selected yet).
     this.updateAddButtonVisibility(null);
+  }
+
+  // Show or hide the global filters area
+  _setFilterVisibility(show) {
+    const gs = this.filterContainers.globalSearchContainer;
+    const rc = this.filterContainers.rowControlsContainer;
+    if (gs) {
+      if (show) gs.classList.remove('hidden'); else gs.classList.add('hidden');
+    }
+    if (rc) {
+      if (show) rc.classList.remove('hidden'); else rc.classList.add('hidden');
+    }
+  }
+
+  // Hide the inline map overlay and clear the iframe src to stop active scripts
+  _hideMapOverlay() {
+    const mapContainer = document.getElementById('mapContainer');
+    const mapIframe = document.getElementById('mapIframe');
+    if (mapContainer) mapContainer.classList.add('hidden');
+    if (mapIframe) mapIframe.src = 'about:blank';
   }
 
   updateAddButtonVisibility(tableName) {
@@ -453,6 +492,8 @@ class TableView {
       this.clearTable();
       this.manager.selectedTable = null;
       this.updateAddButtonVisibility(null);
+      // hide filters when no table selected
+      this._setFilterVisibility(false);
       return Promise.resolve();
     }
     return this.manager.fetchTableData(selectedTable)
@@ -462,6 +503,9 @@ class TableView {
         this.populateColumnPicker(selectedTable);
         // Update add button visibility based on selected table
         this.updateAddButtonVisibility(selectedTable);
+        // hide inline map overlay when a table is opened and show filters
+        this._hideMapOverlay();
+        this._setFilterVisibility(true);
         this.manager.applyFiltersAndSort(selectedTable);
       })
       .catch(err => { console.error('Error fetching data', err); alert('Error: ' + err.message); });
@@ -591,6 +635,8 @@ class TableView {
     if (this.tableBodyElement) this.tableBodyElement.innerHTML = '';
     // hide Add New Entry button when no table selected
     this.updateAddButtonVisibility(null);
+    // hide filters when clearing table
+    this._setFilterVisibility(false);
   }
 }
 
@@ -859,21 +905,38 @@ document.addEventListener('DOMContentLoaded', () => {
   const currentUser = configuration.user || null;
 
   const tableManager = new TableManager({tables, navMenu: navigationMenu});
-  tableManager.currentUser = currentUser; // store user for future use
+  tableManager.currentUser = currentUser;
   const tableView = new TableView(tableManager);
   const modalManager = new ModalManager(tableManager);
 
-  // attach modal close helper to global functions used in Pug markup where applicable
   window.closeModal = () => modalManager.close();
   window.openMyProfileModalFunction = () => modalManager.open('profile');
   window.closeMyProfileModalFunction = () => modalManager.close();
   window.addNewEntry = () => { if (!tableManager.selectedTable) { alert('Please select a table first.'); return; } modalManager.open('add', tableManager.selectedTable); };
+
+  window.closeMapOverlay = () => {
+    const mapContainer = document.getElementById('mapContainer');
+    const mapIframe = document.getElementById('mapIframe');
+    if (mapContainer) mapContainer.classList.add('hidden');
+    if (mapIframe) {
+      mapIframe.src = 'about:blank'; // clear src to stop active scripts and free resources
+    }
+  };
 
   // expose a few objects for debugging in console
   window.__dataManagement = {tableManager, tableView, modalManager};
 
   // initial render of nav menu
   tableView.renderNavMenu();
+
+  // open map overlay by default on initial page load (invokes the existing handler)
+  try {
+    if (tableManager && tableManager.actionHandlerMap && typeof tableManager.actionHandlerMap.openMap === 'function') {
+      tableManager.actionHandlerMap.openMap();
+    }
+  } catch (err) {
+    console.error('Failed to open map overlay by default:', err);
+  }
 
   // Wire up nav clicks: nav items with tableKey call tableView.onTableSelected
   // Already wired in renderNavMenu
