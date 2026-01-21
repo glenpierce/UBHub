@@ -23,10 +23,10 @@ function fetchJson(url, options = {}) {
 }
 
 function debounce(fn, wait = 200) {
-  let timerId;
+  let timer;
   return (...args) => {
-    clearTimeout(timerId);
-    timerId = setTimeout(() => fn(...args), wait);
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), wait);
   };
 }
 
@@ -52,8 +52,8 @@ class RendererRegistry {
   constructor() {
     this.registryMap = new Map();
   }
-  register(name, fn) {
-    this.registryMap.set(name, fn);
+  register(name, rendererFunction) {
+    this.registryMap.set(name, rendererFunction);
   }
   get(name) {
     return this.registryMap.get(name);
@@ -137,11 +137,19 @@ class TableManager {
       openMap: () => {
         const mapContainer = document.getElementById('mapContainer');
         const mapIframe = document.getElementById('mapIframe');
-        if (mapIframe) {
-          // set src only when opening to avoid unnecessary loads
-          mapIframe.src = '/map';
-        }
+        // set src only when opening to avoid unnecessary loads
+        if (mapIframe) mapIframe.src = '/map';
+        // show the map overlay
         if (mapContainer) mapContainer.classList.remove('hidden');
+        // hide the main table area so the map takes focus
+        try {
+          const tableContainer = document.querySelector('.table-container');
+          if (tableContainer) tableContainer.classList.add('hidden');
+        } catch (err) { /* ignore */ }
+        // ensure filters are hidden while map is open
+        if (this.tableView && typeof this.tableView._setFilterVisibility === 'function') {
+          this.tableView._setFilterVisibility(false);
+        }
       }
     };
   }
@@ -388,13 +396,13 @@ class TableView {
 
   // Show or hide the global filters area
   _setFilterVisibility(show) {
-    const gs = this.filterContainers.globalSearchContainer;
-    const rc = this.filterContainers.rowControlsContainer;
-    if (gs) {
-      if (show) gs.classList.remove('hidden'); else gs.classList.add('hidden');
+    const globalSearchContainerElement = this.filterContainers.globalSearchContainer;
+    const rowControlsContainerElement = this.filterContainers.rowControlsContainer;
+    if (globalSearchContainerElement) {
+      if (show) globalSearchContainerElement.classList.remove('hidden'); else globalSearchContainerElement.classList.add('hidden');
     }
-    if (rc) {
-      if (show) rc.classList.remove('hidden'); else rc.classList.add('hidden');
+    if (rowControlsContainerElement) {
+      if (show) rowControlsContainerElement.classList.remove('hidden'); else rowControlsContainerElement.classList.add('hidden');
     }
   }
 
@@ -404,6 +412,28 @@ class TableView {
     const mapIframe = document.getElementById('mapIframe');
     if (mapContainer) mapContainer.classList.add('hidden');
     if (mapIframe) mapIframe.src = 'about:blank';
+  }
+
+  // Show the main table area and filters when a table is selected (used after closing the map overlay
+  // or when a table is selected). This centralizes DOM updates so the logic isn't duplicated.
+  showTable() {
+    // Ensure the inline map overlay is hidden and any active iframe scripts are stopped
+    try {
+      this._hideMapOverlay();
+    } catch (err) { /* ignore */ }
+
+    // Show the main table container only if a table is selected
+    try {
+      const tableContainerElement = document.querySelector('.table-container');
+      if (tableContainerElement && this.manager && this.manager.selectedTable) tableContainerElement.classList.remove('hidden');
+    } catch (err) { /* ignore */ }
+
+    // Show global filters and row controls only when a table is selected
+    if (this.manager && this.manager.selectedTable) {
+      try {
+        this._setFilterVisibility(true);
+      } catch (err) { /* ignore */ }
+    }
   }
 
   updateAddButtonVisibility(tableName) {
@@ -417,28 +447,28 @@ class TableView {
     if (!container) return;
     container.innerHTML = '';
     (this.manager.navMenu || []).forEach(menuItem => {
-      const div = document.createElement('div');
-      div.className = 'clickable';
+      const navItemElement = document.createElement('div');
+      navItemElement.className = 'clickable';
       if (menuItem.onClick) {
-        div.onclick = () => {
+        navItemElement.onclick = () => {
           const handlerFunction = this.manager.actionHandlerMap[menuItem.onClick];
           if (handlerFunction && typeof handlerFunction === 'function') {
             handlerFunction();
           }
         };
       } else if (menuItem.tableKey) {
-        div.onclick = () => this.onTableSelected(menuItem.tableKey);
+        navItemElement.onclick = () => this.onTableSelected(menuItem.tableKey);
       }
       if (menuItem.icon) {
-        const img = document.createElement('img');
-        img.className = 'nav-icon';
-        img.src = menuItem.icon;
-        img.alt = menuItem.label + ' icon';
-        div.appendChild(img);
+        const imageElement = document.createElement('img');
+        imageElement.className = 'nav-icon';
+        imageElement.src = menuItem.icon;
+        imageElement.alt = menuItem.label + ' icon';
+        navItemElement.appendChild(imageElement);
       }
-      const text = document.createTextNode(' ' + (menuItem.label || menuItem.tableKey));
-      div.appendChild(text);
-      container.appendChild(div);
+      const textNodeElement = document.createTextNode(' ' + (menuItem.label || menuItem.tableKey));
+      navItemElement.appendChild(textNodeElement);
+      container.appendChild(navItemElement);
     });
   }
 
@@ -451,15 +481,15 @@ class TableView {
     }
 
     if (this.globalSearchInputElement) {
-      this.globalSearchInputElement.addEventListener('input', (e) => {
-        this.manager.globalSearchQuery = e.target.value;
+      this.globalSearchInputElement.addEventListener('input', (event) => {
+        this.manager.globalSearchQuery = event.target.value;
         if (this.manager.selectedTable) this.manager.applyFiltersAndSort(this.manager.selectedTable);
       });
     }
 
     if (this.columnPickerElement) {
-      this.columnPickerElement.addEventListener('change', (e) => {
-        this.manager.columnFilter.columnName = e.target.value || null;
+      this.columnPickerElement.addEventListener('change', (event) => {
+        this.manager.columnFilter.columnName = event.target.value || null;
         this.columnFilterInputElement.value = '';
         this.manager.columnFilter.filterValue = '';
         if (this.manager.selectedTable) this.manager.applyFiltersAndSort(this.manager.selectedTable);
@@ -467,8 +497,8 @@ class TableView {
     }
 
     if (this.columnFilterInputElement) {
-      this.columnFilterInputElement.addEventListener('input', (e) => {
-        this.manager.columnFilter.filterValue = e.target.value;
+      this.columnFilterInputElement.addEventListener('input', (event) => {
+        this.manager.columnFilter.filterValue = event.target.value;
         if (this.manager.selectedTable) this.manager.applyFiltersAndSort(this.manager.selectedTable);
       });
     }
@@ -504,28 +534,28 @@ class TableView {
         // Update add button visibility based on selected table
         this.updateAddButtonVisibility(selectedTable);
         // hide inline map overlay when a table is opened and show filters
-        this._hideMapOverlay();
-        this._setFilterVisibility(true);
+        // use the centralized helper to show the table area and filters
+        this.showTable();
         this.manager.applyFiltersAndSort(selectedTable);
       })
       .catch(err => { console.error('Error fetching data', err); alert('Error: ' + err.message); });
   }
 
   populateColumnPicker(tableName) {
-    const picker = this.columnPickerElement;
-    if (!picker) return;
-    picker.innerHTML = '';
-    const emptyOption = document.createElement('option');
-    emptyOption.value = '';
-    emptyOption.textContent = '-- Column filter --';
-    picker.appendChild(emptyOption);
+    const columnPickerElement = this.columnPickerElement;
+    if (!columnPickerElement) return;
+    columnPickerElement.innerHTML = '';
+    const emptyOptionElement = document.createElement('option');
+    emptyOptionElement.value = '';
+    emptyOptionElement.textContent = '-- Column filter --';
+    columnPickerElement.appendChild(emptyOptionElement);
     const columns = (this.manager.tables[tableName] && this.manager.tables[tableName].columns) || [];
     columns.forEach(column => {
       if (column.visible && column.name && column.type !== 'date') {
-        const opt = document.createElement('option');
-        opt.value = column.name;
-        opt.textContent = column.label || column.name;
-        picker.appendChild(opt);
+        const optionElement = document.createElement('option');
+        optionElement.value = column.name;
+        optionElement.textContent = column.label || column.name;
+        columnPickerElement.appendChild(optionElement);
       }
     });
   }
@@ -535,27 +565,27 @@ class TableView {
       this.clearTable();
       return;
     }
-    const headerRow = this.headerRowElement;
-    const tableBody = this.tableBodyElement;
-    headerRow.innerHTML = '';
-    tableBody.innerHTML = '';
+    const headerRowElement = this.headerRowElement;
+    const tableBodyElement = this.tableBodyElement;
+    headerRowElement.innerHTML = '';
+    tableBodyElement.innerHTML = '';
 
     const columns = this.manager.tables[tableName].columns;
     columns.forEach(column => {
       if (column.visible) {
-        const th = document.createElement('th');
-        th.textContent = column.label || column.name || '';
+        const tableHeaderCellElement = document.createElement('th');
+        tableHeaderCellElement.textContent = column.label || column.name || '';
         if (column.name) {
-          th.setAttribute('data-col-name', column.name);
-          th.className = 'sortable';
-          const indicator = document.createElement('span');
-          indicator.className = 'sortIndicator';
+          tableHeaderCellElement.setAttribute('data-col-name', column.name);
+          tableHeaderCellElement.className = 'sortable';
+          const sortIndicatorElement = document.createElement('span');
+          sortIndicatorElement.className = 'sortIndicator';
           if (this.manager.sortState.columnName === column.name) {
-            indicator.textContent = this.manager.sortState.direction === 'asc' ? ' ▲' : ' ▼';
+            sortIndicatorElement.textContent = this.manager.sortState.direction === 'asc' ? ' ▲' : ' ▼';
           }
-          th.appendChild(indicator);
+          tableHeaderCellElement.appendChild(sortIndicatorElement);
 
-          th.onclick = () => {
+          tableHeaderCellElement.onclick = () => {
             if (this.manager.sortState.columnName === column.name) {
               this.manager.sortState.direction = this.manager.sortState.direction === 'asc' ? 'desc' : 'asc';
             } else {
@@ -565,26 +595,26 @@ class TableView {
             this.manager.applyFiltersAndSort(tableName);
           };
         }
-        headerRow.appendChild(th);
+        headerRowElement.appendChild(tableHeaderCellElement);
       }
     });
 
     data.forEach(rowData => {
-      const tr = document.createElement('tr');
+      const tableRowElement = document.createElement('tr');
       columns.forEach(column => {
         if (column.name === 'data') {
-          const td = document.createElement('td');
-          td.textContent = JSON.stringify(rowData.data?.part_name || rowData.data?.inst_title || rowData.data?.doc_title || '');
-          tr.appendChild(td);
+          const tableDataCellElement = document.createElement('td');
+          tableDataCellElement.textContent = JSON.stringify(rowData.data?.part_name || rowData.data?.inst_title || rowData.data?.doc_title || '');
+          tableRowElement.appendChild(tableDataCellElement);
         } else {
           if (column.visible) {
-            const td = document.createElement('td');
-            this._populateCell(rowData, column, td);
-            tr.appendChild(td);
+            const tableDataCellElement = document.createElement('td');
+            this._populateCell(rowData, column, tableDataCellElement);
+            tableRowElement.appendChild(tableDataCellElement);
           }
         }
       });
-      tableBody.appendChild(tr);
+      tableBodyElement.appendChild(tableRowElement);
     });
   }
 
@@ -921,6 +951,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mapIframe) {
       mapIframe.src = 'about:blank'; // clear src to stop active scripts and free resources
     }
+    // centralize showing the table area & filters via the tableView helper
+    try { tableView.showTable(); } catch (err) { /* ignore */ }
   };
 
   // expose a few objects for debugging in console

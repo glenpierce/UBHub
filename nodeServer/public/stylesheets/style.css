@@ -120,7 +120,6 @@ header nav li {
     header nav ul {
         flex-direction: column;
         background: var(--dataHubBlue);
-        position: absolute;
         top: 100%;
         left: 0;
         width: 100%;
