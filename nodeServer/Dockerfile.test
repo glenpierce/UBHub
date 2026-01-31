@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 # Copy package manifests first for layer caching
 COPY package.json package-lock.json* ./
 
-# If a package-lock.json exists use npm ci, otherwise fall back to npm install
-RUN if [ -f package-lock.json ]; then npm ci --quiet; else npm install --quiet; fi
+# Use npm install (with legacy-peer-deps) to avoid failing on mismatched/absent lockfiles in CI
+RUN npm install --legacy-peer-deps --no-audit --no-fund --silent
 
 # Copy the rest of the application source
 COPY . ./
