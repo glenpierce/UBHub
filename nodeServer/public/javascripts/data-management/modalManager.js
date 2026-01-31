@@ -153,40 +153,147 @@ export class ModalRenderer {
     });
   }
 
-  buildModalForReview(titleElement, fieldsContainer, rowData) {
-    if (!titleElement || !fieldsContainer) return;
-    titleElement.textContent = `Review Submission - ${rowData.operation.charAt(0).toUpperCase() + rowData.operation.slice(1)}`;
+  buildModalForReview(manager, titleElement, fieldsContainer, rowData) {
+    // Show a side-by-side read-only comparison between the current row in the referenced
+    // table and the pending change stored in `row_versions` (rowData).
+    if (!titleElement || !fieldsContainer || !rowData) return;
+
+    const operationText = String(rowData.operation || '').charAt(0).toUpperCase() + String(rowData.operation || '').slice(1);
+    titleElement.textContent = `Review Submission - ${operationText}`;
     fieldsContainer.innerHTML = '';
 
-    let dataObject = {};
-    if (rowData && rowData.data) {
-      try { dataObject = (typeof rowData.data === 'string') ? JSON.parse(rowData.data) : rowData.data; }
-      catch (err) { dataObject = { data: rowData.data }; }
-    }
+    // Parse pending data and row key
+    let pendingData = {};
+    try { pendingData = (typeof rowData.data === 'string') ? JSON.parse(rowData.data) : (rowData.data || {}); }
+    catch (err) { pendingData = { data: rowData.data }; }
 
-    if (!dataObject || Object.keys(dataObject).length === 0) {
-      fieldsContainer.innerHTML = '<div class="form-row">No data fields available</div>';
-    } else {
-      for (const [key, value] of Object.entries(dataObject)) {
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'form-row';
-        const label = document.createElement('label');
-        label.setAttribute('for', `field_${key}`);
-        label.textContent = key;
-        rowDiv.appendChild(label);
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.id = `${key}`;
-        input.name = key;
-        input.value = (value === null || value === undefined) ? '' : (typeof value === 'object' ? JSON.stringify(value) : value);
-        input.setAttribute('data-col-name', key);
-        input.placeholder = `Enter ${key}`;
-        input.disabled = true;
-        rowDiv.appendChild(input);
-        fieldsContainer.appendChild(rowDiv);
+    let rowKeyObject = {};
+    try { rowKeyObject = (typeof rowData.row_key === 'string') ? JSON.parse(rowData.row_key) : (rowData.row_key || {}); }
+    catch (err) { rowKeyObject = { row_key: rowData.row_key }; }
+
+    const tableName = rowData.table_name;
+
+    // Attempt to find the current row in the manager cache
+    let currentRow = null;
+    try {
+      const cache = (manager && manager.tableDataCache && manager.tableDataCache[tableName]) || [];
+      if (Array.isArray(cache) && Object.keys(rowKeyObject).length > 0) {
+        currentRow = cache.find(r => {
+          try {
+            return Object.keys(rowKeyObject).every(k => {
+              const a = (r && r[k] !== undefined && r[k] !== null) ? String(r[k]) : '';
+              const b = (rowKeyObject[k] !== undefined && rowKeyObject[k] !== null) ? String(rowKeyObject[k]) : '';
+              return a === b;
+            });
+          } catch (err) { return false; }
+        }) || null;
       }
+    } catch (err) { currentRow = null; }
+
+    // Determine which field names to show. Prefer client-side meta if available, otherwise
+    // union of keys from currentRow and pendingData.
+    let fieldKeys = [];
+    if (manager && manager.tables && manager.tables[tableName] && Array.isArray(manager.tables[tableName].columns)) {
+      fieldKeys = manager.tables[tableName].columns
+        .filter(c => c && c.name)
+        .map(c => c.name);
     }
 
+    if (!fieldKeys || fieldKeys.length === 0) {
+      // fall back to keys present in data objects
+      const keySet = new Set();
+      if (currentRow) Object.keys(currentRow).forEach(k => keySet.add(k));
+      Object.keys(pendingData || {}).forEach(k => keySet.add(k));
+      fieldKeys = Array.from(keySet);
+    }
+
+    if (!fieldKeys || fieldKeys.length === 0) {
+      fieldsContainer.innerHTML = '<div class="form-row">No data fields available</div>';
+      return;
+    }
+
+    // Header row indicating Current vs Pending
+    const headerRow = document.createElement('div');
+    headerRow.className = 'form-row review-header';
+    const blankHeader = document.createElement('label');
+    blankHeader.className = 'review-field-label';
+    blankHeader.textContent = '';
+    headerRow.appendChild(blankHeader);
+    const currentHeader = document.createElement('div');
+    currentHeader.className = 'review-column-header';
+    currentHeader.textContent = 'Current';
+    headerRow.appendChild(currentHeader);
+    const pendingHeader = document.createElement('div');
+    pendingHeader.className = 'review-column-header';
+    pendingHeader.textContent = 'Pending';
+    headerRow.appendChild(pendingHeader);
+    fieldsContainer.appendChild(headerRow);
+
+    // For each field, render a label + two read-only inputs and highlight differences
+    fieldKeys.forEach(key => {
+      const labelText = (manager && manager.tables && manager.tables[tableName])
+        ? ((manager.tables[tableName].columns || []).find(c => c && c.name === key)?.label || key)
+        : key;
+
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'form-row review-compare-row';
+
+      const label = document.createElement('label');
+      label.setAttribute('for', `review_field_${key}`);
+      label.textContent = labelText;
+      label.className = 'review-field-label';
+      rowDiv.appendChild(label);
+
+      // Current value
+      const currentValueContainer = document.createElement('div');
+      currentValueContainer.className = 'review-value review-current';
+      const currentInput = document.createElement('input');
+      currentInput.type = 'text';
+      currentInput.disabled = true;
+      currentInput.id = `current_${key}`;
+      const curValRaw = currentRow && Object.prototype.hasOwnProperty.call(currentRow, key) ? currentRow[key] : null;
+      const currentDisplay = (curValRaw === null || curValRaw === undefined) ? '' : (typeof curValRaw === 'object' ? JSON.stringify(curValRaw) : String(curValRaw));
+      currentInput.value = currentDisplay;
+      currentValueContainer.appendChild(currentInput);
+      rowDiv.appendChild(currentValueContainer);
+
+      // Pending value
+      const pendingValueContainer = document.createElement('div');
+      pendingValueContainer.className = 'review-value review-pending';
+      const pendingInput = document.createElement('input');
+      pendingInput.type = 'text';
+      pendingInput.disabled = true;
+      pendingInput.id = `pending_${key}`;
+      // pendingData may include only changed keys. If not present, for update show current value as pending (no change).
+      const pendingRaw = Object.prototype.hasOwnProperty.call(pendingData, key) ? pendingData[key] : undefined;
+      let pendingDisplay;
+      if (pendingRaw === undefined) {
+        // No change present in pending data. For delete operation, show a marker. For insert, pending contains values.
+        if (rowData.operation === 'delete') {
+          pendingDisplay = '(will be deleted)';
+        } else {
+          pendingDisplay = currentDisplay;
+        }
+      } else {
+        pendingDisplay = (pendingRaw === null || pendingRaw === undefined) ? '' : (typeof pendingRaw === 'object' ? JSON.stringify(pendingRaw) : String(pendingRaw));
+      }
+      pendingInput.value = pendingDisplay;
+      pendingValueContainer.appendChild(pendingInput);
+      rowDiv.appendChild(pendingValueContainer);
+
+      // Highlight if different
+      const normalize = v => (v === null || v === undefined) ? '' : (typeof v === 'object' ? JSON.stringify(v) : String(v));
+      const currentNorm = normalize(curValRaw);
+      const pendingNorm = normalize(pendingRaw === undefined ? (rowData.operation === 'delete' ? '(will be deleted)' : curValRaw) : pendingRaw);
+      if (currentNorm !== pendingNorm) {
+        pendingValueContainer.classList.add('changed');
+        pendingInput.classList.add('changed');
+      }
+
+      fieldsContainer.appendChild(rowDiv);
+    });
+
+    // Comments area (editable for reviewer)
     const commentsRow = document.createElement('div');
     commentsRow.className = 'form-row';
     const commentsLabel = document.createElement('label');
@@ -350,7 +457,7 @@ export class ModalManager {
     document.addEventListener('keydown', this._boundOnEscapeKeyDown);
   }
 
-  open(mode = 'add', tableName = null, rowData = null) {
+  async open(mode = 'add', tableName = null, rowData = null) {
     this.modalFormElement?.reset?.();
     this.modalTitleElement && (this.modalTitleElement.textContent = '');
     this.modalFieldsElement && (this.modalFieldsElement.innerHTML = '');
@@ -369,8 +476,19 @@ export class ModalManager {
       if (this.modalOverlayElement) this.modalOverlayElement.classList.add('hidden');
       if (this.profileOverlayElement) this.profileOverlayElement.classList.add('hidden');
 
+      // Ensure we have up-to-date rows for the referenced table so we can show current values
+      try {
+        const targetTable = rowData && rowData.table_name ? rowData.table_name : tableName;
+        if (targetTable && this.manager && typeof this.manager.fetchTableData === 'function') {
+          const cached = this.manager.tableDataCache && this.manager.tableDataCache[targetTable];
+          if (!Array.isArray(cached) || cached.length === 0) {
+            await this.manager.fetchTableData(targetTable);
+          }
+        }
+      } catch (err) { /* ignore fetch errors, we'll still render what we can */ }
+
       // preserve existing behavior: review content is built into the main modal fields/title
-      this.renderer.buildModalForReview(this.modalTitleElement, this.modalFieldsElement, rowData);
+      this.renderer.buildModalForReview(this.manager, this.modalTitleElement, this.modalFieldsElement, rowData);
       this.reviewOverlayElement && this.reviewOverlayElement.classList.remove('hidden');
       const mainModal = this.reviewOverlayElement && this.reviewOverlayElement.querySelector('.modal');
       this.focusTrap.attach(mainModal || this.reviewOverlayElement);
@@ -445,7 +563,7 @@ export class ModalManager {
       try {
         await this.apiClient.post(`/dataManagement/pending-change`, payload);
         this.close();
-        if (this.manager.selectedTable) await this.manager.fetchTableData(this.manager.selectedTable).then(() => this.manager.applyFiltersAndSort(this.manager.selectedTable));
+        if (this.manager && this.manager.selectedTable) await this.manager.fetchTableData(this.manager.selectedTable).then(() => this.manager.applyFiltersAndSort(this.manager.selectedTable));
       } catch (err) {
         console.error(err);
         alert('Submit error: ' + err.message);
