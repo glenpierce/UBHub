@@ -27,5 +27,21 @@ services:
       RDS_USER: root
       RDS_PASSWORD: my-secret-pw
 
+  node-server-test:
+    build:
+      context: ./nodeServer
+      dockerfile: Dockerfile.test
+    image: ubhub-node-test:latest
+    working_dir: /usr/src/app
+    environment:
+      NODE_ENV: test
+      CI: "true"
+    # Do not mount host node_modules to avoid platform mismatch; use named volume instead
+    volumes:
+      - ./nodeServer:/usr/src/app:cached
+      - node_server_node_modules:/usr/src/app/node_modules
+    entrypoint: ["sh", "-c", "npm ci && npm test"]
+
 volumes:
   ubhub_db_data:
+  node_server_node_modules:

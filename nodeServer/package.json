@@ -8,7 +8,8 @@
     "npm": "10.9.4"
   },
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "test": "vitest --run"
   },
   "dependencies": {
     "aws-sdk": "2.1692.0",
@@ -25,5 +26,8 @@
     "sass": "1.94.2",
     "serve-favicon": "2.5.1",
     "simplemde": "1.11.2"
+  },
+  "devDependencies": {
+    "vitest": "3.2.4"
   }
 }
