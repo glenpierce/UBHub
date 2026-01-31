@@ -681,6 +681,14 @@ class ModalManager {
     this.modalTitleElement = document.getElementById('modalTitle');
     this.profileOverlayElement = document.getElementById('modalOverlayMyProfile');
 
+    // New: review modal elements
+    this.reviewOverlayElement = document.getElementById('modalOverlayReview');
+    this.reviewFormElement = document.getElementById('modalFormReview');
+    this.reviewTitleElement = document.getElementById('modalTitleReview');
+    this.approveButtonElement = document.getElementById('approveReviewButton');
+    this.rejectButtonElement = document.getElementById('rejectReviewButton');
+    this.closeReviewButtonElement = document.getElementById('closeReviewButton');
+
     // Focus management state
     this._previouslyFocusedElement = null;
     this._focusableSelectors = 'a[href], area[href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, [tabindex]:not([tabindex="-1"]), [contenteditable]';
@@ -688,6 +696,21 @@ class ModalManager {
 
     if (this.modalFormElement) {
       this.modalFormElement.addEventListener('submit', (e) => this._onSubmit(e));
+    }
+
+    // Attach handlers for review buttons if present
+    if (this.reviewFormElement) {
+      // Prevent accidental submission if someone presses Enter inside review fields
+      this.reviewFormElement.addEventListener('submit', (e) => e.preventDefault());
+    }
+    if (this.approveButtonElement) {
+      this.approveButtonElement.addEventListener('click', () => this._submitReview('Approve'));
+    }
+    if (this.rejectButtonElement) {
+      this.rejectButtonElement.addEventListener('click', () => this._submitReview('Reject'));
+    }
+    if (this.closeReviewButtonElement) {
+      this.closeReviewButtonElement.addEventListener('click', () => this.close());
     }
 
     // Dismiss modal when clicking on the overlay (outside the modal content)
@@ -699,6 +722,8 @@ class ModalManager {
           if (this.modalOverlayElement && event.target === this.modalOverlayElement) {
             this.close();
           } else if (this.profileOverlayElement && event.target === this.profileOverlayElement) {
+            this.close();
+          } else if (this.reviewOverlayElement && event.target === this.reviewOverlayElement) {
             this.close();
           }
         }
@@ -715,7 +740,8 @@ class ModalManager {
         if (key === 'Escape' || key === 'Esc') {
           const modalVisible = this.modalOverlayElement && !this.modalOverlayElement.classList.contains('hidden');
           const profileVisible = this.profileOverlayElement && !this.profileOverlayElement.classList.contains('hidden');
-          if (modalVisible || profileVisible) {
+          const reviewVisible = this.reviewOverlayElement && !this.reviewOverlayElement.classList.contains('hidden');
+          if (modalVisible || profileVisible || reviewVisible) {
             event.preventDefault();
             this.close();
           }
@@ -726,6 +752,7 @@ class ModalManager {
         if (key === 'Tab') {
           const activeOverlay = (this.modalOverlayElement && !this.modalOverlayElement.classList.contains('hidden')) ? this.modalOverlayElement
                                 : (this.profileOverlayElement && !this.profileOverlayElement.classList.contains('hidden')) ? this.profileOverlayElement
+                                : (this.reviewOverlayElement && !this.reviewOverlayElement.classList.contains('hidden')) ? this.reviewOverlayElement
                                 : null;
           if (!activeOverlay) return;
 
@@ -776,6 +803,19 @@ class ModalManager {
         profileModalContainer.setAttribute('aria-modal', 'true');
         // profile overlay may not have a dedicated title element; use aria-label fallback
         profileModalContainer.setAttribute('aria-label', 'My profile');
+      }
+    }
+
+    // Also wire review overlay accessibility attributes
+    if (this.reviewOverlayElement) {
+      this.reviewOverlayElement.addEventListener('click', this._boundOnOverlayClick);
+      const reviewModalContainer = this.reviewOverlayElement.querySelector('.modal');
+      if (reviewModalContainer) {
+        reviewModalContainer.setAttribute('role', 'dialog');
+        reviewModalContainer.setAttribute('aria-modal', 'true');
+        if (this.reviewTitleElement && this.reviewTitleElement.id) {
+          reviewModalContainer.setAttribute('aria-labelledby', this.reviewTitleElement.id);
+        }
       }
     }
 
@@ -843,16 +883,28 @@ class ModalManager {
       }
       this._focusFirstElementIn(profileModal || this.profileOverlayElement);
     } else if (mode === 'review') {
+      // ensure all other overlays are hidden before showing review
+      if (this.modalOverlayElement) this.modalOverlayElement.classList.add('hidden');
+      if (this.profileOverlayElement) this.profileOverlayElement.classList.add('hidden');
+
       this.buildModalForReview(rowData);
-      this.modalOverlayElement && this.modalOverlayElement.classList.remove('hidden');
-      const mainModal = this.modalOverlayElement && this.modalOverlayElement.querySelector('.modal');
-      this._focusFirstElementIn(mainModal || this.modalOverlayElement);
+      this.reviewOverlayElement && this.reviewOverlayElement.classList.remove('hidden');
+      const mainModal = this.reviewOverlayElement && this.reviewOverlayElement.querySelector('.modal');
+      this._focusFirstElementIn(mainModal || this.reviewOverlayElement);
     } else if (mode === 'add') {
+      // ensure review/profile overlays hidden
+      if (this.reviewOverlayElement) this.reviewOverlayElement.classList.add('hidden');
+      if (this.profileOverlayElement) this.profileOverlayElement.classList.add('hidden');
+
       this.buildModalForTable(tableName);
       this.modalOverlayElement && this.modalOverlayElement.classList.remove('hidden');
       const mainModal = this.modalOverlayElement && this.modalOverlayElement.querySelector('.modal');
       this._focusFirstElementIn(mainModal || this.modalOverlayElement);
     } else if (mode === 'edit') {
+      // ensure review/profile overlays hidden
+      if (this.reviewOverlayElement) this.reviewOverlayElement.classList.add('hidden');
+      if (this.profileOverlayElement) this.profileOverlayElement.classList.add('hidden');
+
       this.buildModalForTable(tableName);
       this._populateEditValues(rowData);
       this.modalOverlayElement && this.modalOverlayElement.classList.remove('hidden');
@@ -864,6 +916,7 @@ class ModalManager {
   close() {
     this.modalOverlayElement && this.modalOverlayElement.classList.add('hidden');
     this.profileOverlayElement && this.profileOverlayElement.classList.add('hidden');
+    this.reviewOverlayElement && this.reviewOverlayElement.classList.add('hidden');
     // restore focus after closing
     this._restoreFocus();
   }
@@ -930,25 +983,6 @@ class ModalManager {
         this.modalFieldsElement.appendChild(rowDiv);
       }
     }
-
-    // decision & comments
-    const decisionRow = document.createElement('div');
-    decisionRow.className = 'form-row';
-    const decisionLabel = document.createElement('label');
-    decisionLabel.textContent = 'Decision';
-    decisionLabel.setAttribute('for', 'reviewDecision');
-    decisionRow.appendChild(decisionLabel);
-    const decisionSelect = document.createElement('select');
-    decisionSelect.id = 'reviewDecision';
-    decisionSelect.name = 'reviewDecision';
-    ['Approve', 'Reject'].forEach(optionValue => {
-      const optionElement = document.createElement('option');
-      optionElement.value = optionValue;
-      optionElement.text = optionValue;
-      decisionSelect.appendChild(optionElement);
-    });
-    decisionRow.appendChild(decisionSelect);
-    this.modalFieldsElement.appendChild(decisionRow);
 
     const commentsRow = document.createElement('div');
     commentsRow.className = 'form-row';
@@ -1047,7 +1081,6 @@ class ModalManager {
     event.preventDefault();
     if (this._currentMode === 'review') {
       if (!this._currentRow) { alert('No review row specified.'); return; }
-      const decision = document.getElementById('reviewDecision')?.value || '';
       const comments = document.getElementById('reviewComments')?.value || '';
       const payload = { id: this._currentRow.id, decision, comments };
       fetch(`/dataManagement/pending-change/review`, {
@@ -1078,6 +1111,21 @@ class ModalManager {
     }
 
     alert('Unknown modal mode: ' + this._currentMode);
+  }
+
+  _submitReview(decision) {
+    if (!this._currentRow) { alert('No review row specified.'); return; }
+    const comments = document.getElementById('reviewComments')?.value || '';
+    const payload = { id: this._currentRow.id, decision, comments };
+    fetch(`/dataManagement/pending-change/review`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+    }).then(response => {
+      if (!response.ok) throw new Error('Review submit failed');
+      return response.json();
+    }).then(() => {
+      this.close();
+      if (this.manager.selectedTable) this.manager.fetchTableData(this.manager.selectedTable).then(() => this.manager.applyFiltersAndSort(this.manager.selectedTable));
+    }).catch(err => { console.error(err); alert('Review submit error: ' + err.message); });
   }
 }
 
