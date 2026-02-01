@@ -61,10 +61,14 @@ mixin header(displayLoginInfo)
 
 script.
   window.onload = function () {
-    const navButton = document.querySelector('.menu-toggle');
+    const navigationToggleButton = document.querySelector('.menu-toggle');
     const activeButton = document.querySelector('nav ul');
-    navButton.addEventListener('click', (e) => {
-      if (e.target.nodeName == "BUTTON") {
+
+    if (!navigationToggleButton || !activeButton) {
+      return;
+    }
+    navigationToggleButton.addEventListener('click', (clickEvent) => {
+      if (clickEvent.target.nodeName == "BUTTON") {
         activeButton.classList.toggle('active-nav');
       }
     });
