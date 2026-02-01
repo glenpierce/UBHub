@@ -1,47 +1,25 @@
 services:
-  db:
-    container_name: ubhub_db
-    image: mysql:8
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: my-secret-pw
-      MYSQL_DATABASE: ubhub
-      MYSQL_USER: root
-      MYSQL_PASSWORD: my-secret-pw
-    ports:
-      - "3306:3306"
-    volumes:
-      - ubhub_db_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  ubhub:
-    environment:
-      # Override production secrets to point at the local MySQL container
-      RDS_HOST: 127.0.0.1
-      RDS_PORT: 3306
-      RDS_DATABASE: ubhub
-      RDS_USER: root
-      RDS_PASSWORD: my-secret-pw
-
-  node-server-test:
+  node:
+    container_name: ubhub_node_local
     build:
       context: ./nodeServer
       dockerfile: Dockerfile.test
-    image: ubhub-node-test:latest
+    image: ubhub-node-local:latest
     working_dir: /usr/src/app
-    environment:
-      NODE_ENV: test
-      CI: "true"
-    # Do not mount host node_modules to avoid platform mismatch; use named volume instead
+    ports:
+      - "3000:3000"
+    # Use an env_file so secrets are not stored in the compose file. Create a `.env.local` next to
+    # this compose file with the real credentials (see .env.local).
+    env_file: .env.local
+    # Mount the app source so edits are visible inside the container.
+    # Keep node_modules inside a named volume so npm runs happen in the container only.
     volumes:
       - ./nodeServer:/usr/src/app:cached
       - node_server_node_modules:/usr/src/app/node_modules
-    entrypoint: ["sh", "-c", "npm ci && npm test"]
+    # Run installs inside the container and then start the application.
+    # For iterative development you can remove the `npm ci` here and run it manually via `docker compose exec`.
+    command: ["sh", "-c", "npm ci --ignore-scripts --prefer-offline --no-audit && npm start"]
+    restart: unless-stopped
 
 volumes:
-  ubhub_db_data:
   node_server_node_modules:
