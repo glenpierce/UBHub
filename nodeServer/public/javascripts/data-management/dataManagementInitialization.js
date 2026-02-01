@@ -2,7 +2,6 @@ import { TableManager } from './tableManager.js';
 import { TableView } from './tableView.js';
 import { ModalManager } from './modalManager.js';
 import { Typeahead } from './typeahead.js';
-import { renderNavMenu } from "./navMenu.js";
 
 export function initializeDataManagement(config = window.dataManagementConfigFromServer || {}) {
   const tables = config.tablesForUser || {};
@@ -30,7 +29,7 @@ export function initializeDataManagement(config = window.dataManagementConfigFro
 
   window.__dataManagement = {tableManager, tableView, modalManager};
 
-  renderNavMenu(tableView);
+  tableView.renderNavMenu();
 
   try {
     if (tableManager && tableManager.actionHandlerMap && typeof tableManager.actionHandlerMap.openMap === 'function') {
