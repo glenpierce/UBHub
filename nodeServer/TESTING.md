@@ -35,7 +35,7 @@ Notes
 
 Troubleshooting
 - "Cannot connect to the Docker daemon": Start Docker Desktop on macOS and try again.
-- If tests fail with native build errors when installing dependencies, the test image may need extra system packages (e.g., build tools). Edit `nodeServer/Dockerfile.test` and add packages to `apt-get install`.
+- If tests fail with native build errors when installing dependencies, the test image may need extra system packages (e.g., build tools). Edit `nodeServer/Dockerfile` and add packages to `apt-get install` or build with the build-arg `INSTALL_BUILD_TOOLS=1`.
 - If you'd like to speed up subsequent builds, generate a `package-lock.json` (run `npm install` inside the container, commit the lockfile) so `npm ci` can be used.
 
 Expected output
@@ -45,10 +45,9 @@ Files added/modified for testing
 - Modified: `nodeServer/package.json` (added `test` script and `vitest` devDependency)
 - Added: `nodeServer/vitest.config.ts`
 - Added: `nodeServer/test/example.test.ts`
-- Added: `nodeServer/Dockerfile.test`
+- Added: `nodeServer/Dockerfile`
 - Added: `nodeServer/.dockerignore`
 - Added: `docker-compose.test.yml`
-- Added: `nodeServer/TESTING.md`
 
 If you want, I can also:
 - Add a GitHub Actions job that builds and runs the same test container in CI.

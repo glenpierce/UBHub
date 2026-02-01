@@ -102,7 +102,7 @@ Notes and troubleshooting
 
 - node_modules volume: the compose file mounts `nodeServer/` and uses a named volume for `node_modules`, so `npm ci` and module installs happen inside the container and do not modify the host. This keeps the host free of the installed dependencies for better isolation.
 
-- Engine warnings: the project `package.json` requests Node 22.x but the container is built on Node 18 in the provided Dockerfile.test. This results in an npm EBADENGINE warning but is not fatal. If you need exact engine parity, update the Dockerfile base image.
+- Engine warnings: the project `package.json` requests Node 22.x so the test image uses Node 22 to match the project's engine. If you need a different engine, edit `nodeServer/Dockerfile` to select another base image.
 
 Useful commands
 

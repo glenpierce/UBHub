@@ -3,7 +3,7 @@ services:
     container_name: ubhub_node_local
     build:
       context: ./nodeServer
-      dockerfile: Dockerfile.test
+      dockerfile: Dockerfile
     image: ubhub-node-local:latest
     working_dir: /usr/src/app
     ports:
