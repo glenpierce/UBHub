@@ -352,6 +352,8 @@ export class ModalManager {
     this.reviewOverlayElement = document.getElementById('modalOverlayReview');
     this.reviewFormElement = document.getElementById('modalFormReview');
     this.reviewTitleElement = document.getElementById('modalTitleReview');
+    // Capture the review-specific fields container so review rendering goes into the correct DOM node
+    this.reviewFieldsElement = document.getElementById('modalFieldsReview');
     this.approveButtonElement = document.getElementById('approveReviewButton');
     this.rejectButtonElement = document.getElementById('rejectReviewButton');
     this.closeReviewButtonElement = document.getElementById('closeReviewButton');
@@ -399,13 +401,15 @@ export class ModalManager {
     this._boundApproveClick = () => this._submitReview('Approve');
     this._boundRejectClick = () => this._submitReview('Reject');
     this._boundCloseReviewClick = () => this.close();
+    // Use a bound no-op submit handler for the review form so we can remove it later in destroy()
+    this._boundReviewFormSubmit = (e) => { e.preventDefault(); };
 
     // wire form submits
     if (this.modalFormElement) {
       this.modalFormElement.addEventListener('submit', this._boundOnSubmit);
     }
     if (this.reviewFormElement) {
-      this.reviewFormElement.addEventListener('submit', (e) => e.preventDefault());
+      this.reviewFormElement.addEventListener('submit', this._boundReviewFormSubmit);
     }
 
     if (this.approveButtonElement) {
@@ -487,8 +491,14 @@ export class ModalManager {
         }
       } catch (err) { /* ignore fetch errors, we'll still render what we can */ }
 
-      // preserve existing behavior: review content is built into the main modal fields/title
-      this.renderer.buildModalForReview(this.manager, this.modalTitleElement, this.modalFieldsElement, rowData);
+      // Build review UI into the review-specific title/fields when available. Fall back to main modal nodes
+      // to preserve backward compatibility with older templates.
+      this.renderer.buildModalForReview(
+        this.manager,
+        this.reviewTitleElement || this.modalTitleElement,
+        this.reviewFieldsElement || this.modalFieldsElement,
+        rowData
+      );
       this.reviewOverlayElement && this.reviewOverlayElement.classList.remove('hidden');
       const mainModal = this.reviewOverlayElement && this.reviewOverlayElement.querySelector('.modal');
       this.focusTrap.attach(mainModal || this.reviewOverlayElement);
@@ -523,7 +533,7 @@ export class ModalManager {
   destroy() {
     try {
       if (this.modalFormElement) this.modalFormElement.removeEventListener('submit', this._boundOnSubmit);
-      if (this.reviewFormElement) this.reviewFormElement.removeEventListener('submit', (e) => e.preventDefault());
+      if (this.reviewFormElement) this.reviewFormElement.removeEventListener('submit', this._boundReviewFormSubmit);
       if (this.approveButtonElement) this.approveButtonElement.removeEventListener('click', this._boundApproveClick);
       if (this.rejectButtonElement) this.rejectButtonElement.removeEventListener('click', this._boundRejectClick);
       if (this.closeReviewButtonElement) this.closeReviewButtonElement.removeEventListener('click', this._boundCloseReviewClick);
