@@ -30,7 +30,7 @@ export function initializeDataManagement(config = window.dataManagementConfigFro
 
   window.__dataManagement = {tableManager, tableView, modalManager};
 
-  renderNavMenu();
+  renderNavMenu(tableView);
 
   try {
     if (tableManager && tableManager.actionHandlerMap && typeof tableManager.actionHandlerMap.openMap === 'function') {

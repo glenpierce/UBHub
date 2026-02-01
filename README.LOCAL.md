@@ -118,6 +118,9 @@ docker compose -f docker-compose.local.yml down --remove-orphans
 
 # Rebuild and restart container
 docker compose -f docker-compose.local.yml up -d --build
+
+# restart node to pick up code changes
+docker compose -f docker-compose.local.yml restart node
 ```
 
 Security
