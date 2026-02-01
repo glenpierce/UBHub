@@ -21,3 +21,7 @@ No one letter names, this includes loop counters.
 Descriptive names for variables, functions, classes, and modules that clearly convey their purpose.
 Consistent casing style (e.g., camelCase for variables and functions, PascalCase for classes).
 Avoid using reserved keywords or names that may cause confusion.
+
+Dependency Management:
+All external libraries and frameworks must be versioned deterministically using a lock file (e.g., package-lock.json for npm).
+All versions numbers must be explicitly specified, avoiding the use of wildcards.
