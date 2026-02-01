@@ -40,15 +40,3 @@ Troubleshooting
 
 Expected output
 - Vitest prints test results to stdout from the container. A non-zero exit code means failing tests.
-
-Files added/modified for testing
-- Modified: `nodeServer/package.json` (added `test` script and `vitest` devDependency)
-- Added: `nodeServer/vitest.config.ts`
-- Added: `nodeServer/test/example.test.ts`
-- Added: `nodeServer/Dockerfile`
-- Added: `nodeServer/.dockerignore`
-- Added: `docker-compose.test.yml`
-
-If you want, I can also:
-- Add a GitHub Actions job that builds and runs the same test container in CI.
-- Add more example tests wired to actual application modules.

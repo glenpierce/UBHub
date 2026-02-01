@@ -15,7 +15,7 @@ System architecture (high level)
 - nodeServer/ — The main server application. A Node.js + Express app that implements the web UI and API endpoints (routes are under `nodeServer/routes/`). Views are server-rendered with Pug templates in `nodeServer/views/` and public assets are under `nodeServer/public/`.
 - MySQL database — Persistent storage for users, submissions and application data. The repository includes `databaseTools.sql` with the schema and seed statements to initialise the database.
 - Docker — The repository contains compose files to run the app in containers for local development (`docker-compose.local.yml`) and for running tests (`docker-compose.test.yml`). The local compose file expects database connection details via env file and uses `host.docker.internal` on macOS to reach the host DB when required.
-- Tests — Unit and integration tests run inside a Docker test image; test files are located under `nodeServer/test/` and test configuration is in `nodeServer/vitest.config.ts`.
+- Tests — Unit and integration tests run inside a Docker test image; test files are located under `nodeServer/test/` and test configuration is in `nodeServer/vitest.config.js`.
 - Tools and utilities — Helper scripts and tooling live in `nodeServer/tools/` (database helpers, session decoding utilities, etc.).
 
 If you prefer a simple mental model: the server (nodeServer) is the application hexagon (business logic + routing + views) and the database and Docker compose are external adapters used for persistence and local runtime.
