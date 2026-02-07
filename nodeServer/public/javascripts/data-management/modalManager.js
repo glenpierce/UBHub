@@ -288,6 +288,8 @@ export class ModalRenderer {
       if (currentNorm !== pendingNorm) {
         pendingValueContainer.classList.add('changed');
         pendingInput.classList.add('changed');
+        // mark the entire row as changed for row-level highlighting/alignment
+        rowDiv.classList.add('changed');
       }
 
       fieldsContainer.appendChild(rowDiv);
