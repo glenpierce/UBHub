@@ -5,7 +5,7 @@ html
     script.
       window.dataManagementConfigFromServer = !{dataManagementConfig};
 
-    script(type="module" src="/javascripts/dataManagement.js")
+    script(type="module" src="/javascripts/data-management/dataManagementInitialization.js")
 
     link(rel='stylesheet', href='/stylesheets/style.css')
 
@@ -57,6 +57,22 @@ html
       .modal-actions
         button(type="button", onclick="closeModal()") Cancel
         button(type="submit") Submit
+
+// Modal overlay specifically for review actions (Approve / Reject)
+.modal-overlay#modalOverlayReview.hidden
+  .modal(id="modalContainerReview")
+    h2.modal-title#modalTitleReview
+    // We use a separate form container for review fields, but the review actions are handled
+    // by explicit buttons (Approve / Reject) rather than a form submit so the decision is clear.
+    form#modalFormReview
+      #modalFieldsReview
+      .modal-actions
+        // Buttons will be wired programmatically by the ModalManager to ensure handlers are
+        // attached and that only one overlay is visible at a time.
+        // Provide placeholders for accessibility and graceful fallback.
+        button(type="button", id="closeReviewButton", onclick="closeModal()") Cancel
+        button(type="button", id="approveReviewButton") Approve
+        button(type="button", id="rejectReviewButton") Reject
 
 .modal-overlay#modalOverlayMyProfile.hidden
   .modal(id="modalContainerMyProfile")

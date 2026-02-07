@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  node-server-test:
+    build:
+      context: ./nodeServer
+      dockerfile: Dockerfile
+    image: ubhub-node-test:latest
+    working_dir: /usr/src/app
+    environment:
+      NODE_ENV: test
+      CI: "true"
+    volumes:
+      - ./nodeServer:/usr/src/app:cached
+      - node_server_node_modules:/usr/src/app/node_modules
+    entrypoint: ["sh", "-c", "npm ci --prefer-offline --no-audit --ignore-scripts && npm test"]
+
+volumes:
+  node_server_node_modules:

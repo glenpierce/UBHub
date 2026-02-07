@@ -6,3 +6,4 @@
 *app-*.zip
 config.js
 /secrets/
+/.env.local

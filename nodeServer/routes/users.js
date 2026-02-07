@@ -16,33 +16,34 @@ router.post('/', async function (req, res) {
   try {
     const rows = await makeDbCallAsPromise('CALL login(?)', [req.body.email]);
 
-    if (!rows) {
+    if (!rows || rows.length === 0) {
       console.log("no rows found for user");
-      return res.send('/login');
+      return res.redirect('/login');
     }
 
-    const hashedPassword = rows[0].hashedPassword;
+    const userRow = rows[0];
+    const hashedPassword = userRow.hashedPassword;
 
     bcrypt.compare(req.body.password, hashedPassword, function (error, result) {
       if (error) {
         console.error('error occurred:', error);
-        return res.send('/login');
+        return res.redirect('/login');
       }
       if (result) {
-        req.session.user = rows[0].alias;
-        req.session.email = rows[0].email;
+        req.session.user = userRow.alias;
+        req.session.email = userRow.email;
         // req.session.email = rows[0].email; // todo: update the login function to return email
-        req.session.privileges = rows[0].privileges;
-        return res.send('/dataManagement', { user: req.session.user });
+        req.session.privileges = userRow.privileges;
+        return res.redirect('/dataManagement');
       } else {
         console.error('No result, error? :', error);
-        return res.send('/login');
+        return res.redirect('/login');
       }
     });
 
   } catch (error) {
     console.error(error);
-    return res.send('/login');
+    return res.redirect('/login');
   }
 });
 

@@ -916,10 +916,21 @@ div.mapValuesControl span.disabled {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
+    /* Hidden by default; shown when the 'hidden' class is removed */
+    display: none;
+    z-index: 9999;
+}
+
+/* Ensure overlays with the hidden class are explicitly hidden (higher specificity) */
+.modal-overlay.hidden {
+    display: none;
+}
+
+/* Show modal-overlay when it does NOT have the .hidden class */
+.modal-overlay:not(.hidden) {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
 }
 
 .modal {
@@ -944,134 +955,60 @@ div.mapValuesControl span.disabled {
     flex-direction: column;
 }
 
+/* Review view: show comparison rows in a horizontal layout and align columns */
+.form-row.review-header,
+.form-row.review-compare-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+
+.review-field-label {
+    width: 30%;
+    min-width: 140px;
+    max-width: 220px;
+    font-weight: 600;
+}
+
+.review-column-header {
+    flex: 1 1 0;
+    text-align: left;
+    font-weight: 600;
+}
+
+.review-value {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+}
+
+.review-value input,
+.review-value textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fafafa;
+}
+
+/* Visual treatment for changed rows */
+.form-row.review-compare-row.changed {
+    background-color: #fff8e6; /* subtle warm highlight */
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+/* More specific highlight for the pending value when changed */
+.review-value.changed input {
+    border-color: #ff9800;
+    background: #fff3e0;
+}
+
+/* Keep existing input styles for other inputs */
 .form-row input {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
-}
-
-.modal-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    margin-top: 12px;
-}
-
-/* New scoped helpers for this view */
-.globalSearchContainer {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.row-controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-    align-items: center;
-}
-
-.dataManagementInput {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-#globalSearch {
-    width: 100%;
-}
-
-.flex-1 {
-    flex: 1;
-}
-
-.flex-2 {
-    flex: 2;
-}
-
-.clearFilters {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: var(--dataHubBlue);
-    color: white;
-    cursor: pointer;
-}
-
-.userAlias {
-    margin-left: 12px;
-    font-size: 14px;
-    color: #555;
-}
-
-.hidden {
-    display: none !important;
-}
-
-.userNameContainer {
-    margin: 50px 0px;
-}
-
-.smallMarginBottom {
-    margin-bottom: 10px;
-}
-
-.largeMarginBottom {
-    margin-bottom: 200px;
-}
-
-.center-auto {
-    margin: auto;
-}
-
-.button-margin {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.forgot-password-link {
-    color: blue;
-    font-size: 10px;
-    cursor: pointer;
-    margin-bottom: 10px;
-}
-
-.nameCell {
-    font-weight: bold;
-}
-
-/* sort indicator + sortable header */
-.sortable {
-    cursor: pointer;
-}
-
-.sortIndicator {
-    margin-left: 8px;
-}
-
-/* status classes used by statusRendererFunction */
-.status-active {
-    color: green;
-}
-
-.status-inactive {
-    color: red;
-}
-
-.status-unknown {
-    color: black;
-}
-
-/* typeahead (results) styles */
-.typeahead-results {
-    position: absolute;
-    background: white;
-    border: 1px solid #ccc;
-    z-index: 10000;
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-.typeahead-item {
-    padding: 6px;
-    cursor: pointer;
 }

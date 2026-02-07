@@ -4,49 +4,32 @@ html
   head
     link(rel='stylesheet', href='/stylesheets/style.css')
 
-body
-  block content
+  body
+    block content
 
-  script.
-    function httpPostAsync(theUrl, callback) {
-      let email = document.getElementById('email').value;
-      let pass = document.getElementById('password').value;
-      let data = {
-        "email": email,
-        "password": pass
+    script.
+      window.onload = function () {
+        var emailField = document.getElementById('email');
+        if (emailField) { emailField.focus(); }
       }
-      var xmlHttp = new XMLHttpRequest();
-      xmlHttp.onreadystatechange = function () {
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-          callback(xmlHttp.responseText);
-      }
-      xmlHttp.open("POST", theUrl, true); // true for asynchronous
-      xmlHttp.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-      var dataAsJson = JSON.stringify(data);
-      xmlHttp.send(dataAsJson);
-    }
-    function redirect(res) {
-      window.location = res;
-    }
-
-    window.onload = () => {
-      document.getElementById('email').focus();
-    }
 
 
+    +dataManagementHeader
 
-  +dataManagementHeader
+    form(method='post', action='/users', id='loginForm', autocomplete='on', style='display:flex; flex-direction:column; align-items:center; width:100%; padding-bottom:20px;')
+      div(style='padding-bottom:20px;')
+        div(style='display:inline;') Welcome back! Please log in below, or return to our&nbsp;
+        div(style="display:inline; color:#4490ba; cursor:pointer;" onclick="window.location='/home'")
+          u home page
 
-  div(style="display:flex; flex-direction:column; align-items:center; width:100%; padding-bottom:20px;")
-    div(style="padding-bottom:20px;")
-      div(style="display:inline;") Welcome back! Please log in below, or return to our&nbsp;
-      div(style="display:inline; color:#4490ba; cursor:pointer;" onclick="window.location='/home'") <u>home page</u>
-    div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
-      div(style="margin:auto; width:300px;")
-        div(style="display:inline-block; margin-top:4px;") Email
-        input(id="email" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="text")
-    div(style="display:flex; align-items:center; width:100%; padding-bottom:5px;")
-      div(style="margin:auto; width:300px;")
-        div(style="display:inline-block; margin-top:4px;") Password
-        input(id="password" style="display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;" type="password")
-    button(onclick='httpPostAsync("/users", redirect)' style="background-color:#4490ba; border-radius:5px; border:none; padding:5px; color: white; cursor:pointer; margin:auto;") Login
+      div(style='display:flex; align-items:center; width:100%; padding-bottom:5px;')
+        div(style='margin:auto; width:300px;')
+          label(for='email' style='display:inline-block; margin-top:4px;') Email
+          input#email(name='email' type='text' required autocomplete='username' autocapitalize='off' spellcheck='false' style='display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;')
+
+      div(style='display:flex; align-items:center; width:100%; padding-bottom:5px;')
+        div(style='margin:auto; width:300px;')
+          label(for='password' style='display:inline-block; margin-top:4px;') Password
+          input#password(name='password' type='password' required autocomplete='current-password' autocapitalize='off' spellcheck='false' style='display:inline; float:right; border:solid; border-color:#4490ba; border-radius:5px; border-width:1px; padding:4px;')
+
+      button(type='submit' style='background-color:#4490ba; border-radius:5px; border:none; padding:5px; color: white; cursor:pointer; margin:auto;') Login
