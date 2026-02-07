@@ -9,27 +9,50 @@ router.get('/', function(req, res) {
   res.render('createUser', {errorFromServer:false});
 });
 
-router.post('/', function(req, res) {
-  isUserEmailUnique(req, res);
+router.post('/', async function(req, res) {
+  try {
+    const userIsUnique = await isUserEmailUnique(req, res);
+    if (!userIsUnique) {
+      res.render('createUser', {errorFromServer: true});
+      return;
+    }
+
+    await createUser(req, res);
+  } catch (error) {
+    console.error('Unexpected error during user creation flow:', error);
+    res.render('createUser', {errorFromServer: true});
+  }
+
 });
 
 function isUserEmailUnique(req, res){
-  // normalize and sanitize the email for consistent and safe lookups
   req.body.email = normalizeAndSanitizeEmail(req.body.email);
   if (!req.body.email) {
     console.error('Invalid email provided to isUserEmailUnique:', String(req.body.email));
     res.render('createUser', {errorFromServer: true});
-    return;
+    return Promise.resolve(false);
   }
 
   const queryString = 'select * from users where email = ?';
-  makeDbCallAsPromise(queryString, [req.body.email])
+  return makeDbCallAsPromise(queryString, [req.body.email])
     .then(rows => {
-        createUser(req, res);
+        if (!Array.isArray(rows)) {
+          console.warn('isUserEmailUnique: unexpected rows result from DB', rows);
+          res.render('createUser', {errorFromServer: true});
+          return false;
+        }
+
+        if (rows.length === 0) {
+          return true;
+        }
+
+        console.log('Email already exists in users table:', req.body.email);
+        return false;
     })
     .catch(error => {
       console.error('Error checking email uniqueness:', error);
       res.render('createUser', {errorFromServer: true});
+      return false;
     });
 }
 
@@ -42,21 +65,22 @@ function createUser(req, res) {
   const queryString = 'CALL createUser(?, ?, ?, ?, ?, ?, ?)';
   const params = [req.body.email, hash, req.body.alias, req.body.userAddress, req.body.title, req.body.institution, req.body.whatsAppNumber];
 
-  makeDbCallAsPromise(queryString, params)
+  return makeDbCallAsPromise(queryString, params)
     .then(rows => {
       // pass the normalized email string (not JSON.stringify of rows) to setUserPrivileges
       setUserPrivileges(req.body.email);
       console.log('The user db has created a user: ', JSON.stringify(rows));
       res.redirect('login');
+      return rows;
     })
       .catch(error => {
         console.error('Error creating user:', error);
         res.render('createUser', {errorFromServer: true});
+        throw error;
       });
 }
 
 function setUserPrivileges(normalizedEmail) {
-  // email is expected to be a normalized (lowercase, trimmed) string
   if (!normalizedEmail) {
     console.warn('setUserPrivileges called without an email');
     return;
@@ -83,7 +107,7 @@ function normalizeAndSanitizeEmail(rawEmail) {
     return undefined;
   }
   const email = String(rawEmail).toLowerCase().trim();
-  const normalizedEmail = email.replace(/[\x00-\x1F\x7F"'\\;]/g, '');
+  const normalizedEmail = email.replace(/[[\x00-\x1F\x7F"'\\;]/g, '');
 
   if (normalizedEmail === email) {
     return normalizedEmail;
