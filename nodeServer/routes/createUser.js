@@ -70,7 +70,8 @@ function createUser(req, res) {
       // pass the normalized email string (not JSON.stringify of rows) to setUserPrivileges
       setUserPrivileges(req.body.email);
       console.log('The user db has created a user: ', JSON.stringify(rows));
-      res.redirect('login');
+      // Redirect to login with a query flag so the login page can display a success popup
+      res.redirect('/login?created=1');
       return rows;
     })
       .catch(error => {
