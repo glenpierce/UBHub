@@ -1,9 +1,9 @@
 import express from 'express';
 const router = express.Router();
-import bcrypt from 'bcryptjs';
-import config from '../config.js';
 import { makeDbCallAsPromise } from '../ConnectionPool.js';
 import preApprovedUser from './preApprovedUser.json';
+import { sendAdminNotification } from '../services/mailer.js';
+import { generatePasswordHash } from '../services/passwordUtils.js';
 
 router.get('/', function(req, res) {
   res.render('createUser', {errorFromServer:false});
@@ -59,8 +59,7 @@ function isUserEmailUnique(req, res){
 function createUser(req, res) {
   console.log("creating user");
 
-  const salt = bcrypt.genSaltSync(10) + req.body.email.toLowerCase() + config.salt;
-  const hash = bcrypt.hashSync(req.body.password, salt);
+  const hash = generatePasswordHash(req.body.password, req.body.email);
 
   const queryString = 'CALL createUser(?, ?, ?, ?, ?, ?, ?)';
   const params = [req.body.email, hash, req.body.alias, req.body.userAddress, req.body.title, req.body.institution, req.body.whatsAppNumber];
@@ -72,6 +71,22 @@ function createUser(req, res) {
       console.log('The user db has created a user: ', JSON.stringify(rows));
       // Redirect to login with a query flag so the login page can display a success popup
       res.redirect('/login?created=1');
+
+      // Send admin notification asynchronously (don't block response)
+      try {
+        const createdAt = new Date().toISOString();
+        sendAdminNotification({
+          newUserEmail: req.body.email,
+          alias: req.body.alias,
+          institution: req.body.institution,
+          title: req.body.title,
+          createdAt
+        });
+      } catch (mailerError) {
+        // sendAdminNotification is async; surrounding try/catch protects against synchronous throws
+        console.error('Synchronous error while initiating admin notification:', mailerError);
+      }
+
       return rows;
     })
       .catch(error => {

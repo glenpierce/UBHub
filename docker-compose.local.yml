@@ -18,7 +18,7 @@ services:
       - node_server_node_modules:/usr/src/app/node_modules
     # Run installs inside the container and then start the application.
     # For iterative development you can remove the `npm ci` here and run it manually via `docker compose exec`.
-    command: ["sh", "-c", "npm ci --ignore-scripts --prefer-offline --no-audit && npm start"]
+    command: ["sh", "-c", "npm i --ignore-scripts --prefer-offline --no-audit && npm start"]
     restart: unless-stopped
 
 volumes:

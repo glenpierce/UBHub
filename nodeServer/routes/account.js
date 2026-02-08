@@ -1,8 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import { makeDbCallAsPromise, pool } from '../ConnectionPool.js';
-import bcrypt from 'bcryptjs';
-import config from '../config.js';
+import { comparePassword, generatePasswordHash } from '../services/passwordUtils.js';
 
 router.post('/update', function (req, res, next) {
   if (req.session.user) {
@@ -17,18 +16,10 @@ router.post('/resetPassword', async function (req, res) {
     if (rows) {
       const storedHash = rows[0].hashedPassword;
 
-      const match = await new Promise((resolve, reject) => {
-        bcrypt.compare(req.body.oldPassword, storedHash, (err, result) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(result);
-        });
-      });
+      const match = await comparePassword(req.body.oldPassword, storedHash);
 
       if (match) {
-        const salt = bcrypt.genSaltSync(10) + req.session.user.toLowerCase() + config.salt;
-        const hash = bcrypt.hashSync(req.body.newPassword, salt);
+        const hash = generatePasswordHash(req.body.newPassword, req.session.user);
 
         const updateQuery = 'UPDATE users SET hashedPassword = ? WHERE email = ?';
         console.log(updateQuery);

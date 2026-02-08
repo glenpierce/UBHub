@@ -12,7 +12,7 @@ services:
     volumes:
       - ./nodeServer:/usr/src/app:cached
       - node_server_node_modules:/usr/src/app/node_modules
-    entrypoint: ["sh", "-c", "npm ci --prefer-offline --no-audit --ignore-scripts && npm test"]
+    entrypoint: ["sh", "-c", "npm i --prefer-offline --no-audit --ignore-scripts && npm test"]
 
 volumes:
   node_server_node_modules:

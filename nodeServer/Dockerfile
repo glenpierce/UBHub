@@ -15,7 +15,7 @@ RUN if [ "$INSTALL_BUILD_TOOLS" = "1" ]; then \
 COPY package.json package-lock.json* ./
 
 # Install dependencies without running lifecycle scripts (faster, more hermetic)
-RUN npm ci --ignore-scripts --no-fund
+RUN npm i --ignore-scripts --no-fund
 
 # Copy the rest of the application source
 COPY . ./
