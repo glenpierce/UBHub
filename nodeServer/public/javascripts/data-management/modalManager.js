@@ -350,6 +350,7 @@ export class ModalManager {
     this.modalFieldsElement = document.getElementById('modalFields');
     this.modalTitleElement = document.getElementById('modalTitle');
     this.profileOverlayElement = document.getElementById('modalOverlayMyProfile');
+    this.profileFormElement = document.getElementById('modalFormMyProfile');
 
     this.reviewOverlayElement = document.getElementById('modalOverlayReview');
     this.reviewFormElement = document.getElementById('modalFormReview');
@@ -371,6 +372,7 @@ export class ModalManager {
 
     // bound handlers so we can remove them in destroy()
     this._boundOnSubmit = (e) => this._onSubmit(e);
+    this._boundOnProfileSubmit = (e) => this._onProfileSubmit(e);
     this._boundOnOverlayClick = (event) => {
       try {
         if (event && event.target) {
@@ -409,6 +411,9 @@ export class ModalManager {
     // wire form submits
     if (this.modalFormElement) {
       this.modalFormElement.addEventListener('submit', this._boundOnSubmit);
+    }
+    if (this.profileFormElement) {
+      this.profileFormElement.addEventListener('submit', this._boundOnProfileSubmit);
     }
     if (this.reviewFormElement) {
       this.reviewFormElement.addEventListener('submit', this._boundReviewFormSubmit);
@@ -473,10 +478,29 @@ export class ModalManager {
     if (mode === 'profile') {
       this.profileOverlayElement && this.profileOverlayElement.classList.remove('hidden');
       const profileModal = this.profileOverlayElement && this.profileOverlayElement.querySelector('.modal');
-      if (profileModal && !profileModal.hasAttribute('aria-labelledby')) {
-        const userNameEl = profileModal.querySelector('.userNameContainer');
-        if (userNameEl && userNameEl.id) profileModal.setAttribute('aria-labelledby', userNameEl.id);
-      }
+      // Populate profile form fields from server-provided config or by fetching current user data
+      try {
+        // Prefer config on window if available
+        const cfg = window.dataManagementConfigFromServer || {};
+        const currentUser = cfg.user || null;
+        if (this.profileFormElement && currentUser) {
+          // common field ids: alias, userAddress, title, institution, whatsAppNumber, primaryContact
+          ['alias','userAddress','title','institution','whatsAppNumber','primaryContact'].forEach(id => {
+            try { const el = document.getElementById(id); if (el) el.value = currentUser[id] || '';} catch(_) {}
+          });
+        } else if (this.profileFormElement && this.apiClient) {
+          // attempt to fetch profile from server
+          try {
+            const profile = await this.apiClient.post('/account/me', {});
+            if (profile) {
+              ['alias','userAddress','title','institution','whatsAppNumber','primaryContact'].forEach(id => {
+                try { const el = document.getElementById(id); if (el) el.value = profile[id] || '';} catch(_) {}
+              });
+            }
+          } catch (err) { /* ignore fetch error, form stays blank */ }
+        }
+      } catch (err) { /* ignore */ }
+
       this.focusTrap.attach(profileModal || this.profileOverlayElement);
     } else if (mode === 'review') {
       if (this.modalOverlayElement) this.modalOverlayElement.classList.add('hidden');
@@ -535,6 +559,7 @@ export class ModalManager {
   destroy() {
     try {
       if (this.modalFormElement) this.modalFormElement.removeEventListener('submit', this._boundOnSubmit);
+      if (this.profileFormElement) this.profileFormElement.removeEventListener('submit', this._boundOnProfileSubmit);
       if (this.reviewFormElement) this.reviewFormElement.removeEventListener('submit', this._boundReviewFormSubmit);
       if (this.approveButtonElement) this.approveButtonElement.removeEventListener('click', this._boundApproveClick);
       if (this.rejectButtonElement) this.rejectButtonElement.removeEventListener('click', this._boundRejectClick);
@@ -585,6 +610,29 @@ export class ModalManager {
     }
 
     alert('Unknown modal mode: ' + this._currentMode);
+  }
+
+  async _onProfileSubmit(event) {
+    event.preventDefault();
+    if (!this.profileFormElement) return;
+    const payload = {};
+    ['alias','userAddress','title','institution','whatsAppNumber','primaryContact'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) payload[id] = el.value;
+    });
+
+    try {
+      await this.apiClient.post('/account/update', payload);
+      this.close();
+      // Refresh user display alias if present on the page
+      try {
+        const aliasEl = document.getElementById('userAlias');
+        if (aliasEl && payload.alias) aliasEl.textContent = 'Hello, ' + payload.alias;
+      } catch (err) { /* ignore */ }
+    } catch (err) {
+      console.error('Profile update failed', err);
+      alert('Profile update failed: ' + err.message);
+    }
   }
 
   async _submitReview(decision) {

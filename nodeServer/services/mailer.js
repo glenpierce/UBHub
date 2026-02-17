@@ -19,12 +19,16 @@ function buildPlainText({ newUserEmail, alias, institution, title, createdAt }) 
 }
 
 export async function sendAdminNotification({ newUserEmail, alias, institution, title, createdAt }) {
-  const mail = {
-    from: config.EMAIL_FROM,
-    to: config.ADMIN_EMAIL,
-    subject: `New UBHub user created: ${newUserEmail}`,
-    text: buildPlainText({ newUserEmail, alias, institution, title, createdAt }),
-  };
+  try {
+    const mail = {
+      from: config.EMAIL_FROM,
+      to: config.ADMIN_EMAIL,
+      subject: `New UBHub user created: ${newUserEmail}`,
+      text: buildPlainText({newUserEmail, alias, institution, title, createdAt}),
+    };
 
-  return transporter.sendMail(mail);
+    return transporter.sendMail(mail);
+  } catch (sendMailError) {
+    console.error('Error sending admin notification email:', sendMailError);
+  }
 }

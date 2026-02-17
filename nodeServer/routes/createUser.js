@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import { makeDbCallAsPromise } from '../ConnectionPool.js';
-import preApprovedUser from './preApprovedUser.json';
+import preApprovedUser from './preApprovedUser.json' with { type: 'json' };
 import { sendAdminNotification } from '../services/mailer.js';
 import { generatePasswordHash } from '../services/passwordUtils.js';
 
@@ -73,21 +73,16 @@ function createUser(req, res) {
       res.redirect('/login?created=1');
 
       // Send admin notification asynchronously (don't block response)
-      try {
-        const createdAt = new Date().toISOString();
-        sendAdminNotification({
-          newUserEmail: req.body.email,
-          alias: req.body.alias,
-          institution: req.body.institution,
-          title: req.body.title,
-          createdAt
-        });
-      } catch (mailerError) {
-        // sendAdminNotification is async; surrounding try/catch protects against synchronous throws
-        console.error('Synchronous error while initiating admin notification:', mailerError);
-      }
+      const createdAt = new Date().toISOString();
+      sendAdminNotification({
+        newUserEmail: req.body.email,
+        alias: req.body.alias,
+        institution: req.body.institution,
+        title: req.body.title,
+        createdAt
+      });
 
-      return rows;
+    return rows;
     })
       .catch(error => {
         console.error('Error creating user:', error);
