@@ -19,7 +19,7 @@ html
 
     main.main-col
       div.container
-        div.horizontalFlex
+        div.profileEditEntryFieldContainer
           h1#tableTitle
           if user
             span#userAlias.userAlias Hello, #{user}
@@ -76,20 +76,42 @@ html
 
 .modal-overlay#modalOverlayMyProfile.hidden
   .modal(id="modalContainerMyProfile")
-    div
-      div.userNameContainer #{username}
-      div
-        div.smallMarginBottom <b>Account details</b>
-        div
-        div.smallMarginBottom <b>Change password</b>
-        div Current password
-        input(type="password" id="oldPassword" class="dataManagementInput")
-        div.forgot-password-link(onclick="showForgotPasswordPopup()") Forgot password
-        div New password
-        input(type="password" id="newPassword" class="dataManagementInput smallMarginBottom")
-        div Confirm new password
-        input(type="password" id="confirmNewPassword" class="dataManagementInput")
-        div
-          button.button-margin(onclick="changePassword()") Change password
+    // user info and editable profile form
+    form#modalFormMyProfile
+      .modal-section
+        div.userNameContainer #{username}
+        div.profileEditEntryFieldContainer
+          label(for="alias") Account name
+          input(type="text" id="alias" name="alias" class="dataManagementInput")
+        div.profileEditEntryFieldContainer
+          label(for="userAddress") Address
+          input(type="text" id="userAddress" name="userAddress" class="dataManagementInput")
+        div.profileEditEntryFieldContainer
+          label(for="title") Title
+          input(type="text" id="title" name="title" class="dataManagementInput")
+        div.profileEditEntryFieldContainer
+          label(for="institution") Institution
+          input(type="text" id="institution" name="institution" class="dataManagementInput")
+        div.profileEditEntryFieldContainer
+          label(for="whatsAppNumber") WhatsApp number
+          input(type="text" id="whatsAppNumber" name="whatsAppNumber" class="dataManagementInput")
+        div.profileEditEntryFieldContainer
+          label(for="primaryContact") Primary contact
+          input(type="text" id="primaryContact" name="primaryContact" class="dataManagementInput")
+      .modal-actions
+        button(type="button", onclick="closeMyProfileModalFunction()") Close
+        button(type="submit") Save Changes
+
+    // Keep the password change controls outside the profile form for compatibility with existing handlers
     div.largeMarginBottom
-      button.center-auto(onclick="closeMyProfileModalFunction()") Close
+      div.profileEditEntryFieldContainer
+        b Change password
+      div Current password
+      input(type="password" id="oldPassword" class="dataManagementInput profileEditEntryFieldContainer")
+      //div.forgot-password-link(onclick="showForgotPasswordPopup()") Forgot password
+      div New password
+      input(type="password" id="newPassword" class="dataManagementInput profileEditEntryFieldContainer")
+      div Confirm new password
+      input(type="password" id="confirmNewPassword" class="dataManagementInput profileEditEntryFieldContainer")
+      div.modal-actions
+        button.button-margin(onclick="changePassword()") Change password

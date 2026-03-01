@@ -706,6 +706,17 @@ div.mapValuesControl span.disabled {
     margin-right: 20px;
 }
 
+.profileEditEntryFieldContainer {
+    display: flex;
+    margin-bottom: 10px;
+    width: 60%;
+    justify-content: space-between;
+}
+
+.modal-actions {
+    margin: 20px;
+}
+
 .layout {
     display: flex;
     gap: 20px;

@@ -9,8 +9,21 @@ html
 
     script.
       window.onload = function () {
-        var emailField = document.getElementById('email');
+        const emailField = document.getElementById('email');
         if (emailField) { emailField.focus(); }
+
+        try {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('created') === '1') {
+            window.alert('Account created successfully. You may now log in.');
+            params.delete('created');
+            const newSearch = params.toString();
+            const newUrl = window.location.pathname + (newSearch ? ('?' + newSearch) : '');
+            window.history.replaceState({}, document.title, newUrl);
+          }
+        } catch (showAccountCreatedPopupError) {
+          console.warn('Could not show account-created popup:', showAccountCreatedPopupError);
+        }
       }
 
 
@@ -18,7 +31,7 @@ html
 
     form(method='post', action='/users', id='loginForm', autocomplete='on', style='display:flex; flex-direction:column; align-items:center; width:100%; padding-bottom:20px;')
       div(style='padding-bottom:20px;')
-        div(style='display:inline;') Welcome back! Please log in below, or return to our&nbsp;
+        div(style='display:inline;') Welcome! Please log in below, or return to our&nbsp;
         div(style="display:inline; color:#4490ba; cursor:pointer;" onclick="window.location='/home'")
           u home page
 
