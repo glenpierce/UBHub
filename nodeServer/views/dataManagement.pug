@@ -19,7 +19,7 @@ html
 
     main.main-col
       div.container
-        div.horizontalFlex
+        div.profileEditEntryFieldContainer
           h1#tableTitle
           if user
             span#userAlias.userAlias Hello, #{user}
@@ -80,22 +80,22 @@ html
     form#modalFormMyProfile
       .modal-section
         div.userNameContainer #{username}
-        div.smallMarginBottom
+        div.profileEditEntryFieldContainer
           label(for="alias") Account name
           input(type="text" id="alias" name="alias" class="dataManagementInput")
-        div.smallMarginBottom
+        div.profileEditEntryFieldContainer
           label(for="userAddress") Address
           input(type="text" id="userAddress" name="userAddress" class="dataManagementInput")
-        div.smallMarginBottom
+        div.profileEditEntryFieldContainer
           label(for="title") Title
           input(type="text" id="title" name="title" class="dataManagementInput")
-        div.smallMarginBottom
+        div.profileEditEntryFieldContainer
           label(for="institution") Institution
           input(type="text" id="institution" name="institution" class="dataManagementInput")
-        div.smallMarginBottom
+        div.profileEditEntryFieldContainer
           label(for="whatsAppNumber") WhatsApp number
           input(type="text" id="whatsAppNumber" name="whatsAppNumber" class="dataManagementInput")
-        div.smallMarginBottom
+        div.profileEditEntryFieldContainer
           label(for="primaryContact") Primary contact
           input(type="text" id="primaryContact" name="primaryContact" class="dataManagementInput")
       .modal-actions
@@ -104,16 +104,14 @@ html
 
     // Keep the password change controls outside the profile form for compatibility with existing handlers
     div.largeMarginBottom
-      div.smallMarginBottom
-        b Account details
-      div.smallMarginBottom
+      div.profileEditEntryFieldContainer
         b Change password
       div Current password
-      input(type="password" id="oldPassword" class="dataManagementInput")
-      div.forgot-password-link(onclick="showForgotPasswordPopup()") Forgot password
+      input(type="password" id="oldPassword" class="dataManagementInput profileEditEntryFieldContainer")
+      //div.forgot-password-link(onclick="showForgotPasswordPopup()") Forgot password
       div New password
-      input(type="password" id="newPassword" class="dataManagementInput smallMarginBottom")
+      input(type="password" id="newPassword" class="dataManagementInput profileEditEntryFieldContainer")
       div Confirm new password
-      input(type="password" id="confirmNewPassword" class="dataManagementInput")
-      div
+      input(type="password" id="confirmNewPassword" class="dataManagementInput profileEditEntryFieldContainer")
+      div.modal-actions
         button.button-margin(onclick="changePassword()") Change password
