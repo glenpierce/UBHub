@@ -370,6 +370,29 @@ async function createPendingChange(pool, tableName, rowKeyObj, operation, dataOb
   console.log("creating pending change");
   assertTableAllowed(tableName);
   console.log("table allowed");
+
+  // Validate cross-reference inst_id early to avoid storing invalid pending changes
+  try {
+    if ((tableName === 'documents' || tableName === 'participation') && dataObj && Object.prototype.hasOwnProperty.call(dataObj, 'inst_id')) {
+      const instId = dataObj.inst_id;
+      const numericId = (typeof instId === 'string') ? (instId.trim() === '' ? null : Number(instId)) : instId;
+      if (numericId === null || numericId === undefined || Number.isNaN(Number(numericId)) || !Number.isInteger(Number(numericId))) {
+        const err = new Error('Invalid inst_id');
+        err.code = 'INVALID_INST_ID';
+        throw err;
+      }
+      const exists = await validateLocationExists(numericId);
+      if (!exists) {
+        const err = new Error('Referenced location not found');
+        err.code = 'INVALID_INST_ID';
+        throw err;
+      }
+    }
+  } catch (err) {
+    // Bubble up validation errors as-is
+    throw err;
+  }
+
   const pkJson = JSON.stringify(rowKeyObj || {});
   const dataJson = JSON.stringify(dataObj || {});
   const connection = await pool.getConnection();
@@ -514,6 +537,21 @@ async function approveVersion(pool, versionId, approver) {
       }
     }
 
+    // validate inst_id again at approval time to avoid race conditions where the referenced
+    // location may have been deleted between submission and approval
+    if ((tableName === 'documents' || tableName === 'participation') && Object.prototype.hasOwnProperty.call(validData, 'inst_id')) {
+      const instId = validData['inst_id'];
+      const numericId = (typeof instId === 'string') ? (instId.trim() === '' ? null : Number(instId)) : instId;
+      if (numericId === null || numericId === undefined || Number.isNaN(Number(numericId)) || !Number.isInteger(Number(numericId))) {
+        throw new Error('Invalid inst_id in pending change');
+      }
+      // Use the current transaction connection to check existence
+      const [locRows] = await connection.query('SELECT 1 FROM `locations` WHERE id = ? LIMIT 1', [numericId]);
+      if (!locRows || locRows.length === 0) {
+        throw new Error('Referenced location not found at approval time');
+      }
+    }
+
     // Build and run appropriate SQL
     if (rowVersion.operation === 'insert') {
       console.log(`Inserting into ${tableName}`);
@@ -592,6 +630,17 @@ async function approveVersion(pool, versionId, approver) {
       }
     }
   }
+}
+
+// New helper: validate that a given inst_id exists in locations table
+export async function validateLocationExists(instId) {
+  if (instId === null || instId === undefined) return false;
+  const numericId = (typeof instId === 'string') ? (instId.trim() === '' ? null : Number(instId)) : instId;
+  if (numericId === null || numericId === undefined || Number.isNaN(Number(numericId)) || !Number.isInteger(Number(numericId))) return false;
+  const rows = await makeDbCallAsPromise('SELECT 1 FROM `locations` WHERE id = ? LIMIT 1', [numericId]);
+  if (!rows) return false;
+  if (Array.isArray(rows) && rows.length === 0) return false;
+  return true;
 }
 
 router.get('/location-search', isAuthenticated, isContributor, async (req, res) => {
