@@ -126,8 +126,8 @@ const tables = {
     displayName: 'Submissions',
     columns: [
       {name: 'id', visible: false},
-      // Cross-reference to locations using inst_id inside the JSON `data` column
-      {crossReferenceTable: 'locations', lookupColumn: 'json:$.inst_id', joinedColumn: 'inst_title', label: 'Institution Title', visible: true},
+      // Cross-reference to locations. Try inst_id first (join), fall back to inst_title inside JSON data
+      {crossReferenceTable: 'locations', lookupColumn: 'json:$.inst_id|json:$.inst_title', joinedColumn: 'inst_title', label: 'Institution Title', visible: true},
       {name: 'table_name', label: 'Table Name', visible: true},
       {name: 'row_key', label: 'Row ID', visible: false},
       {name: 'operation', label: 'Operation', visible: true},
@@ -244,30 +244,67 @@ router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req,
     for (const col of serverMeta.columns) {
       if (col.crossReferenceTable && col.lookupColumn && col.joinedColumn) {
         const crossTable = col.crossReferenceTable;
-        const lookupColumn = col.lookupColumn; // e.g. inst_id on this table or json:$.inst_id
+        const lookupColumnRaw = String(col.lookupColumn);
         const joinedColumn = col.joinedColumn; // e.g. inst_title on the cross table
-        const aliasKey = `${crossTable}__${lookupColumn}`;
+
+        // support multiple lookup options separated by '|', e.g. 'json:$.inst_id|json:$.inst_title'
+        const lookupParts = lookupColumnRaw.split('|').map(p => p.trim()).filter(Boolean);
+
+        // helper to detect a JSON part and extract its path
+        const isJsonPart = p => p.toLowerCase().startsWith('json:');
+        const jsonPathOf = p => p.replace(/^json:/i, '');
+
+        // try to pick a joinable part (prefer plain column like 'inst_id', else JSON path that appears to be an id)
+        let joinPart = lookupParts.find(p => !isJsonPart(p));
+        if (!joinPart) {
+          joinPart = lookupParts.find(p => isJsonPart(p) && (p.toLowerCase().includes('inst_id') || p.toLowerCase().includes('id')));
+        }
+
+        const aliasKey = `${crossTable}__${lookupColumnRaw}`;
         let alias = joinAliases[aliasKey];
-        if (!alias) {
-          // create a safe alias
-          alias = `${crossTable}_x`;
-          let i = 1;
-          while (Object.values(joinAliases).includes(alias)) {
-            alias = `${crossTable}_x${i++}`;
+
+        if (joinPart) {
+          // we can create a LEFT JOIN using the selected joinPart
+          if (!alias) {
+            alias = `${crossTable}_x`;
+            let i = 1;
+            while (Object.values(joinAliases).includes(alias)) {
+              alias = `${crossTable}_x${i++}`;
+            }
+            joinAliases[aliasKey] = alias;
+
+            if (isJsonPart(joinPart)) {
+              const jsonPath = jsonPathOf(joinPart);
+              // join using JSON extraction from the data column (cast to unsigned for numeric compare)
+              joinClauses.push(`LEFT JOIN \`${crossTable}\` AS \`${alias}\` ON CAST(JSON_UNQUOTE(JSON_EXTRACT(\`${tableName}\`.\`data\`, '${jsonPath}')) AS UNSIGNED) = \`${alias}\`.\`id\``);
+            } else {
+              // plain column on the table
+              joinClauses.push(`LEFT JOIN \`${crossTable}\` AS \`${alias}\` ON \`${tableName}\`.\`${joinPart}\` = \`${alias}\`.\`id\``);
+            }
           }
-          joinAliases[aliasKey] = alias;
-          // assume referenced table primary key is `id`
-          if (String(lookupColumn).startsWith('json:')) {
-            // lookupColumn is a JSON path inside the `data` column of the table, e.g. 'json:$.inst_id'
-            const jsonPath = lookupColumn.replace(/^json:/, '');
-            // use JSON_UNQUOTE(JSON_EXTRACT(...)) to get the value and compare to referenced table id
-            joinClauses.push(`LEFT JOIN \`${crossTable}\` AS \`${alias}\` ON JSON_UNQUOTE(JSON_EXTRACT(\`${tableName}\`.\`data\`, '${jsonPath}')) = \`${alias}\`.\`id\``);
+          // select the joined column from the joined alias, but fall back to any JSON-extracted value from this row's data
+          // find a fallback JSON part that likely contains inst_title
+          const fallbackJson = lookupParts.find(p => isJsonPart(p) && p.toLowerCase().includes('inst_title')) || lookupParts.find(p => isJsonPart(p) && p !== joinPart);
+          if (fallbackJson) {
+            const fallbackJsonPath = jsonPathOf(fallbackJson);
+            // use NULLIF to avoid empty-string fallbacks and prefer joined value; leave as raw string
+            selectParts.push(`COALESCE(\`${alias}\`.\`${joinedColumn}\`, NULLIF(JSON_UNQUOTE(JSON_EXTRACT(\`${tableName}\`.\`data\`, '${fallbackJsonPath}')), '')) AS \`${joinedColumn}\``);
           } else {
-            joinClauses.push(`LEFT JOIN \`${crossTable}\` AS \`${alias}\` ON \`${tableName}\`.\`${lookupColumn}\` = \`${alias}\`.\`id\``);
+            selectParts.push(`\`${alias}\`.\`${joinedColumn}\` AS \`${joinedColumn}\``);
+          }
+        } else {
+          // No joinable part found - fall back to selecting the value from the row's own data
+          // choose first JSON part if present, otherwise first plain part
+          const firstJson = lookupParts.find(isJsonPart);
+          if (firstJson) {
+            const jsonPath = jsonPathOf(firstJson);
+            selectParts.push(`JSON_UNQUOTE(JSON_EXTRACT(\`${tableName}\`.\`data\`, '${jsonPath}')) AS \`${joinedColumn}\``);
+          } else {
+            // fallback: select table column if present
+            const firstPart = lookupParts[0];
+            selectParts.push(`\`${tableName}\`.\`${firstPart}\` AS \`${joinedColumn}\``);
           }
         }
-        // select the joined column and alias it to the joinedColumn name so client can read row[joinedColumn]
-        selectParts.push(`\`${alias}\`.\`${joinedColumn}\` AS \`${joinedColumn}\``);
       } else if (col.name) {
         // select the local column; qualify with table name to be explicit
         selectParts.push(`\`${tableName}\`.\`${col.name}\` AS \`${col.name}\``);
