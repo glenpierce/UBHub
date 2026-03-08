@@ -135,9 +135,28 @@ export class ModalRenderer {
         resultsDiv.className = 'typeahead-results hidden';
         resultsDiv.id = `results_${column.lookupColumn}`;
 
+        // Clear selection button: hidden by default, shown after a selection is made.
+        const clearButton = document.createElement('button');
+        clearButton.type = 'button';
+        clearButton.id = `clear_${column.lookupColumn}`;
+        clearButton.className = 'typeahead-clear hidden';
+        clearButton.textContent = 'Clear';
+        clearButton.addEventListener('click', () => {
+          try {
+            hiddenInput.value = '';
+            searchInput.value = '';
+            searchInput.readOnly = false;
+            resultsDiv.classList.add('hidden');
+            clearButton.classList.add('hidden');
+            // return focus to search input so user can type a new query
+            try { searchInput.focus(); } catch (e) { /* ignore */ }
+          } catch (err) { /* ignore */ }
+        });
+
         rowDiv.appendChild(searchInput);
         rowDiv.appendChild(hiddenInput);
         rowDiv.appendChild(resultsDiv);
+        rowDiv.appendChild(clearButton);
       } else {
         const inputElement = document.createElement('input');
         inputElement.type = 'text';
@@ -326,13 +345,24 @@ export class ModalRenderer {
       if (column.crossReferenceTable && column.lookupColumn && column.joinedColumn) {
         const searchInput = document.getElementById(`search_${column.lookupColumn}`);
         const hiddenInput = document.getElementById(column.lookupColumn);
+        const clearButton = document.getElementById(`clear_${column.lookupColumn}`);
         if (hiddenInput && hiddenInput.value) {
           const titleValue = rowData[column.joinedColumn] || '';
-          if (searchInput) searchInput.value = titleValue;
+          if (searchInput) {
+            searchInput.value = titleValue;
+            try { searchInput.readOnly = true; } catch (err) { /* ignore */ }
+          }
+          try { if (clearButton) clearButton.classList.remove('hidden'); } catch (err) { /* ignore */ }
         } else if (rowData[column.lookupColumn]) {
           if (hiddenInput) hiddenInput.value = rowData[column.lookupColumn];
           const titleValue = rowData[column.joinedColumn] || '';
           if (searchInput) searchInput.value = titleValue;
+          try { searchInput.readOnly = true; } catch (err) { /* ignore */ }
+          try { if (clearButton) clearButton.classList.remove('hidden'); } catch (err) { /* ignore */ }
+        } else {
+          // No existing selection - ensure search is editable and clear button hidden
+          try { if (searchInput) searchInput.readOnly = false; } catch (err) { /* ignore */ }
+          try { if (clearButton) clearButton.classList.add('hidden'); } catch (err) { /* ignore */ }
         }
       }
     });
