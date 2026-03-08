@@ -98,7 +98,19 @@ export class ModalRenderer {
     }
 
     const columns = manager.tables[tableName].columns || [];
-    const formColumns = columns.filter(column => column.name !== 'id' && column.name !== undefined);
+    // Exclude direct lookup columns (for example a plain `inst_id` column)
+    // when a crossReference column references them via `lookupColumn`.
+    // This prevents creating duplicate inputs with the same id/name (one visible and one hidden)
+    // which caused the typeahead's document.getElementById lookup to target the wrong element.
+    const formColumns = columns.filter(column => {
+      if (!column || column.name === undefined) return false;
+      if (column.name === 'id') return false;
+      // If some other column is a cross-reference that uses this column as its lookupColumn,
+      // skip this plain column so only the cross-reference controls (search + hidden) are built.
+      const isLookupForCrossRef = columns.some(c => c && c.crossReferenceTable && c.lookupColumn === column.name);
+      if (isLookupForCrossRef) return false;
+      return true;
+    });
     if (formColumns.length === 0) {
       fieldsContainer.innerHTML = '<div class="form-row">No editable fields for this table.</div>';
       return;
