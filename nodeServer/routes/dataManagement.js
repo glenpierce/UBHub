@@ -428,19 +428,26 @@ async function createPendingChange(pool, tableName, rowKeyObj, operation, dataOb
 
 
 router.post('/pending-change/review', isAuthenticated, isApprover, async (req, res) => {
-  const {id, decision, comments} = req.body;
+  // Accept id as number or numeric string; coerce to integer for validation
+  const {decision, comments} = req.body;
+  const idRaw = req.body && req.body.id;
+  const id = (typeof idRaw === 'string') ? (idRaw.trim() === '' ? null : Number(idRaw)) : idRaw;
+
   try {
-    if (!id || typeof id !== 'number') {
+    if (id === null || id === undefined || !Number.isInteger(Number(id))) {
       return res.status(400).json({error: 'Invalid id'});
     }
-    if (!['Approve', 'Reject'].includes(decision)) {
+    if (!decision || typeof decision !== 'string' || !['approve', 'reject'].includes(decision.toLowerCase())) {
       return res.status(400).json({error: 'Invalid decision'});
     }
-    if (decision === 'Reject') {
-      await rejectVersion(pool, id, req);
+    // normalize comments: allow empty/null, otherwise require string
+    const reviewComments = (comments === undefined || comments === null) ? null : String(comments);
+
+    if (decision.toLowerCase() === 'reject') {
+      await rejectVersion(pool, Number(id), req.session.user, reviewComments);
       return res.status(200).json({Status: 'Rejected'});
-    } else if (decision === 'Approve') {
-      await approveVersion(pool, id, req.session.user);
+    } else if (decision.toLowerCase() === 'approve') {
+      await approveVersion(pool, Number(id), req.session.user, reviewComments);
       return res.status(200).json({Status: 'Approved'});
     } else {
       return res.status(400).json({error: 'Invalid decision'});
@@ -451,7 +458,7 @@ router.post('/pending-change/review', isAuthenticated, isApprover, async (req, r
   }
 });
 
-async function rejectVersion(pool, id, req) {
+async function rejectVersion(pool, id, approver, comments) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
@@ -465,7 +472,7 @@ async function rejectVersion(pool, id, req) {
       throw new Error('Version not pending');
     }
 
-    await connection.query('UPDATE row_versions SET status = ?, approved_by = ?, approved_at = NOW() WHERE id = ?', ['rejected', req.session.user, id]);
+    await connection.query('UPDATE row_versions SET status = ?, approved_by = ?, approved_at = NOW(), notes = ? WHERE id = ?', ['rejected', approver, comments, id]);
     await connection.commit();
   } catch (error) {
     if (connection) {
@@ -488,7 +495,7 @@ async function rejectVersion(pool, id, req) {
   }
 }
 
-async function approveVersion(pool, versionId, approver) {
+async function approveVersion(pool, versionId, approver, comments) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
@@ -608,7 +615,7 @@ async function approveVersion(pool, versionId, approver) {
     }
 
     // mark version approved
-    await connection.query('UPDATE row_versions SET status = ?, approved_by = ?, approved_at = NOW() WHERE id = ?', ['approved', approver, versionId]);
+    await connection.query('UPDATE row_versions SET status = ?, approved_by = ?, approved_at = NOW(), notes = ? WHERE id = ?', ['approved', approver, comments, versionId]);
 
     await connection.commit();
   } catch (error) {
