@@ -1,3 +1,5 @@
+import {fetchJson} from "./utils.js";
+
 export class FocusTrap {
   constructor() {
     this._previouslyFocusedElement = null;
@@ -305,6 +307,20 @@ export class ModalRenderer {
       }
 
       fieldsContainer.appendChild(rowDiv);
+
+      if (key === 'inst_id' && pendingRaw) {
+        fetchJson(`/dataManagement/getLocationById/${pendingRaw}`)
+          .then(data => {
+            console.log(data);
+            const instTitle = data.inst_title;
+            if (instTitle) {
+              const titleSpan = document.createElement('span');
+              titleSpan.className = 'related-record-title';
+              titleSpan.textContent = ` (${instTitle})`;
+              pendingValueContainer.appendChild(titleSpan);
+            }
+        });
+      }
     });
 
     // Comments area (editable for reviewer)

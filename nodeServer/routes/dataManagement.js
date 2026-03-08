@@ -643,6 +643,28 @@ export async function validateLocationExists(instId) {
   return true;
 }
 
+router.get('/getLocationById/:id', isAuthenticated, isContributor, async (req, res) => {
+  try {
+    const idParam = req.params.id;
+    if (idParam === undefined || idParam === null) return res.status(400).json({ error: 'Missing id' });
+    const numericId = (typeof idParam === 'string') ? (idParam.trim() === '' ? null : Number(idParam)) : Number(idParam);
+    if (numericId === null || numericId === undefined || Number.isNaN(Number(numericId)) || !Number.isInteger(Number(numericId))) {
+      return res.status(400).json({ error: 'Invalid id' });
+    }
+
+    const rows = await makeDbCallAsPromise('SELECT id, inst_title FROM `locations` WHERE id = ? LIMIT 1', [numericId]);
+    if (!rows || !Array.isArray(rows) || rows.length === 0) {
+      return res.status(404).json({ error: 'Location not found' });
+    }
+
+    // return the first matching row
+    return res.json(rows[0]);
+  } catch (error) {
+    console.error('Error fetching location by id:', error);
+    return res.status(500).json({ error: 'Database error' });
+  }
+});
+
 router.get('/location-search', isAuthenticated, isContributor, async (req, res) => {
   try {
     const query = (req.query.query || '').trim();
