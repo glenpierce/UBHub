@@ -245,15 +245,6 @@ export class TableView {
 
   _populateCell(rowData, column, tableCell) {
     if (column.button) {
-      // If this is the review button, don't render it for rows that are already approved or rejected
-      const isReviewButton = (column.onClickFunction === 'openReviewModal') || (String(column.button).toLowerCase() === 'review');
-      const statusRaw = (rowData && (rowData.status || '')) ? String(rowData.status) : '';
-      const statusLower = statusRaw.toLowerCase();
-      if (isReviewButton && (statusLower.includes('approve') || statusLower.includes('reject'))) {
-        // Do not append a review button for rows that are approved or rejected
-        return;
-      }
-
       const button = document.createElement('button');
       button.textContent = column.label || column.button;
       if (column.onClickFunction && typeof column.onClickFunction === 'string') {

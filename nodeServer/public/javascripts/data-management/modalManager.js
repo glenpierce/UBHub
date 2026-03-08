@@ -553,6 +553,21 @@ export class ModalManager {
         this.reviewFieldsElement || this.modalFieldsElement,
         rowData
       );
+
+      // Hide approve/reject buttons if this submission has already been decided (approved or rejected).
+      // Check a few possible indicators: explicit `status` (non-pending), or presence of approved_by/approved_at.
+      try {
+        const statusRaw = rowData && Object.prototype.hasOwnProperty.call(rowData, 'status') ? rowData.status : null;
+        const statusNormalized = statusRaw ? String(statusRaw).trim().toLowerCase() : '';
+        const alreadyDecided = (statusNormalized && statusNormalized !== 'pending') || !!(rowData && (rowData.approved_by || rowData.approved_at));
+        if (this.approveButtonElement) {
+          if (alreadyDecided) this.approveButtonElement.classList.add('hidden'); else this.approveButtonElement.classList.remove('hidden');
+        }
+        if (this.rejectButtonElement) {
+          if (alreadyDecided) this.rejectButtonElement.classList.add('hidden'); else this.rejectButtonElement.classList.remove('hidden');
+        }
+      } catch (err) { /* ignore UI toggling errors */ }
+
       this.reviewOverlayElement && this.reviewOverlayElement.classList.remove('hidden');
       const mainModal = this.reviewOverlayElement && this.reviewOverlayElement.querySelector('.modal');
       this.focusTrap.attach(mainModal || this.reviewOverlayElement);

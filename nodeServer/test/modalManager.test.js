@@ -231,4 +231,34 @@ describe('ModalManager', () => {
     // overlays should be hidden
     expect(document.getElementById('modalOverlay').classList.contains('hidden')).toBe(true)
   })
+
+  it('hides approve/reject buttons when the submission is already decided', async () => {
+    const apiClientMock = { post: vi.fn().mockResolvedValue({}) }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+
+    // rowData indicates already approved
+    const decidedRow = { id: 100, status: 'approved', table_name: 'users', operation: 'update', data: JSON.stringify({}), row_key: JSON.stringify({ id: 1 }) }
+
+    await mm.open('review', null, decidedRow)
+
+    const approveBtn = document.getElementById('approveReviewButton')
+    const rejectBtn = document.getElementById('rejectReviewButton')
+    expect(approveBtn.classList.contains('hidden')).toBe(true)
+    expect(rejectBtn.classList.contains('hidden')).toBe(true)
+  })
+
+  it('shows approve/reject buttons when the submission is pending', async () => {
+    const apiClientMock = { post: vi.fn().mockResolvedValue({}) }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+
+    // rowData indicates pending
+    const pendingRow = { id: 101, status: 'pending', table_name: 'users', operation: 'update', data: JSON.stringify({}), row_key: JSON.stringify({ id: 1 }) }
+
+    await mm.open('review', null, pendingRow)
+
+    const approveBtn = document.getElementById('approveReviewButton')
+    const rejectBtn = document.getElementById('rejectReviewButton')
+    expect(approveBtn.classList.contains('hidden')).toBe(false)
+    expect(rejectBtn.classList.contains('hidden')).toBe(false)
+  })
 })
