@@ -438,13 +438,13 @@ router.post('/pending-change/review', isAuthenticated, isApprover, async (req, r
     }
     if (decision === 'Reject') {
       await rejectVersion(pool, id, req);
-      res.status(200).json({Status: 'Rejected'});
-    }
-    if (decision === 'Approve') {
+      return res.status(200).json({Status: 'Rejected'});
+    } else if (decision === 'Approve') {
       await approveVersion(pool, id, req.session.user);
-      res.status(200).json({Status: 'Approved'});
+      return res.status(200).json({Status: 'Approved'});
+    } else {
+      return res.status(400).json({error: 'Invalid decision'});
     }
-    return res.status(400).json({error: 'Invalid decision'});
   } catch (error) {
     console.error('Error reviewing pending change:', error);
     res.status(500).json({error: 'Error reviewing pending change' + error.message});
