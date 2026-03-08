@@ -52,20 +52,8 @@ export function initializeDataManagement(config = window.dataManagementConfigFro
           elem.value = item.inst_title || item.title || item.name || '';
           const hidden = document.getElementById(lookupColumn);
           if (hidden) hidden.value = item.id;
-          // mark the search input as readOnly to prevent accidental changes and show clear button
-          try { elem.readOnly = true; } catch (err) { /* ignore */ }
-          try { const clearBtn = document.getElementById(`clear_${lookupColumn}`); if (clearBtn) clearBtn.classList.remove('hidden'); } catch (err) { /* ignore */ }
         } });
         elem._typeaheadAttached = true;
-        // if there's already a hidden value (editing existing row), make search input readonly and show clear
-        try {
-          const hiddenExisting = document.getElementById(lookupColumn);
-          const clearBtnExisting = document.getElementById(`clear_${lookupColumn}`);
-          if (hiddenExisting && hiddenExisting.value) {
-            elem.readOnly = true;
-            if (clearBtnExisting) clearBtnExisting.classList.remove('hidden');
-          }
-        } catch (err) { /* ignore */ }
       }
     });
   });
