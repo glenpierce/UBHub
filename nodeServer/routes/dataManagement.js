@@ -126,6 +126,8 @@ const tables = {
     displayName: 'Submissions',
     columns: [
       {name: 'id', visible: false},
+      // Cross-reference to locations using inst_id inside the JSON `data` column
+      {crossReferenceTable: 'locations', lookupColumn: 'json:$.inst_id', joinedColumn: 'inst_title', label: 'Institution Title', visible: true},
       {name: 'table_name', label: 'Table Name', visible: true},
       {name: 'row_key', label: 'Row ID', visible: false},
       {name: 'operation', label: 'Operation', visible: true},
@@ -242,7 +244,7 @@ router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req,
     for (const col of serverMeta.columns) {
       if (col.crossReferenceTable && col.lookupColumn && col.joinedColumn) {
         const crossTable = col.crossReferenceTable;
-        const lookupColumn = col.lookupColumn; // e.g. inst_id on this table
+        const lookupColumn = col.lookupColumn; // e.g. inst_id on this table or json:$.inst_id
         const joinedColumn = col.joinedColumn; // e.g. inst_title on the cross table
         const aliasKey = `${crossTable}__${lookupColumn}`;
         let alias = joinAliases[aliasKey];
@@ -255,7 +257,14 @@ router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req,
           }
           joinAliases[aliasKey] = alias;
           // assume referenced table primary key is `id`
-          joinClauses.push(`LEFT JOIN \`${crossTable}\` AS \`${alias}\` ON \`${tableName}\`.\`${lookupColumn}\` = \`${alias}\`.\`id\``);
+          if (String(lookupColumn).startsWith('json:')) {
+            // lookupColumn is a JSON path inside the `data` column of the table, e.g. 'json:$.inst_id'
+            const jsonPath = lookupColumn.replace(/^json:/, '');
+            // use JSON_UNQUOTE(JSON_EXTRACT(...)) to get the value and compare to referenced table id
+            joinClauses.push(`LEFT JOIN \`${crossTable}\` AS \`${alias}\` ON JSON_UNQUOTE(JSON_EXTRACT(\`${tableName}\`.\`data\`, '${jsonPath}')) = \`${alias}\`.\`id\``);
+          } else {
+            joinClauses.push(`LEFT JOIN \`${crossTable}\` AS \`${alias}\` ON \`${tableName}\`.\`${lookupColumn}\` = \`${alias}\`.\`id\``);
+          }
         }
         // select the joined column and alias it to the joinedColumn name so client can read row[joinedColumn]
         selectParts.push(`\`${alias}\`.\`${joinedColumn}\` AS \`${joinedColumn}\``);
