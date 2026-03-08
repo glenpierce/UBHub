@@ -126,6 +126,8 @@ const tables = {
     displayName: 'Submissions',
     columns: [
       {name: 'id', visible: false},
+      // Cross-reference to locations. Try inst_id first (join), fall back to inst_title inside JSON data
+      {crossReferenceTable: 'locations', lookupColumn: 'json:$.inst_id|json:$.inst_title', joinedColumn: 'inst_title', label: 'Institution Title', visible: true},
       {name: 'table_name', label: 'Table Name', visible: true},
       {name: 'row_key', label: 'Row ID', visible: false},
       {name: 'operation', label: 'Operation', visible: true},
@@ -242,23 +244,67 @@ router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req,
     for (const col of serverMeta.columns) {
       if (col.crossReferenceTable && col.lookupColumn && col.joinedColumn) {
         const crossTable = col.crossReferenceTable;
-        const lookupColumn = col.lookupColumn; // e.g. inst_id on this table
+        const lookupColumnRaw = String(col.lookupColumn);
         const joinedColumn = col.joinedColumn; // e.g. inst_title on the cross table
-        const aliasKey = `${crossTable}__${lookupColumn}`;
-        let alias = joinAliases[aliasKey];
-        if (!alias) {
-          // create a safe alias
-          alias = `${crossTable}_x`;
-          let i = 1;
-          while (Object.values(joinAliases).includes(alias)) {
-            alias = `${crossTable}_x${i++}`;
-          }
-          joinAliases[aliasKey] = alias;
-          // assume referenced table primary key is `id`
-          joinClauses.push(`LEFT JOIN \`${crossTable}\` AS \`${alias}\` ON \`${tableName}\`.\`${lookupColumn}\` = \`${alias}\`.\`id\``);
+
+        // support multiple lookup options separated by '|', e.g. 'json:$.inst_id|json:$.inst_title'
+        const lookupParts = lookupColumnRaw.split('|').map(p => p.trim()).filter(Boolean);
+
+        // helper to detect a JSON part and extract its path
+        const isJsonPart = p => p.toLowerCase().startsWith('json:');
+        const jsonPathOf = p => p.replace(/^json:/i, '');
+
+        // try to pick a joinable part (prefer plain column like 'inst_id', else JSON path that appears to be an id)
+        let joinPart = lookupParts.find(p => !isJsonPart(p));
+        if (!joinPart) {
+          joinPart = lookupParts.find(p => isJsonPart(p) && (p.toLowerCase().includes('inst_id') || p.toLowerCase().includes('id')));
         }
-        // select the joined column and alias it to the joinedColumn name so client can read row[joinedColumn]
-        selectParts.push(`\`${alias}\`.\`${joinedColumn}\` AS \`${joinedColumn}\``);
+
+        const aliasKey = `${crossTable}__${lookupColumnRaw}`;
+        let alias = joinAliases[aliasKey];
+
+        if (joinPart) {
+          // we can create a LEFT JOIN using the selected joinPart
+          if (!alias) {
+            alias = `${crossTable}_x`;
+            let i = 1;
+            while (Object.values(joinAliases).includes(alias)) {
+              alias = `${crossTable}_x${i++}`;
+            }
+            joinAliases[aliasKey] = alias;
+
+            if (isJsonPart(joinPart)) {
+              const jsonPath = jsonPathOf(joinPart);
+              // join using JSON extraction from the data column (cast to unsigned for numeric compare)
+              joinClauses.push(`LEFT JOIN \`${crossTable}\` AS \`${alias}\` ON CAST(JSON_UNQUOTE(JSON_EXTRACT(\`${tableName}\`.\`data\`, '${jsonPath}')) AS UNSIGNED) = \`${alias}\`.\`id\``);
+            } else {
+              // plain column on the table
+              joinClauses.push(`LEFT JOIN \`${crossTable}\` AS \`${alias}\` ON \`${tableName}\`.\`${joinPart}\` = \`${alias}\`.\`id\``);
+            }
+          }
+          // select the joined column from the joined alias, but fall back to any JSON-extracted value from this row's data
+          // find a fallback JSON part that likely contains inst_title
+          const fallbackJson = lookupParts.find(p => isJsonPart(p) && p.toLowerCase().includes('inst_title')) || lookupParts.find(p => isJsonPart(p) && p !== joinPart);
+          if (fallbackJson) {
+            const fallbackJsonPath = jsonPathOf(fallbackJson);
+            // use NULLIF to avoid empty-string fallbacks and prefer joined value; leave as raw string
+            selectParts.push(`COALESCE(\`${alias}\`.\`${joinedColumn}\`, NULLIF(JSON_UNQUOTE(JSON_EXTRACT(\`${tableName}\`.\`data\`, '${fallbackJsonPath}')), '')) AS \`${joinedColumn}\``);
+          } else {
+            selectParts.push(`\`${alias}\`.\`${joinedColumn}\` AS \`${joinedColumn}\``);
+          }
+        } else {
+          // No joinable part found - fall back to selecting the value from the row's own data
+          // choose first JSON part if present, otherwise first plain part
+          const firstJson = lookupParts.find(isJsonPart);
+          if (firstJson) {
+            const jsonPath = jsonPathOf(firstJson);
+            selectParts.push(`JSON_UNQUOTE(JSON_EXTRACT(\`${tableName}\`.\`data\`, '${jsonPath}')) AS \`${joinedColumn}\``);
+          } else {
+            // fallback: select table column if present
+            const firstPart = lookupParts[0];
+            selectParts.push(`\`${tableName}\`.\`${firstPart}\` AS \`${joinedColumn}\``);
+          }
+        }
       } else if (col.name) {
         // select the local column; qualify with table name to be explicit
         selectParts.push(`\`${tableName}\`.\`${col.name}\` AS \`${col.name}\``);
@@ -370,6 +416,29 @@ async function createPendingChange(pool, tableName, rowKeyObj, operation, dataOb
   console.log("creating pending change");
   assertTableAllowed(tableName);
   console.log("table allowed");
+
+  // Validate cross-reference inst_id early to avoid storing invalid pending changes
+  try {
+    if ((tableName === 'documents' || tableName === 'participation') && dataObj && Object.prototype.hasOwnProperty.call(dataObj, 'inst_id')) {
+      const instId = dataObj.inst_id;
+      const numericId = (typeof instId === 'string') ? (instId.trim() === '' ? null : Number(instId)) : instId;
+      if (numericId === null || numericId === undefined || Number.isNaN(Number(numericId)) || !Number.isInteger(Number(numericId))) {
+        const err = new Error('Invalid inst_id');
+        err.code = 'INVALID_INST_ID';
+        throw err;
+      }
+      const exists = await validateLocationExists(numericId);
+      if (!exists) {
+        const err = new Error('Referenced location not found');
+        err.code = 'INVALID_INST_ID';
+        throw err;
+      }
+    }
+  } catch (err) {
+    // Bubble up validation errors as-is
+    throw err;
+  }
+
   const pkJson = JSON.stringify(rowKeyObj || {});
   const dataJson = JSON.stringify(dataObj || {});
   const connection = await pool.getConnection();
@@ -405,30 +474,37 @@ async function createPendingChange(pool, tableName, rowKeyObj, operation, dataOb
 
 
 router.post('/pending-change/review', isAuthenticated, isApprover, async (req, res) => {
-  const {id, decision, comments} = req.body;
+  // Accept id as number or numeric string; coerce to integer for validation
+  const {decision, comments} = req.body;
+  const idRaw = req.body && req.body.id;
+  const id = (typeof idRaw === 'string') ? (idRaw.trim() === '' ? null : Number(idRaw)) : idRaw;
+
   try {
-    if (!id || typeof id !== 'number') {
+    if (id === null || id === undefined || !Number.isInteger(Number(id))) {
       return res.status(400).json({error: 'Invalid id'});
     }
-    if (!['Approve', 'Reject'].includes(decision)) {
+    if (!decision || typeof decision !== 'string' || !['approve', 'reject'].includes(decision.toLowerCase())) {
       return res.status(400).json({error: 'Invalid decision'});
     }
-    if (decision === 'Reject') {
-      await rejectVersion(pool, id, req);
-      res.status(200).json({Status: 'Rejected'});
+    // normalize comments: allow empty/null, otherwise require string
+    const reviewComments = (comments === undefined || comments === null) ? null : String(comments);
+
+    if (decision.toLowerCase() === 'reject') {
+      await rejectVersion(pool, Number(id), req.session.user, reviewComments);
+      return res.status(200).json({Status: 'Rejected'});
+    } else if (decision.toLowerCase() === 'approve') {
+      await approveVersion(pool, Number(id), req.session.user, reviewComments);
+      return res.status(200).json({Status: 'Approved'});
+    } else {
+      return res.status(400).json({error: 'Invalid decision'});
     }
-    if (decision === 'Approve') {
-      await approveVersion(pool, id, req.session.user);
-      res.status(200).json({Status: 'Approved'});
-    }
-    return res.status(400).json({error: 'Invalid decision'});
   } catch (error) {
     console.error('Error reviewing pending change:', error);
     res.status(500).json({error: 'Error reviewing pending change' + error.message});
   }
 });
 
-async function rejectVersion(pool, id, req) {
+async function rejectVersion(pool, id, approver, comments) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
@@ -442,7 +518,7 @@ async function rejectVersion(pool, id, req) {
       throw new Error('Version not pending');
     }
 
-    await connection.query('UPDATE row_versions SET status = ?, approved_by = ?, approved_at = NOW() WHERE id = ?', ['rejected', req.session.user, id]);
+    await connection.query('UPDATE row_versions SET status = ?, approved_by = ?, approved_at = NOW(), notes = ? WHERE id = ?', ['rejected', approver, comments, id]);
     await connection.commit();
   } catch (error) {
     if (connection) {
@@ -465,7 +541,7 @@ async function rejectVersion(pool, id, req) {
   }
 }
 
-async function approveVersion(pool, versionId, approver) {
+async function approveVersion(pool, versionId, approver, comments) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
@@ -511,6 +587,21 @@ async function approveVersion(pool, versionId, approver) {
     for (const column of meta.columns) {
       if (Object.prototype.hasOwnProperty.call(dataObject, column)) {
         validData[column] = dataObject[column];
+      }
+    }
+
+    // validate inst_id again at approval time to avoid race conditions where the referenced
+    // location may have been deleted between submission and approval
+    if ((tableName === 'documents' || tableName === 'participation') && Object.prototype.hasOwnProperty.call(validData, 'inst_id')) {
+      const instId = validData['inst_id'];
+      const numericId = (typeof instId === 'string') ? (instId.trim() === '' ? null : Number(instId)) : instId;
+      if (numericId === null || numericId === undefined || Number.isNaN(Number(numericId)) || !Number.isInteger(Number(numericId))) {
+        throw new Error('Invalid inst_id in pending change');
+      }
+      // Use the current transaction connection to check existence
+      const [locRows] = await connection.query('SELECT 1 FROM `locations` WHERE id = ? LIMIT 1', [numericId]);
+      if (!locRows || locRows.length === 0) {
+        throw new Error('Referenced location not found at approval time');
       }
     }
 
@@ -570,7 +661,7 @@ async function approveVersion(pool, versionId, approver) {
     }
 
     // mark version approved
-    await connection.query('UPDATE row_versions SET status = ?, approved_by = ?, approved_at = NOW() WHERE id = ?', ['approved', approver, versionId]);
+    await connection.query('UPDATE row_versions SET status = ?, approved_by = ?, approved_at = NOW(), notes = ? WHERE id = ?', ['approved', approver, comments, versionId]);
 
     await connection.commit();
   } catch (error) {
@@ -593,6 +684,39 @@ async function approveVersion(pool, versionId, approver) {
     }
   }
 }
+
+// New helper: validate that a given inst_id exists in locations table
+export async function validateLocationExists(instId) {
+  if (instId === null || instId === undefined) return false;
+  const numericId = (typeof instId === 'string') ? (instId.trim() === '' ? null : Number(instId)) : instId;
+  if (numericId === null || numericId === undefined || Number.isNaN(Number(numericId)) || !Number.isInteger(Number(numericId))) return false;
+  const rows = await makeDbCallAsPromise('SELECT 1 FROM `locations` WHERE id = ? LIMIT 1', [numericId]);
+  if (!rows) return false;
+  if (Array.isArray(rows) && rows.length === 0) return false;
+  return true;
+}
+
+router.get('/getLocationById/:id', isAuthenticated, isContributor, async (req, res) => {
+  try {
+    const idParam = req.params.id;
+    if (idParam === undefined || idParam === null) return res.status(400).json({ error: 'Missing id' });
+    const numericId = (typeof idParam === 'string') ? (idParam.trim() === '' ? null : Number(idParam)) : Number(idParam);
+    if (numericId === null || numericId === undefined || Number.isNaN(Number(numericId)) || !Number.isInteger(Number(numericId))) {
+      return res.status(400).json({ error: 'Invalid id' });
+    }
+
+    const rows = await makeDbCallAsPromise('SELECT id, inst_title FROM `locations` WHERE id = ? LIMIT 1', [numericId]);
+    if (!rows || !Array.isArray(rows) || rows.length === 0) {
+      return res.status(404).json({ error: 'Location not found' });
+    }
+
+    // return the first matching row
+    return res.json(rows[0]);
+  } catch (error) {
+    console.error('Error fetching location by id:', error);
+    return res.status(500).json({ error: 'Database error' });
+  }
+});
 
 router.get('/location-search', isAuthenticated, isContributor, async (req, res) => {
   try {
