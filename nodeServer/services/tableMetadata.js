@@ -312,36 +312,51 @@ export function getTablesForUser(request) {
  * @param {object} request - Express request with session info.
  * @returns {Array<object>}
  */
+const NAV_MENU_INDEX = {
+  PROGRAMS: 0,
+  INSTITUTIONS: 1,
+  DOCUMENTS: 2,
+  PARTICIPATIONS: 3,
+  SUBMISSIONS: 4,
+  USERS: 5,
+  MY_PROFILE: 6,
+  APPROVALS: 7,
+  MANAGE_USERS: 8,
+  MAP: 9,
+  RESOURCES: 10,
+  UBHUBBER_RESOURCES: 11,
+};
+
 export function getNavigationMenuForUser(request) {
   const navigationMenu = [];
 
-  navigationMenu.push(navigationMenuCandidates[9]); // Map
+  navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.MAP]); // Map
 
   if (request.session.user && request.session.privileges >= 2) {
-    navigationMenu.push(navigationMenuCandidates[0]); // Programs
-    navigationMenu.push(navigationMenuCandidates[1]); // Institutions
-    navigationMenu.push(navigationMenuCandidates[2]); // Documents
-    navigationMenu.push(navigationMenuCandidates[3]); // Participations
-    navigationMenu.push(navigationMenuCandidates[4]); // Submissions
+    navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.PROGRAMS]); // Programs
+    navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.INSTITUTIONS]); // Institutions
+    navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.DOCUMENTS]); // Documents
+    navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.PARTICIPATIONS]); // Participations
+    navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.SUBMISSIONS]); // Submissions
   }
 
   if (request.session.user && request.session.privileges >= 3) {
-    navigationMenu.push(navigationMenuCandidates[5]); // Users
+    navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.USERS]); // Users
   }
 
   if (request.session.user) {
-    navigationMenu.push(navigationMenuCandidates[6]); // My Profile
-    navigationMenu.push(navigationMenuCandidates[11]); // UBHubber Resources
+    navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.MY_PROFILE]); // My Profile
+    navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.UBHUBBER_RESOURCES]); // UBHubber Resources
   }
 
-  navigationMenu.push(navigationMenuCandidates[10]); // Resources
+  navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.RESOURCES]); // Resources
 
   if (request.session.user && request.session.privileges >= 3) {
-    navigationMenu.push(navigationMenuCandidates[7]); // Approvals
+    navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.APPROVALS]); // Approvals
   }
 
   if (request.session.user && request.session.privileges >= 4) {
-    navigationMenu.push(navigationMenuCandidates[8]); // Manage Users
+    navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.MANAGE_USERS]); // Manage Users
   }
 
   return navigationMenu;
