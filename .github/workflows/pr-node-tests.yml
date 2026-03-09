@@ -1,0 +1,30 @@
+name: CI - Node Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  node-tests:
+    name: Run tests in nodeServer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js from package engines
+        uses: actions/setup-node@v4
+        with:
+          # Pin to the engine specified in nodeServer/package.json. Using exact version
+          # avoids surprises and matches the project's expectations.
+          node-version: '22.21.1'
+          cache: 'npm'
+          cache-dependency-path: nodeServer/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --prefix nodeServer
+
+      - name: Run tests
+        run: npm test --prefix nodeServer
+
