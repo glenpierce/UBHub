@@ -1,737 +1,219 @@
-import express from 'express';
-const router = express.Router();
-import { pool, makeDbCallAsPromise } from '../ConnectionPool.js';
+/**
+ * Data-management routes.
+ *
+ * This module is a thin orchestration layer: it parses requests, delegates to
+ * services, and formats HTTP responses.  Business logic, SQL generation, and
+ * validation live in dedicated service and utility modules.
+ */
 
-router.get('/', function(req, res) {
+import express from 'express';
+import {pool, makeDbCallAsPromise} from '../ConnectionPool.js';
+import {isAuthenticated, isContributor, isApprover} from '../middleware/authMiddleware.js';
+import {
+  getTablesForUser,
+  getNavigationMenuForUser,
+  getServerTableMetadata,
+} from '../services/tableMetadata.js';
+import {buildTableDataQuery} from '../services/queryBuilder.js';
+import {createPendingChange} from '../services/pendingChangeService.js';
+import {approveVersion, rejectVersion} from '../services/approvalService.js';
+import {
+  coerceToInteger,
+  isNonEmptyString,
+  isValidOperation,
+  isValidReviewDecision,
+  normalizeComments,
+} from '../utils/validationUtils.js';
+
+const router = express.Router();
+
+// ---------------------------------------------------------------------------
+// Page render
+// ---------------------------------------------------------------------------
+
+router.get('/', function (request, response) {
   const dataManagementConfig = {
-    tablesForUser: getTablesForUser(req),
-    navMenu: getNavMenuForUser(req),
-    user: req.user,
-  }
-  res.render('dataManagement', {dataManagementConfig: JSON.stringify(dataManagementConfig), user: req.session.user});
+    tablesForUser: getTablesForUser(request),
+    navMenu: getNavigationMenuForUser(request),
+    user: request.user,
+  };
+
+  response.render('dataManagement', {
+    dataManagementConfig: JSON.stringify(dataManagementConfig),
+    user: request.session.user,
+  });
 });
 
-function getTablesForUser(req) {
-  const tablesForUser = {};
-  if (req.session.user && req.session.privileges >= 2) {
-    // clone table definitions before exposing to client so we can normalize cross-reference columns
-    tablesForUser.locations = transformTableForClient(tables.locations);
-    tablesForUser.documents = transformTableForClient(tables.documents);
-    tablesForUser.participation = transformTableForClient(tables.participation);
-    tablesForUser.mapButtons = transformTableForClient(tables.mapButtons);
-    tablesForUser.row_versions = transformTableForClient(tables.row_versions);
-  }
-  if (req.session.user && req.session.privileges >= 3) {
-    tablesForUser.users = transformTableForClient(tables.users);
-  }
-  if (req.session.user && req.session.privileges >= 4) {
-    addExecutiveFunctions(tablesForUser);
-  }
-  return tablesForUser;
-}
+// ---------------------------------------------------------------------------
+// Table data (SELECT with joins)
+// ---------------------------------------------------------------------------
 
-// Create a shallow deep-clone of a table definition and normalize cross-reference columns
-function transformTableForClient(tableDef) {
-  if (!tableDef) return tableDef;
-  const clone = JSON.parse(JSON.stringify(tableDef));
-  if (Array.isArray(clone.columns)) {
-    clone.columns = clone.columns.map(col => {
-      // if a column references another table, ensure it has a `name` the client can use to read the joined value
-      if (col && col.crossReferenceTable && col.joinedColumn && !col.name) {
-        return Object.assign({}, col, { name: col.joinedColumn });
-      }
-      return col;
-    });
-  }
-  return clone;
-}
-
-const tables = {
-  mapButtons: {
-    displayName: 'Programs',
-    columns: [
-      {name: 'part_name', label: 'Program Name', visible: true},
-      {name: 'button_category', label: 'Category', visible: true},
-      {name: 'button_link', label: 'Website', visible: true},
-      {name: 'button_text', visible: false},
-      {name: 'image', visible: false},
-      {name: 'marker_colors_by', visible: false},
-      {name: 'marker_colors', visible: false},
-      {button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditProgramModal' }
-    ]
-  },
-  locations: {
-    displayName: 'Locations',
-    columns: [
-      {name: 'id', visible: false},
-      {name: 'inst_address', visible: false},
-      {name: 'lat', visible: false},
-      {name: 'lng', visible: false},
-      {name: 'inst_title', label: 'Location Name', visible: true},
-      {name: 'country', label: 'Country', visible: true},
-      {name: 'scale', label: 'Scale', visible: true},
-      {name: 'population', label: 'Population', visible: true},
-      {name: 'density_km2', visible: false},
-      {name: 'area_km2', label: 'Area (km²)', visible: true},
-      {name: 'area_ha', label: 'Area (ha)', visible: false},
-      {name: 'biodiversity_url', visible: false},
-      {name: 'url_verifydate', label: 'Url verified on', visible: false},
-      {name: 'wwf_biome', label: 'WWF Biome', visible: false},
-      {name: 'wwf_terrestrial_ecoregion', label: 'WWF Terrestrial Ecoregion', visible: false},
-      {name: 'hotspot', label: 'Hotspot', visible: false},
-      {name: 'conservation_status_wwf', label: 'Conservation Status WWF', visible: false},
-      {button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditLocationModal' }
-    ]
-  },
-  documents: {
-    displayName: 'Documents',
-    columns: [
-      {name: 'id', visible: false},
-      {name: 'inst_id', visible: false},
-      {crossReferenceTable: 'locations', lookupColumn: 'inst_id', joinedColumn: 'inst_title', label: 'Institution Title', visible: true},
-      {name: 'doc_type', label: 'Document Type', visible: true},
-      {name: 'doc_year', label: 'Year', visible: true},
-      {name: 'doc_title', label: 'Title', visible: true},
-      {name: 'doc_url', label: 'Document URL', visible: true},
-      {name: 'keywords', label: 'Keywords', visible: false},
-      {name: 'source_url', label: 'Source URL', visible: false},
-      {name: 'link_verified', label: 'Link Verified', visible: false},
-      {button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditDocumentModal' }
-    ]
-  },
-  participation: {
-    displayName: 'Participations in Programs',
-    columns: [
-      {name: 'id', visible: false},
-      {name: 'inst_id', visible: false},
-      {crossReferenceTable: 'locations', lookupColumn: 'inst_id', joinedColumn: 'inst_title', label: 'Institution Title', visible: true},
-      {name: 'part_name', label: 'Program Name', visible: true},
-      {name: 'part_category', label: 'Category', visible: true},
-      {name: 'part_year', label: 'Year', visible: true},
-      {name: 'part_data', label: 'Data', visible: false},
-      {name: 'part_units', label: 'Units', visible: false},
-      {name: 'part_level', label: 'Level', visible: false},
-      {name: 'part_link_label', label: 'Link Label 1', visible: false},
-      {name: 'part_link', label: 'Link 1', visible: false},
-      {name: 'part_link_label2', label: 'Link Label 2', visible: false},
-      {name: 'part_link2', label: 'Link 2', visible: false},
-      {name: 'part_link_label3', label: 'Link Label 3', visible: false},
-      {name: 'part_link3', label: 'Link 3', visible: false},
-      {name: 'keywords', label: 'Keywords', visible: false},
-      {name: 'link_verified', label: 'Link Verified', visible: false},
-      {button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditProgramParticipationModal' }
-    ]
-  },
-  row_versions: {
-    displayName: 'Submissions',
-    columns: [
-      {name: 'id', visible: false},
-      // Cross-reference to locations. Try inst_id first (join), fall back to inst_title inside JSON data
-      {crossReferenceTable: 'locations', lookupColumn: 'json:$.inst_id|json:$.inst_title', joinedColumn: 'inst_title', label: 'Institution Title', visible: true},
-      {name: 'table_name', label: 'Table Name', visible: true},
-      {name: 'row_key', label: 'Row ID', visible: false},
-      {name: 'operation', label: 'Operation', visible: true},
-      {name: 'status', label: 'Status', visible: true, renderFunction: 'submissionStatusRenderer'},
-      {name: 'version', label: 'Version', visible: false},
-      {name: 'data', label: 'Data', visible: true},
-      {name: 'created_by', label: 'Submitted By', visible: true},
-      {name: 'created_at', label: 'Submitted At', visible: true},
-      {name: 'approved_by', label: 'Reviewed By', visible: true},
-      {name: 'approved_at', label: 'Reviewed At', visible: true, type: 'date'},
-      {name: 'notes', label: 'Review Comments', visible: true},
-      {button: 'review', label: 'Review', visible: true, onClickFunction: 'openReviewModal' }
-    ]
-  },
-  users: {
-    displayName: 'Users',
-    columns: [
-      {name: 'alias', label: 'Name', visible: true, renderFunction: 'nameRenderer'},
-      {name: 'privileges', label: 'Role', visible: true, renderFunction: 'privilegeRenderer'},
-      {name: 'status', label: 'Status', visible: true, renderFunction: 'statusRenderer'},
-      {name: 'region', label: 'Region', visible: true},
-      {name: 'assignedSite', label: 'Assigned Sites', visible: true, renderFunction: 'assignRenderer'},
-      {name: 'lastActive', label: 'Last Active', visible: true, renderFunction: 'lastActiveRenderer'},
-    ]
-  }
-};
-
-function addExecutiveFunctions(tablesForUser) {
-  tablesForUser.users.columns.push({name: 'email', label: 'Email', visible: true});
-  tablesForUser.users.columns.push({name: 'userAddress', label: 'Address', visible: false});
-  tablesForUser.users.columns.push({name: 'title', label: 'Title', visible: true});
-  tablesForUser.users.columns.push({name: 'institution', label: 'Institution', visible: true});
-  tablesForUser.users.columns.push({name: 'whatsAppNumber', label: 'WhatsApp Number', visible: true});
-  tablesForUser.users.columns.push({name: 'primaryContact', label: 'Primary Contact', visible: true});
-  tablesForUser.users.columns.push({name: 'notes', label: 'Notes', visible: false});
-  tablesForUser.users.columns.push({button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditUserModal' });
-}
-
-function getNavMenuForUser(req) {
-  const navigationMenu = [];
-  navigationMenu.push(menuCandidates[9]); // Map
-  if (req.session.user && req.session.privileges >= 2) {
-    navigationMenu.push(menuCandidates[0]); // Programs
-    navigationMenu.push(menuCandidates[1]); // Institutions
-    navigationMenu.push(menuCandidates[2]); // Documents
-    navigationMenu.push(menuCandidates[3]); // Participations
-    navigationMenu.push(menuCandidates[4]); // Submissions
-  }
-
-  if (req.session.user && req.session.privileges >= 3) {
-    navigationMenu.push(menuCandidates[5]); // Users
-  }
-
-  if (req.session.user) {
-    navigationMenu.push(menuCandidates[6]); // My Profile
-    navigationMenu.push(menuCandidates[11]); // UBHubber Resources
-  }
-
-  navigationMenu.push(menuCandidates[10]); // Resources
-
-  if (req.session.user && req.session.privileges >= 3) {
-    navigationMenu.push(menuCandidates[7]); // Approvals
-  }
-
-  if (req.session.user && req.session.privileges >= 4) {
-    navigationMenu.push(menuCandidates[8]); // Manage Users
-  }
-
-  return navigationMenu;
-}
-
-const menuCandidates = [
-  {tableKey: 'mapButtons', icon: '/icons/programIcon.svg', label: 'Programs'},
-  {tableKey: 'locations', icon: '/icons/institutionIcon.svg', label: 'Locations'},
-  {tableKey: 'documents', icon: '/icons/documentIcon.svg', label: 'Documents'},
-  {tableKey: 'participation', icon: '/icons/participationIcon.svg', label: 'Participations'},
-  {tableKey: 'row_versions', icon: '/icons/submissionIcon.svg', label: 'Submissions'},
-  {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Users'},
-  {onClick: 'openMyProfileModal', icon: '/icons/profileIcon.svg', label: 'My Profile'},
-  {tableKey: 'row_versions', icon: '/icons/approveIcon.svg', label: 'Approvals'},
-  {tableKey: 'users', icon: '/icons/usersIcon.svg', label: 'Manage Users'},
-  {onClick: 'openMap', icon: '/icons/mapIcon.svg', label: 'Map'},
-  {onClick: '', icon: '/icons/resourcesIcon.svg', label: 'Resources'},
-  {onClick: '', icon: '/icons/resourcesIcon.svg', label: 'UBHubber Resources'},
-];
-
-router.get('/table-data/:tableName', isAuthenticated, isContributor, async (req, res) => {
+router.get('/table-data/:tableName', isAuthenticated, isContributor, async (request, response) => {
   try {
-    const tableName = req.params.tableName;
-    // Validate tableName to prevent SQL injection IMPORTANT!!
-    const validTableNames = Object.keys(getTablesForUser(req));
+    const tableName = request.params.tableName;
 
+    const validTableNames = Object.keys(getTablesForUser(request));
     if (!validTableNames.includes(tableName)) {
-      return res.status(400).json({error: 'Invalid table name'});
+      return response.status(400).json({error: 'Invalid table name'});
     }
 
-    // client-facing metadata (normalized)
-    const clientMeta = getTablesForUser(req)[tableName];
+    const clientMeta = getTablesForUser(request)[tableName];
     if (!clientMeta) {
-      return res.status(400).json({error: 'Invalid table name'});
+      return response.status(400).json({error: 'Invalid table name'});
     }
 
-    // server-side original meta (used to construct joins)
-    const serverMeta = tables[tableName];
-    if (!serverMeta) {
-      return res.status(500).json({error: 'Server table metadata not found'});
+    let serverMeta;
+    try {
+      serverMeta = getServerTableMetadata(tableName);
+    } catch {
+      return response.status(500).json({error: 'Server table metadata not found'});
     }
 
-    // Build SELECT list and LEFT JOINs for cross-reference columns
-    const selectParts = [];
-    const joinClauses = [];
-    const joinAliases = {}; // reuse alias when same cross table + lookup used
+    const {sql} = buildTableDataQuery({tableName, serverMeta});
 
-    for (const col of serverMeta.columns) {
-      if (col.crossReferenceTable && col.lookupColumn && col.joinedColumn) {
-        const crossTable = col.crossReferenceTable;
-        const lookupColumnRaw = String(col.lookupColumn);
-        const joinedColumn = col.joinedColumn; // e.g. inst_title on the cross table
-
-        // support multiple lookup options separated by '|', e.g. 'json:$.inst_id|json:$.inst_title'
-        const lookupParts = lookupColumnRaw.split('|').map(p => p.trim()).filter(Boolean);
-
-        // helper to detect a JSON part and extract its path
-        const isJsonPart = p => p.toLowerCase().startsWith('json:');
-        const jsonPathOf = p => p.replace(/^json:/i, '');
-
-        // try to pick a joinable part (prefer plain column like 'inst_id', else JSON path that appears to be an id)
-        let joinPart = lookupParts.find(p => !isJsonPart(p));
-        if (!joinPart) {
-          joinPart = lookupParts.find(p => isJsonPart(p) && (p.toLowerCase().includes('inst_id') || p.toLowerCase().includes('id')));
-        }
-
-        const aliasKey = `${crossTable}__${lookupColumnRaw}`;
-        let alias = joinAliases[aliasKey];
-
-        if (joinPart) {
-          // we can create a LEFT JOIN using the selected joinPart
-          if (!alias) {
-            alias = `${crossTable}_x`;
-            let i = 1;
-            while (Object.values(joinAliases).includes(alias)) {
-              alias = `${crossTable}_x${i++}`;
-            }
-            joinAliases[aliasKey] = alias;
-
-            if (isJsonPart(joinPart)) {
-              const jsonPath = jsonPathOf(joinPart);
-              // join using JSON extraction from the data column (cast to unsigned for numeric compare)
-              joinClauses.push(`LEFT JOIN \`${crossTable}\` AS \`${alias}\` ON CAST(JSON_UNQUOTE(JSON_EXTRACT(\`${tableName}\`.\`data\`, '${jsonPath}')) AS UNSIGNED) = \`${alias}\`.\`id\``);
-            } else {
-              // plain column on the table
-              joinClauses.push(`LEFT JOIN \`${crossTable}\` AS \`${alias}\` ON \`${tableName}\`.\`${joinPart}\` = \`${alias}\`.\`id\``);
-            }
-          }
-          // select the joined column from the joined alias, but fall back to any JSON-extracted value from this row's data
-          // find a fallback JSON part that likely contains inst_title
-          const fallbackJson = lookupParts.find(p => isJsonPart(p) && p.toLowerCase().includes('inst_title')) || lookupParts.find(p => isJsonPart(p) && p !== joinPart);
-          if (fallbackJson) {
-            const fallbackJsonPath = jsonPathOf(fallbackJson);
-            // use NULLIF to avoid empty-string fallbacks and prefer joined value; leave as raw string
-            selectParts.push(`COALESCE(\`${alias}\`.\`${joinedColumn}\`, NULLIF(JSON_UNQUOTE(JSON_EXTRACT(\`${tableName}\`.\`data\`, '${fallbackJsonPath}')), '')) AS \`${joinedColumn}\``);
-          } else {
-            selectParts.push(`\`${alias}\`.\`${joinedColumn}\` AS \`${joinedColumn}\``);
-          }
-        } else {
-          // No joinable part found - fall back to selecting the value from the row's own data
-          // choose first JSON part if present, otherwise first plain part
-          const firstJson = lookupParts.find(isJsonPart);
-          if (firstJson) {
-            const jsonPath = jsonPathOf(firstJson);
-            selectParts.push(`JSON_UNQUOTE(JSON_EXTRACT(\`${tableName}\`.\`data\`, '${jsonPath}')) AS \`${joinedColumn}\``);
-          } else {
-            // fallback: select table column if present
-            const firstPart = lookupParts[0];
-            selectParts.push(`\`${tableName}\`.\`${firstPart}\` AS \`${joinedColumn}\``);
-          }
-        }
-      } else if (col.name) {
-        // select the local column; qualify with table name to be explicit
-        selectParts.push(`\`${tableName}\`.\`${col.name}\` AS \`${col.name}\``);
-      }
+    if (!sql) {
+      return response.json([]);
     }
 
-    if (selectParts.length === 0) {
-      return res.json([]);
-    }
-
-    const queryString = `SELECT ${selectParts.join(', ')} FROM \`${tableName}\` ${joinClauses.join(' ')} LIMIT 2000`;
-
-    const result = await makeDbCallAsPromise(queryString);
-
-    res.json(result);
+    const result = await makeDbCallAsPromise(sql);
+    response.json(result);
   } catch (error) {
     console.error('Error fetching table data:', error);
-    res.status(500).json({error: 'Database error'});
+    response.status(500).json({error: 'Database error'});
   }
 });
 
-router.post('/pending-change', isAuthenticated, isContributor, async (req, res) => {
-  try {
-    const {tableName, rowKey, operation, data} = req.body;
+// ---------------------------------------------------------------------------
+// Pending change creation
+// ---------------------------------------------------------------------------
 
-    // basic validation
-    if (!tableName || typeof tableName !== 'string') {
-      return res.status(400).json({error: 'tableName required'});
+router.post('/pending-change', isAuthenticated, isContributor, async (request, response) => {
+  try {
+    const {tableName, rowKey, operation, data} = request.body;
+
+    if (!isNonEmptyString(tableName)) {
+      return response.status(400).json({error: 'tableName required'});
     }
-    if (!['insert', 'update', 'delete'].includes(operation)) {
-      return res.status(400).json({error: 'invalid operation'});
+    if (!isValidOperation(operation)) {
+      return response.status(400).json({error: 'invalid operation'});
     }
-    // rowKey should be an object for update/delete; for insert it can be empty
     if (rowKey && typeof rowKey !== 'object') {
-      return res.status(400).json({error: 'rowKey must be an object'});
+      return response.status(400).json({error: 'rowKey must be an object'});
     }
     if (data && typeof data !== 'object') {
-      return res.status(400).json({error: 'data must be an object'});
+      return response.status(400).json({error: 'data must be an object'});
     }
 
-    await createPendingChange(pool, tableName, rowKey || {}, operation, data || {}, req.session.user);
+    await createPendingChange(pool, tableName, rowKey || {}, operation, data || {}, request.session.user);
 
-    res.status(201).json({success: true});
+    response.status(201).json({success: true});
   } catch (error) {
     if (error.code === 'INVALID_TABLE') {
-      return res.status(400).json({error: 'Invalid table'});
+      return response.status(400).json({error: 'Invalid table'});
+    }
+    if (error.code === 'INVALID_INST_ID') {
+      return response.status(400).json({error: error.message});
     }
     console.error('Error creating pending change:', error);
-    res.status(500).json({error: 'Error creating pending change' + error.message});
+    response.status(500).json({error: 'Error creating pending change' + error.message});
   }
 });
 
-function isAuthenticated(req, res, next) {
-  if (req.session && req.session.user) {
-    return next();
-  }
-  res.status(401).json({error: 'Not authenticated'});
-}
+// ---------------------------------------------------------------------------
+// Pending change review (approve / reject)
+// ---------------------------------------------------------------------------
 
-function isContributor(req, res, next) {
-  if (req.session.user && req.session.privileges >= 2) {
-    return next();
-  }
-  res.status(403).json({error: 'Not authorized'});
-}
-
-function isApprover(req, res, next) {
-  if (req.session.user && req.session.privileges >= 3) {
-    return next();
-  }
-  res.status(403).json({error: 'Not authorized'});
-}
-
-function isExec(req, res, next) {
-  if (req.session.user && req.session.privileges >= 4) {
-    return next();
-  }
-  res.status(403).json({error: 'Not authorized'});
-}
-
-const editableTables = {
-  mapButtons: {
-    primaryKey: ['part_name'],
-    columns: ['part_name', 'button_category', 'button_text', 'image', 'marker_colors_by', 'marker_colors', 'button_link']
-  },
-  locations: {
-    primaryKey: ['id'],
-    columns: ['id', 'inst_address', 'lat', 'lng', 'inst_title', 'country', 'scale', 'population', 'density_km2', 'area_km2', 'area_ha', 'biodiversity_url', 'url_verifydate', 'wwf_biome', 'wwf_terrestrial_ecoregion', 'hotspot', 'conservation_status_wwf']
-  },
-  documents: {
-    primaryKey: ['id'],
-    columns: ['id', 'inst_id', 'doc_type', 'doc_year', 'doc_title', 'doc_url', 'keywords', 'source_url', 'link_verified']
-  },
-  participation: {
-    primaryKey: ['id'],
-    columns: ['id', 'inst_id', 'part_category', 'part_name', 'part_year', 'part_data', 'part_units', 'part_level', 'part_link_label', 'part_link', 'part_link_label2', 'part_link2', 'part_link_label3', 'part_link3', 'keywords', 'link_verified']
-  }
-};
-
-function assertTableAllowed(tableName) {
-  if (!editableTables[tableName]) {
-    const error = new Error('Invalid table name');
-    error.code = 'INVALID_TABLE';
-    throw error;
-  }
-}
-
-async function createPendingChange(pool, tableName, rowKeyObj, operation, dataObj, user) {
-  console.log("creating pending change");
-  assertTableAllowed(tableName);
-  console.log("table allowed");
-
-  // Validate cross-reference inst_id early to avoid storing invalid pending changes
-  try {
-    if ((tableName === 'documents' || tableName === 'participation') && dataObj && Object.prototype.hasOwnProperty.call(dataObj, 'inst_id')) {
-      const instId = dataObj.inst_id;
-      const numericId = (typeof instId === 'string') ? (instId.trim() === '' ? null : Number(instId)) : instId;
-      if (numericId === null || numericId === undefined || Number.isNaN(Number(numericId)) || !Number.isInteger(Number(numericId))) {
-        const err = new Error('Invalid inst_id');
-        err.code = 'INVALID_INST_ID';
-        throw err;
-      }
-      const exists = await validateLocationExists(numericId);
-      if (!exists) {
-        const err = new Error('Referenced location not found');
-        err.code = 'INVALID_INST_ID';
-        throw err;
-      }
-    }
-  } catch (err) {
-    // Bubble up validation errors as-is
-    throw err;
-  }
-
-  const pkJson = JSON.stringify(rowKeyObj || {});
-  const dataJson = JSON.stringify(dataObj || {});
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-
-    const [rows] = await connection.query(
-      "SELECT COALESCE(MAX(version),0) + 1 AS next_version FROM row_versions WHERE table_name = ? AND JSON_UNQUOTE(JSON_EXTRACT(row_key, '$')) = ?",
-      [tableName, pkJson]
-    );
-    const nextVersion = (rows[0] && rows[0].next_version) || 1;
-
-    await connection.query(
-      'INSERT INTO row_versions (table_name, row_key, operation, data, version, created_by) VALUES (?, ?, ?, ?, ?, ?)',
-      [tableName, pkJson, operation, dataJson, nextVersion, user]
-    );
-    await connection.commit();
-  } catch (error) {
-    console.error('Error creating pending change:', error);
-    if (connection) {
-      try {
-        console.log("rolling back");
-        await connection.rollback();
-      } catch (error) {
-        console.error("Failed to rollback: ", error);
-      }
-    }
-    throw error;
-  } finally {
-    connection.release();
-  }
-}
-
-
-router.post('/pending-change/review', isAuthenticated, isApprover, async (req, res) => {
-  // Accept id as number or numeric string; coerce to integer for validation
-  const {decision, comments} = req.body;
-  const idRaw = req.body && req.body.id;
-  const id = (typeof idRaw === 'string') ? (idRaw.trim() === '' ? null : Number(idRaw)) : idRaw;
+router.post('/pending-change/review', isAuthenticated, isApprover, async (request, response) => {
+  const {decision, comments} = request.body;
+  const id = coerceToInteger(request.body && request.body.id);
 
   try {
-    if (id === null || id === undefined || !Number.isInteger(Number(id))) {
-      return res.status(400).json({error: 'Invalid id'});
+    if (id === null) {
+      return response.status(400).json({error: 'Invalid id'});
     }
-    if (!decision || typeof decision !== 'string' || !['approve', 'reject'].includes(decision.toLowerCase())) {
-      return res.status(400).json({error: 'Invalid decision'});
+    if (!isValidReviewDecision(decision)) {
+      return response.status(400).json({error: 'Invalid decision'});
     }
-    // normalize comments: allow empty/null, otherwise require string
-    const reviewComments = (comments === undefined || comments === null) ? null : String(comments);
 
-    if (decision.toLowerCase() === 'reject') {
-      await rejectVersion(pool, Number(id), req.session.user, reviewComments);
-      return res.status(200).json({Status: 'Rejected'});
-    } else if (decision.toLowerCase() === 'approve') {
-      await approveVersion(pool, Number(id), req.session.user, reviewComments);
-      return res.status(200).json({Status: 'Approved'});
-    } else {
-      return res.status(400).json({error: 'Invalid decision'});
+    const reviewComments = normalizeComments(comments);
+    const normalizedDecision = decision.toLowerCase();
+
+    if (normalizedDecision === 'reject') {
+      await rejectVersion(pool, id, request.session.user, reviewComments);
+      return response.status(200).json({Status: 'Rejected'});
     }
+
+    await approveVersion(pool, id, request.session.user, reviewComments);
+    return response.status(200).json({Status: 'Approved'});
   } catch (error) {
     console.error('Error reviewing pending change:', error);
-    res.status(500).json({error: 'Error reviewing pending change' + error.message});
+    response.status(500).json({error: 'Error reviewing pending change' + error.message});
   }
 });
 
-async function rejectVersion(pool, id, approver, comments) {
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-    // lock the version row
-    const [rowVersions] = await connection.query('SELECT * FROM row_versions WHERE id = ? FOR UPDATE', [id]);
-    if (!rowVersions[0]) {
-      throw new Error('Version not found');
-    }
-    const rowVersion = rowVersions[0];
-    if (rowVersion.status !== 'pending') {
-      throw new Error('Version not pending');
-    }
+// ---------------------------------------------------------------------------
+// Location helpers
+// ---------------------------------------------------------------------------
 
-    await connection.query('UPDATE row_versions SET status = ?, approved_by = ?, approved_at = NOW(), notes = ? WHERE id = ?', ['rejected', approver, comments, id]);
-    await connection.commit();
-  } catch (error) {
-    if (connection) {
-      try {
-        console.log("rolling back");
-        await connection.rollback();
-      } catch (rollbackError) {
-        console.error("Failed to rollback: ", rollbackError);
-      }
-    }
-    throw error;
-  } finally {
-    if (connection) {
-      try {
-        connection.release();
-      } catch (releaseError) {
-        console.error("Failed to release connection: ", releaseError);
-      }
-    }
-  }
-}
-
-async function approveVersion(pool, versionId, approver, comments) {
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-    // lock the version row
-    const [rowVersions] = await connection.query('SELECT * FROM row_versions WHERE id = ? FOR UPDATE', [versionId]);
-    console.log(rowVersions);
-    if (!rowVersions[0]) {
-      throw new Error('Version not found');
-    }
-    const rowVersion = rowVersions[0];
-    const status = String(rowVersion.status || '').trim().toLowerCase();
-    if (status !== 'pending' && status !== 'rejected') {
-      throw new Error('Version not pending or rejected', rowVersion.status);
-    }
-
-    const tableName = rowVersion.table_name;
-    assertTableAllowed(tableName);
-    const meta = editableTables[tableName];
-
-    let rowKeyObject = {};
-    try {
-      rowKeyObject = JSON.parse(rowVersion.row_key);
-    } catch (error) {
-      rowKeyObject = rowVersion.row_key;
-      console.log(rowKeyObject);
-      console.error('Error parsing rowKeyObject', error);
-    }
-
-    console.log(rowKeyObject);
-
-    let dataObject = {};
-    try {
-      dataObject = JSON.parse(rowVersion.data);
-    } catch (error) {
-      dataObject = rowVersion.data;
-      console.error('Error parsing dataObject', error);
-    }
-
-    console.log(dataObject);
-
-    // sanitize: restrict dataObject keys to allowed columns only
-    const validData = {};
-    for (const column of meta.columns) {
-      if (Object.prototype.hasOwnProperty.call(dataObject, column)) {
-        validData[column] = dataObject[column];
-      }
-    }
-
-    // validate inst_id again at approval time to avoid race conditions where the referenced
-    // location may have been deleted between submission and approval
-    if ((tableName === 'documents' || tableName === 'participation') && Object.prototype.hasOwnProperty.call(validData, 'inst_id')) {
-      const instId = validData['inst_id'];
-      const numericId = (typeof instId === 'string') ? (instId.trim() === '' ? null : Number(instId)) : instId;
-      if (numericId === null || numericId === undefined || Number.isNaN(Number(numericId)) || !Number.isInteger(Number(numericId))) {
-        throw new Error('Invalid inst_id in pending change');
-      }
-      // Use the current transaction connection to check existence
-      const [locRows] = await connection.query('SELECT 1 FROM `locations` WHERE id = ? LIMIT 1', [numericId]);
-      if (!locRows || locRows.length === 0) {
-        throw new Error('Referenced location not found at approval time');
-      }
-    }
-
-    // Build and run appropriate SQL
-    if (rowVersion.operation === 'insert') {
-      console.log(`Inserting into ${tableName}`);
-      // Insert only allowed columns
-      const columns = Object.keys(validData);
-      if (columns.length === 0) {
-        throw new Error('No insertable columns');
-      }
-      const placeholders = columns.map(() => '?').join(', ');
-      const statement = `INSERT INTO \`${tableName}\` (${columns.map(c => `\`${c}\``).join(', ')})
-                         VALUES (${placeholders})`;
-      console.log(`insert statement: ${statement}`);
-      const values = columns.map(c => validData[c]);
-      console.log(`values: ${JSON.stringify(values)}`);
-      await connection.query(statement, values);
-    } else if (rowVersion.operation === 'update') {
-      console.log(`Updating ${tableName}`);
-      // Build SET from validData excluding primaryKey keys
-      const pkKeys = meta.primaryKey;
-      const setCols = Object.keys(validData).filter(k => !pkKeys.includes(k));
-      if (setCols.length === 0) {
-        // nothing to update
-      } else {
-        const setClause = setCols.map(c => `\`${c}\` = ?`).join(', ');
-        const setValues = setCols.map(c => validData[c]);
-        // build WHERE from rowKeyObject
-        const whereKeys = Object.keys(rowKeyObject);
-        if (whereKeys.length === 0) {
-          throw new Error('Missing primary key in row_key for update');
-        }
-        const whereClause = whereKeys.map(k => `\`${k}\` = ?`).join(' AND ');
-        const whereValues = whereKeys.map(k => rowKeyObject[k]);
-        const statement = `UPDATE \`${tableName}\`
-                           SET ${setClause}
-                           WHERE ${whereClause}
-                           LIMIT 1`;
-        console.log(`update statement: ${statement}`);
-        await connection.query(statement, [...setValues, ...whereValues]);
-      }
-    } else if (rowVersion.operation === 'delete') {
-      const whereKeys = Object.keys(rowKeyObject);
-      if (whereKeys.length === 0) {
-        throw new Error('Missing primary key in row_key for delete');
-      }
-      const whereClause = whereKeys.map(k => `\`${k}\` = ?`).join(' AND ');
-      const whereValues = whereKeys.map(k => rowKeyObject[k]);
-      const statement = `DELETE
-                         FROM \`${tableName}\`
-                         WHERE ${whereClause}
-                         LIMIT 1`;
-      await connection.query(statement, whereValues);
-    } else {
-      throw new Error('Unknown operation');
-    }
-
-    // mark version approved
-    await connection.query('UPDATE row_versions SET status = ?, approved_by = ?, approved_at = NOW(), notes = ? WHERE id = ?', ['approved', approver, comments, versionId]);
-
-    await connection.commit();
-  } catch (error) {
-    if (connection) {
-      try {
-        console.log("rolling back");
-        await connection.rollback();
-      } catch (rollbackError) {
-        console.error("Failed to rollback: ", rollbackError);
-      }
-    }
-    throw error;
-  } finally {
-    if (connection) {
-      try {
-        connection.release();
-      } catch (releaseError) {
-        console.error("Failed to release connection: ", releaseError);
-      }
-    }
-  }
-}
-
-// New helper: validate that a given inst_id exists in locations table
+/**
+ * Validate that a given inst_id exists in the locations table.
+ * Exported for backward-compatible test access.
+ *
+ * @param {*} instId
+ * @returns {Promise<boolean>}
+ */
 export async function validateLocationExists(instId) {
-  if (instId === null || instId === undefined) return false;
-  const numericId = (typeof instId === 'string') ? (instId.trim() === '' ? null : Number(instId)) : instId;
-  if (numericId === null || numericId === undefined || Number.isNaN(Number(numericId)) || !Number.isInteger(Number(numericId))) return false;
+  const numericId = coerceToInteger(instId);
+  if (numericId === null) {
+    return false;
+  }
+
   const rows = await makeDbCallAsPromise('SELECT 1 FROM `locations` WHERE id = ? LIMIT 1', [numericId]);
-  if (!rows) return false;
-  if (Array.isArray(rows) && rows.length === 0) return false;
+
+  if (!rows || (Array.isArray(rows) && rows.length === 0)) {
+    return false;
+  }
+
   return true;
 }
 
-router.get('/getLocationById/:id', isAuthenticated, isContributor, async (req, res) => {
+router.get('/getLocationById/:id', isAuthenticated, isContributor, async (request, response) => {
   try {
-    const idParam = req.params.id;
-    if (idParam === undefined || idParam === null) return res.status(400).json({ error: 'Missing id' });
-    const numericId = (typeof idParam === 'string') ? (idParam.trim() === '' ? null : Number(idParam)) : Number(idParam);
-    if (numericId === null || numericId === undefined || Number.isNaN(Number(numericId)) || !Number.isInteger(Number(numericId))) {
-      return res.status(400).json({ error: 'Invalid id' });
+    const numericId = coerceToInteger(request.params.id);
+
+    if (numericId === null) {
+      return response.status(400).json({error: 'Invalid id'});
     }
 
     const rows = await makeDbCallAsPromise('SELECT id, inst_title FROM `locations` WHERE id = ? LIMIT 1', [numericId]);
+
     if (!rows || !Array.isArray(rows) || rows.length === 0) {
-      return res.status(404).json({ error: 'Location not found' });
+      return response.status(404).json({error: 'Location not found'});
     }
 
-    // return the first matching row
-    return res.json(rows[0]);
+    return response.json(rows[0]);
   } catch (error) {
     console.error('Error fetching location by id:', error);
-    return res.status(500).json({ error: 'Database error' });
+    return response.status(500).json({error: 'Database error'});
   }
 });
 
-router.get('/location-search', isAuthenticated, isContributor, async (req, res) => {
+router.get('/location-search', isAuthenticated, isContributor, async (request, response) => {
   try {
-    const query = (req.query.query || '').trim();
+    const query = (request.query.query || '').trim();
+
     if (!query) {
-      return res.json([]);
+      return response.json([]);
     }
-    // search locations by inst_title (case-insensitive)
-    const sql = `SELECT id, inst_title FROM \`locations\` WHERE inst_title LIKE ? LIMIT 50`;
-    const params = [`%${query}%`];
-    const rows = await makeDbCallAsPromise(sql, params);
-    res.json(rows || []);
+
+    const sql = 'SELECT id, inst_title FROM `locations` WHERE inst_title LIKE ? LIMIT 50';
+    const parameters = [`%${query}%`];
+    const rows = await makeDbCallAsPromise(sql, parameters);
+
+    response.json(rows || []);
   } catch (error) {
     console.error('Error searching locations:', error);
-    res.status(500).json({error: 'Search error'});
+    response.status(500).json({error: 'Search error'});
   }
 });
 
