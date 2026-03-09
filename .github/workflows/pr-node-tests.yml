@@ -13,11 +13,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js from package engines
+      - name: Use pinned Node.js version 22.21.1
         uses: actions/setup-node@v4
         with:
-          # Pin to the engine specified in nodeServer/package.json. Using exact version
-          # avoids surprises and matches the project's expectations.
+          # Pin to a specific Node.js version to avoid surprises and match the
+          # project's expected runtime environment.
           node-version: '22.21.1'
           cache: 'npm'
           cache-dependency-path: nodeServer/package-lock.json
