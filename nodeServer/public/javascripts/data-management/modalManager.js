@@ -153,14 +153,95 @@ export class ModalRenderer {
         rowDiv.appendChild(hiddenInput);
         rowDiv.appendChild(resultsDiv);
       } else {
-        const inputElement = document.createElement('input');
-        inputElement.type = 'text';
-        inputElement.id = `${column.name}`;
-        inputElement.name = column.name;
-        inputElement.setAttribute('data-col-name', column.name);
-        inputElement.placeholder = `Enter ${labelText}`;
-        inputElement.className = 'dataManagementInput';
-        rowDiv.appendChild(inputElement);
+        // Special-case document URL field: provide a text input that will hold the final
+        // document URL and an adjacent file input + upload button for PDFs. The text
+        // input uses `data-col-name` so existing form submission logic picks it up.
+        if (column.name === 'doc_url') {
+          const urlInput = document.createElement('input');
+          urlInput.type = 'text';
+          urlInput.id = `${column.name}`;
+          urlInput.name = column.name;
+          urlInput.setAttribute('data-col-name', column.name);
+          urlInput.placeholder = `Enter ${labelText} or upload a PDF`;
+          urlInput.className = 'dataManagementInput';
+          rowDiv.appendChild(urlInput);
+
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = 'application/pdf';
+          fileInput.id = `file_${column.name}`;
+          fileInput.className = 'dataManagementFileInput';
+          rowDiv.appendChild(fileInput);
+
+          const uploadButton = document.createElement('button');
+          uploadButton.type = 'button';
+          uploadButton.textContent = 'Upload PDF';
+          uploadButton.className = 'primary';
+          rowDiv.appendChild(uploadButton);
+
+          const statusSpan = document.createElement('span');
+          statusSpan.id = `status_${column.name}`;
+          statusSpan.className = 'upload-status';
+          statusSpan.style.marginLeft = '8px';
+          rowDiv.appendChild(statusSpan);
+
+          // Upload handler: POST to /uploads as multipart/form-data and set the returned URL
+          uploadButton.addEventListener('click', async () => {
+            try {
+              statusSpan.textContent = '';
+              if (!fileInput.files || fileInput.files.length === 0) {
+                statusSpan.textContent = 'No file selected';
+                return;
+              }
+              const file = fileInput.files[0];
+              // Basic client-side validation for PDF
+              const nameLower = (file.name || '').toLowerCase();
+              if (!(file.type === 'application/pdf' || nameLower.endsWith('.pdf'))) {
+                statusSpan.textContent = 'Only PDF files are allowed';
+                return;
+              }
+
+              uploadButton.disabled = true;
+              statusSpan.textContent = 'Uploading...';
+
+              const formData = new FormData();
+              formData.append('file', file);
+
+              // Optionally provide a prefix based on selected table to help with organization in the bucket
+              const prefix = (manager && manager.selectedTable) ? manager.selectedTable : '';
+              const uploadUrl = prefix ? `/uploads?prefix=${encodeURIComponent(prefix)}` : '/uploads';
+
+              const resp = await fetch(uploadUrl, { method: 'POST', body: formData });
+              if (!resp.ok) {
+                const text = await resp.text().catch(() => 'Upload failed');
+                throw new Error(text || ('HTTP ' + resp.status));
+              }
+
+              const body = await resp.json().catch(() => null);
+              if (!body || !body.url) {
+                throw new Error('No URL returned from upload');
+              }
+
+              // Populate the URL input so it's included in the pending-change payload
+              urlInput.value = body.url;
+              statusSpan.textContent = 'Uploaded';
+            } catch (err) {
+              console.error('Upload error:', err);
+              try { statusSpan.textContent = 'Upload failed: ' + (err.message || ''); } catch (_) {}
+            } finally {
+              uploadButton.disabled = false;
+            }
+          });
+        } else {
+          const inputElement = document.createElement('input');
+          inputElement.type = 'text';
+          inputElement.id = `${column.name}`;
+          inputElement.name = column.name;
+          inputElement.setAttribute('data-col-name', column.name);
+          inputElement.placeholder = `Enter ${labelText}`;
+          inputElement.className = 'dataManagementInput';
+          rowDiv.appendChild(inputElement);
+        }
       }
 
       fieldsContainer.appendChild(rowDiv);

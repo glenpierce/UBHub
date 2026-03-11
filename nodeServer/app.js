@@ -13,6 +13,7 @@ import login from './routes/login.js';
 import map from './routes/map.js';
 import dataManagement from './routes/dataManagement.js';
 import users from './routes/users.js';
+import uploads from './routes/uploads.js';
 
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
@@ -59,6 +60,7 @@ app.use('/login', login);
 app.use('/map', map);
 app.use('/dataManagement', dataManagement);
 app.use('/users', users);
+app.use('/uploads', uploads);
 
 app.use(logger('dev'));
 
