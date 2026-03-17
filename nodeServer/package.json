@@ -27,7 +27,7 @@
     "serve-favicon": "2.5.1",
     "simplemde": "1.11.2",
     "@aws-sdk/client-s3": "3.616.0",
-    "multer": "1.4.5"
+    "multer": "2.1.1"
   },
   "devDependencies": {
     "vitest": "1.0.0",
