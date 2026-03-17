@@ -1,13 +1,6 @@
 import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3';
 import path from 'path';
 
-/**
- * Create an S3 client using config values. The AWS SDK default provider
- * chain will be used when explicit credentials are not provided.
- *
- * @param {object} config - configuration object with AWS_*/S3_* fields
- * @returns {S3Client}
- */
 export function createS3Client(config) {
   const clientConfig = {
     region: config.AWS_REGION || config.region || 'ca-central-1',
