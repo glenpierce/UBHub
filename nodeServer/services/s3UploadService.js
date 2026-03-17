@@ -1,9 +1,10 @@
 import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3';
 import path from 'path';
+import config from "../config.js";
 
 export function createS3Client(config) {
   const clientConfig = {
-    region: config.AWS_REGION || config.region || 'ca-central-1',
+    region: config.AWS_REGION,
   };
 
   if (config.AWS_ACCESS_KEY_ID && config.AWS_SECRET_ACCESS_KEY) {
@@ -49,8 +50,7 @@ export async function uploadBufferToS3(s3Client, bucket, key, buffer, contentTyp
 
   await s3Client.send(command);
 
-  const region = s3Client.config && s3Client.config.region ? s3Client.config.region : 'us-east-1';
-  const url = `https://${bucket}.s3.${region}.amazonaws.com/${encodeURIComponent(key)}`;
+  const url = `https://${bucket}.s3.${config.AWS_REGION}.amazonaws.com/${encodeURIComponent(key)}`;
 
   return {bucket, key, url};
 }
