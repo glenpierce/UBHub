@@ -13,15 +13,6 @@ export function createS3Client(config) {
     region: config.AWS_REGION || config.region || 'ca-central-1',
   };
 
-  if (config.S3_ENDPOINT) {
-    clientConfig.endpoint = config.S3_ENDPOINT;
-    // For S3-compatible endpoints, use path style if necessary
-    clientConfig.forcePathStyle = config.S3_FORCE_PATH_STYLE === true;
-  }
-
-  // If explicit credentials are provided via config, use them. Otherwise
-  // the SDK will fall back to the default provider chain (env, shared
-  // credentials file, EC2/ECS/EKS role, etc.).
   if (config.AWS_ACCESS_KEY_ID && config.AWS_SECRET_ACCESS_KEY) {
     clientConfig.credentials = {
       accessKeyId: config.AWS_ACCESS_KEY_ID,
@@ -65,20 +56,8 @@ export async function uploadBufferToS3(s3Client, bucket, key, buffer, contentTyp
 
   await s3Client.send(command);
 
-  // Construct a URL. If a custom endpoint is provided the SDK may not
-  // provide a convenient helper, so build a best-effort URL using
-  // standard S3 URL patterns.
-  let url;
-  if (s3Client.config && s3Client.config.endpoint) {
-    const endpoint = s3Client.config.endpoint;
-    const endpointStr = typeof endpoint === 'string' ? endpoint : (endpoint && endpoint.href) ? endpoint.href : String(endpoint);
-    url = `${endpointStr.replace(/\/+$/,'')}/${bucket}/${encodeURIComponent(key)}`;
-  } else {
-    const region = s3Client.config && s3Client.config.region ? s3Client.config.region : 'us-east-1';
-    // For us-east-1 the URL is slightly different, but using the generic
-    // pattern is sufficient for most cases here.
-    url = `https://${bucket}.s3.${region}.amazonaws.com/${encodeURIComponent(key)}`;
-  }
+  const region = s3Client.config && s3Client.config.region ? s3Client.config.region : 'us-east-1';
+  const url = `https://${bucket}.s3.${region}.amazonaws.com/${encodeURIComponent(key)}`;
 
   return {bucket, key, url};
 }
