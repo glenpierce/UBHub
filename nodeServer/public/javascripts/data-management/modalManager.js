@@ -207,9 +207,7 @@ export class ModalRenderer {
               const formData = new FormData();
               formData.append('file', file);
 
-              // Optionally provide a prefix based on selected table to help with organization in the bucket
-              const prefix = (manager && manager.selectedTable) ? manager.selectedTable : '';
-              const uploadUrl = prefix ? `/uploads?prefix=${encodeURIComponent(prefix)}` : '/uploads';
+              const uploadUrl = '/uploads';
 
               const resp = await fetch(uploadUrl, { method: 'POST', body: formData });
               if (!resp.ok) {

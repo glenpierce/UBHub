@@ -25,10 +25,7 @@ router.post('/', isAuthenticated, upload.single('file'), async (request, respons
 
     const file = request.file;
 
-    // Construct a safe key for the object. Optionally a prefix can be set
-    // via query param or config — keep this minimal for now.
-    const prefix = request.query.prefix || '';
-    const key = makeObjectKey(file.originalname, prefix);
+    const key = makeObjectKey(file.originalname);
 
     const result = await uploadBufferToS3(s3Client, config.S3_BUCKET, key, file.buffer, file.mimetype, config.S3_PUBLIC_READ);
 

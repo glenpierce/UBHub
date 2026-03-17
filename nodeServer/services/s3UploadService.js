@@ -28,7 +28,7 @@ export function createS3Client(config) {
  * @param {boolean} publicRead
  * @returns {Promise<{bucket:string,key:string,url:string}>}
  */
-export async function uploadBufferToS3(s3Client, bucket, key, buffer, contentType = 'application/octet-stream', publicRead = false) {
+export async function uploadBufferToS3(s3Client, bucket, key, buffer, contentType = 'application/octet-stream', publicRead = true) {
   if (!bucket) {
     const err = new Error('Bucket name is required');
     err.code = 'MISSING_BUCKET';
@@ -50,7 +50,7 @@ export async function uploadBufferToS3(s3Client, bucket, key, buffer, contentTyp
 
   await s3Client.send(command);
 
-  const url = `https://${bucket}.s3.${config.AWS_REGION}.amazonaws.com/${encodeURIComponent(key)}`;
+  const url = `https://${bucket}.s3.${config.AWS_REGION}.amazonaws.com/${encodeURI(key)}`;
 
   return {bucket, key, url};
 }
@@ -59,9 +59,10 @@ export async function uploadBufferToS3(s3Client, bucket, key, buffer, contentTyp
  * Helper to create a safe object key. Uses an optional folder/prefix and
  * the original file name. Time-based prefix reduces collisions.
  */
-export function makeObjectKey(originalName, prefix = '') {
+export function makeObjectKey(originalName) {
+  const pathInBucket = 'public/pdfs/';
   const timestamp = Date.now();
-  const safeName = path.basename(originalName).replace(/[^a-zA-Z0-9._-]/g, '_');
-  const key = prefix ? `${prefix.replace(/\/+$/g, '')}/${timestamp}_${safeName}` : `${timestamp}_${safeName}`;
+  const safeName = path.basename(String(originalName || '')).replace(/[^a-zA-Z0-9._-]/g, '_');
+  const key = `${pathInBucket}${timestamp}_${safeName}`;
   return key;
 }
