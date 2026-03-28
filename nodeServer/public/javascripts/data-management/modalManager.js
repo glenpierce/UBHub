@@ -185,8 +185,9 @@ export class ModalRenderer {
           statusSpan.style.marginLeft = '8px';
           rowDiv.appendChild(statusSpan);
 
-          // Upload handler: POST to /uploads as multipart/form-data and set the returned URL
           uploadButton.addEventListener('click', async () => {
+            const maximumFileSizeBytes = 50 * 1024 * 1024;
+            const multipartThresholdBytes = 10 * 1024 * 1024;
             try {
               statusSpan.textContent = '';
               if (!fileInput.files || fileInput.files.length === 0) {
@@ -194,38 +195,168 @@ export class ModalRenderer {
                 return;
               }
               const file = fileInput.files[0];
-              // Basic client-side validation for PDF
-              const nameLower = (file.name || '').toLowerCase();
-              if (!(file.type === 'application/pdf' || nameLower.endsWith('.pdf'))) {
+              const normalizedFileName = (file.name || '').toLowerCase();
+              if (!(file.type === 'application/pdf' || normalizedFileName.endsWith('.pdf'))) {
                 statusSpan.textContent = 'Only PDF files are allowed';
+                return;
+              }
+              if (file.size > maximumFileSizeBytes) {
+                statusSpan.textContent = 'File exceeds maximum allowed size';
                 return;
               }
 
               uploadButton.disabled = true;
               statusSpan.textContent = 'Uploading...';
 
-              const formData = new FormData();
-              formData.append('file', file);
+              const uploadWithPresignedUrl = async () => {
+                const presignResponse = await fetch('/uploads/presign', {
+                  method: 'POST',
+                  headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify({
+                    fileName: file.name,
+                    contentType: file.type || 'application/pdf',
+                    fileSize: file.size,
+                  }),
+                });
 
-              const uploadUrl = '/uploads';
+                if (!presignResponse.ok) {
+                  const errorText = await presignResponse.text().catch(() => 'Presign request failed');
+                  throw new Error(errorText);
+                }
 
-              const resp = await fetch(uploadUrl, { method: 'POST', body: formData });
-              if (!resp.ok) {
-                const text = await resp.text().catch(() => 'Upload failed');
-                throw new Error(text || ('HTTP ' + resp.status));
+                const presignBody = await presignResponse.json();
+                if (!presignBody || !presignBody.url || !presignBody.key) {
+                  throw new Error('Presign response missing upload URL');
+                }
+
+                const putResponse = await fetch(presignBody.url, {
+                  method: 'PUT',
+                  headers: {'Content-Type': file.type || 'application/pdf'},
+                  body: file,
+                });
+
+                if (!putResponse.ok) {
+                  const errorText = await putResponse.text().catch(() => 'S3 upload failed');
+                  throw new Error(errorText || `S3 upload failed with status ${putResponse.status}`);
+                }
+
+                const uploadedObjectUrl = presignBody.objectUrl || presignBody.url.split('?')[0];
+                urlInput.value = uploadedObjectUrl;
+              };
+
+              const uploadWithMultipart = async () => {
+                const initiationResponse = await fetch('/uploads/multipart/initiate', {
+                  method: 'POST',
+                  headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify({
+                    fileName: file.name,
+                    contentType: file.type || 'application/pdf',
+                    fileSize: file.size,
+                  }),
+                });
+
+                if (!initiationResponse.ok) {
+                  const errorText = await initiationResponse.text().catch(() => 'Multipart initiation failed');
+                  throw new Error(errorText);
+                }
+
+                const initiationBody = await initiationResponse.json();
+                const partSizeBytes = initiationBody.partSizeBytes || (8 * 1024 * 1024);
+                const uploadParts = [];
+
+                const abortUpload = async () => {
+                  try {
+                    await fetch('/uploads/multipart/abort', {
+                      method: 'POST',
+                      headers: {'Content-Type': 'application/json'},
+                      body: JSON.stringify({uploadId: initiationBody.uploadId, key: initiationBody.key}),
+                    });
+                  } catch (abortError) {
+                    console.error('Error aborting multipart upload:', abortError);
+                  }
+                };
+
+                for (let partOffset = 0, partNumber = 1; partOffset < file.size; partNumber += 1, partOffset += partSizeBytes) {
+                  const fileChunk = file.slice(partOffset, Math.min(partOffset + partSizeBytes, file.size));
+
+                  const presignPartResponse = await fetch('/uploads/multipart/part-url', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                      uploadId: initiationBody.uploadId,
+                      key: initiationBody.key,
+                      partNumber,
+                    }),
+                  });
+
+                  if (!presignPartResponse.ok) {
+                    const errorText = await presignPartResponse.text().catch(() => 'Failed to create part URL');
+                    await abortUpload();
+                    throw new Error(errorText);
+                  }
+
+                  const presignPartBody = await presignPartResponse.json();
+                  if (!presignPartBody || !presignPartBody.url) {
+                    await abortUpload();
+                    throw new Error('Missing part upload URL');
+                  }
+
+                  const partUploadResponse = await fetch(presignPartBody.url, {
+                    method: 'PUT',
+                    body: fileChunk,
+                  });
+
+                  if (!partUploadResponse.ok) {
+                    const errorText = await partUploadResponse.text().catch(() => 'Part upload failed');
+                    await abortUpload();
+                    throw new Error(errorText || `Part upload failed with status ${partUploadResponse.status}`);
+                  }
+
+                  const entityTag = partUploadResponse.headers.get('ETag') || partUploadResponse.headers.get('etag');
+                  if (!entityTag) {
+                    await abortUpload();
+                    throw new Error('Missing ETag for uploaded part');
+                  }
+
+                  uploadParts.push({partNumber, eTag: entityTag});
+                  statusSpan.textContent = `Uploaded part ${partNumber}`;
+                }
+
+                const completionResponse = await fetch('/uploads/multipart/complete', {
+                  method: 'POST',
+                  headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify({
+                    uploadId: initiationBody.uploadId,
+                    key: initiationBody.key,
+                    parts: uploadParts,
+                  }),
+                });
+
+                if (!completionResponse.ok) {
+                  const errorText = await completionResponse.text().catch(() => 'Multipart completion failed');
+                  await abortUpload();
+                  throw new Error(errorText);
+                }
+
+                const completionBody = await completionResponse.json();
+                const completedObjectUrl = completionBody.location || initiationBody.objectUrl;
+                if (!completedObjectUrl) {
+                  throw new Error('Multipart completion did not return object URL');
+                }
+
+                urlInput.value = completedObjectUrl;
+              };
+
+              if (file.size > multipartThresholdBytes) {
+                await uploadWithMultipart();
+                statusSpan.textContent = 'Uploaded with multipart';
+              } else {
+                await uploadWithPresignedUrl();
+                statusSpan.textContent = 'Uploaded';
               }
-
-              const body = await resp.json().catch(() => null);
-              if (!body || !body.url) {
-                throw new Error('No URL returned from upload');
-              }
-
-              // Populate the URL input so it's included in the pending-change payload
-              urlInput.value = body.url;
-              statusSpan.textContent = 'Uploaded';
-            } catch (err) {
-              console.error('Upload error:', err);
-              try { statusSpan.textContent = 'Upload failed: ' + (err.message || ''); } catch (_) {}
+            } catch (error) {
+              console.error('Upload error:', error);
+              try { statusSpan.textContent = 'Upload failed: ' + (error.message || ''); } catch (_) {}
             } finally {
               uploadButton.disabled = false;
             }
