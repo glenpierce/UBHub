@@ -29,6 +29,6 @@
   },
   "devDependencies": {
     "vitest": "1.0.0",
-    "jsdom": "21.1.0"
+    "jsdom": "28.1.0"
   }
 }
