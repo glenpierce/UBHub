@@ -82,7 +82,7 @@ router.post('/presign', isAuthenticated, async (request, response) => {
     });
   } catch (error) {
     console.error('Error creating presigned PUT URL:', error);
-    return response.status(500).json({error: 'Failed to create presigned URL', details: error.message});
+    return response.status(500).json({error: 'Failed to create presigned URL'});
   }
 });
 
@@ -125,7 +125,7 @@ router.post('/multipart/initiate', isAuthenticated, async (request, response) =>
     });
   } catch (error) {
     console.error('Error initiating multipart upload:', error);
-    return response.status(500).json({error: 'Failed to initiate multipart upload', details: error.message});
+    return response.status(500).json({error: 'Failed to initiate multipart upload'});
   }
 });
 
@@ -165,7 +165,7 @@ router.post('/multipart/part-url', isAuthenticated, async (request, response) =>
     });
   } catch (error) {
     console.error('Error creating presigned upload part URL:', error);
-    return response.status(500).json({error: 'Failed to create presigned part URL', details: error.message});
+    return response.status(500).json({error: 'Failed to create presigned part URL'});
   }
 });
 
@@ -211,7 +211,7 @@ router.post('/multipart/complete', isAuthenticated, async (request, response) =>
     });
   } catch (error) {
     console.error('Error completing multipart upload:', error);
-    return response.status(500).json({error: 'Failed to complete multipart upload', details: error.message});
+    return response.status(500).json({error: 'Failed to complete multipart upload'});
   }
 });
 
@@ -241,7 +241,7 @@ router.post('/multipart/abort', isAuthenticated, async (request, response) => {
     });
   } catch (error) {
     console.error('Error aborting multipart upload:', error);
-    return response.status(500).json({error: 'Failed to abort multipart upload', details: error.message});
+    return response.status(500).json({error: 'Failed to abort multipart upload'});
   }
 });
 
@@ -269,7 +269,7 @@ router.post('/', isAuthenticated, upload.single('file'), async (request, respons
     if (error.code === 'MISSING_BUCKET') {
       return response.status(500).json({error: 'S3 bucket is not configured on the server'});
     }
-    return response.status(500).json({error: 'Upload error', details: error.message});
+    return response.status(500).json({error: 'Upload error'});
   }
 });
 
