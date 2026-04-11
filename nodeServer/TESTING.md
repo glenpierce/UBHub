@@ -12,20 +12,20 @@ Build the test image (this will install dependencies inside the image):
 
 ```bash
 # build the test image using the dedicated compose file
-docker compose -f docker-compose.test.yml build node-server-test
+cd .. && docker compose -f docker-compose.test.yml build node-server-test
 ```
 
 Run the tests (runs `npm ci` then `npm test` inside the container):
 
 ```bash
-docker compose -f docker-compose.test.yml run --rm node-server-test
+cd .. && docker compose -f docker-compose.test.yml run --rm node-server-test
 ```
 
 Alternative CI-friendly command (build and run, then exit when complete):
 
 ```bash
 # starts container, runs tests and stops
-docker compose -f docker-compose.test.yml up --build --abort-on-container-exit node-server-test
+cd .. && docker compose -f docker-compose.test.yml up --build --abort-on-container-exit node-server-test
 ```
 
 Notes

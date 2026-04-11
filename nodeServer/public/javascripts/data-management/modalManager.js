@@ -153,14 +153,224 @@ export class ModalRenderer {
         rowDiv.appendChild(hiddenInput);
         rowDiv.appendChild(resultsDiv);
       } else {
-        const inputElement = document.createElement('input');
-        inputElement.type = 'text';
-        inputElement.id = `${column.name}`;
-        inputElement.name = column.name;
-        inputElement.setAttribute('data-col-name', column.name);
-        inputElement.placeholder = `Enter ${labelText}`;
-        inputElement.className = 'dataManagementInput';
-        rowDiv.appendChild(inputElement);
+        // Special-case document URL field: provide a text input that will hold the final
+        // document URL and an adjacent file input + upload button for PDFs. The text
+        // input uses `data-col-name` so existing form submission logic picks it up.
+        if (column.name === 'doc_url') {
+          const urlInput = document.createElement('input');
+          urlInput.type = 'text';
+          urlInput.id = `${column.name}`;
+          urlInput.name = column.name;
+          urlInput.setAttribute('data-col-name', column.name);
+          urlInput.placeholder = `Enter ${labelText} or upload a PDF`;
+          urlInput.className = 'dataManagementInput';
+          rowDiv.appendChild(urlInput);
+
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = 'application/pdf';
+          fileInput.id = `file_${column.name}`;
+          fileInput.className = 'dataManagementFileInput';
+          rowDiv.appendChild(fileInput);
+
+          const uploadButton = document.createElement('button');
+          uploadButton.type = 'button';
+          uploadButton.textContent = 'Upload PDF';
+          uploadButton.className = 'primary';
+          rowDiv.appendChild(uploadButton);
+
+          const statusSpan = document.createElement('span');
+          statusSpan.id = `status_${column.name}`;
+          statusSpan.className = 'upload-status';
+          statusSpan.style.marginLeft = '8px';
+          rowDiv.appendChild(statusSpan);
+
+          uploadButton.addEventListener('click', async () => {
+            const maximumFileSizeBytes = 50 * 1024 * 1024;
+            const multipartThresholdBytes = 10 * 1024 * 1024;
+            try {
+              statusSpan.textContent = '';
+              if (!fileInput.files || fileInput.files.length === 0) {
+                statusSpan.textContent = 'No file selected';
+                return;
+              }
+              const file = fileInput.files[0];
+              const normalizedFileName = (file.name || '').toLowerCase();
+              if (!(file.type === 'application/pdf' || normalizedFileName.endsWith('.pdf'))) {
+                statusSpan.textContent = 'Only PDF files are allowed';
+                return;
+              }
+              if (file.size > maximumFileSizeBytes) {
+                statusSpan.textContent = 'File exceeds maximum allowed size';
+                return;
+              }
+
+              uploadButton.disabled = true;
+              statusSpan.textContent = 'Uploading...';
+
+              const uploadWithPresignedUrl = async () => {
+                const presignResponse = await fetch('/uploads/presign', {
+                  method: 'POST',
+                  headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify({
+                    fileName: file.name,
+                    contentType: file.type || 'application/pdf',
+                    fileSize: file.size,
+                  }),
+                });
+
+                if (!presignResponse.ok) {
+                  const errorText = await presignResponse.text().catch(() => 'Presign request failed');
+                  throw new Error(errorText);
+                }
+
+                const presignBody = await presignResponse.json();
+                if (!presignBody || !presignBody.url || !presignBody.key) {
+                  throw new Error('Presign response missing upload URL');
+                }
+
+                const putResponse = await fetch(presignBody.url, {
+                  method: 'PUT',
+                  headers: {'Content-Type': file.type || 'application/pdf'},
+                  body: file,
+                });
+
+                if (!putResponse.ok) {
+                  const errorText = await putResponse.text().catch(() => 'S3 upload failed');
+                  throw new Error(errorText || `S3 upload failed with status ${putResponse.status}`);
+                }
+
+                const uploadedObjectUrl = presignBody.objectUrl || presignBody.url.split('?')[0];
+                urlInput.value = uploadedObjectUrl;
+              };
+
+              const uploadWithMultipart = async () => {
+                const initiationResponse = await fetch('/uploads/multipart/initiate', {
+                  method: 'POST',
+                  headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify({
+                    fileName: file.name,
+                    contentType: file.type || 'application/pdf',
+                    fileSize: file.size,
+                  }),
+                });
+
+                if (!initiationResponse.ok) {
+                  const errorText = await initiationResponse.text().catch(() => 'Multipart initiation failed');
+                  throw new Error(errorText);
+                }
+
+                const initiationBody = await initiationResponse.json();
+                const partSizeBytes = initiationBody.partSizeBytes || (8 * 1024 * 1024);
+                const uploadParts = [];
+
+                const abortUpload = async () => {
+                  try {
+                    await fetch('/uploads/multipart/abort', {
+                      method: 'POST',
+                      headers: {'Content-Type': 'application/json'},
+                      body: JSON.stringify({uploadId: initiationBody.uploadId, key: initiationBody.key}),
+                    });
+                  } catch (abortError) {
+                    console.error('Error aborting multipart upload:', abortError);
+                  }
+                };
+
+                for (let partOffset = 0, partNumber = 1; partOffset < file.size; partNumber += 1, partOffset += partSizeBytes) {
+                  const fileChunk = file.slice(partOffset, Math.min(partOffset + partSizeBytes, file.size));
+
+                  const presignPartResponse = await fetch('/uploads/multipart/part-url', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                      uploadId: initiationBody.uploadId,
+                      key: initiationBody.key,
+                      partNumber,
+                    }),
+                  });
+
+                  if (!presignPartResponse.ok) {
+                    const errorText = await presignPartResponse.text().catch(() => 'Failed to create part URL');
+                    await abortUpload();
+                    throw new Error(errorText);
+                  }
+
+                  const presignPartBody = await presignPartResponse.json();
+                  if (!presignPartBody || !presignPartBody.url) {
+                    await abortUpload();
+                    throw new Error('Missing part upload URL');
+                  }
+
+                  const partUploadResponse = await fetch(presignPartBody.url, {
+                    method: 'PUT',
+                    body: fileChunk,
+                  });
+
+                  if (!partUploadResponse.ok) {
+                    const errorText = await partUploadResponse.text().catch(() => 'Part upload failed');
+                    await abortUpload();
+                    throw new Error(errorText || `Part upload failed with status ${partUploadResponse.status}`);
+                  }
+
+                  const entityTag = partUploadResponse.headers.get('ETag') || partUploadResponse.headers.get('etag');
+                  if (!entityTag) {
+                    await abortUpload();
+                    throw new Error('Missing ETag for uploaded part');
+                  }
+
+                  uploadParts.push({partNumber, eTag: entityTag});
+                  statusSpan.textContent = `Uploaded part ${partNumber}`;
+                }
+
+                const completionResponse = await fetch('/uploads/multipart/complete', {
+                  method: 'POST',
+                  headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify({
+                    uploadId: initiationBody.uploadId,
+                    key: initiationBody.key,
+                    parts: uploadParts,
+                  }),
+                });
+
+                if (!completionResponse.ok) {
+                  const errorText = await completionResponse.text().catch(() => 'Multipart completion failed');
+                  await abortUpload();
+                  throw new Error(errorText);
+                }
+
+                const completionBody = await completionResponse.json();
+                const completedObjectUrl = completionBody.location || initiationBody.objectUrl;
+                if (!completedObjectUrl) {
+                  throw new Error('Multipart completion did not return object URL');
+                }
+
+                urlInput.value = completedObjectUrl;
+              };
+
+              if (file.size > multipartThresholdBytes) {
+                await uploadWithMultipart();
+                statusSpan.textContent = 'Uploaded with multipart';
+              } else {
+                await uploadWithPresignedUrl();
+                statusSpan.textContent = 'Uploaded';
+              }
+            } catch (error) {
+              console.error('Upload error:', error);
+              try { statusSpan.textContent = 'Upload failed: ' + (error.message || ''); } catch (_) {}
+            } finally {
+              uploadButton.disabled = false;
+            }
+          });
+        } else {
+          const inputElement = document.createElement('input');
+          inputElement.type = 'text';
+          inputElement.id = `${column.name}`;
+          inputElement.name = column.name;
+          inputElement.setAttribute('data-col-name', column.name);
+          inputElement.placeholder = `Enter ${labelText}`;
+          inputElement.className = 'dataManagementInput';
+          rowDiv.appendChild(inputElement);
+        }
       }
 
       fieldsContainer.appendChild(rowDiv);
