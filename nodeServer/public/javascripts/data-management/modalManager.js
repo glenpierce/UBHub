@@ -120,6 +120,8 @@ export class ModalRenderer {
 
     formColumns.forEach(column => {
       const labelText = column.label || column.name;
+      // allow per-column placeholder via metadata (placeholder or example)
+      const columnPlaceholder = (column && (column.placeholder || column.example)) ? (column.placeholder || column.example) : null;
       const rowDiv = document.createElement('div');
       rowDiv.className = 'form-row';
 
@@ -128,14 +130,68 @@ export class ModalRenderer {
 
       const label = document.createElement('label');
       label.setAttribute('for', inputId);
-      label.textContent = labelText;
+      // ensure row is a positioning context for absolute tooltip
+      try { rowDiv.style.position = rowDiv.style.position || 'relative'; } catch (_) {}
+
+      // label text node
+      label.appendChild(document.createTextNode(labelText));
+
+      // Create an info button that shows a small tooltip on hover/focus. Use column.help or column.description
+      // when available, otherwise fall back to a generic hint.
+      const infoButton = document.createElement('button');
+      infoButton.type = 'button';
+      infoButton.className = 'field-info-button';
+      infoButton.setAttribute('aria-haspopup', 'true');
+      infoButton.setAttribute('aria-expanded', 'false');
+      infoButton.style.marginLeft = '8px';
+      infoButton.style.border = 'none';
+      infoButton.style.background = 'transparent';
+      infoButton.style.cursor = 'pointer';
+      infoButton.style.padding = '0';
+      infoButton.style.lineHeight = '1';
+      infoButton.innerHTML = '&#9432;'; // info symbol
+
+      const tooltip = document.createElement('div');
+      const tooltipId = `tooltip_${inputId}`;
+      tooltip.id = tooltipId;
+      tooltip.className = 'field-info-tooltip hidden';
+      tooltip.setAttribute('role', 'tooltip');
+      tooltip.style.position = 'absolute';
+      tooltip.style.zIndex = '50';
+      tooltip.style.left = '0';
+      tooltip.style.top = '100%';
+      tooltip.style.minWidth = '200px';
+      tooltip.style.maxWidth = '320px';
+      tooltip.style.background = '#fff';
+      tooltip.style.border = '1px solid rgba(0,0,0,0.12)';
+      tooltip.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
+      tooltip.style.padding = '8px';
+      tooltip.style.marginTop = '6px';
+      tooltip.style.fontSize = '13px';
+      tooltip.style.color = '#222';
+
+      const helpText = (column && (column.help || column.description)) ? (column.help || column.description) : `Information about ${labelText}. Provide the value appropriate for this field.`;
+      tooltip.textContent = helpText;
+
+      // show/hide handlers
+      const showTooltip = () => { tooltip.classList.remove('hidden'); infoButton.setAttribute('aria-expanded', 'true'); };
+      const hideTooltip = () => { tooltip.classList.add('hidden'); infoButton.setAttribute('aria-expanded', 'false'); };
+      infoButton.addEventListener('mouseenter', showTooltip);
+      infoButton.addEventListener('mouseleave', hideTooltip);
+      infoButton.addEventListener('focus', showTooltip);
+      infoButton.addEventListener('blur', hideTooltip);
+      tooltip.addEventListener('mouseenter', showTooltip);
+      tooltip.addEventListener('mouseleave', hideTooltip);
+
+      label.appendChild(infoButton);
+      label.appendChild(tooltip);
       rowDiv.appendChild(label);
 
       if (column.crossReferenceTable) {
         const searchInput = document.createElement('input');
         searchInput.type = 'text';
         searchInput.id = `search_${column.lookupColumn}`;
-        searchInput.placeholder = `Search ${labelText}`;
+        searchInput.placeholder = columnPlaceholder || `Search ${labelText}`;
         searchInput.autocomplete = 'off';
         searchInput.className = 'dataManagementInput';
 
@@ -162,7 +218,7 @@ export class ModalRenderer {
           urlInput.id = `${column.name}`;
           urlInput.name = column.name;
           urlInput.setAttribute('data-col-name', column.name);
-          urlInput.placeholder = `Enter ${labelText} or upload a PDF`;
+          urlInput.placeholder = columnPlaceholder || `Enter ${labelText} or upload a PDF`;
           urlInput.className = 'dataManagementInput';
           rowDiv.appendChild(urlInput);
 
@@ -367,7 +423,7 @@ export class ModalRenderer {
           inputElement.id = `${column.name}`;
           inputElement.name = column.name;
           inputElement.setAttribute('data-col-name', column.name);
-          inputElement.placeholder = `Enter ${labelText}`;
+          inputElement.placeholder = columnPlaceholder || `Enter ${labelText}`;
           inputElement.className = 'dataManagementInput';
           rowDiv.appendChild(inputElement);
         }
@@ -464,8 +520,64 @@ export class ModalRenderer {
 
       const label = document.createElement('label');
       label.setAttribute('for', `review_field_${key}`);
-      label.textContent = labelText;
       label.className = 'review-field-label';
+      // ensure row is a positioning context for absolute tooltip
+      try { rowDiv.style.position = rowDiv.style.position || 'relative'; } catch (_) {}
+      label.appendChild(document.createTextNode(labelText));
+
+      // Info button + tooltip for review labels. Use manager metadata when available.
+      const infoButton = document.createElement('button');
+      infoButton.type = 'button';
+      infoButton.className = 'field-info-button';
+      infoButton.setAttribute('aria-haspopup', 'true');
+      infoButton.setAttribute('aria-expanded', 'false');
+      infoButton.style.marginLeft = '8px';
+      infoButton.style.border = 'none';
+      infoButton.style.background = 'transparent';
+      infoButton.style.cursor = 'pointer';
+      infoButton.style.padding = '0';
+      infoButton.style.lineHeight = '1';
+      infoButton.innerHTML = '&#9432;';
+
+      const tooltip = document.createElement('div');
+      const tooltipId = `tooltip_review_${key}`;
+      tooltip.id = tooltipId;
+      tooltip.className = 'field-info-tooltip hidden';
+      tooltip.setAttribute('role', 'tooltip');
+      tooltip.style.position = 'absolute';
+      tooltip.style.zIndex = '50';
+      tooltip.style.left = '0';
+      tooltip.style.top = '100%';
+      tooltip.style.minWidth = '200px';
+      tooltip.style.maxWidth = '320px';
+      tooltip.style.background = '#fff';
+      tooltip.style.border = '1px solid rgba(0,0,0,0.12)';
+      tooltip.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
+      tooltip.style.padding = '8px';
+      tooltip.style.marginTop = '6px';
+      tooltip.style.fontSize = '13px';
+      tooltip.style.color = '#222';
+
+      // try to get help text from manager metadata
+      let helpText = `Information about ${labelText}.`;
+      try {
+        const metaCols = (manager && manager.tables && manager.tables[tableName] && manager.tables[tableName].columns) || [];
+        const colMeta = metaCols.find(c => c && (c.name === key || c.joinedColumn === key));
+        if (colMeta && (colMeta.help || colMeta.description)) helpText = colMeta.help || colMeta.description;
+      } catch (_) {}
+      tooltip.textContent = helpText;
+
+      const showTooltip = () => { tooltip.classList.remove('hidden'); infoButton.setAttribute('aria-expanded', 'true'); };
+      const hideTooltip = () => { tooltip.classList.add('hidden'); infoButton.setAttribute('aria-expanded', 'false'); };
+      infoButton.addEventListener('mouseenter', showTooltip);
+      infoButton.addEventListener('mouseleave', hideTooltip);
+      infoButton.addEventListener('focus', showTooltip);
+      infoButton.addEventListener('blur', hideTooltip);
+      tooltip.addEventListener('mouseenter', showTooltip);
+      tooltip.addEventListener('mouseleave', hideTooltip);
+
+      label.appendChild(infoButton);
+      label.appendChild(tooltip);
       rowDiv.appendChild(label);
 
       // Current value
@@ -475,6 +587,8 @@ export class ModalRenderer {
       currentInput.type = 'text';
       currentInput.disabled = true;
       currentInput.id = `current_${key}`;
+      // show a placeholder when the value is empty so reviewers know intended content
+      currentInput.placeholder = '(no value)';
       const curValRaw = currentRow && Object.prototype.hasOwnProperty.call(currentRow, key) ? currentRow[key] : null;
       const currentDisplay = (curValRaw === null || curValRaw === undefined) ? '' : (typeof curValRaw === 'object' ? JSON.stringify(curValRaw) : String(curValRaw));
       currentInput.value = currentDisplay;
@@ -488,6 +602,7 @@ export class ModalRenderer {
       pendingInput.type = 'text';
       pendingInput.disabled = true;
       pendingInput.id = `pending_${key}`;
+      pendingInput.placeholder = '(no value)';
       // pendingData may include only changed keys. If not present, for update show current value as pending (no change).
       const pendingRaw = Object.prototype.hasOwnProperty.call(pendingData, key) ? pendingData[key] : undefined;
       let pendingDisplay;
