@@ -1,0 +1,119 @@
+extends layout
+
+block content
+  h1 Contacts
+
+  if user
+    p Welcome #{user}
+
+  //- Contacts table
+  table#contactsTable.contacts-table
+    thead
+      tr
+        th Name
+        th Email
+        th Phone
+        th Title
+        th Organization
+        th Actions
+    tbody
+
+  //- Add / edit form
+  form#contactForm
+    input(type='hidden' id='contactId')
+    div
+      label(for='fullName') Name:
+      input(type='text' id='fullName' name='fullName')
+    div
+      label(for='email') Email:
+      input(type='email' id='email' name='email')
+    div
+      label(for='phone') Phone:
+      input(type='text' id='phone' name='phone')
+    div
+      label(for='title') Title:
+      input(type='text' id='title' name='title')
+    div
+      label(for='organization') Organization:
+      input(type='text' id='organization' name='organization')
+    div
+      button(type='button' id='saveButton') Save
+      button(type='button' id='addNewButton') Add New
+
+  script.
+    (function() {
+      async function fetchList() {
+        const res = await fetch('/contacts/list');
+        if (!res.ok) return;
+        const rows = await res.json();
+        const tbody = document.querySelector('#contactsTable tbody');
+        tbody.innerHTML = '';
+        rows.forEach(function(row) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${row.fullName || ''}</td><td>${row.email || ''}</td><td>${row.phone || ''}</td><td>${row.title || ''}</td><td>${row.organization || ''}</td>`;
+          const actionsTd = document.createElement('td');
+          const editButton = document.createElement('button');
+          editButton.textContent = 'Edit';
+          editButton.addEventListener('click', function() {
+            document.getElementById('contactId').value = row.id;
+            document.getElementById('fullName').value = row.fullName || '';
+            document.getElementById('email').value = row.email || '';
+            document.getElementById('phone').value = row.phone || '';
+            document.getElementById('title').value = row.title || '';
+            document.getElementById('organization').value = row.organization || '';
+          });
+          const deleteButton = document.createElement('button');
+          deleteButton.textContent = 'Delete';
+          deleteButton.addEventListener('click', async function() {
+            if (!confirm('Delete this contact?')) return;
+            const resp = await fetch('/contacts/delete/' + row.id, {method: 'POST'});
+            if (resp.ok) fetchList(); else alert('Delete failed');
+          });
+          actionsTd.appendChild(editButton);
+          actionsTd.appendChild(document.createTextNode(' '));
+          actionsTd.appendChild(deleteButton);
+          tr.appendChild(actionsTd);
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('saveButton').addEventListener('click', async function() {
+        const id = document.getElementById('contactId').value;
+        const payload = {
+          fullName: document.getElementById('fullName').value,
+          email: document.getElementById('email').value,
+          phone: document.getElementById('phone').value,
+          title: document.getElementById('title').value,
+          organization: document.getElementById('organization').value,
+        };
+        let url = '/contacts/add';
+        if (id) url = '/contacts/edit/' + encodeURIComponent(id);
+        const resp = await fetch(url, {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+        if (resp.ok) {
+          document.getElementById('contactId').value = '';
+          document.getElementById('fullName').value = '';
+          document.getElementById('email').value = '';
+          document.getElementById('phone').value = '';
+          document.getElementById('title').value = '';
+          document.getElementById('organization').value = '';
+          fetchList();
+        } else {
+          const err = await resp.json().catch(() => ({}));
+          alert('Save failed: ' + (err.error || resp.statusText));
+        }
+      });
+
+      document.getElementById('addNewButton').addEventListener('click', function() {
+        document.getElementById('contactId').value = '';
+        document.getElementById('fullName').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('phone').value = '';
+        document.getElementById('title').value = '';
+        document.getElementById('organization').value = '';
+      });
+
+      // Initial load
+      fetchList().catch(function(e){console.error(e)});
+    })();
+
+

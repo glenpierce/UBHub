@@ -48,6 +48,18 @@ CREATE TABLE programs(
     iconFileName VARCHAR(255)
 );
 
+CREATE TABLE contacts (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fullName VARCHAR(1024) CHARACTER SET utf8 NOT NULL,
+    email VARCHAR(255) CHARACTER SET utf8 NOT NULL,
+    phone VARCHAR(64) CHARACTER SET utf8,
+    title VARCHAR(512) CHARACTER SET utf8,
+    organization VARCHAR(512) CHARACTER SET utf8,
+    createdBy VARCHAR(255) CHARACTER SET utf8,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_contacts_fullName (fullName(255))
+);
+
 CREATE TABLE documents (
     id INT,
     inst_id INT,
