@@ -8,14 +8,19 @@ import { isNonEmptyString } from '../utils/validationUtils.js';
  * Render the contacts page.
  * This page is a simple CMS for contacts and uses AJAX to call the JSON endpoints below.
  */
-router.get('/', isAuthenticated, isContributor, function (request, response) {
+function renderContactsPageHandler(request, response) {
   response.render('contacts', {
     user: request.session && request.session.user,
   });
-});
+}
+
+// Exported for unit/integration tests
+export { renderContactsPageHandler };
+
+router.get('/', isAuthenticated, isContributor, renderContactsPageHandler);
 
 // Return list of contacts as JSON
-router.get('/list', isAuthenticated, isContributor, async (request, response) => {
+async function listContactsHandler(request, response) {
   try {
     const sql = 'SELECT id, fullName, email, phone, title, organization FROM `contacts` ORDER BY fullName';
     const rows = await makeDbCallAsPromise(sql);
@@ -24,10 +29,14 @@ router.get('/list', isAuthenticated, isContributor, async (request, response) =>
     console.error('Error fetching contacts:', error);
     response.status(500).json({ error: 'Database error' });
   }
-});
+}
+
+export { listContactsHandler };
+
+router.get('/list', isAuthenticated, isContributor, listContactsHandler);
 
 // Add a new contact
-router.post('/add', isAuthenticated, isContributor, async (request, response) => {
+async function addContactHandler(request, response) {
   try {
     const fullName = request.body && request.body.fullName ? String(request.body.fullName).trim() : '';
     const email = request.body && request.body.email ? String(request.body.email).trim() : '';
@@ -54,10 +63,14 @@ router.post('/add', isAuthenticated, isContributor, async (request, response) =>
     console.error('Error adding contact:', error);
     response.status(500).json({ error: 'Database error' });
   }
-});
+}
+
+export { addContactHandler };
+
+router.post('/add', isAuthenticated, isContributor, addContactHandler);
 
 // Edit an existing contact
-router.post('/edit/:id', isAuthenticated, isContributor, async (request, response) => {
+async function editContactHandler(request, response) {
   try {
     const numericId = parseInt(request.params.id, 10);
     if (Number.isNaN(numericId) || numericId <= 0) {
@@ -91,10 +104,14 @@ router.post('/edit/:id', isAuthenticated, isContributor, async (request, respons
     console.error('Error editing contact:', error);
     response.status(500).json({ error: 'Database error' });
   }
-});
+}
+
+export { editContactHandler };
+
+router.post('/edit/:id', isAuthenticated, isContributor, editContactHandler);
 
 // Delete a contact
-router.post('/delete/:id', isAuthenticated, isContributor, async (request, response) => {
+async function deleteContactHandler(request, response) {
   try {
     const numericId = parseInt(request.params.id, 10);
     if (Number.isNaN(numericId) || numericId <= 0) {
@@ -107,7 +124,11 @@ router.post('/delete/:id', isAuthenticated, isContributor, async (request, respo
     console.error('Error deleting contact:', error);
     response.status(500).json({ error: 'Database error' });
   }
-});
+}
+
+export { deleteContactHandler };
+
+router.post('/delete/:id', isAuthenticated, isContributor, deleteContactHandler);
 
 export default router;
 
