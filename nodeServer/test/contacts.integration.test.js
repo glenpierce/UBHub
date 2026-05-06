@@ -22,6 +22,9 @@ describe('contacts handlers (integration)', () => {
       phone VARCHAR(64) CHARACTER SET utf8,
       title VARCHAR(512) CHARACTER SET utf8,
       organization VARCHAR(512) CHARACTER SET utf8,
+      region VARCHAR(255) CHARACTER SET utf8,
+      level VARCHAR(255) CHARACTER SET utf8,
+      workingGroup VARCHAR(255) CHARACTER SET utf8,
       createdBy VARCHAR(255) CHARACTER SET utf8,
       createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     )`;

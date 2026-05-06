@@ -15,6 +15,9 @@ block content
         th Phone
         th Title
         th Organization
+        th Region
+        th Level
+        th Working Group
         th Actions
     tbody
 
@@ -37,6 +40,15 @@ block content
       label(for='organization') Organization:
       input(type='text' id='organization' name='organization')
     div
+      label(for='region') Region:
+      input(type='text' id='region' name='region')
+    div
+      label(for='level') Level:
+      input(type='text' id='level' name='level')
+    div
+      label(for='workingGroup') Working Group:
+      input(type='text' id='workingGroup' name='workingGroup')
+    div
       button(type='button' id='saveButton') Save
       button(type='button' id='addNewButton') Add New
 
@@ -50,7 +62,7 @@ block content
         tbody.innerHTML = '';
         rows.forEach(function(row) {
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${row.fullName || ''}</td><td>${row.email || ''}</td><td>${row.phone || ''}</td><td>${row.title || ''}</td><td>${row.organization || ''}</td>`;
+          tr.innerHTML = `<td>${row.fullName || ''}</td><td>${row.email || ''}</td><td>${row.phone || ''}</td><td>${row.title || ''}</td><td>${row.organization || ''}</td><td>${row.region || ''}</td><td>${row.level || ''}</td><td>${row.workingGroup || ''}</td>`;
           const actionsTd = document.createElement('td');
           const editButton = document.createElement('button');
           editButton.textContent = 'Edit';
@@ -61,6 +73,9 @@ block content
             document.getElementById('phone').value = row.phone || '';
             document.getElementById('title').value = row.title || '';
             document.getElementById('organization').value = row.organization || '';
+            document.getElementById('region').value = row.region || '';
+            document.getElementById('level').value = row.level || '';
+            document.getElementById('workingGroup').value = row.workingGroup || '';
           });
           const deleteButton = document.createElement('button');
           deleteButton.textContent = 'Delete';
@@ -85,6 +100,9 @@ block content
           phone: document.getElementById('phone').value,
           title: document.getElementById('title').value,
           organization: document.getElementById('organization').value,
+          region: document.getElementById('region').value,
+          level: document.getElementById('level').value,
+          workingGroup: document.getElementById('workingGroup').value,
         };
         let url = '/contacts/add';
         if (id) url = '/contacts/edit/' + encodeURIComponent(id);

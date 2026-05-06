@@ -22,7 +22,7 @@ router.get('/', isAuthenticated, isContributor, renderContactsPageHandler);
 // Return list of contacts as JSON
 async function listContactsHandler(request, response) {
   try {
-    const sql = 'SELECT id, fullName, email, phone, title, organization FROM `contacts` ORDER BY fullName';
+    const sql = 'SELECT id, fullName, email, phone, title, organization, region, level, workingGroup FROM `contacts` ORDER BY fullName';
     const rows = await makeDbCallAsPromise(sql);
     response.json(rows || []);
   } catch (error) {
@@ -43,6 +43,9 @@ async function addContactHandler(request, response) {
     const phone = request.body && request.body.phone ? String(request.body.phone).trim() : '';
     const title = request.body && request.body.title ? String(request.body.title).trim() : '';
     const organization = request.body && request.body.organization ? String(request.body.organization).trim() : '';
+    const region = request.body && request.body.region ? String(request.body.region).trim() : '';
+    const level = request.body.level ? String(request.body.level).trim() : '';
+    const workingGroup = request.body.workingGroup ? String(request.body.workingGroup).trim() : '';
 
     if (!isNonEmptyString(fullName)) {
       return response.status(400).json({ error: 'fullName is required' });
@@ -51,8 +54,8 @@ async function addContactHandler(request, response) {
       return response.status(400).json({ error: 'email is required' });
     }
 
-    const insertSql = 'INSERT INTO `contacts` (fullName, email, phone, title, organization, createdBy) VALUES (?, ?, ?, ?, ?, ?)';
-    const parameters = [fullName, email, phone, title, organization, request.session && request.session.user ? request.session.user : null];
+    const insertSql = 'INSERT INTO `contacts` (fullName, email, phone, title, organization, region, level, workingGroup, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const parameters = [fullName, email, phone, title, organization, region, level, workingGroup, request.session && request.session.user ? request.session.user : null];
 
     const result = await makeDbCallAsPromise(insertSql, parameters);
 
@@ -77,7 +80,7 @@ async function editContactHandler(request, response) {
       return response.status(400).json({ error: 'Invalid id' });
     }
 
-    const allowedFields = ['fullName', 'email', 'phone', 'title', 'organization'];
+    const allowedFields = ['fullName', 'email', 'phone', 'title', 'organization', 'region', 'level', 'workingGroup'];
     const updatesMap = {};
     allowedFields.forEach((fieldName) => {
       if (Object.prototype.hasOwnProperty.call(request.body, fieldName)) {
