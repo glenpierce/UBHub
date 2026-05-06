@@ -1,56 +1,76 @@
 extends layout
 
 block content
-  h1 Contacts
+  div.layout
+    aside.left-col
+      nav
+        div#navigationMenu
 
-  if user
-    p Welcome #{user}
+    main.main-col
+      div.container
+        .profileEditEntryFieldContainer
+          h1#tableTitle Contacts
+          if user
+            span#userAlias.userAlias Hello, #{user}
+          button.primary#addButton(onclick="document.getElementById('addNewButton').click()") Add New Contact
 
-  //- Contacts table
-  table#contactsTable.contacts-table
-    thead
-      tr
-        th Name
-        th Email
-        th Phone
-        th Title
-        th Organization
-        th Region
-        th Level
-        th Working Group
-        th Actions
-    tbody
+      div.globalSearchContainer
+        input#globalSearch.dataManagementInput(type="text", placeholder="Global search...")
+      div.row-controls
+        select#columnPicker.dataManagementInput.flex-1
+        input#columnFilter.dataManagementInput.flex-2(type="text", placeholder="Column value filter...")
+        button#clearFilters.clearFilters(type="button") Clear Filters
 
-  //- Add / edit form
-  form#contactForm
-    input(type='hidden' id='contactId')
-    div
-      label(for='fullName') Name:
-      input(type='text' id='fullName' name='fullName')
-    div
-      label(for='email') Email:
-      input(type='email' id='email' name='email')
-    div
-      label(for='phone') Phone:
-      input(type='text' id='phone' name='phone')
-    div
-      label(for='title') Title:
-      input(type='text' id='title' name='title')
-    div
-      label(for='organization') Organization:
-      input(type='text' id='organization' name='organization')
-    div
-      label(for='region') Region:
-      input(type='text' id='region' name='region')
-    div
-      label(for='level') Level:
-      input(type='text' id='level' name='level')
-    div
-      label(for='workingGroup') Working Group:
-      input(type='text' id='workingGroup' name='workingGroup')
-    div
-      button(type='button' id='saveButton') Save
-      button(type='button' id='addNewButton') Add New
+      // table + form area
+      div
+        div
+          div.table-and-map
+            div.table-container
+              table.data-table#contactsTable
+                thead
+                  tr
+                    th Name
+                    th Email
+                    th Phone
+                    th Title
+                    th Organization
+                    th Region
+                    th Level
+                    th Working Group
+                    th Actions
+                tbody
+
+            // form sits below the table, but uses the same styled form containers
+            div.form-container
+              form#contactForm
+                input(type='hidden' id='contactId')
+                .profileEditEntryFieldContainer
+                  label(for='fullName') Name
+                  input.dataManagementInput(type='text' id='fullName' name='fullName')
+                .profileEditEntryFieldContainer
+                  label(for='email') Email
+                  input.dataManagementInput(type='email' id='email' name='email')
+                .profileEditEntryFieldContainer
+                  label(for='phone') Phone
+                  input.dataManagementInput(type='text' id='phone' name='phone')
+                .profileEditEntryFieldContainer
+                  label(for='title') Title
+                  input.dataManagementInput(type='text' id='title' name='title')
+                .profileEditEntryFieldContainer
+                  label(for='organization') Organization
+                  input.dataManagementInput(type='text' id='organization' name='organization')
+                .profileEditEntryFieldContainer
+                  label(for='region') Region
+                  input.dataManagementInput(type='text' id='region' name='region')
+                .profileEditEntryFieldContainer
+                  label(for='level') Level
+                  input.dataManagementInput(type='text' id='level' name='level')
+                .profileEditEntryFieldContainer
+                  label(for='workingGroup') Working Group
+                  input.dataManagementInput(type='text' id='workingGroup' name='workingGroup')
+                .modal-actions
+                  button.primary(type='button' id='saveButton') Save
+                  button.secondary(type='button' id='addNewButton') Add New
 
   script.
     (function() {
@@ -76,6 +96,8 @@ block content
             document.getElementById('region').value = row.region || '';
             document.getElementById('level').value = row.level || '';
             document.getElementById('workingGroup').value = row.workingGroup || '';
+            // scroll form into view on small screens
+            document.getElementById('contactForm').scrollIntoView({behavior: 'smooth', block: 'center'});
           });
           const deleteButton = document.createElement('button');
           deleteButton.textContent = 'Delete';
