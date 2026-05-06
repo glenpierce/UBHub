@@ -314,6 +314,10 @@ button.small {
     padding: 8px;
 }
 
+.largerPadding {
+    padding: 16px;
+}
+
 .fullWidth {
     width: 100%;
 }

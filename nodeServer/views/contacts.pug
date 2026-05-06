@@ -2,27 +2,15 @@ extends layout
 
 block content
   div.layout
-    aside.left-col
-      nav
-        div#navigationMenu
-
     main.main-col
       div.container
         .profileEditEntryFieldContainer
           h1#tableTitle Contacts
           if user
             span#userAlias.userAlias Hello, #{user}
-          button.primary#addButton(onclick="document.getElementById('addNewButton').click()") Add New Contact
-
-      div.globalSearchContainer
-        input#globalSearch.dataManagementInput(type="text", placeholder="Global search...")
-      div.row-controls
-        select#columnPicker.dataManagementInput.flex-1
-        input#columnFilter.dataManagementInput.flex-2(type="text", placeholder="Column value filter...")
-        button#clearFilters.clearFilters(type="button") Clear Filters
 
       // table + form area
-      div
+      div.largerPadding
         div
           div.table-and-map
             div.table-container
