@@ -49,7 +49,17 @@ block content
                   input.dataManagementInput(type='text' id='organization' name='organization')
                 .profileEditEntryFieldContainer
                   label(for='region') Region
-                  input.dataManagementInput(type='text' id='region' name='region')
+                  // Region is a multi-select so a user can belong to multiple regions
+                  select.dataManagementInput(id='region' name='region' multiple size='6')
+                    option(value='NA') NA: Canada, US, and Israel
+                    option(value='LA') LA: Latin America
+                    option(value='CAR') CAR: Caribbean and Pacific Islands
+                    option(value='MECNA') MECNA: Middle East, Central Asia, and Northern Asia
+                    option(value='AF') AF: Africa
+                    option(value='ESA') ESA: East and South East Asia
+                    option(value='SA') SA: Southern Asia
+                    option(value='EU') EU: Europe
+                    option(value='OC') OC: Oceania
                 .profileEditEntryFieldContainer
                   label(for='level') Level
                   input.dataManagementInput(type='text' id='level' name='level')
@@ -70,6 +80,7 @@ block content
         tbody.innerHTML = '';
         rows.forEach(function(row) {
           const tr = document.createElement('tr');
+          // region may be stored as a comma-separated string of codes
           tr.innerHTML = `<td>${row.fullName || ''}</td><td>${row.email || ''}</td><td>${row.phone || ''}</td><td>${row.title || ''}</td><td>${row.organization || ''}</td><td>${row.region || ''}</td><td>${row.level || ''}</td><td>${row.workingGroup || ''}</td>`;
           const actionsTd = document.createElement('td');
           const editButton = document.createElement('button');
@@ -81,7 +92,13 @@ block content
             document.getElementById('phone').value = row.phone || '';
             document.getElementById('title').value = row.title || '';
             document.getElementById('organization').value = row.organization || '';
-            document.getElementById('region').value = row.region || '';
+            // Set selected options for multi-select region
+            const regionSelect = document.getElementById('region');
+            const regionValue = row.region || '';
+            const selectedCodes = regionValue.split(',').map(function(s) { return String(s).trim(); }).filter(Boolean);
+            Array.from(regionSelect.options).forEach(function(opt) {
+              opt.selected = selectedCodes.includes(opt.value);
+            });
             document.getElementById('level').value = row.level || '';
             document.getElementById('workingGroup').value = row.workingGroup || '';
             // scroll form into view on small screens
@@ -110,7 +127,8 @@ block content
           phone: document.getElementById('phone').value,
           title: document.getElementById('title').value,
           organization: document.getElementById('organization').value,
-          region: document.getElementById('region').value,
+          // collect selected region codes as an array
+          region: Array.from(document.getElementById('region').selectedOptions).map(function(o){ return o.value; }),
           level: document.getElementById('level').value,
           workingGroup: document.getElementById('workingGroup').value,
         };
@@ -124,6 +142,11 @@ block content
           document.getElementById('phone').value = '';
           document.getElementById('title').value = '';
           document.getElementById('organization').value = '';
+          // clear multi-select region
+          const regionSelectClear = document.getElementById('region');
+          Array.from(regionSelectClear.options).forEach(function(opt) { opt.selected = false; });
+          document.getElementById('level').value = '';
+          document.getElementById('workingGroup').value = '';
           fetchList();
         } else {
           const err = await resp.json().catch(() => ({}));
@@ -138,6 +161,11 @@ block content
         document.getElementById('phone').value = '';
         document.getElementById('title').value = '';
         document.getElementById('organization').value = '';
+        // clear multi-select region
+        const regionSelect = document.getElementById('region');
+        Array.from(regionSelect.options).forEach(function(opt) { opt.selected = false; });
+        document.getElementById('level').value = '';
+        document.getElementById('workingGroup').value = '';
       });
 
       // Initial load

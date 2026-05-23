@@ -71,6 +71,34 @@ describe('contacts handlers (unit)', () => {
     expect(makeDbCallAsPromise).toHaveBeenCalledWith(expect.any(String), expect.any(Array));
   });
 
+  it('returns 400 when adding contact with invalid region code', async () => {
+    const req = { body: { fullName: 'Dana', email: 'd@e.com', region: 'INVALID' }, session: { user: 'alice' } };
+    const res = createMockResponse();
+    await addContactHandler(req, res);
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid region code: INVALID' });
+  });
+
+  it('adds a contact with multiple region codes', async () => {
+    const req = { body: { fullName: 'Eve', email: 'e@f.com', region: ['EU','NA'] }, session: { user: 'alice' } };
+    const res = createMockResponse();
+    makeDbCallAsPromise.mockResolvedValue({ insertId: 99 });
+
+    await addContactHandler(req, res);
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toEqual({ success: true, id: 99 });
+    // ensure DB was called
+    expect(makeDbCallAsPromise).toHaveBeenCalledWith(expect.any(String), expect.any(Array));
+  });
+
+  it('returns 400 when adding contact with invalid region array', async () => {
+    const req = { body: { fullName: 'Fred', email: 'f@g.com', region: ['EU','BAD'] }, session: { user: 'alice' } };
+    const res = createMockResponse();
+    await addContactHandler(req, res);
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid region code: BAD' });
+  });
+
   it('returns 400 for invalid edit id', async () => {
     const req = { params: { id: 'abc' }, body: {} };
     const res = createMockResponse();
@@ -95,6 +123,22 @@ describe('contacts handlers (unit)', () => {
     await editContactHandler(req, res);
     expect(res.body).toEqual({ success: true });
     expect(makeDbCallAsPromise).toHaveBeenCalledWith(expect.stringContaining('UPDATE contacts SET'), expect.any(Array));
+  });
+
+  it('returns 400 when editing contact with invalid region code', async () => {
+    const req = { params: { id: '1' }, body: { region: 'BAD' } };
+    const res = createMockResponse();
+    await editContactHandler(req, res);
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid region code: BAD' });
+  });
+
+  it('returns 400 when editing contact with invalid region array', async () => {
+    const req = { params: { id: '1' }, body: { region: ['NA','FOO'] } };
+    const res = createMockResponse();
+    await editContactHandler(req, res);
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: 'Invalid region code: FOO' });
   });
 
   it('returns 400 for delete with invalid id', async () => {
