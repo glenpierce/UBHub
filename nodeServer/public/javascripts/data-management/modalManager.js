@@ -750,18 +750,7 @@ export class ModalManager {
       this.helpTexts = dataManagementHelpTexts || {};
       this._helpTooltipElement = document.createElement('div');
       this._helpTooltipElement.className = 'help-tooltip';
-      this._helpTooltipElement.style.position = 'absolute';
-      this._helpTooltipElement.style.zIndex = '2000';
-      this._helpTooltipElement.style.maxWidth = '360px';
-      this._helpTooltipElement.style.padding = '8px 10px';
-      this._helpTooltipElement.style.background = '#fff';
-      this._helpTooltipElement.style.border = '1px solid #ccc';
-      this._helpTooltipElement.style.borderRadius = '4px';
-      this._helpTooltipElement.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
-      this._helpTooltipElement.style.display = 'none';
-      this._helpTooltipElement.style.color = '#111';
-      this._helpTooltipElement.style.fontSize = '13px';
-      this._helpTooltipElement.style.lineHeight = '1.3';
+      // Keep visual styling in the main stylesheet; only append the element here.
       document.body && document.body.appendChild(this._helpTooltipElement);
 
       this._lastHelpAnchor = null;
@@ -911,7 +900,7 @@ export class ModalManager {
       event.stopPropagation();
       const helpKey = btn.getAttribute('data-help-key') || '';
       // Toggle if same anchor
-      if (this._lastHelpAnchor === btn && this._helpTooltipElement && this._helpTooltipElement.style.display !== 'none') {
+      if (this._lastHelpAnchor === btn && this._helpTooltipElement && this._helpTooltipElement.classList.contains('visible')) {
         this._hideHelpTooltip();
         return;
       }
@@ -952,11 +941,13 @@ export class ModalManager {
     this._helpTooltipElement.textContent = text || '';
     // If there is no text, show a subtle placeholder so icons are still interactive
     if (!text) this._helpTooltipElement.textContent = '';
-    this._helpTooltipElement.style.display = 'block';
+    // Make tooltip visible by adding the 'visible' class. Position is set directly.
+    this._helpTooltipElement.classList.add('visible');
     try {
       const rect = anchorEl.getBoundingClientRect();
-      const top = window.scrollY + rect.bottom + 8;
-      const left = Math.max(8, window.scrollX + rect.left);
+      // For fixed positioning we use viewport coordinates directly.
+      const top = rect.bottom + 8;
+      const left = Math.max(8, rect.left);
       this._helpTooltipElement.style.top = `${top}px`;
       this._helpTooltipElement.style.left = `${left}px`;
     } catch (err) {
@@ -966,7 +957,12 @@ export class ModalManager {
 
   _hideHelpTooltip() {
     try {
-      if (this._helpTooltipElement) this._helpTooltipElement.style.display = 'none';
+      if (this._helpTooltipElement) {
+        // Use class toggling to hide so we don't conflict with inline display styles.
+        this._helpTooltipElement.classList.remove('visible');
+        // Clear position to avoid stale coordinates if element is shown later
+        try { this._helpTooltipElement.style.top = ''; this._helpTooltipElement.style.left = ''; } catch (_) {}
+      }
       this._lastHelpAnchor = null;
     } catch (err) { /* ignore */ }
   }
