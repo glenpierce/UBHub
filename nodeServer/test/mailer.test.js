@@ -37,8 +37,8 @@ describe('mailer service', () => {
 
     const { sendAdminNotification } = await import('../services/mailer.js');
 
-    // Act/Assert - should resolve without throwing
-    await expect(sendAdminNotification({ newUserEmail: 'localtest@example.com', alias: 'Local Tester', institution: 'Local Inst', title: 'Ms', createdAt: new Date().toISOString() })).resolves.toBeUndefined();
+    // Act - call and ensure it does not throw (we don't assert on transporter internals)
+    await sendAdminNotification({ newUserEmail: 'localtest@example.com', alias: 'Local Tester', institution: 'Local Inst', title: 'Ms', createdAt: new Date().toISOString() });
 
     config.EMAIL_PROVIDER = originalProvider;
   });

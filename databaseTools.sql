@@ -1,4 +1,4 @@
-CREATE TABLE users(
+CREATE TABLE IF NOT EXISTS users(
     email VARCHAR(255) NOT NULL,
     userAddress TEXT,
     hashedPassword CHAR(255) not null,
@@ -17,7 +17,7 @@ CREATE TABLE users(
     UNIQUE INDEX (email)
 );
 
-CREATE TABLE locations (
+CREATE TABLE IF NOT EXISTS locations (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     inst_address VARCHAR(255) CHARACTER SET utf8,
     lat NUMERIC(10, 7),
@@ -37,7 +37,7 @@ CREATE TABLE locations (
     conservation_status_wwf VARCHAR(255) CHARACTER SET utf8
 );
 
-CREATE TABLE programs(
+CREATE TABLE IF NOT EXISTS programs(
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     programName VARCHAR(2048) CHARACTER SET utf8,
     description VARCHAR(2048) CHARACTER SET utf8,
@@ -48,7 +48,22 @@ CREATE TABLE programs(
     iconFileName VARCHAR(255)
 );
 
-CREATE TABLE documents (
+CREATE TABLE IF NOT EXISTS contacts (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fullName VARCHAR(1024) CHARACTER SET utf8 NOT NULL,
+    email VARCHAR(255) CHARACTER SET utf8 NOT NULL,
+    phone VARCHAR(64) CHARACTER SET utf8,
+    title VARCHAR(512) CHARACTER SET utf8,
+    organization VARCHAR(512) CHARACTER SET utf8,
+    region VARCHAR(255) CHARACTER SET utf8,
+    level VARCHAR(255) CHARACTER SET utf8,
+    workingGroup VARCHAR(255) CHARACTER SET utf8,
+    createdBy VARCHAR(255) CHARACTER SET utf8,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_contacts_fullName (fullName(255))
+ );
+
+CREATE TABLE IF NOT EXISTS documents (
     id INT,
     inst_id INT,
     doc_type VARCHAR(255) CHARACTER SET utf8,
@@ -60,7 +75,7 @@ CREATE TABLE documents (
     link_verified VARCHAR(255) CHARACTER SET utf8
 );
 
-CREATE TABLE participation (
+CREATE TABLE IF NOT EXISTS participation (
     id INT,
     inst_id INT,
     part_category VARCHAR(255) CHARACTER SET utf8,

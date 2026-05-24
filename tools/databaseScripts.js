@@ -22,6 +22,7 @@ let updateLocationProcedure;
 let documentsTable;
 let participationTable;
 let mapButtonsTable;
+let contactsTable;
 
 createDb = `CREATE DATABASE ubhub;`;
 useDb = `use ubhub;`;
@@ -118,6 +119,21 @@ mapButtonsTable =
             \`marker_colors_by\` VARCHAR(255) CHARACTER SET utf8,
             \`marker_colors\` VARCHAR(255) CHARACTER SET utf8,
             \`button_link\` VARCHAR(255) CHARACTER SET utf8
+        );`;
+
+contactsTable =
+    `CREATE TABLE contacts (
+            \`id\` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            \`fullName\` VARCHAR(1024) CHARACTER SET utf8 NOT NULL,
+            \`email\` VARCHAR(255) CHARACTER SET utf8 NOT NULL,
+            \`phone\` VARCHAR(64) CHARACTER SET utf8,
+            \`title\` VARCHAR(512) CHARACTER SET utf8,
+            \`organization\` VARCHAR(512) CHARACTER SET utf8,
+            \`region\` VARCHAR(255) CHARACTER SET utf8,
+            \`level\` VARCHAR(255) CHARACTER SET utf8,
+            \`workingGroup\` VARCHAR(255) CHARACTER SET utf8,
+            \`createdBy\` VARCHAR(255) CHARACTER SET utf8,
+            \`createdAt\` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         );`;
 
 const updateLocations = function(lower, upper) {
@@ -260,6 +276,7 @@ const update = function(existingDB = true) {
     query.push(participationTable);
     query.push(documentsTable);
     query.push(mapButtonsTable);
+    query.push(contactsTable);
 
     // console.log(query.length);
     // console.log(query);

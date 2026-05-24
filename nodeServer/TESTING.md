@@ -33,6 +33,16 @@ Notes
 - The first run may be slow as devDependencies (including `vitest`) get installed inside the image.
 - If you don't have a `package-lock.json`, the Dockerfile will run `npm install` instead of `npm ci`.
 
+Note about integration tests
+
+- The test compose brings up an ephemeral MySQL service used by the integration tests. Use the `up --build` form so the database service is started and healthy before the test container runs:
+
+```bash
+cd .. && docker compose -f docker-compose.test.yml up --build --abort-on-container-exit node-server-test
+```
+
+The `run` form does not start dependency services; use `up` for the integration tests that require the MySQL service.
+
 Troubleshooting
 - "Cannot connect to the Docker daemon": Start Docker Desktop on macOS and try again.
 - If tests fail with native build errors when installing dependencies, the test image may need extra system packages (e.g., build tools). Edit `nodeServer/Dockerfile` and add packages to `apt-get install` or build with the build-arg `INSTALL_BUILD_TOOLS=1`.

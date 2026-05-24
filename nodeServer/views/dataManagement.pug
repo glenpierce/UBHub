@@ -82,21 +82,27 @@ html
         div.userNameContainer #{username}
         div.profileEditEntryFieldContainer
           label(for="alias") Account name
+          button.help-icon(type="button" data-help-key="profile.alias" aria-label="Help for Account name") ?
           input(type="text" id="alias" name="alias" class="dataManagementInput")
         div.profileEditEntryFieldContainer
           label(for="userAddress") Address
+          button.help-icon(type="button" data-help-key="profile.userAddress" aria-label="Help for Address") ?
           input(type="text" id="userAddress" name="userAddress" class="dataManagementInput")
         div.profileEditEntryFieldContainer
           label(for="title") Title
+          button.help-icon(type="button" data-help-key="profile.title" aria-label="Help for Title") ?
           input(type="text" id="title" name="title" class="dataManagementInput")
         div.profileEditEntryFieldContainer
           label(for="institution") Institution
+          button.help-icon(type="button" data-help-key="profile.institution" aria-label="Help for Institution") ?
           input(type="text" id="institution" name="institution" class="dataManagementInput")
         div.profileEditEntryFieldContainer
           label(for="whatsAppNumber") WhatsApp number
+          button.help-icon(type="button" data-help-key="profile.whatsAppNumber" aria-label="Help for WhatsApp number") ?
           input(type="text" id="whatsAppNumber" name="whatsAppNumber" class="dataManagementInput")
         div.profileEditEntryFieldContainer
           label(for="primaryContact") Primary contact
+          button.help-icon(type="button" data-help-key="profile.primaryContact" aria-label="Help for Primary contact") ?
           input(type="text" id="primaryContact" name="primaryContact" class="dataManagementInput")
       .modal-actions
         button(type="button", onclick="closeMyProfileModalFunction()") Close

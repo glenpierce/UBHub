@@ -1,5 +1,20 @@
 version: '3.8'
 services:
+  mysql-test:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: testuser
+      MYSQL_PASSWORD: testpassword
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
   node-server-test:
     build:
       context: ./nodeServer
@@ -9,10 +24,18 @@ services:
     environment:
       NODE_ENV: test
       CI: "true"
+      # Point the test container to the MySQL service defined above
+      RDS_HOST: mysql-test
+      RDS_USER: testuser
+      RDS_PASSWORD: testpassword
+      RDS_DATABASE: testdb
     volumes:
       - ./nodeServer:/usr/src/app:cached
       - node_server_node_modules:/usr/src/app/node_modules
-    entrypoint: ["sh", "-c", "npm i --prefer-offline --no-audit --ignore-scripts && npm test"]
+    entrypoint: ["bash", "-c", "HOST=${RDS_HOST:-mysql-test}; echo \"waiting for mysql to be available at $${HOST}:3306\"; until >/dev/tcp/$${HOST}/3306 2>/dev/null; do sleep 0.5; done; echo 'mysql is available'; npm i --prefer-offline --no-audit --ignore-scripts && npm test"]
+    depends_on:
+      - mysql-test
 
 volumes:
   node_server_node_modules:
+
