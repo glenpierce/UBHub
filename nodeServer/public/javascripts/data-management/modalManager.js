@@ -1,4 +1,5 @@
 import {fetchJson} from "./utils.js";
+import { dataManagementHelpTexts } from "./helpTexts.js";
 
 export class FocusTrap {
   constructor() {
@@ -53,7 +54,9 @@ export class FocusTrap {
       if (this._focusableElements.length === 0) {
         event.preventDefault();
         if (this._container && !this._container.hasAttribute('tabindex')) this._container.setAttribute('tabindex', '-1');
-        try { this._container && this._container.focus(); } catch (err) { /* ignore */ }
+        try { this._container && this._container.focus(); } catch (err) {
+          console.error(err);
+        }
         return;
       }
 
@@ -110,7 +113,9 @@ export class ModalRenderer {
       // If some other column is a cross-reference that uses this column as its lookupColumn,
       // skip this plain column so only the cross-reference controls (search + hidden) are built.
       const isLookupForCrossRef = columns.some(c => c && c.crossReferenceTable && c.lookupColumn === column.name);
-      if (isLookupForCrossRef) return false;
+      if (isLookupForCrossRef) {
+        return false;
+      }
       return true;
     });
     if (formColumns.length === 0) {
@@ -129,6 +134,24 @@ export class ModalRenderer {
       const label = document.createElement('label');
       label.setAttribute('for', inputId);
       label.textContent = labelText;
+      // Attach a help icon that can show help text for this field. The key uses the table name + column name
+      try {
+        const helpIcon = document.createElement('button');
+        helpIcon.type = 'button';
+        helpIcon.className = 'help-icon';
+        helpIcon.setAttribute('aria-label', `Help for ${labelText}`);
+        helpIcon.setAttribute('data-help-key', `${tableName}.${column.name}`);
+        helpIcon.style.marginLeft = '8px';
+        helpIcon.style.border = 'none';
+        helpIcon.style.background = 'transparent';
+        helpIcon.style.cursor = 'pointer';
+        helpIcon.style.padding = '0 6px';
+        helpIcon.style.fontWeight = '600';
+        helpIcon.textContent = '?';
+        label.appendChild(helpIcon);
+      } catch (err) {
+        console.error(err);
+      }
       rowDiv.appendChild(label);
 
       if (column.crossReferenceTable) {
@@ -466,6 +489,22 @@ export class ModalRenderer {
       label.setAttribute('for', `review_field_${key}`);
       label.textContent = labelText;
       label.className = 'review-field-label';
+      // attach help icon for review labels too
+      try {
+        const helpIcon = document.createElement('button');
+        helpIcon.type = 'button';
+        helpIcon.className = 'help-icon';
+        helpIcon.setAttribute('aria-label', `Help for ${labelText}`);
+        helpIcon.setAttribute('data-help-key', `${tableName}.${key}`);
+        helpIcon.style.marginLeft = '8px';
+        helpIcon.style.border = 'none';
+        helpIcon.style.background = 'transparent';
+        helpIcon.style.cursor = 'pointer';
+        helpIcon.style.padding = '0 6px';
+        helpIcon.style.fontWeight = '600';
+        helpIcon.textContent = '?';
+        label.appendChild(helpIcon);
+      } catch (err) { /* ignore */ }
       rowDiv.appendChild(label);
 
       // Current value
@@ -704,6 +743,33 @@ export class ModalManager {
 
     // only handle Escape here; Tab is handled by FocusTrap when attached
     document.addEventListener('keydown', this._boundOnEscapeKeyDown);
+
+    // Help text support: load help-text constants (may be empty) and wire a delegated
+    // click handler that will show a small tooltip when a help icon is clicked.
+    try {
+      this.helpTexts = dataManagementHelpTexts || {};
+      this._helpTooltipElement = document.createElement('div');
+      this._helpTooltipElement.className = 'help-tooltip';
+      this._helpTooltipElement.style.position = 'absolute';
+      this._helpTooltipElement.style.zIndex = '2000';
+      this._helpTooltipElement.style.maxWidth = '360px';
+      this._helpTooltipElement.style.padding = '8px 10px';
+      this._helpTooltipElement.style.background = '#fff';
+      this._helpTooltipElement.style.border = '1px solid #ccc';
+      this._helpTooltipElement.style.borderRadius = '4px';
+      this._helpTooltipElement.style.boxShadow = '0 2px 6px rgba(0,0,0,0.12)';
+      this._helpTooltipElement.style.display = 'none';
+      this._helpTooltipElement.style.color = '#111';
+      this._helpTooltipElement.style.fontSize = '13px';
+      this._helpTooltipElement.style.lineHeight = '1.3';
+      document.body && document.body.appendChild(this._helpTooltipElement);
+
+      this._lastHelpAnchor = null;
+      this._boundOnHelpClick = (e) => { this._onDocumentClickForHelp(e); };
+      document.addEventListener('click', this._boundOnHelpClick);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   async open(mode = 'add', tableName = null, rowData = null) {
@@ -823,10 +889,86 @@ export class ModalManager {
       if (this.reviewOverlayElement) this.reviewOverlayElement.removeEventListener('click', this._boundOnOverlayClick);
 
       document.removeEventListener('keydown', this._boundOnEscapeKeyDown);
+      try { if (this._boundOnHelpClick) document.removeEventListener('click', this._boundOnHelpClick); } catch(_) {}
+      try { if (this._helpTooltipElement && this._helpTooltipElement.parentNode) this._helpTooltipElement.parentNode.removeChild(this._helpTooltipElement); } catch(_) {}
       this.focusTrap.detach();
       // clear manager reference
       try { if (this.manager && typeof this.manager.setModalManager === 'function') this.manager.setModalManager(null); } catch (_) { /* ignore */ }
     } catch (err) { console.error('Error destroying ModalManager', err); }
+  }
+
+  _onDocumentClickForHelp(event) {
+    try {
+      if (!event || !event.target) return;
+      const btn = event.target.closest ? event.target.closest('.help-icon') : null;
+      if (!btn) {
+        // Clicked outside a help icon -> hide tooltip
+        this._hideHelpTooltip();
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      const helpKey = btn.getAttribute('data-help-key') || '';
+      // Toggle if same anchor
+      if (this._lastHelpAnchor === btn && this._helpTooltipElement && this._helpTooltipElement.style.display !== 'none') {
+        this._hideHelpTooltip();
+        return;
+      }
+
+      const helpText = this._getHelpText(helpKey) || '';
+      this._showHelpTooltip(helpText, btn);
+      this._lastHelpAnchor = btn;
+    } catch (err) {
+      console.error('Error handling help icon click', err);
+    }
+  }
+
+  _getHelpText(key) {
+    if (!key) {
+      console.error('Error getting help key', key);
+      return '';
+    }
+    // Expect key format: 'tableName.columnName'
+    const parts = key.split('.');
+    if (parts.length < 2) {
+      console.error('Error getting help key because parts.length < 2', key);
+      return '';
+    }
+    const table = parts[0];
+    const column = parts.slice(1).join('.');
+    try {
+      if (this.helpTexts && this.helpTexts[table] && Object.prototype.hasOwnProperty.call(this.helpTexts[table], column)) {
+        return this.helpTexts[table][column] || '';
+      }
+    } catch (err) {
+      console.error('Error retrieving help text for key', key, err);
+    }
+    return '';
+  }
+
+  _showHelpTooltip(text, anchorEl) {
+    if (!this._helpTooltipElement) return;
+    this._helpTooltipElement.textContent = text || '';
+    // If there is no text, show a subtle placeholder so icons are still interactive
+    if (!text) this._helpTooltipElement.textContent = '';
+    this._helpTooltipElement.style.display = 'block';
+    try {
+      const rect = anchorEl.getBoundingClientRect();
+      const top = window.scrollY + rect.bottom + 8;
+      const left = Math.max(8, window.scrollX + rect.left);
+      this._helpTooltipElement.style.top = `${top}px`;
+      this._helpTooltipElement.style.left = `${left}px`;
+    } catch (err) {
+      console.error('Error positioning help tooltip', err);
+    }
+  }
+
+  _hideHelpTooltip() {
+    try {
+      if (this._helpTooltipElement) this._helpTooltipElement.style.display = 'none';
+      this._lastHelpAnchor = null;
+    } catch (err) { /* ignore */ }
   }
 
   async _onSubmit(event) {

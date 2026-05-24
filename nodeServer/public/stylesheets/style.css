@@ -542,14 +542,14 @@ button.small {
     top: 40%;
     right: 8px;
     content: "";
-    z-index: 98;
+    z-index: 5;
 }
 
 .selectBox select {
     width: 240px;
     border: 0;
     position: relative;
-    z-index: 99;
+    z-index: 6;
     background: none;
     margin: 0;
     padding: 4px;
@@ -933,7 +933,7 @@ div.mapValuesControl span.disabled {
     background: rgba(0, 0, 0, 0.5);
     /* Hidden by default; shown when the 'hidden' class is removed */
     display: none;
-    z-index: 9999;
+    z-index: 7;
 }
 
 /* Ensure overlays with the hidden class are explicitly hidden (higher specificity) */

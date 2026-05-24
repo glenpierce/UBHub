@@ -29,6 +29,14 @@ export function initializeDataManagement(config = window.dataManagementConfigFro
 
   window.__dataManagement = {tableManager, tableView, modalManager};
 
+  // Ensure modal manager cleans up listeners when the page is unloaded to avoid
+  // dangling handlers in long-running single-page flows or when navigating away.
+  try {
+    window.addEventListener('beforeunload', () => {
+      try { if (modalManager && typeof modalManager.destroy === 'function') modalManager.destroy(); } catch (_) {}
+    });
+  } catch (err) { /* ignore */ }
+
   tableView.renderNavMenu();
 
   try {

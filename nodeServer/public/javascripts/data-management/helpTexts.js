@@ -1,0 +1,108 @@
+// Centralized help-text constant for data-management modal fields.
+// The structure is: { <tableName>: { <columnName>: "help text" } }
+// Leave values empty so subject-matter experts can fill them in the PR.
+
+export const dataManagementHelpTexts = {
+  mapButtons: {
+    part_name: 'Program or button name shown on the map. Use a concise, human-readable title (e.g. "School Bee Project").',
+    button_category: 'Category used to group similar programs. Choose the most appropriate category so users can filter by category.',
+    button_text: 'Optional longer descriptive text for the program button. This is not shown by default but may be used by some views.',
+    image: 'Optional image URL or identifier for the program. Prefer SVG or PNG files. Leave blank to use the default icon.',
+    marker_colors_by: 'Specifies which attribute controls marker color grouping (for advanced map styling). Leave blank for default behavior.',
+    marker_colors: 'Comma-separated list of CSS color values used for map markers when custom coloring is enabled.',
+    button_link: 'A full URL (including https://) to the program website or resource. Ensure the link is reachable and begins with http/https.',
+  },
+
+  locations: {
+    id: 'Internal identifier for the location. This is usually assigned by the system and should not be changed unless you know the implications.',
+    inst_address: 'Street address or postal address of the location. Include city, region and country where appropriate.',
+    lat: 'Latitude in decimal degrees (e.g. 34.052235). Use negative for southern hemisphere.',
+    lng: 'Longitude in decimal degrees (e.g. -118.243683). Use negative for western hemisphere.',
+    inst_title: 'A clear, human-readable name for the location (for example "Big Creek Reserve"). Keep it short but descriptive.',
+    country: 'Country where the location is situated. Prefer the full country name (e.g. "Canada").',
+    scale: 'Scale or administrative level of the location (for example: local, regional, national).',
+    population: 'Estimated population for the area, if applicable. Enter a numeric value only (no commas).',
+    density_km2: 'Population density per square kilometer. Provide a number or leave blank if unknown.',
+    area_km2: 'Area in square kilometres. Enter a numeric value; do not include units (km² will be displayed automatically).',
+    area_ha: 'Area in hectares. Optional alternative area measure; enter a numeric value only.',
+    biodiversity_url: 'Optional URL to a biodiversity profile or data source for this location. Include full http/https URL.',
+    url_verifydate: 'Date when the linked URL was last verified. Use YYYY-MM-DD format if available.',
+    wwf_biome: 'WWF biome classification for the location (if known). Use the standard WWF biome name.',
+    wwf_terrestrial_ecoregion: 'WWF terrestrial ecoregion name, if applicable.',
+    hotspot: 'Indicate whether the location is in a biodiversity hotspot (e.g. "Yes"/"No" or the hotspot name).',
+    conservation_status_wwf: 'Conservation status according to WWF classification, if available.',
+  },
+
+  documents: {
+    id: 'Internal document identifier. Do not modify unless you understand how it is used by the system.',
+    inst_id: 'Reference to the associated location id. Use the search box to find and select the correct location rather than entering a raw id.',
+    inst_title: 'Read-only title of the institution/location associated with this document. It is populated from the selected location.',
+    doc_type: 'Type of document (e.g. report, article, dataset). Choose a concise type so users can filter documents by type.',
+    doc_year: 'Year when the document was published. Enter a four-digit year (e.g. 2021).',
+    doc_title: 'Full title of the document. Provide the official title as it appears in the source.',
+    doc_url: 'Direct URL to the document (PDF or webpage). Prefer stable, permanent links; include the protocol (https://).',
+    keywords: 'Comma-separated keywords that describe the document. Useful for search and filtering (e.g. climate, restoration).',
+    source_url: 'Optional URL to the source where the document was found or referenced. Include full http/https URL.',
+    link_verified: 'Indicator that the link has been manually verified. Enter "true"/"yes" or leave blank if not verified.',
+  },
+
+  participation: {
+    id: 'Internal identifier for the participation record. Typically assigned by the system.',
+    inst_id: 'Reference to the associated location id. Use the location search input to pick the correct location.',
+    part_name: 'Name of the program or activity in which the institution participated. Be concise and descriptive.',
+    part_category: 'Category or type of the participation (e.g. education, monitoring, outreach). Helps with filtering and reporting.',
+    part_year: 'Year of the participation (use a four-digit year). If a range, provide the start year and note the range in the description field if available.',
+    part_data: 'Numeric or textual data associated with the participation (e.g. participant counts). Enter values appropriate to the program.',
+    part_units: 'Units for any numeric participation data (e.g. "people", "hectares").',
+    part_level: 'Level or scale of the program (for example: site, regional, national).',
+    part_link_label: 'Label describing the first link (for example "Report" or "Project page").',
+    part_link: 'URL for the first supporting link. Include full http/https URL.',
+    part_link_label2: 'Label for the second link (optional).',
+    part_link2: 'URL for the second supporting link (optional).',
+    part_link_label3: 'Label for the third link (optional).',
+    part_link3: 'URL for the third supporting link (optional).',
+    keywords: 'Comma-separated keywords describing the participation entry to aid search and categorization.',
+    link_verified: 'Indicates whether provided links were checked and confirmed. Use "true"/"yes" or leave blank if not verified.',
+  },
+
+  users: {
+    alias: 'The display name for the user. This is how the user will be shown throughout the application (e.g. "Jane Doe").',
+    privileges: 'The role or privilege level assigned to the user. Higher values grant more administrative capabilities; do not escalate privileges without approval.',
+    status: 'Account status (for example "active", "inactive"). Use this to temporarily disable access if needed.',
+    region: 'Geographic region associated with the user (optional). Use standard region names where possible.',
+    assignedSite: 'A list or description of sites assigned to the user for administrative duties.',
+    lastActive: 'Timestamp of the user\'s last activity in the system. Read-only field that helps with auditing.',
+    email: 'User email address. Used for notifications and account recovery. Must be a valid email format.',
+    userAddress: 'Postal or mailing address for the user (optional).',
+    title: 'Job title or role of the user (e.g. "Field Coordinator").',
+    institution: 'Institutional affiliation of the user (optional).',
+    whatsAppNumber: 'WhatsApp contact number for the user (include country code). Optional and used for outreach.',
+    primaryContact: 'Primary contact name for the user\'s institution or team, if different from the account holder.',
+    notes: 'Free-text notes about the user. Avoid storing sensitive personal data in this field.',
+  },
+
+  row_versions: {
+    id: 'Internal submission id for tracking pending changes. Read-only in most interfaces.',
+    table_name: 'The table to which this submission applies (for example "locations" or "documents").',
+    row_key: 'A JSON object identifying the primary key(s) of the row being changed. Read-only.',
+    operation: 'Type of operation requested: insert, update, or delete. Reviewers should check this to understand the requested change.',
+    status: 'Current review status (for example "pending", "approved", "rejected").',
+    version: 'Internal version number for the submission (used for auditing).',
+    data: 'The pending data payload for the submission. Contains only the fields being inserted/updated; reviewers should compare this to the current values.',
+    created_by: 'Username or identifier of who submitted the change.',
+    created_at: 'Timestamp when the submission was created.',
+    approved_by: 'Reviewer who approved the submission (if approved).',
+    approved_at: 'Timestamp when the submission was approved (if approved).',
+    notes: 'Optional reviewer comments or notes associated with the submission.',
+  },
+
+  profile: {
+    alias: 'Your display name in the system. This is shown in the UI (for example "Sam Nguyen").',
+    userAddress: 'Your postal address (optional).',
+    title: 'Your job title (optional).',
+    institution: 'Your affiliation, such as the organization or institution you represent.',
+    whatsAppNumber: 'Your WhatsApp number including country code (optional).',
+    primaryContact: 'Primary contact person for your team or institution (optional).',
+  },
+};
+
