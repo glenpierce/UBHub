@@ -12,8 +12,8 @@ function createElement(tag, id = null, classNames = []) {
 describe('TableManager', () => {
   let manager
   beforeEach(() => {
-    // default manager with empty tables
-    manager = new TableManager({ tables: {}, navMenu: [] })
+    // default manager with empty tables and no editable columns
+    manager = new TableManager({ tables: {}, editableColumns: {}, navMenu: [] })
   })
 
   afterEach(() => {
@@ -63,12 +63,23 @@ describe('TableManager', () => {
 
     it('privilegeRenderer maps levels to classes and labels', () => {
       const renderer = manager.rendererRegistry.get('privilegeRenderer')
+
+      const cellContact = createElement('div')
+      renderer({ privileges: 0 }, cellContact)
+      expect(cellContact.querySelector('div').textContent).toBe('Contact')
+      expect(cellContact.querySelector('div').className).toBe('contactRole')
+
       const cell = createElement('div')
       renderer({ privileges: 3 }, cell)
       const child = cell.querySelector('div')
       expect(child).toBeTruthy()
       expect(child.textContent).toBe('Lead')
       expect(child.className).toBe('leadRole')
+
+      const cellUser = createElement('div')
+      renderer({ privileges: 1 }, cellUser)
+      expect(cellUser.querySelector('div').textContent).toBe('User')
+      expect(cellUser.querySelector('div').className).toBe('userRole')
     })
 
     it('statusRenderer sets class based on status', () => {

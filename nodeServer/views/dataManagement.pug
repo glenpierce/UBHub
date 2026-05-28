@@ -23,7 +23,8 @@ html
           h1#tableTitle
           if user
             span#userAlias.userAlias Hello, #{user}
-          button.primary#addButton(onclick="addNewEntry()") Add New Entry
+          button.primary#addButton(onclick="addNewEntry()" style="display:none") Add New Entry
+          button.secondary#emailListButton(style="display:none") Email List
 
       div.globalSearchContainer
         input#globalSearch.dataManagementInput(type="text", placeholder="Global search...")
@@ -121,3 +122,31 @@ html
       input(type="password" id="confirmNewPassword" class="dataManagementInput profileEditEntryFieldContainer")
       div.modal-actions
         button.button-margin(onclick="changePassword()") Change password
+
+// Modal overlay for generating region-based email lists from the Users table
+.modal-overlay#modalOverlayEmailList.hidden
+  .modal(id="modalContainerEmailList")
+    h2.modal-title Email List by Region
+    .profileEditEntryFieldContainer
+      label(for='emailListRegions') Select Regions
+      select#emailListRegions.dataManagementInput(multiple size='9')
+        option(value='NA') NA: Canada, US, and Israel
+        option(value='LA') LA: Latin America
+        option(value='CAR') CAR: Caribbean and Pacific Islands
+        option(value='MECNA') MECNA: Middle East, Central Asia, and Northern Asia
+        option(value='AF') AF: Africa
+        option(value='ESA') ESA: East and South East Asia
+        option(value='SA') SA: Southern Asia
+        option(value='EU') EU: Europe
+        option(value='OC') OC: Oceania
+    .profileEditEntryFieldContainer
+      label(for='emailListResult') Recipient list
+      textarea#emailListResult.dataManagementInput(rows='6' readonly placeholder='Select regions above and click Generate List')
+    .smallText
+      span Count: &nbsp;
+      span#emailListCount 0
+    .modal-actions
+      button(type='button' id='closeEmailListButton') Close
+      button.secondary(type='button' id='copyEmailListButton') Copy to Clipboard
+      button.primary(type='button' id='generateEmailListButton') Generate List
+

@@ -13,6 +13,7 @@ import {
   getTablesForUser,
   getNavigationMenuForUser,
   getServerTableMetadata,
+  getEditableColumnsForUser,
 } from '../services/tableMetadata.js';
 import {buildTableDataQuery} from '../services/queryBuilder.js';
 import {createPendingChange} from '../services/pendingChangeService.js';
@@ -34,6 +35,7 @@ const router = express.Router();
 router.get('/', function (request, response) {
   const dataManagementConfig = {
     tablesForUser: getTablesForUser(request),
+    editableColumns: getEditableColumnsForUser(request),
     navMenu: getNavigationMenuForUser(request),
     user: request.user,
   };
@@ -214,6 +216,135 @@ router.get('/location-search', isAuthenticated, isContributor, async (request, r
   } catch (error) {
     console.error('Error searching locations:', error);
     response.status(500).json({error: 'Search error'});
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Contact management (users with privileges = 0)
+// These endpoints bypass the approval workflow and write directly to the users
+// table.  Region codes must be from the allowed set.
+// ---------------------------------------------------------------------------
+
+const ALLOWED_REGION_CODES = new Set(['NA', 'LA', 'CAR', 'MECNA', 'AF', 'ESA', 'SA', 'EU', 'OC']);
+
+function validateRegionCodes(regionString) {
+  if (!regionString) return { ok: true, value: '' };
+  const codes = String(regionString).split(',').map(code => code.trim()).filter(Boolean);
+  for (const code of codes) {
+    if (!ALLOWED_REGION_CODES.has(code)) return { ok: false, invalid: code };
+  }
+  return { ok: true, value: codes.join(',') };
+}
+
+/**
+ * Create a Contact (user with privileges = 0, no password).
+ * Required body fields: email, alias.
+ */
+router.post('/contact', isAuthenticated, isContributor, async (request, response) => {
+  try {
+    const normalizedEmail = request.body.email ? String(request.body.email).trim().toLowerCase() : '';
+    const alias = request.body.alias ? String(request.body.alias).trim() : '';
+
+    if (!alias) return response.status(400).json({error: 'alias is required'});
+    if (!normalizedEmail) return response.status(400).json({error: 'email is required'});
+
+    const regionValidation = validateRegionCodes(request.body.region || '');
+    if (!regionValidation.ok) {
+      return response.status(400).json({error: `Invalid region code: ${regionValidation.invalid}`});
+    }
+
+    const insertSql = 'INSERT INTO `users` (email, alias, phone, title, institution, region, level, workingGroup, createdBy, privileges) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)';
+    const parameters = [
+      normalizedEmail,
+      alias,
+      request.body.phone ? String(request.body.phone).trim() : '',
+      request.body.title ? String(request.body.title).trim() : '',
+      request.body.institution ? String(request.body.institution).trim() : '',
+      regionValidation.value,
+      request.body.level ? String(request.body.level).trim() : '',
+      request.body.workingGroup ? String(request.body.workingGroup).trim() : '',
+      request.session && request.session.user ? request.session.user : null,
+    ];
+
+    await makeDbCallAsPromise(insertSql, parameters);
+    return response.status(201).json({success: true, email: normalizedEmail});
+  } catch (error) {
+    console.error('Error creating contact:', error);
+    return response.status(500).json({error: 'Database error'});
+  }
+});
+
+/**
+ * Update an existing contact/user's editable fields (direct, no approval workflow).
+ * Body: { rowKey: { email }, data: { alias, phone, title, institution, region, level, workingGroup } }
+ * Requires approver-level privileges to prevent contributors from editing user records.
+ */
+router.post('/contact/update', isAuthenticated, isApprover, async (request, response) => {
+  try {
+    const rowKey = request.body && request.body.rowKey ? request.body.rowKey : {};
+    const data = request.body && request.body.data ? request.body.data : {};
+    const emailKey = rowKey.email ? String(rowKey.email).trim() : '';
+
+    if (!emailKey) return response.status(400).json({error: 'rowKey.email is required'});
+
+    const allowedUpdateFields = ['alias', 'phone', 'title', 'institution', 'region', 'level', 'workingGroup'];
+    const updatesMap = {};
+    allowedUpdateFields.forEach(fieldName => {
+      if (Object.prototype.hasOwnProperty.call(data, fieldName)) {
+        updatesMap[fieldName] = String(data[fieldName] || '').trim();
+      }
+    });
+
+    if (Object.keys(updatesMap).length === 0) {
+      return response.status(400).json({error: 'No updatable fields provided'});
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updatesMap, 'region')) {
+      const regionValidation = validateRegionCodes(updatesMap.region);
+      if (!regionValidation.ok) {
+        return response.status(400).json({error: `Invalid region code: ${regionValidation.invalid}`});
+      }
+      updatesMap.region = regionValidation.value;
+    }
+
+    const setFragments = Object.keys(updatesMap).map(fieldName => `${fieldName} = ?`);
+    const queryParameters = [...Object.values(updatesMap), emailKey];
+
+    await makeDbCallAsPromise(`UPDATE users SET ${setFragments.join(', ')} WHERE email = ?`, queryParameters);
+    return response.json({success: true});
+  } catch (error) {
+    console.error('Error updating contact:', error);
+    return response.status(500).json({error: 'Database error'});
+  }
+});
+
+/**
+ * Return distinct email addresses for users matching the provided region codes.
+ * Query param: regions — comma-separated region codes (e.g. "EU,NA").
+ */
+router.get('/users/emails', isAuthenticated, isApprover, async (request, response) => {
+  try {
+    const regionsRaw = request.query && request.query.regions ? request.query.regions : null;
+    if (!regionsRaw) return response.status(400).json({error: 'regions query parameter is required'});
+
+    const codes = String(regionsRaw).split(',').map(code => code.trim()).filter(Boolean);
+    if (codes.length === 0) return response.status(400).json({error: 'No region codes provided'});
+
+    for (const code of codes) {
+      if (!ALLOWED_REGION_CODES.has(code)) {
+        return response.status(400).json({error: `Invalid region code: ${code}`});
+      }
+    }
+
+    const conditions = codes.map(() => 'FIND_IN_SET(?, region)');
+    const sql = `SELECT DISTINCT email FROM users WHERE (${conditions.join(' OR ')}) AND email IS NOT NULL AND TRIM(email) <> ''`;
+    const rows = await makeDbCallAsPromise(sql, codes);
+    const emails = (rows || []).map(row => String(row.email || '').trim()).filter(Boolean);
+    const uniqueEmails = Array.from(new Set(emails));
+    return response.json({emails: uniqueEmails, count: uniqueEmails.length, copyText: uniqueEmails.join(', ')});
+  } catch (error) {
+    console.error('Error fetching emails by region:', error);
+    return response.status(500).json({error: 'Database error'});
   }
 });
 

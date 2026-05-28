@@ -2,8 +2,9 @@ import { RendererRegistry } from './rendererRegistry.js';
 import { fetchJson } from './utils.js';
 
 export class TableManager {
-  constructor({tables = {}, navMenu = []}) {
+  constructor({tables = {}, editableColumns = {}, navMenu = []}) {
     this.tables = tables;
+    this.editableColumns = editableColumns;
     this.navMenu = navMenu;
 
     this.selectedTable = null;
@@ -55,6 +56,9 @@ export class TableManager {
       let displayText;
       switch (privilegeLevel) {
         case 0:
+          displayText = 'Contact';
+          styleClass = 'contactRole';
+          break;
         case 1:
           displayText = 'User';
           styleClass = 'userRole';

@@ -116,7 +116,7 @@ const tableDisplayMetadata = {
       { name: 'email', label: 'Email', visible: true },
       { name: 'privileges', label: 'Role', visible: true, renderFunction: 'privilegeRenderer' },
       { name: 'status', label: 'Status', visible: true, renderFunction: 'statusRenderer' },
-      { name: 'region', label: 'Region', visible: true },
+      { name: 'region', label: 'Region', visible: true, placeholder: 'e.g. EU,NA  (codes: NA, LA, CAR, MECNA, AF, ESA, SA, EU, OC)' },
       { name: 'phone', label: 'Phone', visible: false },
       { name: 'institution', label: 'Institution', visible: true },
       { name: 'title', label: 'Title', visible: false },
@@ -162,6 +162,13 @@ const editableTableMetadata = {
   participation: {
     primaryKey: ['id'],
     columns: ['id', 'inst_id', 'part_category', 'part_name', 'part_year', 'part_data', 'part_units', 'part_level', 'part_link_label', 'part_link', 'part_link_label2', 'part_link2', 'part_link_label3', 'part_link3', 'keywords', 'link_verified'],
+  },
+  // Users table: supports direct contact creation (privileges = 0) via /dataManagement/contact.
+  // Does NOT use the approval workflow (row_versions). assertTableAllowed intentionally excludes it
+  // so that pending-change submissions for users are always rejected.
+  users: {
+    primaryKey: ['email'],
+    columns: ['email', 'alias', 'phone', 'title', 'institution', 'region', 'level', 'workingGroup'],
   },
 };
 
@@ -241,13 +248,18 @@ export function getEditableTableMetadata(tableName) {
 }
 
 /**
- * Assert that a table is editable. Throws a domain error if not.
+ * Assert that a table is editable via the pending-change approval workflow.
+ * Throws a domain error if not.
+ *
+ * Note: the 'users' table has its own direct-insert endpoint (/dataManagement/contact)
+ * and is intentionally excluded here to prevent accidental approval-workflow submissions.
  *
  * @param {string} tableName
  * @throws {Error} with code 'INVALID_TABLE'.
  */
 export function assertTableAllowed(tableName) {
-  if (!editableTableMetadata[tableName]) {
+  const approvalWorkflowTables = new Set(['mapButtons', 'locations', 'documents', 'participation']);
+  if (!approvalWorkflowTables.has(tableName)) {
     const error = new Error('Invalid table name');
     error.code = 'INVALID_TABLE';
     throw error;
@@ -365,5 +377,24 @@ export function getNavigationMenuForUser(request) {
   }
 
   return navigationMenu;
+}
+
+/**
+ * Build a map of tableKey → editable column name array for tables that the requesting
+ * user can see. Used by the client-side modal form builder to restrict which columns
+ * appear in create/edit forms.
+ *
+ * @param {object} request - Express request with session info.
+ * @returns {object} A map of tableKey → string[].
+ */
+export function getEditableColumnsForUser(request) {
+  const visibleTables = getTablesForUser(request);
+  const result = {};
+  Object.keys(editableTableMetadata).forEach(tableName => {
+    if (visibleTables[tableName]) {
+      result[tableName] = editableTableMetadata[tableName].columns;
+    }
+  });
+  return result;
 }
 

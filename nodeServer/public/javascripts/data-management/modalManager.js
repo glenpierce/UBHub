@@ -103,19 +103,23 @@ export class ModalRenderer {
     }
 
     const columns = manager.tables[tableName].columns || [];
+
+    // When editable column metadata is available, restrict the form to only those columns.
+    // This prevents display-only columns (e.g. lastActive, assignedSite) from appearing in
+    // create/edit forms.
+    const editableColumnSet = (manager.editableColumns && manager.editableColumns[tableName])
+      ? new Set(manager.editableColumns[tableName])
+      : null;
+
     // Exclude direct lookup columns (for example a plain `inst_id` column)
     // when a crossReference column references them via `lookupColumn`.
-    // This prevents creating duplicate inputs with the same id/name (one visible and one hidden)
-    // which caused the typeahead's document.getElementById lookup to target the wrong element.
     const formColumns = columns.filter(column => {
       if (!column || column.name === undefined) return false;
       if (column.name === 'id') return false;
-      // If some other column is a cross-reference that uses this column as its lookupColumn,
-      // skip this plain column so only the cross-reference controls (search + hidden) are built.
+      // Filter to editable set when one is defined
+      if (editableColumnSet && !editableColumnSet.has(column.name)) return false;
       const isLookupForCrossRef = columns.some(c => c && c.crossReferenceTable && c.lookupColumn === column.name);
-      if (isLookupForCrossRef) {
-        return false;
-      }
+      if (isLookupForCrossRef) return false;
       return true;
     });
     if (formColumns.length === 0) {
@@ -390,7 +394,7 @@ export class ModalRenderer {
           inputElement.id = `${column.name}`;
           inputElement.name = column.name;
           inputElement.setAttribute('data-col-name', column.name);
-          inputElement.placeholder = `Enter ${labelText}`;
+          inputElement.placeholder = column.placeholder || `Enter ${labelText}`;
           inputElement.className = 'dataManagementInput';
           rowDiv.appendChild(inputElement);
         }
@@ -632,11 +636,19 @@ export class ModalManager {
     this.reviewOverlayElement = document.getElementById('modalOverlayReview');
     this.reviewFormElement = document.getElementById('modalFormReview');
     this.reviewTitleElement = document.getElementById('modalTitleReview');
-    // Capture the review-specific fields container so review rendering goes into the correct DOM node
     this.reviewFieldsElement = document.getElementById('modalFieldsReview');
     this.approveButtonElement = document.getElementById('approveReviewButton');
     this.rejectButtonElement = document.getElementById('rejectReviewButton');
     this.closeReviewButtonElement = document.getElementById('closeReviewButton');
+
+    // Email list modal DOM references
+    this.emailListOverlayElement = document.getElementById('modalOverlayEmailList');
+    this.emailListRegionsElement = document.getElementById('emailListRegions');
+    this.emailListResultElement = document.getElementById('emailListResult');
+    this.emailListCountElement = document.getElementById('emailListCount');
+    this.generateEmailListButtonElement = document.getElementById('generateEmailListButton');
+    this.copyEmailListButtonElement = document.getElementById('copyEmailListButton');
+    this.closeEmailListButtonElement = document.getElementById('closeEmailListButton');
 
     // collaborators (allow injection for testing)
     this.apiClient = apiClient || new ApiClient();
@@ -659,6 +671,8 @@ export class ModalManager {
             this.close();
           } else if (this.reviewOverlayElement && event.target === this.reviewOverlayElement) {
             this.close();
+          } else if (this.emailListOverlayElement && event.target === this.emailListOverlayElement) {
+            this.close();
           }
         }
       } catch (err) { /* ignore */ }
@@ -671,7 +685,8 @@ export class ModalManager {
           const modalVisible = this.modalOverlayElement && !this.modalOverlayElement.classList.contains('hidden');
           const profileVisible = this.profileOverlayElement && !this.profileOverlayElement.classList.contains('hidden');
           const reviewVisible = this.reviewOverlayElement && !this.reviewOverlayElement.classList.contains('hidden');
-          if (modalVisible || profileVisible || reviewVisible) {
+          const emailListVisible = this.emailListOverlayElement && !this.emailListOverlayElement.classList.contains('hidden');
+          if (modalVisible || profileVisible || reviewVisible || emailListVisible) {
             event.preventDefault();
             this.close();
           }
@@ -684,6 +699,11 @@ export class ModalManager {
     this._boundCloseReviewClick = () => this.close();
     // Use a bound no-op submit handler for the review form so we can remove it later in destroy()
     this._boundReviewFormSubmit = (e) => { e.preventDefault(); };
+
+    // Email list modal bound handlers
+    this._boundGenerateEmailList = () => this._generateEmailList();
+    this._boundCopyEmailList = () => this._copyEmailList();
+    this._boundCloseEmailList = () => this.close();
 
     // wire form submits
     if (this.modalFormElement) {
@@ -704,6 +724,20 @@ export class ModalManager {
     }
     if (this.closeReviewButtonElement) {
       this.closeReviewButtonElement.addEventListener('click', this._boundCloseReviewClick);
+    }
+
+    // Wire email list modal buttons
+    if (this.generateEmailListButtonElement) {
+      this.generateEmailListButtonElement.addEventListener('click', this._boundGenerateEmailList);
+    }
+    if (this.copyEmailListButtonElement) {
+      this.copyEmailListButtonElement.addEventListener('click', this._boundCopyEmailList);
+    }
+    if (this.closeEmailListButtonElement) {
+      this.closeEmailListButtonElement.addEventListener('click', this._boundCloseEmailList);
+    }
+    if (this.emailListOverlayElement) {
+      this.emailListOverlayElement.addEventListener('click', this._boundOnOverlayClick);
     }
 
     // overlay click handling
@@ -860,6 +894,7 @@ export class ModalManager {
     this.modalOverlayElement && this.modalOverlayElement.classList.add('hidden');
     this.profileOverlayElement && this.profileOverlayElement.classList.add('hidden');
     this.reviewOverlayElement && this.reviewOverlayElement.classList.add('hidden');
+    this.emailListOverlayElement && this.emailListOverlayElement.classList.add('hidden');
     this.focusTrap.detach();
   }
 
@@ -876,12 +911,16 @@ export class ModalManager {
       if (this.modalOverlayElement) this.modalOverlayElement.removeEventListener('click', this._boundOnOverlayClick);
       if (this.profileOverlayElement) this.profileOverlayElement.removeEventListener('click', this._boundOnOverlayClick);
       if (this.reviewOverlayElement) this.reviewOverlayElement.removeEventListener('click', this._boundOnOverlayClick);
+      if (this.emailListOverlayElement) this.emailListOverlayElement.removeEventListener('click', this._boundOnOverlayClick);
+
+      try { if (this.generateEmailListButtonElement) this.generateEmailListButtonElement.removeEventListener('click', this._boundGenerateEmailList); } catch(_) {}
+      try { if (this.copyEmailListButtonElement) this.copyEmailListButtonElement.removeEventListener('click', this._boundCopyEmailList); } catch(_) {}
+      try { if (this.closeEmailListButtonElement) this.closeEmailListButtonElement.removeEventListener('click', this._boundCloseEmailList); } catch(_) {}
 
       document.removeEventListener('keydown', this._boundOnEscapeKeyDown);
       try { if (this._boundOnHelpClick) document.removeEventListener('click', this._boundOnHelpClick); } catch(_) {}
       try { if (this._helpTooltipElement && this._helpTooltipElement.parentNode) this._helpTooltipElement.parentNode.removeChild(this._helpTooltipElement); } catch(_) {}
       this.focusTrap.detach();
-      // clear manager reference
       try { if (this.manager && typeof this.manager.setModalManager === 'function') this.manager.setModalManager(null); } catch (_) { /* ignore */ }
     } catch (err) { console.error('Error destroying ModalManager', err); }
   }
@@ -976,17 +1015,41 @@ export class ModalManager {
 
     if (this._currentMode === 'add' || this._currentMode === 'edit') {
       if (!this.manager.selectedTable) { alert('No table selected.'); return; }
+
+      const formData = {};
+      this.modalFormElement.querySelectorAll('[data-col-name]').forEach(inputElement => {
+        const col = inputElement.getAttribute('data-col-name');
+        formData[col] = inputElement.value;
+      });
+
+      // The users table uses a direct endpoint that bypasses the approval workflow.
+      if (this.manager.selectedTable === 'users') {
+        try {
+          if (this._currentMode === 'add') {
+            await this.apiClient.post('/dataManagement/contact', formData);
+          } else {
+            const rowKey = this.manager.getPrimaryKeyForSelectedTable(this._currentRow);
+            await this.apiClient.post('/dataManagement/contact/update', {rowKey, data: formData});
+          }
+          this.close();
+          if (this.manager && this.manager.selectedTable) {
+            await this.manager.fetchTableData(this.manager.selectedTable)
+              .then(() => this.manager.applyFiltersAndSort(this.manager.selectedTable));
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Submit error: ' + err.message);
+        }
+        return;
+      }
+
+      // All other tables use the approval workflow via pending-change.
       const payload = {
         tableName: this.manager.selectedTable,
         rowKey: this._currentMode === 'add' ? {} : this.manager.getPrimaryKeyForSelectedTable(this._currentRow),
         operation: this._currentMode === 'add' ? 'insert' : 'update',
-        data: {}
+        data: formData
       };
-
-      this.modalFormElement.querySelectorAll('[data-col-name]').forEach(inputElement => {
-        const col = inputElement.getAttribute('data-col-name');
-        payload.data[col] = inputElement.value;
-      });
 
       try {
         await this.apiClient.post(`/dataManagement/pending-change`, payload);
@@ -1037,6 +1100,84 @@ export class ModalManager {
     } catch (err) {
       console.error(err);
       alert('Review submit error: ' + err.message);
+    }
+  }
+
+  /**
+   * Open the email list modal, resetting any prior state.
+   */
+  openEmailList() {
+    this.close();
+    if (!this.emailListOverlayElement) return;
+    try {
+      if (this.emailListResultElement) this.emailListResultElement.value = '';
+      if (this.emailListCountElement) this.emailListCountElement.textContent = '0';
+      if (this.emailListRegionsElement) {
+        Array.from(this.emailListRegionsElement.options).forEach(option => { option.selected = false; });
+      }
+    } catch (err) { /* ignore reset errors */ }
+    this.emailListOverlayElement.classList.remove('hidden');
+    const emailListModal = this.emailListOverlayElement.querySelector('.modal');
+    this.focusTrap.attach(emailListModal || this.emailListOverlayElement);
+  }
+
+  async _generateEmailList() {
+    if (!this.emailListRegionsElement) return;
+    const selectedCodes = Array.from(this.emailListRegionsElement.selectedOptions).map(option => option.value);
+    if (selectedCodes.length === 0) {
+      alert('Select at least one region.');
+      return;
+    }
+    try {
+      const params = new URLSearchParams();
+      params.set('regions', selectedCodes.join(','));
+      const response = await fetch(`/dataManagement/users/emails?${params.toString()}`);
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({}));
+        alert('Failed to generate list: ' + (errorBody.error || response.statusText));
+        return;
+      }
+      const data = await response.json();
+      if (this.emailListResultElement) {
+        this.emailListResultElement.value = data.copyText || (data.emails || []).join(', ');
+      }
+      if (this.emailListCountElement) {
+        this.emailListCountElement.textContent = String(data.count || (data.emails || []).length || 0);
+      }
+    } catch (err) {
+      console.error('Error generating email list:', err);
+      alert('Error generating email list: ' + (err.message || ''));
+    }
+  }
+
+  _copyEmailList() {
+    if (!this.emailListResultElement) return;
+    const text = this.emailListResultElement.value || '';
+    if (!text) { alert('No emails to copy. Generate the list first.'); return; }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          alert('Copied to clipboard');
+        }).catch(err => {
+          console.error('Clipboard write failed:', err);
+          this._fallbackCopyEmailList();
+        });
+      } else {
+        this._fallbackCopyEmailList();
+      }
+    } catch (err) {
+      this._fallbackCopyEmailList();
+    }
+  }
+
+  _fallbackCopyEmailList() {
+    if (!this.emailListResultElement) return;
+    this.emailListResultElement.select();
+    try {
+      document.execCommand('copy');
+      alert('Copied to clipboard');
+    } catch (err) {
+      alert('Copy failed: ' + (err.message || 'Unable to copy'));
     }
   }
 }

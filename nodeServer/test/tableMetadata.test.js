@@ -59,21 +59,29 @@ describe('tableMetadata', () => {
       expect(metadata.columns).toContain('inst_title');
     });
 
+    it('returns editable metadata for the users table', () => {
+      const metadata = getEditableTableMetadata('users');
+      expect(metadata).toBeDefined();
+      expect(metadata.primaryKey).toEqual(['email']);
+      expect(Array.isArray(metadata.columns)).toBe(true);
+      expect(metadata.columns).toContain('email');
+      expect(metadata.columns).toContain('alias');
+    });
+
     it('returns undefined for a non-editable table', () => {
-      expect(getEditableTableMetadata('users')).toBeUndefined();
       expect(getEditableTableMetadata('nonexistent')).toBeUndefined();
     });
   });
 
   describe('assertTableAllowed', () => {
-    it('does not throw for editable tables', () => {
+    it('does not throw for approval-workflow tables', () => {
       expect(() => assertTableAllowed('locations')).not.toThrow();
       expect(() => assertTableAllowed('documents')).not.toThrow();
       expect(() => assertTableAllowed('participation')).not.toThrow();
       expect(() => assertTableAllowed('mapButtons')).not.toThrow();
     });
 
-    it('throws with code INVALID_TABLE for non-editable tables', () => {
+    it('throws with code INVALID_TABLE for users (direct endpoint, not approval workflow)', () => {
       expect(() => assertTableAllowed('users')).toThrowError('Invalid table name');
       try {
         assertTableAllowed('users');
