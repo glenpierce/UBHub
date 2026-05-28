@@ -12,52 +12,41 @@ function createMockResponse() {
   return res;
 }
 
+const TEST_EMAIL = 'int@example.com';
+
 describe('contacts handlers (integration)', () => {
   beforeAll(async () => {
-    // Ensure the contacts table exists in the test database
-    const createSql = `CREATE TABLE IF NOT EXISTS contacts (
-      id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-      fullName VARCHAR(1024) CHARACTER SET utf8 NOT NULL,
-      email VARCHAR(255) CHARACTER SET utf8 NOT NULL,
-      phone VARCHAR(64) CHARACTER SET utf8,
-      title VARCHAR(512) CHARACTER SET utf8,
-      organization VARCHAR(512) CHARACTER SET utf8,
-      region VARCHAR(255) CHARACTER SET utf8,
-      level VARCHAR(255) CHARACTER SET utf8,
-      workingGroup VARCHAR(255) CHARACTER SET utf8,
-      createdBy VARCHAR(255) CHARACTER SET utf8,
-      createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )`;
-    await makeDbCallAsPromise(createSql);
+    // Ensure the users table has the columns required for contacts and clean up any leftover test rows.
+    // The full schema is managed via databaseTools.sql; here we only guarantee test isolation.
+    await makeDbCallAsPromise('DELETE FROM users WHERE email = ?', [TEST_EMAIL]);
   }, 30000);
 
   afterAll(async () => {
-    // Clean up table contents
-    await makeDbCallAsPromise('DELETE FROM contacts');
+    // Clean up any rows created during this test suite.
+    await makeDbCallAsPromise('DELETE FROM users WHERE email = ?', [TEST_EMAIL]);
   });
 
   it('can add and list a contact using the real database', async () => {
-    const reqAdd = { body: { fullName: 'Integration User', email: 'int@example.com' }, session: { user: 'tester' } };
+    const reqAdd = { body: { alias: 'Integration User', email: TEST_EMAIL }, session: { user: 'tester' } };
     const resAdd = createMockResponse();
 
     await addContactHandler(reqAdd, resAdd);
     expect(resAdd.statusCode).toBe(201);
     expect(resAdd.body && resAdd.body.success).toBe(true);
-    const insertedId = resAdd.body.id;
-    expect(insertedId).toBeDefined();
+    expect(resAdd.body.email).toBe(TEST_EMAIL);
 
     const reqList = {};
     const resList = createMockResponse();
     await listContactsHandler(reqList, resList);
     expect(Array.isArray(resList.body)).toBe(true);
-    const found = resList.body.find(r => r.email === 'int@example.com');
+    const found = resList.body.find(r => r.email === TEST_EMAIL);
     expect(found).toBeDefined();
+    expect(found.privileges).toBe(0);
 
     // cleanup the inserted contact
-    const reqDel = { params: { id: String(insertedId) } };
+    const reqDel = { params: { email: TEST_EMAIL } };
     const resDel = createMockResponse();
     await deleteContactHandler(reqDel, resDel);
     expect(resDel.body && resDel.body.success).toBe(true);
   }, 30000);
 });
-

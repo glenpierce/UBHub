@@ -113,9 +113,15 @@ const tableDisplayMetadata = {
     displayName: 'Users',
     columns: [
       { name: 'alias', label: 'Name', visible: true, renderFunction: 'nameRenderer' },
+      { name: 'email', label: 'Email', visible: true },
       { name: 'privileges', label: 'Role', visible: true, renderFunction: 'privilegeRenderer' },
       { name: 'status', label: 'Status', visible: true, renderFunction: 'statusRenderer' },
       { name: 'region', label: 'Region', visible: true },
+      { name: 'phone', label: 'Phone', visible: false },
+      { name: 'institution', label: 'Institution', visible: true },
+      { name: 'title', label: 'Title', visible: false },
+      { name: 'level', label: 'Level', visible: false },
+      { name: 'workingGroup', label: 'Working Group', visible: false },
       { name: 'assignedSite', label: 'Assigned Sites', visible: true, renderFunction: 'assignRenderer' },
       { name: 'lastActive', label: 'Last Active', visible: true, renderFunction: 'lastActiveRenderer' },
     ],
@@ -127,12 +133,11 @@ const tableDisplayMetadata = {
 // ---------------------------------------------------------------------------
 
 const executiveUserColumns = [
-  { name: 'email', label: 'Email', visible: true },
   { name: 'userAddress', label: 'Address', visible: false },
-  { name: 'title', label: 'Title', visible: true },
-  { name: 'institution', label: 'Institution', visible: true },
   { name: 'whatsAppNumber', label: 'WhatsApp Number', visible: true },
   { name: 'primaryContact', label: 'Primary Contact', visible: true },
+  { name: 'createdBy', label: 'Created By', visible: false },
+  { name: 'createdAt', label: 'Created At', visible: false },
   { name: 'notes', label: 'Notes', visible: false },
   { button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditUserModal' },
 ];

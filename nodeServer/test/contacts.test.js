@@ -42,7 +42,7 @@ describe('contacts handlers (unit)', () => {
   });
 
   it('lists contacts', async () => {
-    const fakeRows = [{ id: 1, fullName: 'Bob' }];
+    const fakeRows = [{ email: 'bob@example.com', alias: 'Bob', privileges: 0 }];
     makeDbCallAsPromise.mockResolvedValue(fakeRows);
 
     const req = {};
@@ -52,27 +52,27 @@ describe('contacts handlers (unit)', () => {
     expect(makeDbCallAsPromise).toHaveBeenCalled();
   });
 
-  it('returns 400 when adding contact without fullName', async () => {
+  it('returns 400 when adding contact without alias', async () => {
     const req = { body: { email: 'a@b.com' }, session: { user: 'alice' } };
     const res = createMockResponse();
     await addContactHandler(req, res);
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'fullName is required' });
+    expect(res.body).toEqual({ error: 'alias is required' });
   });
 
-  it('adds a contact and returns insert id', async () => {
-    const req = { body: { fullName: 'Charlie', email: 'c@d.com' }, session: { user: 'alice' } };
+  it('adds a contact and returns the email', async () => {
+    const req = { body: { alias: 'Charlie', email: 'c@d.com' }, session: { user: 'alice' } };
     const res = createMockResponse();
-    makeDbCallAsPromise.mockResolvedValue({ insertId: 42 });
+    makeDbCallAsPromise.mockResolvedValue({ affectedRows: 1 });
 
     await addContactHandler(req, res);
     expect(res.statusCode).toBe(201);
-    expect(res.body).toEqual({ success: true, id: 42 });
+    expect(res.body).toEqual({ success: true, email: 'c@d.com' });
     expect(makeDbCallAsPromise).toHaveBeenCalledWith(expect.any(String), expect.any(Array));
   });
 
   it('returns 400 when adding contact with invalid region code', async () => {
-    const req = { body: { fullName: 'Dana', email: 'd@e.com', region: 'INVALID' }, session: { user: 'alice' } };
+    const req = { body: { alias: 'Dana', email: 'd@e.com', region: 'INVALID' }, session: { user: 'alice' } };
     const res = createMockResponse();
     await addContactHandler(req, res);
     expect(res.statusCode).toBe(400);
@@ -80,35 +80,35 @@ describe('contacts handlers (unit)', () => {
   });
 
   it('adds a contact with multiple region codes', async () => {
-    const req = { body: { fullName: 'Eve', email: 'e@f.com', region: ['EU','NA'] }, session: { user: 'alice' } };
+    const req = { body: { alias: 'Eve', email: 'e@f.com', region: ['EU','NA'] }, session: { user: 'alice' } };
     const res = createMockResponse();
-    makeDbCallAsPromise.mockResolvedValue({ insertId: 99 });
+    makeDbCallAsPromise.mockResolvedValue({ affectedRows: 1 });
 
     await addContactHandler(req, res);
     expect(res.statusCode).toBe(201);
-    expect(res.body).toEqual({ success: true, id: 99 });
+    expect(res.body).toEqual({ success: true, email: 'e@f.com' });
     // ensure DB was called
     expect(makeDbCallAsPromise).toHaveBeenCalledWith(expect.any(String), expect.any(Array));
   });
 
   it('returns 400 when adding contact with invalid region array', async () => {
-    const req = { body: { fullName: 'Fred', email: 'f@g.com', region: ['EU','BAD'] }, session: { user: 'alice' } };
+    const req = { body: { alias: 'Fred', email: 'f@g.com', region: ['EU','BAD'] }, session: { user: 'alice' } };
     const res = createMockResponse();
     await addContactHandler(req, res);
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({ error: 'Invalid region code: BAD' });
   });
 
-  it('returns 400 for invalid edit id', async () => {
-    const req = { params: { id: 'abc' }, body: {} };
+  it('returns 400 for edit with empty email param', async () => {
+    const req = { params: { email: '' }, body: { alias: 'New Name' } };
     const res = createMockResponse();
     await editContactHandler(req, res);
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Invalid id' });
+    expect(res.body).toEqual({ error: 'Invalid email' });
   });
 
   it('returns 400 for edit with no updatable fields', async () => {
-    const req = { params: { id: '1' }, body: {} };
+    const req = { params: { email: 'test@example.com' }, body: {} };
     const res = createMockResponse();
     await editContactHandler(req, res);
     expect(res.statusCode).toBe(400);
@@ -116,17 +116,17 @@ describe('contacts handlers (unit)', () => {
   });
 
   it('edits a contact successfully', async () => {
-    const req = { params: { id: '1' }, body: { fullName: 'New Name' } };
+    const req = { params: { email: 'test@example.com' }, body: { alias: 'New Name' } };
     const res = createMockResponse();
     makeDbCallAsPromise.mockResolvedValue({ affectedRows: 1 });
 
     await editContactHandler(req, res);
     expect(res.body).toEqual({ success: true });
-    expect(makeDbCallAsPromise).toHaveBeenCalledWith(expect.stringContaining('UPDATE contacts SET'), expect.any(Array));
+    expect(makeDbCallAsPromise).toHaveBeenCalledWith(expect.stringContaining('UPDATE users SET'), expect.any(Array));
   });
 
   it('returns 400 when editing contact with invalid region code', async () => {
-    const req = { params: { id: '1' }, body: { region: 'BAD' } };
+    const req = { params: { email: 'test@example.com' }, body: { region: 'BAD' } };
     const res = createMockResponse();
     await editContactHandler(req, res);
     expect(res.statusCode).toBe(400);
@@ -134,29 +134,28 @@ describe('contacts handlers (unit)', () => {
   });
 
   it('returns 400 when editing contact with invalid region array', async () => {
-    const req = { params: { id: '1' }, body: { region: ['NA','FOO'] } };
+    const req = { params: { email: 'test@example.com' }, body: { region: ['NA','FOO'] } };
     const res = createMockResponse();
     await editContactHandler(req, res);
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({ error: 'Invalid region code: FOO' });
   });
 
-  it('returns 400 for delete with invalid id', async () => {
-    const req = { params: { id: '0' } };
+  it('returns 400 for delete with empty email param', async () => {
+    const req = { params: { email: '' } };
     const res = createMockResponse();
     await deleteContactHandler(req, res);
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({ error: 'Invalid id' });
+    expect(res.body).toEqual({ error: 'Invalid email' });
   });
 
   it('deletes a contact successfully', async () => {
-    const req = { params: { id: '2' } };
+    const req = { params: { email: 'del@example.com' } };
     const res = createMockResponse();
     makeDbCallAsPromise.mockResolvedValue({ affectedRows: 1 });
 
     await deleteContactHandler(req, res);
     expect(res.body).toEqual({ success: true });
-    expect(makeDbCallAsPromise).toHaveBeenCalledWith('DELETE FROM contacts WHERE id = ?', [2]);
+    expect(makeDbCallAsPromise).toHaveBeenCalledWith('DELETE FROM users WHERE email = ?', ['del@example.com']);
   });
 });
-

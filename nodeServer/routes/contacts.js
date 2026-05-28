@@ -4,7 +4,7 @@ import { makeDbCallAsPromise } from '../ConnectionPool.js';
 import { isAuthenticated, isContributor, isApprover } from '../middleware/authMiddleware.js';
 import { isNonEmptyString } from '../utils/validationUtils.js';
 
-// Allowed region codes for contacts.region
+// Allowed region codes for users.region
 const ALLOWED_REGION_CODES = ['NA','LA','CAR','MECNA','AF','ESA','SA','EU','OC'];
 
 function normalizeRegionInput(input) {
@@ -24,7 +24,8 @@ function normalizeRegionInput(input) {
 
 /**
  * Render the contacts page.
- * This page is a simple CMS for contacts and uses AJAX to call the JSON endpoints below.
+ * This page is a CMS for all contacts (users with privileges = 0) and uses AJAX
+ * to call the JSON endpoints below.
  */
 function renderContactsPageHandler(request, response) {
   response.render('contacts', {
@@ -37,10 +38,11 @@ export { renderContactsPageHandler };
 
 router.get('/', isAuthenticated, isContributor, renderContactsPageHandler);
 
-// Return list of contacts as JSON
+// Return list of contacts (all users) as JSON.
+// Fields are projected to the names used by the contacts view.
 async function listContactsHandler(request, response) {
   try {
-    const sql = 'SELECT id, fullName, email, phone, title, organization, region, level, workingGroup FROM `contacts` ORDER BY fullName';
+    const sql = 'SELECT email, alias, phone, title, institution, region, level, workingGroup, privileges FROM `users` ORDER BY alias';
     const rows = await makeDbCallAsPromise(sql);
     response.json(rows || []);
   } catch (error) {
@@ -82,7 +84,7 @@ async function getEmailsHandler(request, response) {
 
     // Build SQL using FIND_IN_SET for each code to support comma-separated storage
     const conditions = codes.map(() => 'FIND_IN_SET(?, region)');
-    const sql = `SELECT DISTINCT email FROM contacts WHERE (${conditions.join(' OR ')}) AND email IS NOT NULL AND TRIM(email) <> ''`;
+    const sql = `SELECT DISTINCT email FROM users WHERE (${conditions.join(' OR ')}) AND email IS NOT NULL AND TRIM(email) <> ''`;
     const rows = await makeDbCallAsPromise(sql, codes);
     const emails = (rows || []).map((r) => String(r.email || '').trim()).filter(Boolean);
     // unique
@@ -98,20 +100,20 @@ export { getEmailsHandler };
 
 router.get('/emails', isAuthenticated, isApprover, getEmailsHandler);
 
-// Add a new contact
+// Add a new contact to the users table with privileges = 0 (Contact) and no password.
 async function addContactHandler(request, response) {
   try {
-    const fullName = request.body && request.body.fullName ? String(request.body.fullName).trim() : '';
+    const alias = request.body && request.body.alias ? String(request.body.alias).trim() : '';
     const email = request.body && request.body.email ? String(request.body.email).trim() : '';
     const phone = request.body && request.body.phone ? String(request.body.phone).trim() : '';
     const title = request.body && request.body.title ? String(request.body.title).trim() : '';
-    const organization = request.body && request.body.organization ? String(request.body.organization).trim() : '';
+    const institution = request.body && request.body.institution ? String(request.body.institution).trim() : '';
     const regionRaw = request.body && Object.prototype.hasOwnProperty.call(request.body, 'region') ? request.body.region : null;
     const level = request.body.level ? String(request.body.level).trim() : '';
     const workingGroup = request.body.workingGroup ? String(request.body.workingGroup).trim() : '';
 
-    if (!isNonEmptyString(fullName)) {
-      return response.status(400).json({ error: 'fullName is required' });
+    if (!isNonEmptyString(alias)) {
+      return response.status(400).json({ error: 'alias is required' });
     }
     if (!isNonEmptyString(email)) {
       return response.status(400).json({ error: 'email is required' });
@@ -123,14 +125,12 @@ async function addContactHandler(request, response) {
     }
     const region = normalized.value;
 
-    const insertSql = 'INSERT INTO `contacts` (fullName, email, phone, title, organization, region, level, workingGroup, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    const parameters = [fullName, email, phone, title, organization, region, level, workingGroup, request.session && request.session.user ? request.session.user : null];
+    const insertSql = 'INSERT INTO `users` (email, alias, phone, title, institution, region, level, workingGroup, createdBy, privileges) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)';
+    const parameters = [email, alias, phone, title, institution, region, level, workingGroup, request.session && request.session.user ? request.session.user : null];
 
-    const result = await makeDbCallAsPromise(insertSql, parameters);
+    await makeDbCallAsPromise(insertSql, parameters);
 
-    // result for INSERT should contain insertId
-    const insertedId = result && result.insertId ? result.insertId : null;
-    response.status(201).json({ success: true, id: insertedId });
+    response.status(201).json({ success: true, email });
   } catch (error) {
     console.error('Error adding contact:', error);
     response.status(500).json({ error: 'Database error' });
@@ -141,15 +141,15 @@ export { addContactHandler };
 
 router.post('/add', isAuthenticated, isContributor, addContactHandler);
 
-// Edit an existing contact
+// Edit an existing contact identified by email (the primary key of users).
 async function editContactHandler(request, response) {
   try {
-    const numericId = parseInt(request.params.id, 10);
-    if (Number.isNaN(numericId) || numericId <= 0) {
-      return response.status(400).json({ error: 'Invalid id' });
+    const emailParam = request.params.email ? decodeURIComponent(request.params.email) : '';
+    if (!isNonEmptyString(emailParam)) {
+      return response.status(400).json({ error: 'Invalid email' });
     }
 
-    const allowedFields = ['fullName', 'email', 'phone', 'title', 'organization', 'region', 'level', 'workingGroup'];
+    const allowedFields = ['alias', 'phone', 'title', 'institution', 'region', 'level', 'workingGroup'];
     const updatesMap = {};
     allowedFields.forEach((fieldName) => {
       if (Object.prototype.hasOwnProperty.call(request.body, fieldName)) {
@@ -179,9 +179,9 @@ async function editContactHandler(request, response) {
       setFragments.push(`${columnName} = ?`);
       params.push(updatesMap[columnName]);
     });
-    params.push(numericId);
+    params.push(emailParam);
 
-    const updateSql = `UPDATE contacts SET ${setFragments.join(', ')} WHERE id = ?`;
+    const updateSql = `UPDATE users SET ${setFragments.join(', ')} WHERE email = ?`;
     await makeDbCallAsPromise(updateSql, params);
     response.json({ success: true });
   } catch (error) {
@@ -192,17 +192,17 @@ async function editContactHandler(request, response) {
 
 export { editContactHandler };
 
-router.post('/edit/:id', isAuthenticated, isContributor, editContactHandler);
+router.post('/edit/:email', isAuthenticated, isContributor, editContactHandler);
 
-// Delete a contact
+// Delete a contact by email (the primary key of users).
 async function deleteContactHandler(request, response) {
   try {
-    const numericId = parseInt(request.params.id, 10);
-    if (Number.isNaN(numericId) || numericId <= 0) {
-      return response.status(400).json({ error: 'Invalid id' });
+    const emailParam = request.params.email ? decodeURIComponent(request.params.email) : '';
+    if (!isNonEmptyString(emailParam)) {
+      return response.status(400).json({ error: 'Invalid email' });
     }
 
-    await makeDbCallAsPromise('DELETE FROM contacts WHERE id = ?', [numericId]);
+    await makeDbCallAsPromise('DELETE FROM users WHERE email = ?', [emailParam]);
     response.json({ success: true });
   } catch (error) {
     console.error('Error deleting contact:', error);
@@ -212,8 +212,6 @@ async function deleteContactHandler(request, response) {
 
 export { deleteContactHandler };
 
-router.post('/delete/:id', isAuthenticated, isContributor, deleteContactHandler);
+router.post('/delete/:email', isAuthenticated, isContributor, deleteContactHandler);
 
 export default router;
-
-
