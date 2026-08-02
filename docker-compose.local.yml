@@ -21,5 +21,21 @@ services:
     command: ["sh", "-c", "npm i --ignore-scripts --prefer-offline --no-audit && npm start"]
     restart: unless-stopped
 
+  mysql-local:
+    container_name: ubhub_mysql_local
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${RDS_PASSWORD}
+      MYSQL_DATABASE: ${RDS_DATABASE}
+      MYSQL_USER: ${RDS_USER}
+      MYSQL_PASSWORD: ${RDS_PASSWORD}
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
 volumes:
   node_server_node_modules:
