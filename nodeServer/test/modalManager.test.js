@@ -262,3 +262,116 @@ describe('ModalManager', () => {
     expect(rejectBtn.classList.contains('hidden')).toBe(false)
   })
 })
+
+describe('ModalManager email list filters', () => {
+  let managerMock
+  let focusTrapMock
+  let rendererMock
+
+  function appendEmailListDom() {
+    const overlay = createElementWithId('div', 'modalOverlayEmailList', ['hidden'])
+    const modal = createElementWithId('div', null, ['modal'])
+    overlay.appendChild(modal)
+    document.body.appendChild(overlay)
+
+    const regionsSelect = createElementWithId('select', 'emailListRegions')
+    regionsSelect.multiple = true;
+    ['NA', 'EU', 'LA'].forEach(code => {
+      const option = document.createElement('option')
+      option.value = code
+      option.textContent = code
+      regionsSelect.appendChild(option)
+    })
+    document.body.appendChild(regionsSelect)
+
+    document.body.appendChild(createElementWithId('input', 'emailListInstitution'))
+    document.body.appendChild(createElementWithId('input', 'emailListTitle'))
+    document.body.appendChild(createElementWithId('input', 'emailListWorkingGroup'))
+    document.body.appendChild(createElementWithId('input', 'emailListLevel'))
+
+    const privilegesSelect = createElementWithId('select', 'emailListPrivileges')
+    ;[['', 'Any role'], ['2', 'Approver']].forEach(([value, label]) => {
+      const option = document.createElement('option')
+      option.value = value
+      option.textContent = label
+      privilegesSelect.appendChild(option)
+    })
+    document.body.appendChild(privilegesSelect)
+
+    document.body.appendChild(createElementWithId('textarea', 'emailListResult'))
+    document.body.appendChild(createElementWithId('span', 'emailListCount'))
+    document.body.appendChild(createElementWithId('button', 'generateEmailListButton'))
+    document.body.appendChild(createElementWithId('button', 'copyEmailListButton'))
+    document.body.appendChild(createElementWithId('button', 'closeEmailListButton'))
+  }
+
+  beforeEach(() => {
+    const modalOverlay = createElementWithId('div', 'modalOverlay')
+    const modal = createElementWithId('div', null, ['modal'])
+    modalOverlay.appendChild(modal)
+    document.body.appendChild(modalOverlay)
+    document.body.appendChild(createElementWithId('form', 'modalForm'))
+    document.body.appendChild(createElementWithId('div', 'modalFields'))
+    document.body.appendChild(createElementWithId('div', 'modalTitle'))
+
+    appendEmailListDom()
+
+    managerMock = { setModalManager: vi.fn(), tables: {}, tableDataCache: {}, selectedTable: null }
+    focusTrapMock = { attach: vi.fn(), detach: vi.fn() }
+    rendererMock = { buildModalForTable: vi.fn(), buildModalForReview: vi.fn(), populateEditValues: vi.fn() }
+  })
+
+  afterEach(() => {
+    document.body.innerHTML = ''
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
+  })
+
+  it('collects only populated filter fields', () => {
+    const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    document.getElementById('emailListRegions').options[0].selected = true // NA
+    document.getElementById('emailListRegions').options[1].selected = true // EU
+    document.getElementById('emailListInstitution').value = '  Zoo  '
+    document.getElementById('emailListPrivileges').value = '2'
+
+    const filterCriteria = mm._collectEmailListFilterCriteria()
+
+    expect(filterCriteria).toEqual({ region: 'NA,EU', institution: 'Zoo', privileges: '2' })
+  })
+
+  it('alerts and does not call fetch when no filters are selected', async () => {
+    const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    const alertMock = vi.fn()
+    vi.stubGlobal('alert', alertMock)
+
+    await mm._generateEmailList()
+
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(alertMock).toHaveBeenCalledWith('Select at least one filter.')
+  })
+
+  it('calls the email endpoint with all populated filters and renders the result', async () => {
+    const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    document.getElementById('emailListInstitution').value = 'Zoo'
+    document.getElementById('emailListLevel').value = 'Senior'
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({ emails: ['a@example.com', 'b@example.com'], count: 2, copyText: 'a@example.com, b@example.com' })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await mm._generateEmailList()
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const requestedUrl = fetchMock.mock.calls[0][0]
+    expect(requestedUrl).toContain('/dataManagement/users/emails?')
+    expect(requestedUrl).toContain('institution=Zoo')
+    expect(requestedUrl).toContain('level=Senior')
+    expect(document.getElementById('emailListResult').value).toBe('a@example.com, b@example.com')
+    expect(document.getElementById('emailListCount').textContent).toBe('2')
+  })
+})
+

@@ -644,6 +644,11 @@ export class ModalManager {
     // Email list modal DOM references
     this.emailListOverlayElement = document.getElementById('modalOverlayEmailList');
     this.emailListRegionsElement = document.getElementById('emailListRegions');
+    this.emailListInstitutionElement = document.getElementById('emailListInstitution');
+    this.emailListTitleElement = document.getElementById('emailListTitle');
+    this.emailListWorkingGroupElement = document.getElementById('emailListWorkingGroup');
+    this.emailListLevelElement = document.getElementById('emailListLevel');
+    this.emailListPrivilegesElement = document.getElementById('emailListPrivileges');
     this.emailListResultElement = document.getElementById('emailListResult');
     this.emailListCountElement = document.getElementById('emailListCount');
     this.generateEmailListButtonElement = document.getElementById('generateEmailListButton');
@@ -1115,22 +1120,60 @@ export class ModalManager {
       if (this.emailListRegionsElement) {
         Array.from(this.emailListRegionsElement.options).forEach(option => { option.selected = false; });
       }
+      if (this.emailListInstitutionElement) this.emailListInstitutionElement.value = '';
+      if (this.emailListTitleElement) this.emailListTitleElement.value = '';
+      if (this.emailListWorkingGroupElement) this.emailListWorkingGroupElement.value = '';
+      if (this.emailListLevelElement) this.emailListLevelElement.value = '';
+      if (this.emailListPrivilegesElement) this.emailListPrivilegesElement.value = '';
     } catch (err) { /* ignore reset errors */ }
     this.emailListOverlayElement.classList.remove('hidden');
     const emailListModal = this.emailListOverlayElement.querySelector('.modal');
     this.focusTrap.attach(emailListModal || this.emailListOverlayElement);
   }
 
+  /**
+   * Gather all populated email-list filter controls into a single
+   * fieldName → value map, matching the filter field names understood by
+   * GET /dataManagement/users/emails (see getUserEmailFilterFieldDefinitions
+   * in services/tableMetadata.js).
+   *
+   * @returns {object} filterCriteria
+   */
+  _collectEmailListFilterCriteria() {
+    const filterCriteria = {};
+
+    if (this.emailListRegionsElement) {
+      const selectedCodes = Array.from(this.emailListRegionsElement.selectedOptions).map(option => option.value);
+      if (selectedCodes.length > 0) filterCriteria.region = selectedCodes.join(',');
+    }
+    if (this.emailListInstitutionElement && this.emailListInstitutionElement.value.trim()) {
+      filterCriteria.institution = this.emailListInstitutionElement.value.trim();
+    }
+    if (this.emailListTitleElement && this.emailListTitleElement.value.trim()) {
+      filterCriteria.title = this.emailListTitleElement.value.trim();
+    }
+    if (this.emailListWorkingGroupElement && this.emailListWorkingGroupElement.value.trim()) {
+      filterCriteria.workingGroup = this.emailListWorkingGroupElement.value.trim();
+    }
+    if (this.emailListLevelElement && this.emailListLevelElement.value.trim()) {
+      filterCriteria.level = this.emailListLevelElement.value.trim();
+    }
+    if (this.emailListPrivilegesElement && this.emailListPrivilegesElement.value !== '') {
+      filterCriteria.privileges = this.emailListPrivilegesElement.value;
+    }
+
+    return filterCriteria;
+  }
+
   async _generateEmailList() {
-    if (!this.emailListRegionsElement) return;
-    const selectedCodes = Array.from(this.emailListRegionsElement.selectedOptions).map(option => option.value);
-    if (selectedCodes.length === 0) {
-      alert('Select at least one region.');
+    const filterCriteria = this._collectEmailListFilterCriteria();
+    if (Object.keys(filterCriteria).length === 0) {
+      alert('Select at least one filter.');
       return;
     }
     try {
       const params = new URLSearchParams();
-      params.set('regions', selectedCodes.join(','));
+      Object.entries(filterCriteria).forEach(([fieldName, value]) => params.set(fieldName, value));
       const response = await fetch(`/dataManagement/users/emails?${params.toString()}`);
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}));

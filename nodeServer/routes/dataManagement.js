@@ -14,8 +14,10 @@ import {
   getNavigationMenuForUser,
   getServerTableMetadata,
   getEditableColumnsForUser,
+  getUserEmailFilterFieldDefinitions,
 } from '../services/tableMetadata.js';
 import {buildTableDataQuery} from '../services/queryBuilder.js';
+import {buildUserEmailFilterQuery} from '../services/userFilterQueryBuilder.js';
 import {createPendingChange} from '../services/pendingChangeService.js';
 import {approveVersion, rejectVersion} from '../services/approvalService.js';
 import {
@@ -319,31 +321,49 @@ router.post('/contact/update', isAuthenticated, isApprover, async (request, resp
 });
 
 /**
- * Return distinct email addresses for users matching the provided region codes.
- * Query param: regions — comma-separated region codes (e.g. "EU,NA").
+ * Return distinct email addresses for users matching the provided filters.
+ *
+ * Query params — one per filterable field (see getUserEmailFilterFieldDefinitions()
+ * in services/tableMetadata.js): region (comma-separated codes, e.g. "EU,NA"),
+ * institution, title, workingGroup (substring match), level, privileges (exact
+ * match). At least one non-empty filter must be supplied. Multiple filters are
+ * combined with AND.
  */
 router.get('/users/emails', isAuthenticated, isApprover, async (request, response) => {
   try {
-    const regionsRaw = request.query && request.query.regions ? request.query.regions : null;
-    if (!regionsRaw) return response.status(400).json({error: 'regions query parameter is required'});
-
-    const codes = String(regionsRaw).split(',').map(code => code.trim()).filter(Boolean);
-    if (codes.length === 0) return response.status(400).json({error: 'No region codes provided'});
-
-    for (const code of codes) {
-      if (!ALLOWED_REGION_CODES.has(code)) {
-        return response.status(400).json({error: `Invalid region code: ${code}`});
+    const filterCriteria = {};
+    for (const filterFieldDefinition of getUserEmailFilterFieldDefinitions()) {
+      const rawValue = request.query ? request.query[filterFieldDefinition.fieldName] : undefined;
+      if (rawValue !== undefined && rawValue !== null && String(rawValue).trim() !== '') {
+        filterCriteria[filterFieldDefinition.fieldName] = rawValue;
       }
     }
 
-    const conditions = codes.map(() => 'FIND_IN_SET(?, region)');
-    const sql = `SELECT DISTINCT email FROM users WHERE (${conditions.join(' OR ')}) AND email IS NOT NULL AND TRIM(email) <> ''`;
-    const rows = await makeDbCallAsPromise(sql, codes);
+    if (Object.prototype.hasOwnProperty.call(filterCriteria, 'region')) {
+      const regionValidation = validateRegionCodes(filterCriteria.region);
+      if (!regionValidation.ok) {
+        return response.status(400).json({error: `Invalid region code: ${regionValidation.invalid}`});
+      }
+      filterCriteria.region = regionValidation.value;
+    }
+
+    let sql;
+    let parameters;
+    try {
+      ({sql, parameters} = buildUserEmailFilterQuery(filterCriteria));
+    } catch (error) {
+      if (error.code === 'INVALID_FILTER_CRITERIA' || error.code === 'INVALID_FILTER_FIELD') {
+        return response.status(400).json({error: error.message});
+      }
+      throw error;
+    }
+
+    const rows = await makeDbCallAsPromise(sql, parameters);
     const emails = (rows || []).map(row => String(row.email || '').trim()).filter(Boolean);
     const uniqueEmails = Array.from(new Set(emails));
     return response.json({emails: uniqueEmails, count: uniqueEmails.length, copyText: uniqueEmails.join(', ')});
   } catch (error) {
-    console.error('Error fetching emails by region:', error);
+    console.error('Error fetching emails by filter:', error);
     return response.status(500).json({error: 'Database error'});
   }
 });

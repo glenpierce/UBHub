@@ -129,6 +129,27 @@ const tableDisplayMetadata = {
 };
 
 // ---------------------------------------------------------------------------
+// Filterable fields for the "email list" feature (users table).
+//
+// Single source of truth consumed by services/userFilterQueryBuilder.js (SQL
+// generation) and by the client-side email-list modal (form controls). Each
+// definition declares how the field's value should be compared in SQL:
+//   - 'commaSeparatedSet'  – value is a comma-separated set stored in the
+//                            column (e.g. region); matched with FIND_IN_SET.
+//   - 'exactMatch'         – value must equal the column exactly.
+//   - 'containsSubstring'  – value is matched as a case-insensitive substring.
+// ---------------------------------------------------------------------------
+
+const userEmailFilterFieldDefinitions = [
+  { fieldName: 'region', label: 'Region', comparisonType: 'commaSeparatedSet' },
+  { fieldName: 'institution', label: 'Institution', comparisonType: 'containsSubstring' },
+  { fieldName: 'title', label: 'Title', comparisonType: 'containsSubstring' },
+  { fieldName: 'workingGroup', label: 'Working Group', comparisonType: 'containsSubstring' },
+  { fieldName: 'level', label: 'Level', comparisonType: 'exactMatch' },
+  { fieldName: 'privileges', label: 'Role', comparisonType: 'exactMatch' },
+];
+
+// ---------------------------------------------------------------------------
 // Executive-only additional columns appended to the users table at runtime.
 // ---------------------------------------------------------------------------
 
@@ -245,6 +266,16 @@ export function listAvailableTables() {
  */
 export function getEditableTableMetadata(tableName) {
   return editableTableMetadata[tableName];
+}
+
+/**
+ * Return the filterable-field definitions for the users "email list" feature.
+ * Returns a new array copy so callers cannot mutate the shared definitions.
+ *
+ * @returns {Array<{fieldName: string, label: string, comparisonType: string}>}
+ */
+export function getUserEmailFilterFieldDefinitions() {
+  return userEmailFilterFieldDefinitions.map(definition => ({ ...definition }));
 }
 
 /**

@@ -123,12 +123,12 @@ html
       div.modal-actions
         button.button-margin(onclick="changePassword()") Change password
 
-// Modal overlay for generating region-based email lists from the Users table
+// Modal overlay for generating filtered email lists from the Users table
 .modal-overlay#modalOverlayEmailList.hidden
   .modal(id="modalContainerEmailList")
-    h2.modal-title Email List by Region
+    h2.modal-title Email List
     .profileEditEntryFieldContainer
-      label(for='emailListRegions') Select Regions
+      label(for='emailListRegions') Region
       select#emailListRegions.dataManagementInput(multiple size='9')
         option(value='NA') NA: Canada, US, and Israel
         option(value='LA') LA: Latin America
@@ -140,8 +140,29 @@ html
         option(value='EU') EU: Europe
         option(value='OC') OC: Oceania
     .profileEditEntryFieldContainer
+      label(for='emailListInstitution') Institution contains
+      input#emailListInstitution.dataManagementInput(type='text' placeholder='e.g. Zoo')
+    .profileEditEntryFieldContainer
+      label(for='emailListTitle') Title contains
+      input#emailListTitle.dataManagementInput(type='text' placeholder='e.g. Director')
+    .profileEditEntryFieldContainer
+      label(for='emailListWorkingGroup') Working Group contains
+      input#emailListWorkingGroup.dataManagementInput(type='text' placeholder='e.g. Education')
+    .profileEditEntryFieldContainer
+      label(for='emailListLevel') Level (exact match)
+      input#emailListLevel.dataManagementInput(type='text' placeholder='e.g. Senior')
+    .profileEditEntryFieldContainer
+      label(for='emailListPrivileges') Role (exact match)
+      select#emailListPrivileges.dataManagementInput
+        option(value='') Any role
+        option(value='0') 0: Contact
+        option(value='1') 1: Contributor
+        option(value='2') 2: Approver
+        option(value='3') 3: Admin
+        option(value='4') 4: Executive
+    .profileEditEntryFieldContainer
       label(for='emailListResult') Recipient list
-      textarea#emailListResult.dataManagementInput(rows='6' readonly placeholder='Select regions above and click Generate List')
+      textarea#emailListResult.dataManagementInput(rows='6' readonly placeholder='Select filters above and click Generate List')
     .smallText
       span Count: &nbsp;
       span#emailListCount 0
