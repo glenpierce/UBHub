@@ -186,3 +186,32 @@ html
       button.secondary(type='button' id='generateEmailListButton') Preview Recipient Count
       button.primary(type='button' id='requestEmailScheduleButton') Request Email be Scheduled
 
+// Modal overlay for Executives to review a pending email send request (Approve / Reject).
+// Deliberately separate from modalOverlayReview: this data isn't a row_versions
+// current-vs-pending diff, it's a subject/recipient-count/HTML-body request.
+.modal-overlay#modalOverlayEmailRequestReview.hidden
+  .modal(id="modalContainerEmailRequestReview")
+    h2.modal-title Review Email Request
+    .profileEditEntryFieldContainer
+      label Requested by
+      span#emailRequestReviewRequestedBy
+    .profileEditEntryFieldContainer
+      label Requested at
+      span#emailRequestReviewCreatedAt
+    .profileEditEntryFieldContainer
+      label Subject
+      span#emailRequestReviewSubject
+    .profileEditEntryFieldContainer
+      label Recipient count
+      span#emailRequestReviewRecipientCount
+    .profileEditEntryFieldContainer
+      label Content preview
+      iframe#emailRequestReviewPreview(sandbox='' style='width:100%;height:300px;border:1px solid #ccc;background:#fff;')
+    .profileEditEntryFieldContainer
+      label(for='emailRequestReviewComments') Comments
+      textarea#emailRequestReviewComments.dataManagementInput(rows='3' placeholder='Optional review comments')
+    .modal-actions
+      button(type='button' id='closeEmailRequestReviewButton') Cancel
+      button(type='button' id='approveEmailRequestButton') Approve
+      button(type='button' id='rejectEmailRequestButton') Reject
+

@@ -8,7 +8,7 @@
 
 import express from 'express';
 import {pool, makeDbCallAsPromise} from '../ConnectionPool.js';
-import {isAuthenticated, isContributor, isApprover} from '../middleware/authMiddleware.js';
+import {isAuthenticated, isContributor, isApprover, isExec} from '../middleware/authMiddleware.js';
 import {
   getTablesForUser,
   getNavigationMenuForUser,
@@ -19,7 +19,14 @@ import {
 import {buildTableDataQuery} from '../services/queryBuilder.js';
 import {buildUserEmailFilterQuery} from '../services/userFilterQueryBuilder.js';
 import {createPendingChange} from '../services/pendingChangeService.js';
-import {createEmailSendRequest} from '../services/emailSendRequestService.js';
+import {
+  createEmailSendRequest,
+  approveEmailSendRequest,
+  rejectEmailSendRequest,
+  markEmailSendRequestSent,
+} from '../services/emailSendRequestService.js';
+import {sendToAllRecipientsIndividually} from '../services/brevoService.js';
+import config from '../config.js';
 import {approveVersion, rejectVersion} from '../services/approvalService.js';
 import {
   coerceToInteger,
@@ -438,6 +445,87 @@ router.post('/email-requests', isAuthenticated, isApprover, async (request, resp
     }
     console.error('Error creating email send request:', error);
     return response.status(500).json({error: 'Error creating email send request'});
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Email send request review (Executive approve / reject)
+// ---------------------------------------------------------------------------
+
+/**
+ * Kick off the actual Brevo send for an approved email request without
+ * blocking the HTTP response. Never throws — any failure here (including a
+ * missing Brevo API key) is caught, logged, and still recorded via
+ * markEmailSendRequestSent() so the row doesn't sit stuck at 'approved'
+ * indefinitely with no explanation.
+ *
+ * @param {number} id
+ * @param {{subject: string, htmlBody: string, recipients: string[]}} approvedRequest
+ */
+async function sendApprovedEmailRequestInBackground(id, approvedRequest) {
+  try {
+    const {succeeded, failed} = await sendToAllRecipientsIndividually({
+      apiKey: config.BREVO_API_KEY,
+      senderEmail: config.EMAIL_FROM,
+      recipients: approvedRequest.recipients,
+      subject: approvedRequest.subject,
+      htmlContent: approvedRequest.htmlBody,
+    });
+    await markEmailSendRequestSent(pool, {id, succeeded, failed});
+  } catch (error) {
+    console.error(`Error sending approved email request ${id}:`, error);
+    try {
+      await markEmailSendRequestSent(pool, {
+        id,
+        succeeded: [],
+        failed: (approvedRequest.recipients || []).map(email => ({email, error: error.message || String(error)})),
+      });
+    } catch (markError) {
+      console.error(`Error recording send failure for email request ${id}:`, markError);
+    }
+  }
+}
+
+/**
+ * Approve or reject a pending email send request.
+ *
+ * Reject: marks the row 'rejected'; nothing is sent.
+ * Approve: marks the row 'approved' and responds immediately, then sends to
+ * every snapshotted recipient in the background (one Brevo call per
+ * recipient — see services/brevoService.js), finally marking the row 'sent'.
+ *
+ * Body: { decision: 'approve'|'reject', comments?: string }
+ */
+router.post('/email-requests/:id/review', isAuthenticated, isExec, async (request, response) => {
+  const {decision, comments} = request.body || {};
+  const id = coerceToInteger(request.params.id);
+
+  try {
+    if (id === null) {
+      return response.status(400).json({error: 'Invalid id'});
+    }
+    if (!isValidReviewDecision(decision)) {
+      return response.status(400).json({error: 'Invalid decision'});
+    }
+
+    const reviewComments = normalizeComments(comments);
+    const normalizedDecision = decision.toLowerCase();
+
+    if (normalizedDecision === 'reject') {
+      await rejectEmailSendRequest(pool, {id, approver: request.session.user, comments: reviewComments});
+      return response.status(200).json({status: 'Rejected'});
+    }
+
+    const approvedRequest = await approveEmailSendRequest(pool, {id, approver: request.session.user, comments: reviewComments});
+    response.status(200).json({status: 'Approved'});
+
+    // Intentionally not awaited: the executive's request already got its response above.
+    sendApprovedEmailRequestInBackground(id, approvedRequest);
+  } catch (error) {
+    console.error('Error reviewing email send request:', error);
+    if (!response.headersSent) {
+      response.status(500).json({error: 'Error reviewing email send request: ' + error.message});
+    }
   }
 });
 

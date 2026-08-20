@@ -22,6 +22,7 @@ export class TableManager {
 
     this.actionHandlerMap = {
       openReviewModal: (rowData) => this.modalManager && this.modalManager.open('review', null, rowData),
+      openEmailRequestReviewModal: (rowData) => this.modalManager && this.modalManager.open('reviewEmailRequest', null, rowData),
       openEditUserModal: (rowData) => this.modalManager && this.modalManager.open('edit', 'users', rowData),
       openEditProgramModal: (rowData) => this.modalManager && this.modalManager.open('edit', 'mapButtons', rowData),
       openEditLocationModal: (rowData) => this.modalManager && this.modalManager.open('edit', 'locations', rowData),
@@ -103,6 +104,9 @@ export class TableManager {
       if (lower === 'approved' || lower === 'approve') {
         styleClass = 'approvedStatus';
         displayText = 'Approved';
+      } else if (lower === 'sent') {
+        styleClass = 'approvedStatus';
+        displayText = 'Sent';
       } else if (lower === 'rejected' || lower === 'reject') {
         styleClass = 'rejectedStatus';
         displayText = 'Rejected';

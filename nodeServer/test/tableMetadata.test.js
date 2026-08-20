@@ -159,6 +159,27 @@ describe('tableMetadata', () => {
       );
       expect(editButton).toBeDefined();
     });
+
+    it('does not expose email_send_requests below privilege level 4', () => {
+      const request = { session: { user: 'charlie', privileges: 3 } };
+      const tables = getTablesForUser(request);
+      expect(tables.email_send_requests).toBeUndefined();
+    });
+
+    it('includes email_send_requests for privilege level 4', () => {
+      const request = { session: { user: 'admin', privileges: 4 } };
+      const tables = getTablesForUser(request);
+      expect(tables.email_send_requests).toBeDefined();
+
+      const subjectColumn = tables.email_send_requests.columns.find(column => column.name === 'subject');
+      expect(subjectColumn).toBeDefined();
+      expect(subjectColumn.jsonPath).toBe('$.subject');
+
+      const reviewButton = tables.email_send_requests.columns.find(
+        column => column.button === 'review' && column.onClickFunction === 'openEmailRequestReviewModal',
+      );
+      expect(reviewButton).toBeDefined();
+    });
   });
 
   describe('getNavigationMenuForUser', () => {
@@ -201,6 +222,14 @@ describe('tableMetadata', () => {
       const menu = getNavigationMenuForUser(request);
       const labels = menu.map(item => item.label);
       expect(labels).toContain('Manage Users');
+      expect(labels).toContain('Email Approvals');
+    });
+
+    it('does not include Email Approvals below privilege level 4', () => {
+      const request = { session: { user: 'charlie', privileges: 3 } };
+      const menu = getNavigationMenuForUser(request);
+      const labels = menu.map(item => item.label);
+      expect(labels).not.toContain('Email Approvals');
     });
 
     it('includes My Profile and UBHubber Resources for authenticated users', () => {

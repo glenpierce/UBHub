@@ -657,6 +657,18 @@ export class ModalManager {
     this.requestEmailScheduleButtonElement = document.getElementById('requestEmailScheduleButton');
     this.closeEmailListButtonElement = document.getElementById('closeEmailListButton');
 
+    // Email request review modal DOM references (Executive approve/reject)
+    this.emailRequestReviewOverlayElement = document.getElementById('modalOverlayEmailRequestReview');
+    this.emailRequestReviewRequestedByElement = document.getElementById('emailRequestReviewRequestedBy');
+    this.emailRequestReviewCreatedAtElement = document.getElementById('emailRequestReviewCreatedAt');
+    this.emailRequestReviewSubjectElement = document.getElementById('emailRequestReviewSubject');
+    this.emailRequestReviewRecipientCountElement = document.getElementById('emailRequestReviewRecipientCount');
+    this.emailRequestReviewPreviewElement = document.getElementById('emailRequestReviewPreview');
+    this.emailRequestReviewCommentsElement = document.getElementById('emailRequestReviewComments');
+    this.approveEmailRequestButtonElement = document.getElementById('approveEmailRequestButton');
+    this.rejectEmailRequestButtonElement = document.getElementById('rejectEmailRequestButton');
+    this.closeEmailRequestReviewButtonElement = document.getElementById('closeEmailRequestReviewButton');
+
     // collaborators (allow injection for testing)
     this.apiClient = apiClient || new ApiClient();
     this.focusTrap = focusTrap || new FocusTrap();
@@ -680,6 +692,8 @@ export class ModalManager {
             this.close();
           } else if (this.emailListOverlayElement && event.target === this.emailListOverlayElement) {
             this.close();
+          } else if (this.emailRequestReviewOverlayElement && event.target === this.emailRequestReviewOverlayElement) {
+            this.close();
           }
         }
       } catch (err) { /* ignore */ }
@@ -693,7 +707,8 @@ export class ModalManager {
           const profileVisible = this.profileOverlayElement && !this.profileOverlayElement.classList.contains('hidden');
           const reviewVisible = this.reviewOverlayElement && !this.reviewOverlayElement.classList.contains('hidden');
           const emailListVisible = this.emailListOverlayElement && !this.emailListOverlayElement.classList.contains('hidden');
-          if (modalVisible || profileVisible || reviewVisible || emailListVisible) {
+          const emailRequestReviewVisible = this.emailRequestReviewOverlayElement && !this.emailRequestReviewOverlayElement.classList.contains('hidden');
+          if (modalVisible || profileVisible || reviewVisible || emailListVisible || emailRequestReviewVisible) {
             event.preventDefault();
             this.close();
           }
@@ -715,6 +730,11 @@ export class ModalManager {
     // the contenteditable editor before the formatting command runs.
     this._boundToolbarMouseDown = (event) => { event.preventDefault(); };
     this._boundToolbarClick = (event) => this._onRichTextToolbarClick(event);
+
+    // Email request review modal bound handlers
+    this._boundApproveEmailRequestClick = () => this._submitEmailRequestReview('approve');
+    this._boundRejectEmailRequestClick = () => this._submitEmailRequestReview('reject');
+    this._boundCloseEmailRequestReviewClick = () => this.close();
 
     // wire form submits
     if (this.modalFormElement) {
@@ -753,6 +773,20 @@ export class ModalManager {
     }
     if (this.emailListOverlayElement) {
       this.emailListOverlayElement.addEventListener('click', this._boundOnOverlayClick);
+    }
+
+    // Wire email request review modal buttons
+    if (this.approveEmailRequestButtonElement) {
+      this.approveEmailRequestButtonElement.addEventListener('click', this._boundApproveEmailRequestClick);
+    }
+    if (this.rejectEmailRequestButtonElement) {
+      this.rejectEmailRequestButtonElement.addEventListener('click', this._boundRejectEmailRequestClick);
+    }
+    if (this.closeEmailRequestReviewButtonElement) {
+      this.closeEmailRequestReviewButtonElement.addEventListener('click', this._boundCloseEmailRequestReviewClick);
+    }
+    if (this.emailRequestReviewOverlayElement) {
+      this.emailRequestReviewOverlayElement.addEventListener('click', this._boundOnOverlayClick);
     }
 
     // overlay click handling
@@ -902,6 +936,35 @@ export class ModalManager {
       this.modalOverlayElement && this.modalOverlayElement.classList.remove('hidden');
       const mainModal = this.modalOverlayElement && this.modalOverlayElement.querySelector('.modal');
       this.focusTrap.attach(mainModal || this.modalOverlayElement);
+    } else if (mode === 'reviewEmailRequest') {
+      if (this.modalOverlayElement) this.modalOverlayElement.classList.add('hidden');
+      if (this.profileOverlayElement) this.profileOverlayElement.classList.add('hidden');
+      if (this.reviewOverlayElement) this.reviewOverlayElement.classList.add('hidden');
+
+      this._currentRow = rowData;
+
+      if (this.emailRequestReviewRequestedByElement) this.emailRequestReviewRequestedByElement.textContent = (rowData && rowData.requested_by) || '';
+      if (this.emailRequestReviewCreatedAtElement) this.emailRequestReviewCreatedAtElement.textContent = (rowData && rowData.created_at) || '';
+      if (this.emailRequestReviewSubjectElement) this.emailRequestReviewSubjectElement.textContent = (rowData && rowData.subject) || '';
+      if (this.emailRequestReviewRecipientCountElement) {
+        this.emailRequestReviewRecipientCountElement.textContent = (rowData && rowData.recipientCount != null) ? String(rowData.recipientCount) : '0';
+      }
+      if (this.emailRequestReviewCommentsElement) this.emailRequestReviewCommentsElement.value = '';
+      // Sandboxed (no scripts) so a malicious/broken HTML body can't execute in the admin UI.
+      if (this.emailRequestReviewPreviewElement) this.emailRequestReviewPreviewElement.srcdoc = (rowData && rowData.htmlBody) || '';
+
+      const statusNormalized = (rowData && rowData.status) ? String(rowData.status).trim().toLowerCase() : '';
+      const alreadyDecided = statusNormalized && statusNormalized !== 'pending';
+      if (this.approveEmailRequestButtonElement) {
+        if (alreadyDecided) this.approveEmailRequestButtonElement.classList.add('hidden'); else this.approveEmailRequestButtonElement.classList.remove('hidden');
+      }
+      if (this.rejectEmailRequestButtonElement) {
+        if (alreadyDecided) this.rejectEmailRequestButtonElement.classList.add('hidden'); else this.rejectEmailRequestButtonElement.classList.remove('hidden');
+      }
+
+      this.emailRequestReviewOverlayElement && this.emailRequestReviewOverlayElement.classList.remove('hidden');
+      const emailRequestReviewModal = this.emailRequestReviewOverlayElement && this.emailRequestReviewOverlayElement.querySelector('.modal');
+      this.focusTrap.attach(emailRequestReviewModal || this.emailRequestReviewOverlayElement);
     }
   }
 
@@ -910,6 +973,7 @@ export class ModalManager {
     this.profileOverlayElement && this.profileOverlayElement.classList.add('hidden');
     this.reviewOverlayElement && this.reviewOverlayElement.classList.add('hidden');
     this.emailListOverlayElement && this.emailListOverlayElement.classList.add('hidden');
+    this.emailRequestReviewOverlayElement && this.emailRequestReviewOverlayElement.classList.add('hidden');
     this.focusTrap.detach();
   }
 
@@ -927,12 +991,16 @@ export class ModalManager {
       if (this.profileOverlayElement) this.profileOverlayElement.removeEventListener('click', this._boundOnOverlayClick);
       if (this.reviewOverlayElement) this.reviewOverlayElement.removeEventListener('click', this._boundOnOverlayClick);
       if (this.emailListOverlayElement) this.emailListOverlayElement.removeEventListener('click', this._boundOnOverlayClick);
+      if (this.emailRequestReviewOverlayElement) this.emailRequestReviewOverlayElement.removeEventListener('click', this._boundOnOverlayClick);
 
       try { if (this.generateEmailListButtonElement) this.generateEmailListButtonElement.removeEventListener('click', this._boundGenerateEmailList); } catch(_) {}
       try { if (this.requestEmailScheduleButtonElement) this.requestEmailScheduleButtonElement.removeEventListener('click', this._boundRequestEmailSchedule); } catch(_) {}
       try { if (this.emailListToolbarElement) this.emailListToolbarElement.removeEventListener('mousedown', this._boundToolbarMouseDown); } catch(_) {}
       try { if (this.emailListToolbarElement) this.emailListToolbarElement.removeEventListener('click', this._boundToolbarClick); } catch(_) {}
       try { if (this.closeEmailListButtonElement) this.closeEmailListButtonElement.removeEventListener('click', this._boundCloseEmailList); } catch(_) {}
+      try { if (this.approveEmailRequestButtonElement) this.approveEmailRequestButtonElement.removeEventListener('click', this._boundApproveEmailRequestClick); } catch(_) {}
+      try { if (this.rejectEmailRequestButtonElement) this.rejectEmailRequestButtonElement.removeEventListener('click', this._boundRejectEmailRequestClick); } catch(_) {}
+      try { if (this.closeEmailRequestReviewButtonElement) this.closeEmailRequestReviewButtonElement.removeEventListener('click', this._boundCloseEmailRequestReviewClick); } catch(_) {}
 
       document.removeEventListener('keydown', this._boundOnEscapeKeyDown);
       try { if (this._boundOnHelpClick) document.removeEventListener('click', this._boundOnHelpClick); } catch(_) {}
@@ -1258,6 +1326,30 @@ export class ModalManager {
     } catch (err) {
       console.error('Error requesting email schedule:', err);
       alert('Error requesting email schedule: ' + (err.message || ''));
+    }
+  }
+
+  /**
+   * Approve or reject the email send request currently open in the review
+   * modal. Approving does not mean the email has been sent yet — the server
+   * flips status to 'approved' immediately and sends in the background,
+   * later flipping it to 'sent'.
+   *
+   * @param {'approve'|'reject'} decision
+   */
+  async _submitEmailRequestReview(decision) {
+    if (!this._currentRow) { alert('No email request specified.'); return; }
+    const comments = this.emailRequestReviewCommentsElement ? this.emailRequestReviewCommentsElement.value : '';
+    const payload = {decision, comments};
+    try {
+      await this.apiClient.post(`/dataManagement/email-requests/${this._currentRow.id}/review`, payload);
+      this.close();
+      if (this.manager.selectedTable) {
+        await this.manager.fetchTableData(this.manager.selectedTable).then(() => this.manager.applyFiltersAndSort(this.manager.selectedTable));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Email request review error: ' + (err.message || ''));
     }
   }
 }

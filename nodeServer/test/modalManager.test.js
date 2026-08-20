@@ -481,3 +481,118 @@ describe('ModalManager email list filters', () => {
   })
 })
 
+describe('ModalManager email request review', () => {
+  let managerMock
+  let focusTrapMock
+  let rendererMock
+
+  function appendEmailRequestReviewDom() {
+    const overlay = createElementWithId('div', 'modalOverlayEmailRequestReview', ['hidden'])
+    const modal = createElementWithId('div', null, ['modal'])
+    overlay.appendChild(modal)
+    document.body.appendChild(overlay)
+
+    document.body.appendChild(createElementWithId('span', 'emailRequestReviewRequestedBy'))
+    document.body.appendChild(createElementWithId('span', 'emailRequestReviewCreatedAt'))
+    document.body.appendChild(createElementWithId('span', 'emailRequestReviewSubject'))
+    document.body.appendChild(createElementWithId('span', 'emailRequestReviewRecipientCount'))
+    document.body.appendChild(createElementWithId('iframe', 'emailRequestReviewPreview'))
+    document.body.appendChild(createElementWithId('textarea', 'emailRequestReviewComments'))
+    document.body.appendChild(createElementWithId('button', 'approveEmailRequestButton'))
+    document.body.appendChild(createElementWithId('button', 'rejectEmailRequestButton'))
+    document.body.appendChild(createElementWithId('button', 'closeEmailRequestReviewButton'))
+  }
+
+  beforeEach(() => {
+    appendEmailRequestReviewDom()
+    managerMock = {
+      setModalManager: vi.fn(),
+      tables: {},
+      tableDataCache: {},
+      selectedTable: 'email_send_requests',
+      fetchTableData: vi.fn().mockResolvedValue(),
+      applyFiltersAndSort: vi.fn()
+    }
+    focusTrapMock = { attach: vi.fn(), detach: vi.fn() }
+    rendererMock = { buildModalForTable: vi.fn(), buildModalForReview: vi.fn(), populateEditValues: vi.fn() }
+  })
+
+  afterEach(() => {
+    document.body.innerHTML = ''
+    vi.restoreAllMocks()
+  })
+
+  it('populates read-only fields and the sandboxed preview iframe from rowData', async () => {
+    const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    const rowData = {
+      id: 5,
+      requested_by: 'approver@example.com',
+      created_at: '2026-08-19 10:00:00',
+      subject: 'Hello',
+      recipientCount: 12,
+      htmlBody: '<p>Hi</p>',
+      status: 'pending'
+    }
+
+    await mm.open('reviewEmailRequest', null, rowData)
+
+    expect(document.getElementById('emailRequestReviewRequestedBy').textContent).toBe('approver@example.com')
+    expect(document.getElementById('emailRequestReviewSubject').textContent).toBe('Hello')
+    expect(document.getElementById('emailRequestReviewRecipientCount').textContent).toBe('12')
+    expect(document.getElementById('emailRequestReviewPreview').srcdoc).toBe('<p>Hi</p>')
+    expect(document.getElementById('modalOverlayEmailRequestReview').classList.contains('hidden')).toBe(false)
+  })
+
+  it('hides approve/reject buttons when the request is already decided', async () => {
+    const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    await mm.open('reviewEmailRequest', null, { id: 5, status: 'sent' })
+
+    expect(document.getElementById('approveEmailRequestButton').classList.contains('hidden')).toBe(true)
+    expect(document.getElementById('rejectEmailRequestButton').classList.contains('hidden')).toBe(true)
+  })
+
+  it('shows approve/reject buttons when the request is pending', async () => {
+    const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    await mm.open('reviewEmailRequest', null, { id: 5, status: 'pending' })
+
+    expect(document.getElementById('approveEmailRequestButton').classList.contains('hidden')).toBe(false)
+    expect(document.getElementById('rejectEmailRequestButton').classList.contains('hidden')).toBe(false)
+  })
+
+  it('submits an approve decision to the per-id review endpoint and refreshes the table', async () => {
+    const apiClientMock = { post: vi.fn().mockResolvedValue({ status: 'Approved' }) }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    await mm.open('reviewEmailRequest', null, { id: 5, status: 'pending' })
+    document.getElementById('emailRequestReviewComments').value = 'looks fine'
+
+    await mm._submitEmailRequestReview('approve')
+
+    expect(apiClientMock.post).toHaveBeenCalledWith('/dataManagement/email-requests/5/review', { decision: 'approve', comments: 'looks fine' })
+    expect(document.getElementById('modalOverlayEmailRequestReview').classList.contains('hidden')).toBe(true)
+    expect(managerMock.fetchTableData).toHaveBeenCalledWith('email_send_requests')
+    expect(managerMock.applyFiltersAndSort).toHaveBeenCalledWith('email_send_requests')
+  })
+
+  it('submits a reject decision to the per-id review endpoint', async () => {
+    const apiClientMock = { post: vi.fn().mockResolvedValue({ status: 'Rejected' }) }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    await mm.open('reviewEmailRequest', null, { id: 9, status: 'pending' })
+
+    await mm._submitEmailRequestReview('reject')
+
+    expect(apiClientMock.post).toHaveBeenCalledWith('/dataManagement/email-requests/9/review', { decision: 'reject', comments: '' })
+  })
+
+  it('alerts and does not call the API when no row is currently open', async () => {
+    const apiClientMock = { post: vi.fn() }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    const alertMock = vi.fn()
+    vi.stubGlobal('alert', alertMock)
+
+    await mm._submitEmailRequestReview('approve')
+
+    expect(apiClientMock.post).not.toHaveBeenCalled()
+    expect(alertMock).toHaveBeenCalledWith('No email request specified.')
+  })
+})
+

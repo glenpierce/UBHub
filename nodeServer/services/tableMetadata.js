@@ -109,6 +109,22 @@ const tableDisplayMetadata = {
       { button: 'review', label: 'Review', visible: true, onClickFunction: 'openReviewModal' },
     ],
   },
+  email_send_requests: {
+    displayName: 'Email Approvals',
+    columns: [
+      { name: 'id', visible: false },
+      { name: 'requested_by', label: 'Requested By', visible: true },
+      { name: 'status', label: 'Status', visible: true, renderFunction: 'submissionStatusRenderer' },
+      { name: 'subject', jsonPath: '$.subject', label: 'Subject', visible: true },
+      { name: 'recipientCount', jsonPath: '$.recipientCount', label: 'Recipients', visible: true },
+      { name: 'htmlBody', jsonPath: '$.htmlBody', label: 'Content', visible: false },
+      { name: 'created_at', label: 'Requested At', visible: true },
+      { name: 'approved_by', label: 'Reviewed By', visible: true },
+      { name: 'approved_at', label: 'Reviewed At', visible: true, type: 'date' },
+      { name: 'notes', label: 'Send Notes', visible: true },
+      { button: 'review', label: 'Review', visible: true, onClickFunction: 'openEmailRequestReviewModal' },
+    ],
+  },
   users: {
     displayName: 'Users',
     columns: [
@@ -210,6 +226,7 @@ const navigationMenuCandidates = [
   { onClick: 'openMap', icon: '/icons/mapIcon.svg', label: 'Map' },
   { onClick: '', icon: '/icons/resourcesIcon.svg', label: 'Resources' },
   { onClick: '', icon: '/icons/resourcesIcon.svg', label: 'UBHubber Resources' },
+  { tableKey: 'email_send_requests', icon: '/icons/sendIcon.svg', label: 'Email Approvals' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -349,6 +366,7 @@ export function getTablesForUser(request) {
     for (const column of executiveUserColumns) {
       tablesForUser.users.columns.push(column);
     }
+    tablesForUser.email_send_requests = transformTableForClient(tableDisplayMetadata.email_send_requests);
   }
 
   return tablesForUser;
@@ -373,6 +391,7 @@ const NAV_MENU_INDEX = {
   MAP: 9,
   RESOURCES: 10,
   UBHUBBER_RESOURCES: 11,
+  EMAIL_APPROVALS: 12,
 };
 
 export function getNavigationMenuForUser(request) {
@@ -405,6 +424,7 @@ export function getNavigationMenuForUser(request) {
 
   if (request.session.user && request.session.privileges >= 4) {
     navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.MANAGE_USERS]); // Manage Users
+    navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.EMAIL_APPROVALS]); // Email Approvals
   }
 
   return navigationMenu;
