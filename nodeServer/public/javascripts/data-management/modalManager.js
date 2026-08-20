@@ -649,10 +649,12 @@ export class ModalManager {
     this.emailListWorkingGroupElement = document.getElementById('emailListWorkingGroup');
     this.emailListLevelElement = document.getElementById('emailListLevel');
     this.emailListPrivilegesElement = document.getElementById('emailListPrivileges');
-    this.emailListResultElement = document.getElementById('emailListResult');
+    this.emailListSubjectElement = document.getElementById('emailListSubject');
+    this.emailListHtmlBodyElement = document.getElementById('emailListHtmlBody');
+    this.emailListToolbarElement = document.getElementById('emailListRichTextToolbar');
     this.emailListCountElement = document.getElementById('emailListCount');
     this.generateEmailListButtonElement = document.getElementById('generateEmailListButton');
-    this.copyEmailListButtonElement = document.getElementById('copyEmailListButton');
+    this.requestEmailScheduleButtonElement = document.getElementById('requestEmailScheduleButton');
     this.closeEmailListButtonElement = document.getElementById('closeEmailListButton');
 
     // collaborators (allow injection for testing)
@@ -706,9 +708,13 @@ export class ModalManager {
     this._boundReviewFormSubmit = (e) => { e.preventDefault(); };
 
     // Email list modal bound handlers
-    this._boundGenerateEmailList = () => this._generateEmailList();
-    this._boundCopyEmailList = () => this._copyEmailList();
+    this._boundGenerateEmailList = () => this._previewEmailCount();
+    this._boundRequestEmailSchedule = () => this._requestEmailSchedule();
     this._boundCloseEmailList = () => this.close();
+    // mousedown (not click) so the toolbar button never steals focus/selection away from
+    // the contenteditable editor before the formatting command runs.
+    this._boundToolbarMouseDown = (event) => { event.preventDefault(); };
+    this._boundToolbarClick = (event) => this._onRichTextToolbarClick(event);
 
     // wire form submits
     if (this.modalFormElement) {
@@ -735,8 +741,12 @@ export class ModalManager {
     if (this.generateEmailListButtonElement) {
       this.generateEmailListButtonElement.addEventListener('click', this._boundGenerateEmailList);
     }
-    if (this.copyEmailListButtonElement) {
-      this.copyEmailListButtonElement.addEventListener('click', this._boundCopyEmailList);
+    if (this.requestEmailScheduleButtonElement) {
+      this.requestEmailScheduleButtonElement.addEventListener('click', this._boundRequestEmailSchedule);
+    }
+    if (this.emailListToolbarElement) {
+      this.emailListToolbarElement.addEventListener('mousedown', this._boundToolbarMouseDown);
+      this.emailListToolbarElement.addEventListener('click', this._boundToolbarClick);
     }
     if (this.closeEmailListButtonElement) {
       this.closeEmailListButtonElement.addEventListener('click', this._boundCloseEmailList);
@@ -919,7 +929,9 @@ export class ModalManager {
       if (this.emailListOverlayElement) this.emailListOverlayElement.removeEventListener('click', this._boundOnOverlayClick);
 
       try { if (this.generateEmailListButtonElement) this.generateEmailListButtonElement.removeEventListener('click', this._boundGenerateEmailList); } catch(_) {}
-      try { if (this.copyEmailListButtonElement) this.copyEmailListButtonElement.removeEventListener('click', this._boundCopyEmailList); } catch(_) {}
+      try { if (this.requestEmailScheduleButtonElement) this.requestEmailScheduleButtonElement.removeEventListener('click', this._boundRequestEmailSchedule); } catch(_) {}
+      try { if (this.emailListToolbarElement) this.emailListToolbarElement.removeEventListener('mousedown', this._boundToolbarMouseDown); } catch(_) {}
+      try { if (this.emailListToolbarElement) this.emailListToolbarElement.removeEventListener('click', this._boundToolbarClick); } catch(_) {}
       try { if (this.closeEmailListButtonElement) this.closeEmailListButtonElement.removeEventListener('click', this._boundCloseEmailList); } catch(_) {}
 
       document.removeEventListener('keydown', this._boundOnEscapeKeyDown);
@@ -1115,7 +1127,6 @@ export class ModalManager {
     this.close();
     if (!this.emailListOverlayElement) return;
     try {
-      if (this.emailListResultElement) this.emailListResultElement.value = '';
       if (this.emailListCountElement) this.emailListCountElement.textContent = '0';
       if (this.emailListRegionsElement) {
         Array.from(this.emailListRegionsElement.options).forEach(option => { option.selected = false; });
@@ -1125,6 +1136,8 @@ export class ModalManager {
       if (this.emailListWorkingGroupElement) this.emailListWorkingGroupElement.value = '';
       if (this.emailListLevelElement) this.emailListLevelElement.value = '';
       if (this.emailListPrivilegesElement) this.emailListPrivilegesElement.value = '';
+      if (this.emailListSubjectElement) this.emailListSubjectElement.value = '';
+      if (this.emailListHtmlBodyElement) this.emailListHtmlBodyElement.innerHTML = '';
     } catch (err) { /* ignore reset errors */ }
     this.emailListOverlayElement.classList.remove('hidden');
     const emailListModal = this.emailListOverlayElement.querySelector('.modal');
@@ -1134,8 +1147,8 @@ export class ModalManager {
   /**
    * Gather all populated email-list filter controls into a single
    * fieldName → value map, matching the filter field names understood by
-   * GET /dataManagement/users/emails (see getUserEmailFilterFieldDefinitions
-   * in services/tableMetadata.js).
+   * GET /dataManagement/users/email-count and POST /dataManagement/email-requests
+   * (see getUserEmailFilterFieldDefinitions in services/tableMetadata.js).
    *
    * @returns {object} filterCriteria
    */
@@ -1165,7 +1178,7 @@ export class ModalManager {
     return filterCriteria;
   }
 
-  async _generateEmailList() {
+  async _previewEmailCount() {
     const filterCriteria = this._collectEmailListFilterCriteria();
     if (Object.keys(filterCriteria).length === 0) {
       alert('Select at least one filter.');
@@ -1174,53 +1187,77 @@ export class ModalManager {
     try {
       const params = new URLSearchParams();
       Object.entries(filterCriteria).forEach(([fieldName, value]) => params.set(fieldName, value));
-      const response = await fetch(`/dataManagement/users/emails?${params.toString()}`);
+      const response = await fetch(`/dataManagement/users/email-count?${params.toString()}`);
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}));
-        alert('Failed to generate list: ' + (errorBody.error || response.statusText));
+        alert('Failed to preview count: ' + (errorBody.error || response.statusText));
         return;
       }
       const data = await response.json();
-      if (this.emailListResultElement) {
-        this.emailListResultElement.value = data.copyText || (data.emails || []).join(', ');
-      }
       if (this.emailListCountElement) {
-        this.emailListCountElement.textContent = String(data.count || (data.emails || []).length || 0);
+        this.emailListCountElement.textContent = String(data.count || 0);
       }
     } catch (err) {
-      console.error('Error generating email list:', err);
-      alert('Error generating email list: ' + (err.message || ''));
+      console.error('Error previewing email count:', err);
+      alert('Error previewing email count: ' + (err.message || ''));
     }
   }
 
-  _copyEmailList() {
-    if (!this.emailListResultElement) return;
-    const text = this.emailListResultElement.value || '';
-    if (!text) { alert('No emails to copy. Generate the list first.'); return; }
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-          alert('Copied to clipboard');
-        }).catch(err => {
-          console.error('Clipboard write failed:', err);
-          this._fallbackCopyEmailList();
-        });
-      } else {
-        this._fallbackCopyEmailList();
-      }
-    } catch (err) {
-      this._fallbackCopyEmailList();
+  /**
+   * Handle a click anywhere inside the rich-text toolbar. Delegates to
+   * document.execCommand() against the contenteditable editor. Focus/selection
+   * is preserved because the toolbar's mousedown handler already prevented
+   * the default (which would otherwise blur the editor before this runs).
+   */
+  _onRichTextToolbarClick(event) {
+    const button = event.target.closest && event.target.closest('[data-rt-command]');
+    if (!button || !this.emailListHtmlBodyElement) return;
+    event.preventDefault();
+
+    const command = button.getAttribute('data-rt-command');
+    this.emailListHtmlBodyElement.focus();
+
+    if (command === 'createLink') {
+      const url = window.prompt('Enter a URL:', 'https://');
+      if (!url) return;
+      document.execCommand('createLink', false, url);
+      return;
     }
+
+    document.execCommand(command, false, null);
   }
 
-  _fallbackCopyEmailList() {
-    if (!this.emailListResultElement) return;
-    this.emailListResultElement.select();
+  /**
+   * True when the rich-text editor has no meaningful content (ignoring stray
+   * markup like a lone <br> left behind after deleting all text).
+   */
+  _isRichTextEditorEmpty() {
+    return !this.emailListHtmlBodyElement || this.emailListHtmlBodyElement.textContent.trim() === '';
+  }
+
+  async _requestEmailSchedule() {
+    const filterCriteria = this._collectEmailListFilterCriteria();
+    if (Object.keys(filterCriteria).length === 0) {
+      alert('Select at least one filter.');
+      return;
+    }
+    const subject = this.emailListSubjectElement ? this.emailListSubjectElement.value.trim() : '';
+    const htmlBody = this.emailListHtmlBodyElement ? this.emailListHtmlBodyElement.innerHTML : '';
+    if (!subject) {
+      alert('Enter an email subject.');
+      return;
+    }
+    if (this._isRichTextEditorEmpty()) {
+      alert('Enter the email content.');
+      return;
+    }
     try {
-      document.execCommand('copy');
-      alert('Copied to clipboard');
+      const data = await this.apiClient.post('/dataManagement/email-requests', {filterCriteria, subject, htmlBody});
+      alert(`Email request submitted for ${data && data.recipientCount != null ? data.recipientCount : 0} recipient(s). It now awaits Executive approval.`);
+      this.close();
     } catch (err) {
-      alert('Copy failed: ' + (err.message || 'Unable to copy'));
+      console.error('Error requesting email schedule:', err);
+      alert('Error requesting email schedule: ' + (err.message || ''));
     }
   }
 }

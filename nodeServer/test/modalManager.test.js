@@ -298,10 +298,21 @@ describe('ModalManager email list filters', () => {
     })
     document.body.appendChild(privilegesSelect)
 
-    document.body.appendChild(createElementWithId('textarea', 'emailListResult'))
+    document.body.appendChild(createElementWithId('input', 'emailListSubject'))
+    const toolbar = createElementWithId('div', 'emailListRichTextToolbar')
+    ;['bold', 'italic', 'underline', 'insertUnorderedList', 'insertOrderedList', 'createLink', 'removeFormat'].forEach(command => {
+      const button = document.createElement('button')
+      button.setAttribute('type', 'button')
+      button.setAttribute('data-rt-command', command)
+      toolbar.appendChild(button)
+    })
+    document.body.appendChild(toolbar)
+    const htmlBodyEditor = createElementWithId('div', 'emailListHtmlBody')
+    htmlBodyEditor.setAttribute('contenteditable', 'true')
+    document.body.appendChild(htmlBodyEditor)
     document.body.appendChild(createElementWithId('span', 'emailListCount'))
     document.body.appendChild(createElementWithId('button', 'generateEmailListButton'))
-    document.body.appendChild(createElementWithId('button', 'copyEmailListButton'))
+    document.body.appendChild(createElementWithId('button', 'requestEmailScheduleButton'))
     document.body.appendChild(createElementWithId('button', 'closeEmailListButton'))
   }
 
@@ -339,39 +350,134 @@ describe('ModalManager email list filters', () => {
     expect(filterCriteria).toEqual({ region: 'NA,EU', institution: 'Zoo', privileges: '2' })
   })
 
-  it('alerts and does not call fetch when no filters are selected', async () => {
+  it('alerts and does not call fetch when no filters are selected (preview count)', async () => {
     const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
     const alertMock = vi.fn()
     vi.stubGlobal('alert', alertMock)
 
-    await mm._generateEmailList()
+    await mm._previewEmailCount()
 
     expect(fetchMock).not.toHaveBeenCalled()
     expect(alertMock).toHaveBeenCalledWith('Select at least one filter.')
   })
 
-  it('calls the email endpoint with all populated filters and renders the result', async () => {
+  it('calls the count endpoint with all populated filters and renders only the count', async () => {
     const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
     document.getElementById('emailListInstitution').value = 'Zoo'
     document.getElementById('emailListLevel').value = 'Senior'
 
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: vi.fn().mockResolvedValue({ emails: ['a@example.com', 'b@example.com'], count: 2, copyText: 'a@example.com, b@example.com' })
+      json: vi.fn().mockResolvedValue({ count: 2 })
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    await mm._generateEmailList()
+    await mm._previewEmailCount()
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
     const requestedUrl = fetchMock.mock.calls[0][0]
-    expect(requestedUrl).toContain('/dataManagement/users/emails?')
+    expect(requestedUrl).toContain('/dataManagement/users/email-count?')
     expect(requestedUrl).toContain('institution=Zoo')
     expect(requestedUrl).toContain('level=Senior')
-    expect(document.getElementById('emailListResult').value).toBe('a@example.com, b@example.com')
     expect(document.getElementById('emailListCount').textContent).toBe('2')
+  })
+
+  it('alerts and does not call the API when requesting a schedule with no filters selected', async () => {
+    const apiClientMock = { post: vi.fn() }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    const alertMock = vi.fn()
+    vi.stubGlobal('alert', alertMock)
+
+    await mm._requestEmailSchedule()
+
+    expect(apiClientMock.post).not.toHaveBeenCalled()
+    expect(alertMock).toHaveBeenCalledWith('Select at least one filter.')
+  })
+
+  it('alerts and does not call the API when subject or htmlBody are missing', async () => {
+    const apiClientMock = { post: vi.fn() }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    const alertMock = vi.fn()
+    vi.stubGlobal('alert', alertMock)
+    document.getElementById('emailListInstitution').value = 'Zoo'
+
+    await mm._requestEmailSchedule()
+    expect(alertMock).toHaveBeenCalledWith('Enter an email subject.')
+
+    document.getElementById('emailListSubject').value = 'Hello'
+    await mm._requestEmailSchedule()
+    expect(alertMock).toHaveBeenCalledWith('Enter the email content.')
+
+    // A stray <br> with no real text (e.g. left behind after deleting all typed content)
+    // must still count as empty.
+    document.getElementById('emailListHtmlBody').innerHTML = '<br>'
+    await mm._requestEmailSchedule()
+    expect(alertMock).toHaveBeenCalledWith('Enter the email content.')
+
+    expect(apiClientMock.post).not.toHaveBeenCalled()
+  })
+
+  it('posts filters, subject, and htmlBody to the email-requests endpoint and closes on success', async () => {
+    const apiClientMock = { post: vi.fn().mockResolvedValue({ success: true, id: 7, recipientCount: 3 }) }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    const alertMock = vi.fn()
+    vi.stubGlobal('alert', alertMock)
+    const closeSpy = vi.spyOn(mm, 'close')
+
+    document.getElementById('emailListInstitution').value = 'Zoo'
+    document.getElementById('emailListSubject').value = 'Hello'
+    document.getElementById('emailListHtmlBody').innerHTML = '<p>Hi</p>'
+
+    await mm._requestEmailSchedule()
+
+    expect(apiClientMock.post).toHaveBeenCalledWith('/dataManagement/email-requests', {
+      filterCriteria: { institution: 'Zoo' },
+      subject: 'Hello',
+      htmlBody: '<p>Hi</p>'
+    })
+    expect(alertMock).toHaveBeenCalledWith(expect.stringContaining('3 recipient'))
+    expect(closeSpy).toHaveBeenCalled()
+  })
+
+  it('delegates a toolbar button click to document.execCommand and keeps focus on the editor', () => {
+    new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    const execCommandMock = vi.fn()
+    document.execCommand = execCommandMock
+    const editor = document.getElementById('emailListHtmlBody')
+    const focusSpy = vi.spyOn(editor, 'focus')
+    const boldButton = document.querySelector('[data-rt-command="bold"]')
+
+    boldButton.dispatchEvent(new window.MouseEvent('mousedown', { bubbles: true, cancelable: true }))
+    boldButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }))
+
+    expect(focusSpy).toHaveBeenCalled()
+    expect(execCommandMock).toHaveBeenCalledWith('bold', false, null)
+  })
+
+  it('prompts for a URL and calls createLink when the link button is clicked', () => {
+    new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    const execCommandMock = vi.fn()
+    document.execCommand = execCommandMock
+    vi.stubGlobal('prompt', vi.fn().mockReturnValue('https://example.com'))
+    const linkButton = document.querySelector('[data-rt-command="createLink"]')
+
+    linkButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }))
+
+    expect(execCommandMock).toHaveBeenCalledWith('createLink', false, 'https://example.com')
+  })
+
+  it('does not call createLink when the URL prompt is cancelled', () => {
+    new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    const execCommandMock = vi.fn()
+    document.execCommand = execCommandMock
+    vi.stubGlobal('prompt', vi.fn().mockReturnValue(null))
+    const linkButton = document.querySelector('[data-rt-command="createLink"]')
+
+    linkButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }))
+
+    expect(execCommandMock).not.toHaveBeenCalled()
   })
 })
 

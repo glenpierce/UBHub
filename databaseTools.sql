@@ -24,25 +24,15 @@ CREATE TABLE IF NOT EXISTS users(
     INDEX idx_users_alias (alias(255))
 );
 
--- The contacts table has been merged into the users table (privileges = 0 represents a Contact).
--- The contacts table definition is retained below for reference only and should not be created in new deployments.
--- Migration: ALTER TABLE users ADD COLUMN phone VARCHAR(64), ADD COLUMN workingGroup VARCHAR(255), ADD COLUMN level VARCHAR(255), ADD COLUMN createdBy VARCHAR(255), ADD COLUMN createdAt DATETIME DEFAULT CURRENT_TIMESTAMP, MODIFY COLUMN hashedPassword CHAR(255) NULL;
--- Migration: INSERT INTO users (email, alias, phone, title, institution, region, level, workingGroup, createdBy, createdAt, privileges) SELECT email, fullName, phone, title, organization, region, level, workingGroup, createdBy, createdAt, 0 FROM contacts ON DUPLICATE KEY UPDATE phone = VALUES(phone), workingGroup = VALUES(workingGroup), level = VALUES(level);
--- DEPRECATED contacts table (replaced by users with privileges = 0):
--- CREATE TABLE IF NOT EXISTS contacts (
---     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
---     fullName VARCHAR(1024) CHARACTER SET utf8 NOT NULL,
---     email VARCHAR(255) CHARACTER SET utf8 NOT NULL,
---     phone VARCHAR(64) CHARACTER SET utf8,
---     title VARCHAR(512) CHARACTER SET utf8,
---     organization VARCHAR(512) CHARACTER SET utf8,
---     region VARCHAR(255) CHARACTER SET utf8,
---     level VARCHAR(255) CHARACTER SET utf8,
---     workingGroup VARCHAR(255) CHARACTER SET utf8,
---     createdBy VARCHAR(255) CHARACTER SET utf8,
---     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
---     INDEX idx_contacts_fullName (fullName(255))
--- );
+CREATE TABLE IF NOT EXISTS mapButtons (
+    part_name VARCHAR(255) CHARACTER SET utf8,
+    button_category VARCHAR(255) CHARACTER SET utf8,
+    button_link VARCHAR(255) CHARACTER SET utf8,
+    button_text VARCHAR(255) CHARACTER SET utf8,
+    button_image VARCHAR(255) CHARACTER SET utf8,
+    marker_colors_by VARCHAR(255) CHARACTER SET utf8,
+    marker_colors VARCHAR(255) CHARACTER SET utf8
+);
 
 CREATE TABLE IF NOT EXISTS locations (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -124,6 +114,20 @@ CREATE TABLE IF NOT EXISTS row_versions (
     KEY idx_row_versions_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS email_send_requests (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    requested_by VARCHAR(255) NOT NULL,
+    status ENUM('pending','approved','rejected','sent') NOT NULL DEFAULT 'pending',
+    data JSON NOT NULL, -- { subject, htmlBody, recipients: [...], recipientCount, filterCriteria }
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    approved_by VARCHAR(255) DEFAULT NULL,
+    approved_at DATETIME DEFAULT NULL,
+    sent_at DATETIME DEFAULT NULL,
+    notes TEXT DEFAULT NULL,
+    PRIMARY KEY (id),
+    KEY idx_email_send_requests_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 #createUser procedure – creates an authenticated user with privileges = 1 (User)
 create
     definer = root@`%` procedure createUser(IN emailInput varchar(255), IN passwordHash varchar(255), IN alias varchar(255), IN userAddress varchar(2000), IN title varchar(255), IN institution varchar(255), whatsAppNumber varchar(20))
@@ -147,3 +151,11 @@ BEGIN
     FROM users
     WHERE email = emailInput;
 END;
+
+# Schema migrations – run once against any database created before the Contacts-to-users branch.
+ALTER TABLE users ADD COLUMN phone VARCHAR(64);
+ALTER TABLE users ADD COLUMN workingGroup VARCHAR(255);
+ALTER TABLE users ADD COLUMN level VARCHAR(255);
+ALTER TABLE users ADD COLUMN createdBy VARCHAR(255);
+ALTER TABLE users ADD COLUMN createdAt DATETIME DEFAULT CURRENT_TIMESTAMP;
+

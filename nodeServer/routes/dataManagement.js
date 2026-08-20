@@ -19,6 +19,7 @@ import {
 import {buildTableDataQuery} from '../services/queryBuilder.js';
 import {buildUserEmailFilterQuery} from '../services/userFilterQueryBuilder.js';
 import {createPendingChange} from '../services/pendingChangeService.js';
+import {createEmailSendRequest} from '../services/emailSendRequestService.js';
 import {approveVersion, rejectVersion} from '../services/approvalService.js';
 import {
   coerceToInteger,
@@ -321,30 +322,57 @@ router.post('/contact/update', isAuthenticated, isApprover, async (request, resp
 });
 
 /**
- * Return distinct email addresses for users matching the provided filters.
+ * Parse and validate the users "email list" filter criteria from query
+ * parameters. Shared by the count-preview and email-request endpoints so the
+ * parsing/validation logic lives in one place.
  *
- * Query params — one per filterable field (see getUserEmailFilterFieldDefinitions()
- * in services/tableMetadata.js): region (comma-separated codes, e.g. "EU,NA"),
- * institution, title, workingGroup (substring match), level, privileges (exact
- * match). At least one non-empty filter must be supplied. Multiple filters are
+ * Recognised query params — one per filterable field (see
+ * getUserEmailFilterFieldDefinitions() in services/tableMetadata.js): region
+ * (comma-separated codes, e.g. "EU,NA"), institution, title, workingGroup
+ * (substring match), level, privileges (exact match).
+ *
+ * @param {import('express').Request} request
+ * @returns {object} filterCriteria
+ * @throws {Error} with code 'INVALID_REGION_CODE' when an unrecognised region
+ *   code is supplied.
+ */
+function parseUserEmailFilterCriteriaFromQuery(request) {
+  const filterCriteria = {};
+  for (const filterFieldDefinition of getUserEmailFilterFieldDefinitions()) {
+    const rawValue = request.query ? request.query[filterFieldDefinition.fieldName] : undefined;
+    if (rawValue !== undefined && rawValue !== null && String(rawValue).trim() !== '') {
+      filterCriteria[filterFieldDefinition.fieldName] = rawValue;
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(filterCriteria, 'region')) {
+    const regionValidation = validateRegionCodes(filterCriteria.region);
+    if (!regionValidation.ok) {
+      const error = new Error(`Invalid region code: ${regionValidation.invalid}`);
+      error.code = 'INVALID_REGION_CODE';
+      throw error;
+    }
+    filterCriteria.region = regionValidation.value;
+  }
+
+  return filterCriteria;
+}
+
+/**
+ * Return the count of distinct email addresses for users matching the
+ * provided filters. Deliberately never returns the addresses themselves —
+ * requesters only need to know how many people will receive the email.
+ *
+ * At least one non-empty filter must be supplied. Multiple filters are
  * combined with AND.
  */
-router.get('/users/emails', isAuthenticated, isApprover, async (request, response) => {
+router.get('/users/email-count', isAuthenticated, isApprover, async (request, response) => {
   try {
-    const filterCriteria = {};
-    for (const filterFieldDefinition of getUserEmailFilterFieldDefinitions()) {
-      const rawValue = request.query ? request.query[filterFieldDefinition.fieldName] : undefined;
-      if (rawValue !== undefined && rawValue !== null && String(rawValue).trim() !== '') {
-        filterCriteria[filterFieldDefinition.fieldName] = rawValue;
-      }
-    }
-
-    if (Object.prototype.hasOwnProperty.call(filterCriteria, 'region')) {
-      const regionValidation = validateRegionCodes(filterCriteria.region);
-      if (!regionValidation.ok) {
-        return response.status(400).json({error: `Invalid region code: ${regionValidation.invalid}`});
-      }
-      filterCriteria.region = regionValidation.value;
+    let filterCriteria;
+    try {
+      filterCriteria = parseUserEmailFilterCriteriaFromQuery(request);
+    } catch (error) {
+      return response.status(400).json({error: error.message});
     }
 
     let sql;
@@ -358,13 +386,58 @@ router.get('/users/emails', isAuthenticated, isApprover, async (request, respons
       throw error;
     }
 
-    const rows = await makeDbCallAsPromise(sql, parameters);
-    const emails = (rows || []).map(row => String(row.email || '').trim()).filter(Boolean);
-    const uniqueEmails = Array.from(new Set(emails));
-    return response.json({emails: uniqueEmails, count: uniqueEmails.length, copyText: uniqueEmails.join(', ')});
+    const countSql = `SELECT COUNT(*) AS count FROM (${sql}) AS matched_recipients`;
+    const rows = await makeDbCallAsPromise(countSql, parameters);
+    const count = (rows && rows[0] && rows[0].count) || 0;
+    return response.json({count});
   } catch (error) {
-    console.error('Error fetching emails by filter:', error);
+    console.error('Error counting emails by filter:', error);
     return response.status(500).json({error: 'Database error'});
+  }
+});
+
+/**
+ * Create an email send request: resolves the recipient list from the
+ * supplied filters once (snapshotted for a later Executive-approval step),
+ * and stores it alongside the subject/HTML body. Never returns the
+ * recipient addresses — only a count.
+ *
+ * Body: { filterCriteria: object, subject: string, htmlBody: string }
+ */
+router.post('/email-requests', isAuthenticated, isApprover, async (request, response) => {
+  try {
+    const {filterCriteria, subject, htmlBody} = request.body || {};
+
+    if (!filterCriteria || typeof filterCriteria !== 'object' || Array.isArray(filterCriteria)) {
+      return response.status(400).json({error: 'filterCriteria must be an object'});
+    }
+
+    if (Object.prototype.hasOwnProperty.call(filterCriteria, 'region')) {
+      const regionValidation = validateRegionCodes(filterCriteria.region);
+      if (!regionValidation.ok) {
+        return response.status(400).json({error: `Invalid region code: ${regionValidation.invalid}`});
+      }
+      filterCriteria.region = regionValidation.value;
+    }
+
+    const result = await createEmailSendRequest(pool, {
+      requestedBy: request.session.user,
+      subject,
+      htmlBody,
+      filterCriteria,
+    });
+
+    return response.status(201).json({success: true, id: result.id, recipientCount: result.recipientCount});
+  } catch (error) {
+    if (
+      error.code === 'INVALID_EMAIL_REQUEST' ||
+      error.code === 'INVALID_FILTER_CRITERIA' ||
+      error.code === 'INVALID_FILTER_FIELD'
+    ) {
+      return response.status(400).json({error: error.message});
+    }
+    console.error('Error creating email send request:', error);
+    return response.status(500).json({error: 'Error creating email send request'});
   }
 });
 

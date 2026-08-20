@@ -161,13 +161,28 @@ html
         option(value='3') 3: Admin
         option(value='4') 4: Executive
     .profileEditEntryFieldContainer
-      label(for='emailListResult') Recipient list
-      textarea#emailListResult.dataManagementInput(rows='6' readonly placeholder='Select filters above and click Generate List')
+      label(for='emailListSubject') Email subject
+      input#emailListSubject.dataManagementInput(type='text' placeholder='Subject line')
+    .profileEditEntryFieldContainer
+      label(for='emailListHtmlBody') Email content
+      .richTextEditorContainer
+        .richTextToolbar#emailListRichTextToolbar(role='toolbar' aria-label='Text formatting')
+          button.richTextButton(type='button' data-rt-command='bold' title='Bold' aria-label='Bold')
+            b B
+          button.richTextButton(type='button' data-rt-command='italic' title='Italic' aria-label='Italic')
+            i I
+          button.richTextButton(type='button' data-rt-command='underline' title='Underline' aria-label='Underline')
+            u U
+          button.richTextButton(type='button' data-rt-command='insertUnorderedList' title='Bullet list' aria-label='Bullet list') •&nbsp;List
+          button.richTextButton(type='button' data-rt-command='insertOrderedList' title='Numbered list' aria-label='Numbered list') 1.&nbsp;List
+          button.richTextButton(type='button' data-rt-command='createLink' title='Insert link' aria-label='Insert link') Link
+          button.richTextButton(type='button' data-rt-command='removeFormat' title='Clear formatting' aria-label='Clear formatting') Clear
+        div#emailListHtmlBody.dataManagementInput.richTextEditor(contenteditable='true' role='textbox' aria-multiline='true' aria-label='Email content' data-placeholder='Write the email content...')
     .smallText
-      span Count: &nbsp;
+      span Recipient count: &nbsp;
       span#emailListCount 0
     .modal-actions
       button(type='button' id='closeEmailListButton') Close
-      button.secondary(type='button' id='copyEmailListButton') Copy to Clipboard
-      button.primary(type='button' id='generateEmailListButton') Generate List
+      button.secondary(type='button' id='generateEmailListButton') Preview Recipient Count
+      button.primary(type='button' id='requestEmailScheduleButton') Request Email be Scheduled
 
