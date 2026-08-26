@@ -9,6 +9,7 @@
  */
 
 import { buildUserEmailFilterQuery } from './userFilterQueryBuilder.js';
+import { isValidEmailAddress } from '../utils/validationUtils.js';
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -109,7 +110,10 @@ export async function createEmailSendRequest(pool, { requestedBy, subject, htmlB
 
   try {
     const [rows] = await connection.query(sql, parameters);
-    const emails = (rows || []).map(row => String(row.email || '').trim()).filter(Boolean);
+    // Filter to well-formed addresses only: the users table has no email-format
+    // constraint at the DB level, and a malformed row (test data, a bad import,
+    // a typo) must never silently end up in a real send batch.
+    const emails = (rows || []).map(row => String(row.email || '').trim()).filter(isValidEmailAddress);
     const recipients = Array.from(new Set(emails));
 
     if (recipients.length === 0) {
@@ -127,6 +131,11 @@ export async function createEmailSendRequest(pool, { requestedBy, subject, htmlB
     const [insertResult] = await connection.query(
       'INSERT INTO email_send_requests (requested_by, data) VALUES (?, ?)',
       [requestedBy, dataJson],
+    );
+
+    console.log(
+      `[EmailSendRequest #${insertResult.insertId}] created by ${requestedBy}: ` +
+      `${recipients.length} recipient(s), status=pending, awaiting Executive approval`,
     );
 
     return { id: insertResult.insertId, recipientCount: recipients.length };
@@ -159,6 +168,8 @@ export async function rejectEmailSendRequest(pool, { id, approver, comments }) {
     );
 
     await connection.commit();
+
+    console.log(`[EmailSendRequest #${id}] rejected by ${approver}; no email will be sent`);
   } catch (error) {
     try {
       await connection.rollback();
@@ -201,7 +212,13 @@ export async function approveEmailSendRequest(pool, { id, approver, comments }) 
 
     await connection.commit();
 
-    return safeJsonParse(emailSendRequest.data);
+    const parsedRequest = safeJsonParse(emailSendRequest.data);
+    console.log(
+      `[EmailSendRequest #${id}] approved by ${approver}; ` +
+      `${(parsedRequest.recipients || []).length} recipient(s) queued for background send`,
+    );
+
+    return parsedRequest;
   } catch (error) {
     try {
       await connection.rollback();
@@ -234,5 +251,10 @@ export async function markEmailSendRequestSent(pool, { id, succeeded, failed }) 
   await pool.query(
     'UPDATE email_send_requests SET status = ?, sent_at = NOW(), notes = ? WHERE id = ?',
     ['sent', notes, id],
+  );
+
+  console.log(
+    `[EmailSendRequest #${id}] marked sent: ${succeeded.length} succeeded, ${failed.length} failed` +
+    (failed.length > 0 ? ` (failed: ${failed.map(f => f.email).join(', ')})` : ''),
   );
 }

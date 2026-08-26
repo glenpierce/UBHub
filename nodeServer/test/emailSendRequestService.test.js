@@ -102,6 +102,30 @@ describe('emailSendRequestService', () => {
 
       expect(connection.release).toHaveBeenCalled()
     })
+
+    it('filters out malformed email values (e.g. leftover placeholder/test data) before snapshotting', async () => {
+      const selectRows = [{ email: 'a@example.com' }, { email: 'contact01' }, { email: '  ' }, { email: 'b@example.com' }]
+      const { pool, connection } = buildMockPool({ selectRows, insertId: 7 })
+
+      const result = await createEmailSendRequest(pool, {
+        requestedBy: 'approver@example.com',
+        subject: 'Hello',
+        htmlBody: '<p>Hi</p>',
+        filterCriteria: { region: 'EU' }
+      })
+
+      expect(result).toEqual({ id: 7, recipientCount: 2 })
+      const insertCall = connection.query.mock.calls.find(call => String(call[0]).trim().toUpperCase().startsWith('INSERT'))
+      const data = JSON.parse(insertCall[1][1])
+      expect(data.recipients).toEqual(['a@example.com', 'b@example.com'])
+    })
+
+    it('throws INVALID_EMAIL_REQUEST when every matched row has a malformed email', async () => {
+      const { pool } = buildMockPool({ selectRows: [{ email: 'contact01' }, { email: 'not-an-email' }] })
+      await expect(createEmailSendRequest(pool, {
+        requestedBy: 'user@example.com', subject: 'Hello', htmlBody: '<p>Hi</p>', filterCriteria: { region: 'EU' }
+      })).rejects.toMatchObject({ code: 'INVALID_EMAIL_REQUEST', message: 'No recipients match the provided filters' })
+    })
   })
 
   describe('rejectEmailSendRequest', () => {

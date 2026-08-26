@@ -70,6 +70,21 @@ export function isValidReviewDecision(decision) {
   return typeof decision === 'string' && ['approve', 'reject'].includes(decision.toLowerCase());
 }
 
+// Pragmatic email format check (not full RFC 5322): local part, '@', domain
+// with at least one '.'. Good enough to reject placeholder/test values like
+// "contact01" before they're treated as a real send address.
+const EMAIL_FORMAT_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Return true when value looks like a plausible email address.
+ *
+ * @param {*} value - The value to check.
+ * @returns {boolean}
+ */
+export function isValidEmailAddress(value) {
+  return typeof value === 'string' && EMAIL_FORMAT_PATTERN.test(value.trim());
+}
+
 /**
  * Normalize a comments value.
  *

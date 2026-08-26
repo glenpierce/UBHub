@@ -50,7 +50,10 @@ export async function sendSingleTransactionalEmail({
     throw new Error(`Brevo API error (${response.status}): ${errorBody || response.statusText}`);
   }
 
-  return response.json();
+  const result = await response.json();
+  console.log(`[Brevo] sent to ${recipientEmail} (messageId=${result && result.messageId})`);
+  console.log(result);
+  return result;
 }
 
 /**
@@ -78,8 +81,14 @@ export async function sendToAllRecipientsIndividually({
   const succeeded = [];
   const failed = [];
 
+  console.log(`[Brevo] starting send for "${subject}" to ${recipients.length} recipient(s)`);
+  if (!apiKey) {
+    console.warn('[Brevo] BREVO_API_KEY is not configured — every send below will fail');
+  }
+
   for (const recipientEmail of recipients) {
     try {
+      console.log(`[Brevo] (${succeeded.length + failed.length + 1}/${recipients.length}) sending to ${recipientEmail}...`);
       await sendSingleTransactionalEmail({
         apiKey,
         senderEmail,
@@ -90,10 +99,12 @@ export async function sendToAllRecipientsIndividually({
       });
       succeeded.push(recipientEmail);
     } catch (error) {
-      console.error(`Error sending email to ${recipientEmail}:`, error);
+      console.error(`[Brevo] (${succeeded.length + failed.length + 1}/${recipients.length}) failed to send to ${recipientEmail}:`, error);
       failed.push({ email: recipientEmail, error: error.message || String(error) });
     }
   }
+
+  console.log(`[Brevo] finished send for "${subject}": ${succeeded.length} succeeded, ${failed.length} failed`);
 
   return { succeeded, failed };
 }

@@ -31,6 +31,7 @@ import {approveVersion, rejectVersion} from '../services/approvalService.js';
 import {
   coerceToInteger,
   isNonEmptyString,
+  isValidEmailAddress,
   isValidOperation,
   isValidReviewDecision,
   normalizeComments,
@@ -257,6 +258,7 @@ router.post('/contact', isAuthenticated, isContributor, async (request, response
 
     if (!alias) return response.status(400).json({error: 'alias is required'});
     if (!normalizedEmail) return response.status(400).json({error: 'email is required'});
+    if (!isValidEmailAddress(normalizedEmail)) return response.status(400).json({error: 'email must be a valid email address'});
 
     const regionValidation = validateRegionCodes(request.body.region || '');
     if (!regionValidation.ok) {
@@ -463,6 +465,7 @@ router.post('/email-requests', isAuthenticated, isApprover, async (request, resp
  * @param {{subject: string, htmlBody: string, recipients: string[]}} approvedRequest
  */
 async function sendApprovedEmailRequestInBackground(id, approvedRequest) {
+  console.log(`[EmailSendRequest #${id}] background send starting (${(approvedRequest.recipients || []).length} recipient(s))`);
   try {
     const {succeeded, failed} = await sendToAllRecipientsIndividually({
       apiKey: config.BREVO_API_KEY,
@@ -473,7 +476,7 @@ async function sendApprovedEmailRequestInBackground(id, approvedRequest) {
     });
     await markEmailSendRequestSent(pool, {id, succeeded, failed});
   } catch (error) {
-    console.error(`Error sending approved email request ${id}:`, error);
+    console.error(`[EmailSendRequest #${id}] background send crashed before completion:`, error);
     try {
       await markEmailSendRequestSent(pool, {
         id,
@@ -481,7 +484,7 @@ async function sendApprovedEmailRequestInBackground(id, approvedRequest) {
         failed: (approvedRequest.recipients || []).map(email => ({email, error: error.message || String(error)})),
       });
     } catch (markError) {
-      console.error(`Error recording send failure for email request ${id}:`, markError);
+      console.error(`[EmailSendRequest #${id}] failed to record the send crash:`, markError);
     }
   }
 }
@@ -511,6 +514,8 @@ router.post('/email-requests/:id/review', isAuthenticated, isExec, async (reques
     const reviewComments = normalizeComments(comments);
     const normalizedDecision = decision.toLowerCase();
 
+    console.log(`[EmailSendRequest #${id}] ${normalizedDecision} decision received from ${request.session.user}`);
+
     if (normalizedDecision === 'reject') {
       await rejectEmailSendRequest(pool, {id, approver: request.session.user, comments: reviewComments});
       return response.status(200).json({status: 'Rejected'});
@@ -522,7 +527,7 @@ router.post('/email-requests/:id/review', isAuthenticated, isExec, async (reques
     // Intentionally not awaited: the executive's request already got its response above.
     sendApprovedEmailRequestInBackground(id, approvedRequest);
   } catch (error) {
-    console.error('Error reviewing email send request:', error);
+    console.error(`[EmailSendRequest #${id}] review failed:`, error);
     if (!response.headersSent) {
       response.status(500).json({error: 'Error reviewing email send request: ' + error.message});
     }
