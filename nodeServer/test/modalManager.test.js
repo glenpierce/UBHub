@@ -262,3 +262,337 @@ describe('ModalManager', () => {
     expect(rejectBtn.classList.contains('hidden')).toBe(false)
   })
 })
+
+describe('ModalManager email list filters', () => {
+  let managerMock
+  let focusTrapMock
+  let rendererMock
+
+  function appendEmailListDom() {
+    const overlay = createElementWithId('div', 'modalOverlayEmailList', ['hidden'])
+    const modal = createElementWithId('div', null, ['modal'])
+    overlay.appendChild(modal)
+    document.body.appendChild(overlay)
+
+    const regionsSelect = createElementWithId('select', 'emailListRegions')
+    regionsSelect.multiple = true;
+    ['NA', 'EU', 'LA'].forEach(code => {
+      const option = document.createElement('option')
+      option.value = code
+      option.textContent = code
+      regionsSelect.appendChild(option)
+    })
+    document.body.appendChild(regionsSelect)
+
+    document.body.appendChild(createElementWithId('input', 'emailListInstitution'))
+    document.body.appendChild(createElementWithId('input', 'emailListTitle'))
+    document.body.appendChild(createElementWithId('input', 'emailListWorkingGroup'))
+    document.body.appendChild(createElementWithId('input', 'emailListLevel'))
+
+    const privilegesSelect = createElementWithId('select', 'emailListPrivileges')
+    ;[['', 'Any role'], ['2', 'Approver']].forEach(([value, label]) => {
+      const option = document.createElement('option')
+      option.value = value
+      option.textContent = label
+      privilegesSelect.appendChild(option)
+    })
+    document.body.appendChild(privilegesSelect)
+
+    document.body.appendChild(createElementWithId('input', 'emailListSubject'))
+    const toolbar = createElementWithId('div', 'emailListRichTextToolbar')
+    ;['bold', 'italic', 'underline', 'insertUnorderedList', 'insertOrderedList', 'createLink', 'removeFormat'].forEach(command => {
+      const button = document.createElement('button')
+      button.setAttribute('type', 'button')
+      button.setAttribute('data-rt-command', command)
+      toolbar.appendChild(button)
+    })
+    document.body.appendChild(toolbar)
+    const htmlBodyEditor = createElementWithId('div', 'emailListHtmlBody')
+    htmlBodyEditor.setAttribute('contenteditable', 'true')
+    document.body.appendChild(htmlBodyEditor)
+    document.body.appendChild(createElementWithId('span', 'emailListCount'))
+    document.body.appendChild(createElementWithId('button', 'generateEmailListButton'))
+    document.body.appendChild(createElementWithId('button', 'requestEmailScheduleButton'))
+    document.body.appendChild(createElementWithId('button', 'closeEmailListButton'))
+  }
+
+  beforeEach(() => {
+    const modalOverlay = createElementWithId('div', 'modalOverlay')
+    const modal = createElementWithId('div', null, ['modal'])
+    modalOverlay.appendChild(modal)
+    document.body.appendChild(modalOverlay)
+    document.body.appendChild(createElementWithId('form', 'modalForm'))
+    document.body.appendChild(createElementWithId('div', 'modalFields'))
+    document.body.appendChild(createElementWithId('div', 'modalTitle'))
+
+    appendEmailListDom()
+
+    managerMock = { setModalManager: vi.fn(), tables: {}, tableDataCache: {}, selectedTable: null }
+    focusTrapMock = { attach: vi.fn(), detach: vi.fn() }
+    rendererMock = { buildModalForTable: vi.fn(), buildModalForReview: vi.fn(), populateEditValues: vi.fn() }
+  })
+
+  afterEach(() => {
+    document.body.innerHTML = ''
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
+  })
+
+  it('collects only populated filter fields', () => {
+    const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    document.getElementById('emailListRegions').options[0].selected = true // NA
+    document.getElementById('emailListRegions').options[1].selected = true // EU
+    document.getElementById('emailListInstitution').value = '  Zoo  '
+    document.getElementById('emailListPrivileges').value = '2'
+
+    const filterCriteria = mm._collectEmailListFilterCriteria()
+
+    expect(filterCriteria).toEqual({ region: 'NA,EU', institution: 'Zoo', privileges: '2' })
+  })
+
+  it('alerts and does not call fetch when no filters are selected (preview count)', async () => {
+    const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    const alertMock = vi.fn()
+    vi.stubGlobal('alert', alertMock)
+
+    await mm._previewEmailCount()
+
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(alertMock).toHaveBeenCalledWith('Select at least one filter.')
+  })
+
+  it('calls the count endpoint with all populated filters and renders only the count', async () => {
+    const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    document.getElementById('emailListInstitution').value = 'Zoo'
+    document.getElementById('emailListLevel').value = 'Senior'
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({ count: 2 })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await mm._previewEmailCount()
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const requestedUrl = fetchMock.mock.calls[0][0]
+    expect(requestedUrl).toContain('/dataManagement/users/email-count?')
+    expect(requestedUrl).toContain('institution=Zoo')
+    expect(requestedUrl).toContain('level=Senior')
+    expect(document.getElementById('emailListCount').textContent).toBe('2')
+  })
+
+  it('alerts and does not call the API when requesting a schedule with no filters selected', async () => {
+    const apiClientMock = { post: vi.fn() }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    const alertMock = vi.fn()
+    vi.stubGlobal('alert', alertMock)
+
+    await mm._requestEmailSchedule()
+
+    expect(apiClientMock.post).not.toHaveBeenCalled()
+    expect(alertMock).toHaveBeenCalledWith('Select at least one filter.')
+  })
+
+  it('alerts and does not call the API when subject or htmlBody are missing', async () => {
+    const apiClientMock = { post: vi.fn() }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    const alertMock = vi.fn()
+    vi.stubGlobal('alert', alertMock)
+    document.getElementById('emailListInstitution').value = 'Zoo'
+
+    await mm._requestEmailSchedule()
+    expect(alertMock).toHaveBeenCalledWith('Enter an email subject.')
+
+    document.getElementById('emailListSubject').value = 'Hello'
+    await mm._requestEmailSchedule()
+    expect(alertMock).toHaveBeenCalledWith('Enter the email content.')
+
+    // A stray <br> with no real text (e.g. left behind after deleting all typed content)
+    // must still count as empty.
+    document.getElementById('emailListHtmlBody').innerHTML = '<br>'
+    await mm._requestEmailSchedule()
+    expect(alertMock).toHaveBeenCalledWith('Enter the email content.')
+
+    expect(apiClientMock.post).not.toHaveBeenCalled()
+  })
+
+  it('posts filters, subject, and htmlBody to the email-requests endpoint and closes on success', async () => {
+    const apiClientMock = { post: vi.fn().mockResolvedValue({ success: true, id: 7, recipientCount: 3 }) }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    const alertMock = vi.fn()
+    vi.stubGlobal('alert', alertMock)
+    const closeSpy = vi.spyOn(mm, 'close')
+
+    document.getElementById('emailListInstitution').value = 'Zoo'
+    document.getElementById('emailListSubject').value = 'Hello'
+    document.getElementById('emailListHtmlBody').innerHTML = '<p>Hi</p>'
+
+    await mm._requestEmailSchedule()
+
+    expect(apiClientMock.post).toHaveBeenCalledWith('/dataManagement/email-requests', {
+      filterCriteria: { institution: 'Zoo' },
+      subject: 'Hello',
+      htmlBody: '<p>Hi</p>'
+    })
+    expect(alertMock).toHaveBeenCalledWith(expect.stringContaining('3 recipient'))
+    expect(closeSpy).toHaveBeenCalled()
+  })
+
+  it('delegates a toolbar button click to document.execCommand and keeps focus on the editor', () => {
+    new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    const execCommandMock = vi.fn()
+    document.execCommand = execCommandMock
+    const editor = document.getElementById('emailListHtmlBody')
+    const focusSpy = vi.spyOn(editor, 'focus')
+    const boldButton = document.querySelector('[data-rt-command="bold"]')
+
+    boldButton.dispatchEvent(new window.MouseEvent('mousedown', { bubbles: true, cancelable: true }))
+    boldButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }))
+
+    expect(focusSpy).toHaveBeenCalled()
+    expect(execCommandMock).toHaveBeenCalledWith('bold', false, null)
+  })
+
+  it('prompts for a URL and calls createLink when the link button is clicked', () => {
+    new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    const execCommandMock = vi.fn()
+    document.execCommand = execCommandMock
+    vi.stubGlobal('prompt', vi.fn().mockReturnValue('https://example.com'))
+    const linkButton = document.querySelector('[data-rt-command="createLink"]')
+
+    linkButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }))
+
+    expect(execCommandMock).toHaveBeenCalledWith('createLink', false, 'https://example.com')
+  })
+
+  it('does not call createLink when the URL prompt is cancelled', () => {
+    new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    const execCommandMock = vi.fn()
+    document.execCommand = execCommandMock
+    vi.stubGlobal('prompt', vi.fn().mockReturnValue(null))
+    const linkButton = document.querySelector('[data-rt-command="createLink"]')
+
+    linkButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }))
+
+    expect(execCommandMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('ModalManager email request review', () => {
+  let managerMock
+  let focusTrapMock
+  let rendererMock
+
+  function appendEmailRequestReviewDom() {
+    const overlay = createElementWithId('div', 'modalOverlayEmailRequestReview', ['hidden'])
+    const modal = createElementWithId('div', null, ['modal'])
+    overlay.appendChild(modal)
+    document.body.appendChild(overlay)
+
+    document.body.appendChild(createElementWithId('span', 'emailRequestReviewRequestedBy'))
+    document.body.appendChild(createElementWithId('span', 'emailRequestReviewCreatedAt'))
+    document.body.appendChild(createElementWithId('span', 'emailRequestReviewSubject'))
+    document.body.appendChild(createElementWithId('span', 'emailRequestReviewRecipientCount'))
+    document.body.appendChild(createElementWithId('iframe', 'emailRequestReviewPreview'))
+    document.body.appendChild(createElementWithId('textarea', 'emailRequestReviewComments'))
+    document.body.appendChild(createElementWithId('button', 'approveEmailRequestButton'))
+    document.body.appendChild(createElementWithId('button', 'rejectEmailRequestButton'))
+    document.body.appendChild(createElementWithId('button', 'closeEmailRequestReviewButton'))
+  }
+
+  beforeEach(() => {
+    appendEmailRequestReviewDom()
+    managerMock = {
+      setModalManager: vi.fn(),
+      tables: {},
+      tableDataCache: {},
+      selectedTable: 'email_send_requests',
+      fetchTableData: vi.fn().mockResolvedValue(),
+      applyFiltersAndSort: vi.fn()
+    }
+    focusTrapMock = { attach: vi.fn(), detach: vi.fn() }
+    rendererMock = { buildModalForTable: vi.fn(), buildModalForReview: vi.fn(), populateEditValues: vi.fn() }
+  })
+
+  afterEach(() => {
+    document.body.innerHTML = ''
+    vi.restoreAllMocks()
+  })
+
+  it('populates read-only fields and the sandboxed preview iframe from rowData', async () => {
+    const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    const rowData = {
+      id: 5,
+      requested_by: 'approver@example.com',
+      created_at: '2026-08-19 10:00:00',
+      subject: 'Hello',
+      recipientCount: 12,
+      htmlBody: '<p>Hi</p>',
+      status: 'pending'
+    }
+
+    await mm.open('reviewEmailRequest', null, rowData)
+
+    expect(document.getElementById('emailRequestReviewRequestedBy').textContent).toBe('approver@example.com')
+    expect(document.getElementById('emailRequestReviewSubject').textContent).toBe('Hello')
+    expect(document.getElementById('emailRequestReviewRecipientCount').textContent).toBe('12')
+    expect(document.getElementById('emailRequestReviewPreview').srcdoc).toBe('<p>Hi</p>')
+    expect(document.getElementById('modalOverlayEmailRequestReview').classList.contains('hidden')).toBe(false)
+  })
+
+  it('hides approve/reject buttons when the request is already decided', async () => {
+    const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    await mm.open('reviewEmailRequest', null, { id: 5, status: 'sent' })
+
+    expect(document.getElementById('approveEmailRequestButton').classList.contains('hidden')).toBe(true)
+    expect(document.getElementById('rejectEmailRequestButton').classList.contains('hidden')).toBe(true)
+  })
+
+  it('shows approve/reject buttons when the request is pending', async () => {
+    const mm = new ModalManager(managerMock, { apiClient: null, focusTrap: focusTrapMock, renderer: rendererMock })
+    await mm.open('reviewEmailRequest', null, { id: 5, status: 'pending' })
+
+    expect(document.getElementById('approveEmailRequestButton').classList.contains('hidden')).toBe(false)
+    expect(document.getElementById('rejectEmailRequestButton').classList.contains('hidden')).toBe(false)
+  })
+
+  it('submits an approve decision to the per-id review endpoint and refreshes the table', async () => {
+    const apiClientMock = { post: vi.fn().mockResolvedValue({ status: 'Approved' }) }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    await mm.open('reviewEmailRequest', null, { id: 5, status: 'pending' })
+    document.getElementById('emailRequestReviewComments').value = 'looks fine'
+
+    await mm._submitEmailRequestReview('approve')
+
+    expect(apiClientMock.post).toHaveBeenCalledWith('/dataManagement/email-requests/5/review', { decision: 'approve', comments: 'looks fine' })
+    expect(document.getElementById('modalOverlayEmailRequestReview').classList.contains('hidden')).toBe(true)
+    expect(managerMock.fetchTableData).toHaveBeenCalledWith('email_send_requests')
+    expect(managerMock.applyFiltersAndSort).toHaveBeenCalledWith('email_send_requests')
+  })
+
+  it('submits a reject decision to the per-id review endpoint', async () => {
+    const apiClientMock = { post: vi.fn().mockResolvedValue({ status: 'Rejected' }) }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    await mm.open('reviewEmailRequest', null, { id: 9, status: 'pending' })
+
+    await mm._submitEmailRequestReview('reject')
+
+    expect(apiClientMock.post).toHaveBeenCalledWith('/dataManagement/email-requests/9/review', { decision: 'reject', comments: '' })
+  })
+
+  it('alerts and does not call the API when no row is currently open', async () => {
+    const apiClientMock = { post: vi.fn() }
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    const alertMock = vi.fn()
+    vi.stubGlobal('alert', alertMock)
+
+    await mm._submitEmailRequestReview('approve')
+
+    expect(apiClientMock.post).not.toHaveBeenCalled()
+    expect(alertMock).toHaveBeenCalledWith('No email request specified.')
+  })
+})
+

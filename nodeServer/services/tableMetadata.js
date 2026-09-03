@@ -109,13 +109,35 @@ const tableDisplayMetadata = {
       { button: 'review', label: 'Review', visible: true, onClickFunction: 'openReviewModal' },
     ],
   },
+  email_send_requests: {
+    displayName: 'Email Approvals',
+    columns: [
+      { name: 'id', visible: false },
+      { name: 'requested_by', label: 'Requested By', visible: true },
+      { name: 'status', label: 'Status', visible: true, renderFunction: 'submissionStatusRenderer' },
+      { name: 'subject', jsonPath: '$.subject', label: 'Subject', visible: true },
+      { name: 'recipientCount', jsonPath: '$.recipientCount', label: 'Recipients', visible: true },
+      { name: 'htmlBody', jsonPath: '$.htmlBody', label: 'Content', visible: false },
+      { name: 'created_at', label: 'Requested At', visible: true },
+      { name: 'approved_by', label: 'Reviewed By', visible: true },
+      { name: 'approved_at', label: 'Reviewed At', visible: true, type: 'date' },
+      { name: 'notes', label: 'Send Notes', visible: true },
+      { button: 'review', label: 'Review', visible: true, onClickFunction: 'openEmailRequestReviewModal' },
+    ],
+  },
   users: {
     displayName: 'Users',
     columns: [
       { name: 'alias', label: 'Name', visible: true, renderFunction: 'nameRenderer' },
+      { name: 'email', label: 'Email', visible: true },
       { name: 'privileges', label: 'Role', visible: true, renderFunction: 'privilegeRenderer' },
       { name: 'status', label: 'Status', visible: true, renderFunction: 'statusRenderer' },
-      { name: 'region', label: 'Region', visible: true },
+      { name: 'region', label: 'Region', visible: true, placeholder: 'e.g. EU,NA  (codes: NA, LA, CAR, MECNA, AF, ESA, SA, EU, OC)' },
+      { name: 'phone', label: 'Phone', visible: false },
+      { name: 'institution', label: 'Institution', visible: true },
+      { name: 'title', label: 'Title', visible: false },
+      { name: 'level', label: 'Level', visible: false },
+      { name: 'workingGroup', label: 'Working Group', visible: false },
       { name: 'assignedSite', label: 'Assigned Sites', visible: true, renderFunction: 'assignRenderer' },
       { name: 'lastActive', label: 'Last Active', visible: true, renderFunction: 'lastActiveRenderer' },
     ],
@@ -123,16 +145,36 @@ const tableDisplayMetadata = {
 };
 
 // ---------------------------------------------------------------------------
+// Filterable fields for the "email list" feature (users table).
+//
+// Single source of truth consumed by services/userFilterQueryBuilder.js (SQL
+// generation) and by the client-side email-list modal (form controls). Each
+// definition declares how the field's value should be compared in SQL:
+//   - 'commaSeparatedSet'  – value is a comma-separated set stored in the
+//                            column (e.g. region); matched with FIND_IN_SET.
+//   - 'exactMatch'         – value must equal the column exactly.
+//   - 'containsSubstring'  – value is matched as a case-insensitive substring.
+// ---------------------------------------------------------------------------
+
+const userEmailFilterFieldDefinitions = [
+  { fieldName: 'region', label: 'Region', comparisonType: 'commaSeparatedSet' },
+  { fieldName: 'institution', label: 'Institution', comparisonType: 'containsSubstring' },
+  { fieldName: 'title', label: 'Title', comparisonType: 'containsSubstring' },
+  { fieldName: 'workingGroup', label: 'Working Group', comparisonType: 'containsSubstring' },
+  { fieldName: 'level', label: 'Level', comparisonType: 'exactMatch' },
+  { fieldName: 'privileges', label: 'Role', comparisonType: 'exactMatch' },
+];
+
+// ---------------------------------------------------------------------------
 // Executive-only additional columns appended to the users table at runtime.
 // ---------------------------------------------------------------------------
 
 const executiveUserColumns = [
-  { name: 'email', label: 'Email', visible: true },
   { name: 'userAddress', label: 'Address', visible: false },
-  { name: 'title', label: 'Title', visible: true },
-  { name: 'institution', label: 'Institution', visible: true },
   { name: 'whatsAppNumber', label: 'WhatsApp Number', visible: true },
   { name: 'primaryContact', label: 'Primary Contact', visible: true },
+  { name: 'createdBy', label: 'Created By', visible: false },
+  { name: 'createdAt', label: 'Created At', visible: false },
   { name: 'notes', label: 'Notes', visible: false },
   { button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditUserModal' },
 ];
@@ -158,6 +200,13 @@ const editableTableMetadata = {
     primaryKey: ['id'],
     columns: ['id', 'inst_id', 'part_category', 'part_name', 'part_year', 'part_data', 'part_units', 'part_level', 'part_link_label', 'part_link', 'part_link_label2', 'part_link2', 'part_link_label3', 'part_link3', 'keywords', 'link_verified'],
   },
+  // Users table: supports direct contact creation (privileges = 0) via /dataManagement/contact.
+  // Does NOT use the approval workflow (row_versions). assertTableAllowed intentionally excludes it
+  // so that pending-change submissions for users are always rejected.
+  users: {
+    primaryKey: ['email'],
+    columns: ['email', 'alias', 'phone', 'title', 'institution', 'region', 'level', 'workingGroup'],
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -177,6 +226,7 @@ const navigationMenuCandidates = [
   { onClick: 'openMap', icon: '/icons/mapIcon.svg', label: 'Map' },
   { onClick: '', icon: '/icons/resourcesIcon.svg', label: 'Resources' },
   { onClick: '', icon: '/icons/resourcesIcon.svg', label: 'UBHubber Resources' },
+  { tableKey: 'email_send_requests', icon: '/icons/sendIcon.svg', label: 'Email Approvals' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -236,13 +286,28 @@ export function getEditableTableMetadata(tableName) {
 }
 
 /**
- * Assert that a table is editable. Throws a domain error if not.
+ * Return the filterable-field definitions for the users "email list" feature.
+ * Returns a new array copy so callers cannot mutate the shared definitions.
+ *
+ * @returns {Array<{fieldName: string, label: string, comparisonType: string}>}
+ */
+export function getUserEmailFilterFieldDefinitions() {
+  return userEmailFilterFieldDefinitions.map(definition => ({ ...definition }));
+}
+
+/**
+ * Assert that a table is editable via the pending-change approval workflow.
+ * Throws a domain error if not.
+ *
+ * Note: the 'users' table has its own direct-insert endpoint (/dataManagement/contact)
+ * and is intentionally excluded here to prevent accidental approval-workflow submissions.
  *
  * @param {string} tableName
  * @throws {Error} with code 'INVALID_TABLE'.
  */
 export function assertTableAllowed(tableName) {
-  if (!editableTableMetadata[tableName]) {
+  const approvalWorkflowTables = new Set(['mapButtons', 'locations', 'documents', 'participation']);
+  if (!approvalWorkflowTables.has(tableName)) {
     const error = new Error('Invalid table name');
     error.code = 'INVALID_TABLE';
     throw error;
@@ -301,6 +366,7 @@ export function getTablesForUser(request) {
     for (const column of executiveUserColumns) {
       tablesForUser.users.columns.push(column);
     }
+    tablesForUser.email_send_requests = transformTableForClient(tableDisplayMetadata.email_send_requests);
   }
 
   return tablesForUser;
@@ -325,6 +391,7 @@ const NAV_MENU_INDEX = {
   MAP: 9,
   RESOURCES: 10,
   UBHUBBER_RESOURCES: 11,
+  EMAIL_APPROVALS: 12,
 };
 
 export function getNavigationMenuForUser(request) {
@@ -357,8 +424,28 @@ export function getNavigationMenuForUser(request) {
 
   if (request.session.user && request.session.privileges >= 4) {
     navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.MANAGE_USERS]); // Manage Users
+    navigationMenu.push(navigationMenuCandidates[NAV_MENU_INDEX.EMAIL_APPROVALS]); // Email Approvals
   }
 
   return navigationMenu;
+}
+
+/**
+ * Build a map of tableKey → editable column name array for tables that the requesting
+ * user can see. Used by the client-side modal form builder to restrict which columns
+ * appear in create/edit forms.
+ *
+ * @param {object} request - Express request with session info.
+ * @returns {object} A map of tableKey → string[].
+ */
+export function getEditableColumnsForUser(request) {
+  const visibleTables = getTablesForUser(request);
+  const result = {};
+  Object.keys(editableTableMetadata).forEach(tableName => {
+    if (visibleTables[tableName]) {
+      result[tableName] = editableTableMetadata[tableName].columns;
+    }
+  });
+  return result;
 }
 

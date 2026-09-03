@@ -59,21 +59,29 @@ describe('tableMetadata', () => {
       expect(metadata.columns).toContain('inst_title');
     });
 
+    it('returns editable metadata for the users table', () => {
+      const metadata = getEditableTableMetadata('users');
+      expect(metadata).toBeDefined();
+      expect(metadata.primaryKey).toEqual(['email']);
+      expect(Array.isArray(metadata.columns)).toBe(true);
+      expect(metadata.columns).toContain('email');
+      expect(metadata.columns).toContain('alias');
+    });
+
     it('returns undefined for a non-editable table', () => {
-      expect(getEditableTableMetadata('users')).toBeUndefined();
       expect(getEditableTableMetadata('nonexistent')).toBeUndefined();
     });
   });
 
   describe('assertTableAllowed', () => {
-    it('does not throw for editable tables', () => {
+    it('does not throw for approval-workflow tables', () => {
       expect(() => assertTableAllowed('locations')).not.toThrow();
       expect(() => assertTableAllowed('documents')).not.toThrow();
       expect(() => assertTableAllowed('participation')).not.toThrow();
       expect(() => assertTableAllowed('mapButtons')).not.toThrow();
     });
 
-    it('throws with code INVALID_TABLE for non-editable tables', () => {
+    it('throws with code INVALID_TABLE for users (direct endpoint, not approval workflow)', () => {
       expect(() => assertTableAllowed('users')).toThrowError('Invalid table name');
       try {
         assertTableAllowed('users');
@@ -151,6 +159,27 @@ describe('tableMetadata', () => {
       );
       expect(editButton).toBeDefined();
     });
+
+    it('does not expose email_send_requests below privilege level 4', () => {
+      const request = { session: { user: 'charlie', privileges: 3 } };
+      const tables = getTablesForUser(request);
+      expect(tables.email_send_requests).toBeUndefined();
+    });
+
+    it('includes email_send_requests for privilege level 4', () => {
+      const request = { session: { user: 'admin', privileges: 4 } };
+      const tables = getTablesForUser(request);
+      expect(tables.email_send_requests).toBeDefined();
+
+      const subjectColumn = tables.email_send_requests.columns.find(column => column.name === 'subject');
+      expect(subjectColumn).toBeDefined();
+      expect(subjectColumn.jsonPath).toBe('$.subject');
+
+      const reviewButton = tables.email_send_requests.columns.find(
+        column => column.button === 'review' && column.onClickFunction === 'openEmailRequestReviewModal',
+      );
+      expect(reviewButton).toBeDefined();
+    });
   });
 
   describe('getNavigationMenuForUser', () => {
@@ -193,6 +222,14 @@ describe('tableMetadata', () => {
       const menu = getNavigationMenuForUser(request);
       const labels = menu.map(item => item.label);
       expect(labels).toContain('Manage Users');
+      expect(labels).toContain('Email Approvals');
+    });
+
+    it('does not include Email Approvals below privilege level 4', () => {
+      const request = { session: { user: 'charlie', privileges: 3 } };
+      const menu = getNavigationMenuForUser(request);
+      const labels = menu.map(item => item.label);
+      expect(labels).not.toContain('Email Approvals');
     });
 
     it('includes My Profile and UBHubber Resources for authenticated users', () => {

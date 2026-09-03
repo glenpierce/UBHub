@@ -24,6 +24,12 @@ router.post('/', async function (req, res) {
     const userRow = rows[0];
     const hashedPassword = userRow.hashedPassword;
 
+    // Contacts (privileges = 0) have no password and cannot authenticate.
+    if (!hashedPassword) {
+      console.log('Login rejected: no password set for user (Contact-level account)', userRow.email || '');
+      return res.redirect('/login');
+    }
+
     bcrypt.compare(req.body.password, hashedPassword, function (error, result) {
       if (error) {
         console.error('error occurred:', error);

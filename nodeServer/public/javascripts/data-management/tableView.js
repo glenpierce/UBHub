@@ -25,8 +25,9 @@ export class TableView {
     this.columnPickerElement = document.querySelector(this.selectors.columnPicker);
     this.columnFilterInputElement = document.querySelector(this.selectors.columnFilter);
     this.clearFiltersButtonElement = document.querySelector(this.selectors.clearFilters);
+    this.emailListButtonElement = document.querySelector('#emailListButton');
 
-    this.allowedAddTables = new Set(['mapButtons', 'locations', 'documents', 'participation']);
+    this.allowedAddTables = new Set(['mapButtons', 'locations', 'documents', 'participation', 'users']);
 
     this.filterContainers = {
       globalSearchContainer: document.querySelector('.globalSearchContainer'),
@@ -74,6 +75,14 @@ export class TableView {
     if (!this.addButtonElement) return;
     const shouldShow = tableName && this.allowedAddTables.has(tableName);
     this.addButtonElement.style.display = shouldShow ? '' : 'none';
+    // Update button label to reflect what is being created
+    if (shouldShow) {
+      this.addButtonElement.textContent = tableName === 'users' ? 'Create Contact' : 'Add New Entry';
+    }
+    // Show the Email List button only for the users table
+    if (this.emailListButtonElement) {
+      this.emailListButtonElement.style.display = (tableName === 'users') ? '' : 'none';
+    }
   }
 
   renderNavMenu() {
@@ -111,6 +120,12 @@ export class TableView {
       this.addButtonElement.addEventListener('click', () => {
         if (!this.manager.selectedTable) { alert('Please select a table first.'); return; }
         this.manager.modalManager.open('add', this.manager.selectedTable);
+      });
+    }
+
+    if (this.emailListButtonElement) {
+      this.emailListButtonElement.addEventListener('click', () => {
+        this.manager.modalManager && this.manager.modalManager.openEmailList();
       });
     }
 

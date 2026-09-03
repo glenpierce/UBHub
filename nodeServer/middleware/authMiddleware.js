@@ -1,8 +1,12 @@
 /**
  * Reusable Express middleware for authentication and role-based authorization.
  *
- * Privilege levels follow the existing convention:
- *   2 = contributor, 3 = approver, 4 = executive.
+ * Privilege levels:
+ *   0 = Contact (no password, cannot authenticate)
+ *   1 = User    (authenticated, read-only access)
+ *   2 = Contributor
+ *   3 = Approver
+ *   4 = Executive
  */
 
 /**

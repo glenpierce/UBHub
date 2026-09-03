@@ -5,10 +5,11 @@ import { Typeahead } from './typeahead.js';
 
 export function initializeDataManagement(config = window.dataManagementConfigFromServer || {}) {
   const tables = config.tablesForUser || {};
+  const editableColumns = config.editableColumns || {};
   const navigationMenu = config.navMenu || [];
   const currentUser = config.user || null;
 
-  const tableManager = new TableManager({tables, navMenu: navigationMenu});
+  const tableManager = new TableManager({tables, editableColumns, navMenu: navigationMenu});
   tableManager.currentUser = currentUser;
   const tableView = new TableView(tableManager);
   const modalManager = new ModalManager(tableManager);
@@ -28,6 +29,14 @@ export function initializeDataManagement(config = window.dataManagementConfigFro
   };
 
   window.__dataManagement = {tableManager, tableView, modalManager};
+
+  // Ensure modal manager cleans up listeners when the page is unloaded to avoid
+  // dangling handlers in long-running single-page flows or when navigating away.
+  try {
+    window.addEventListener('beforeunload', () => {
+      try { if (modalManager && typeof modalManager.destroy === 'function') modalManager.destroy(); } catch (_) {}
+    });
+  } catch (err) { /* ignore */ }
 
   tableView.renderNavMenu();
 

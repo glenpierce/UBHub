@@ -1,23 +1,40 @@
-CREATE TABLE users(
+-- Privilege levels: 0 = Contact (no password), 1 = User, 2 = Contributor, 3 = Approver, 4 = Executive
+CREATE TABLE IF NOT EXISTS users(
     email VARCHAR(255) NOT NULL,
     userAddress TEXT,
-    hashedPassword CHAR(255) not null,
-    alias VARCHAR(255) NOT NULL, #name
-    privileges INT,
+    hashedPassword CHAR(255), -- NULL for Contact-level users (privileges = 0); NOT NULL for authenticated users (privileges >= 1)
+    alias VARCHAR(255) NOT NULL, -- display name
+    privileges INT DEFAULT 0, -- 0 = Contact, 1 = User, 2 = Contributor, 3 = Approver, 4 = Executive
     lastActive DATE,
     region VARCHAR(255),
     title VARCHAR(255),
     institution VARCHAR(255),
     status VARCHAR(255),
-    assignedSite VARCHAR(255), # assignedSites
+    assignedSite VARCHAR(255), -- assignedSites
     whatsAppNumber VARCHAR(20),
     primaryContact VARCHAR(255),
     notes TEXT,
+    phone VARCHAR(64),
+    workingGroup VARCHAR(255),
+    level VARCHAR(255), -- contact engagement level (e.g. "Observer", "Senior Member")
+    createdBy VARCHAR(255),
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (email),
-    UNIQUE INDEX (email)
+    UNIQUE INDEX (email),
+    INDEX idx_users_alias (alias(255))
 );
 
-CREATE TABLE locations (
+CREATE TABLE IF NOT EXISTS mapButtons (
+    part_name VARCHAR(255) CHARACTER SET utf8,
+    button_category VARCHAR(255) CHARACTER SET utf8,
+    button_link VARCHAR(255) CHARACTER SET utf8,
+    button_text VARCHAR(255) CHARACTER SET utf8,
+    button_image VARCHAR(255) CHARACTER SET utf8,
+    marker_colors_by VARCHAR(255) CHARACTER SET utf8,
+    marker_colors VARCHAR(255) CHARACTER SET utf8
+);
+
+CREATE TABLE IF NOT EXISTS locations (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     inst_address VARCHAR(255) CHARACTER SET utf8,
     lat NUMERIC(10, 7),
@@ -37,7 +54,7 @@ CREATE TABLE locations (
     conservation_status_wwf VARCHAR(255) CHARACTER SET utf8
 );
 
-CREATE TABLE programs(
+CREATE TABLE IF NOT EXISTS programs(
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     programName VARCHAR(2048) CHARACTER SET utf8,
     description VARCHAR(2048) CHARACTER SET utf8,
@@ -48,7 +65,7 @@ CREATE TABLE programs(
     iconFileName VARCHAR(255)
 );
 
-CREATE TABLE documents (
+CREATE TABLE IF NOT EXISTS documents (
     id INT,
     inst_id INT,
     doc_type VARCHAR(255) CHARACTER SET utf8,
@@ -60,7 +77,7 @@ CREATE TABLE documents (
     link_verified VARCHAR(255) CHARACTER SET utf8
 );
 
-CREATE TABLE participation (
+CREATE TABLE IF NOT EXISTS participation (
     id INT,
     inst_id INT,
     part_category VARCHAR(255) CHARACTER SET utf8,
@@ -97,11 +114,33 @@ CREATE TABLE IF NOT EXISTS row_versions (
     KEY idx_row_versions_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-#createUser procedure
+CREATE TABLE IF NOT EXISTS email_send_requests (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    requested_by VARCHAR(255) NOT NULL,
+    status ENUM('pending','approved','rejected','sent') NOT NULL DEFAULT 'pending',
+    data JSON NOT NULL, -- { subject, htmlBody, recipients: [...], recipientCount, filterCriteria }
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    approved_by VARCHAR(255) DEFAULT NULL,
+    approved_at DATETIME DEFAULT NULL,
+    sent_at DATETIME DEFAULT NULL,
+    notes TEXT DEFAULT NULL,
+    PRIMARY KEY (id),
+    KEY idx_email_send_requests_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+#createUser procedure – creates an authenticated user with privileges = 1 (User)
 create
     definer = root@`%` procedure createUser(IN emailInput varchar(255), IN passwordHash varchar(255), IN alias varchar(255), IN userAddress varchar(2000), IN title varchar(255), IN institution varchar(255), whatsAppNumber varchar(20))
 BEGIN
-    insert into users (email, hashedPassword, alias, userAddress, title, institution, whatsAppNumber) values(emailInput, passwordHash, alias, userAddress, title, institution, whatsAppNumber);
+    insert into users (email, hashedPassword, alias, userAddress, title, institution, whatsAppNumber, privileges) values(emailInput, passwordHash, alias, userAddress, title, institution, whatsAppNumber, 1);
+END;
+
+#createContact procedure – creates a Contact (privileges = 0) with no password
+create
+    definer = root@`%` procedure createContact(IN emailInput varchar(255), IN aliasInput varchar(255), IN phoneInput varchar(64), IN titleInput varchar(255), IN institutionInput varchar(512), IN regionInput varchar(255), IN levelInput varchar(255), IN workingGroupInput varchar(255), IN createdByInput varchar(255))
+BEGIN
+    insert into users (email, alias, phone, title, institution, region, level, workingGroup, createdBy, privileges)
+    values(emailInput, aliasInput, phoneInput, titleInput, institutionInput, regionInput, levelInput, workingGroupInput, createdByInput, 0);
 END;
 
 #login procedure
@@ -112,3 +151,11 @@ BEGIN
     FROM users
     WHERE email = emailInput;
 END;
+
+# Schema migrations – run once against any database created before the Contacts-to-users branch.
+ALTER TABLE users ADD COLUMN phone VARCHAR(64);
+ALTER TABLE users ADD COLUMN workingGroup VARCHAR(255);
+ALTER TABLE users ADD COLUMN level VARCHAR(255);
+ALTER TABLE users ADD COLUMN createdBy VARCHAR(255);
+ALTER TABLE users ADD COLUMN createdAt DATETIME DEFAULT CURRENT_TIMESTAMP;
+

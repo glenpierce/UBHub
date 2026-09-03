@@ -52,6 +52,29 @@ describe('queryBuilder', () => {
       expect(result.parameters).toEqual([]);
     });
 
+    it('builds a JSON_EXTRACT expression for a plain jsonPath column (no crossReferenceTable)', () => {
+      const result = buildTableDataQuery({
+        tableName: 'email_send_requests',
+        serverMeta: {
+          columns: [
+            { name: 'id', visible: false },
+            { name: 'subject', jsonPath: '$.subject', label: 'Subject', visible: true },
+            { name: 'recipientCount', jsonPath: '$.recipientCount', label: 'Recipients', visible: true },
+          ],
+        },
+      });
+
+      expect(result.sql).toContain('`email_send_requests`.`id` AS `id`');
+      expect(result.sql).toContain(
+        "JSON_UNQUOTE(JSON_EXTRACT(`email_send_requests`.`data`, '$.subject')) AS `subject`",
+      );
+      expect(result.sql).toContain(
+        "JSON_UNQUOTE(JSON_EXTRACT(`email_send_requests`.`data`, '$.recipientCount')) AS `recipientCount`",
+      );
+      expect(result.sql).toContain('FROM `email_send_requests`');
+      expect(result.parameters).toEqual([]);
+    });
+
     it('builds a LEFT JOIN for a cross-reference column with plain lookup', () => {
       const result = buildTableDataQuery({
         tableName: 'documents',

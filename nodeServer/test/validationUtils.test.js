@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   coerceToInteger,
   isNonEmptyString,
+  isValidEmailAddress,
   isValidOperation,
   isValidReviewDecision,
   normalizeComments,
@@ -146,6 +147,35 @@ describe('validationUtils', () => {
 
     it('returns false for null', () => {
       expect(isValidReviewDecision(null)).toBe(false);
+    });
+  });
+
+  describe('isValidEmailAddress', () => {
+    it('returns true for a plausible email address', () => {
+      expect(isValidEmailAddress('user@example.com')).toBe(true);
+    });
+
+    it('returns true for an address with a subdomain and plus-addressing', () => {
+      expect(isValidEmailAddress('user+tag@mail.example.co')).toBe(true);
+    });
+
+    it('returns false for a bare placeholder value with no @ or domain', () => {
+      expect(isValidEmailAddress('contact01')).toBe(false);
+    });
+
+    it('returns false for a value missing the domain TLD', () => {
+      expect(isValidEmailAddress('user@localhost')).toBe(false);
+    });
+
+    it('returns false for a value with spaces', () => {
+      expect(isValidEmailAddress('user name@example.com')).toBe(false);
+    });
+
+    it('returns false for empty string, null, undefined, and non-strings', () => {
+      expect(isValidEmailAddress('')).toBe(false);
+      expect(isValidEmailAddress(null)).toBe(false);
+      expect(isValidEmailAddress(undefined)).toBe(false);
+      expect(isValidEmailAddress(42)).toBe(false);
     });
   });
 

@@ -23,7 +23,8 @@ html
           h1#tableTitle
           if user
             span#userAlias.userAlias Hello, #{user}
-          button.primary#addButton(onclick="addNewEntry()") Add New Entry
+          button.primary#addButton(onclick="addNewEntry()" style="display:none") Add New Entry
+          button.secondary#emailListButton(style="display:none") Email List
 
       div.globalSearchContainer
         input#globalSearch.dataManagementInput(type="text", placeholder="Global search...")
@@ -82,21 +83,27 @@ html
         div.userNameContainer #{username}
         div.profileEditEntryFieldContainer
           label(for="alias") Account name
+          button.help-icon(type="button" data-help-key="profile.alias" aria-label="Help for Account name") ?
           input(type="text" id="alias" name="alias" class="dataManagementInput")
         div.profileEditEntryFieldContainer
           label(for="userAddress") Address
+          button.help-icon(type="button" data-help-key="profile.userAddress" aria-label="Help for Address") ?
           input(type="text" id="userAddress" name="userAddress" class="dataManagementInput")
         div.profileEditEntryFieldContainer
           label(for="title") Title
+          button.help-icon(type="button" data-help-key="profile.title" aria-label="Help for Title") ?
           input(type="text" id="title" name="title" class="dataManagementInput")
         div.profileEditEntryFieldContainer
           label(for="institution") Institution
+          button.help-icon(type="button" data-help-key="profile.institution" aria-label="Help for Institution") ?
           input(type="text" id="institution" name="institution" class="dataManagementInput")
         div.profileEditEntryFieldContainer
           label(for="whatsAppNumber") WhatsApp number
+          button.help-icon(type="button" data-help-key="profile.whatsAppNumber" aria-label="Help for WhatsApp number") ?
           input(type="text" id="whatsAppNumber" name="whatsAppNumber" class="dataManagementInput")
         div.profileEditEntryFieldContainer
           label(for="primaryContact") Primary contact
+          button.help-icon(type="button" data-help-key="profile.primaryContact" aria-label="Help for Primary contact") ?
           input(type="text" id="primaryContact" name="primaryContact" class="dataManagementInput")
       .modal-actions
         button(type="button", onclick="closeMyProfileModalFunction()") Close
@@ -115,3 +122,96 @@ html
       input(type="password" id="confirmNewPassword" class="dataManagementInput profileEditEntryFieldContainer")
       div.modal-actions
         button.button-margin(onclick="changePassword()") Change password
+
+// Modal overlay for generating filtered email lists from the Users table
+.modal-overlay#modalOverlayEmailList.hidden
+  .modal(id="modalContainerEmailList")
+    h2.modal-title Email List
+    .profileEditEntryFieldContainer
+      label(for='emailListRegions') Region
+      select#emailListRegions.dataManagementInput(multiple size='9')
+        option(value='NA') NA: Canada, US, and Israel
+        option(value='LA') LA: Latin America
+        option(value='CAR') CAR: Caribbean and Pacific Islands
+        option(value='MECNA') MECNA: Middle East, Central Asia, and Northern Asia
+        option(value='AF') AF: Africa
+        option(value='ESA') ESA: East and South East Asia
+        option(value='SA') SA: Southern Asia
+        option(value='EU') EU: Europe
+        option(value='OC') OC: Oceania
+    .profileEditEntryFieldContainer
+      label(for='emailListInstitution') Institution contains
+      input#emailListInstitution.dataManagementInput(type='text' placeholder='e.g. Zoo')
+    .profileEditEntryFieldContainer
+      label(for='emailListTitle') Title contains
+      input#emailListTitle.dataManagementInput(type='text' placeholder='e.g. Director')
+    .profileEditEntryFieldContainer
+      label(for='emailListWorkingGroup') Working Group contains
+      input#emailListWorkingGroup.dataManagementInput(type='text' placeholder='e.g. Education')
+    .profileEditEntryFieldContainer
+      label(for='emailListLevel') Level (exact match)
+      input#emailListLevel.dataManagementInput(type='text' placeholder='e.g. Senior')
+    .profileEditEntryFieldContainer
+      label(for='emailListPrivileges') Role (exact match)
+      select#emailListPrivileges.dataManagementInput
+        option(value='') Any role
+        option(value='0') 0: Contact
+        option(value='1') 1: Contributor
+        option(value='2') 2: Approver
+        option(value='3') 3: Admin
+        option(value='4') 4: Executive
+    .profileEditEntryFieldContainer
+      label(for='emailListSubject') Email subject
+      input#emailListSubject.dataManagementInput(type='text' placeholder='Subject line')
+    .profileEditEntryFieldContainer
+      label(for='emailListHtmlBody') Email content
+      .richTextEditorContainer
+        .richTextToolbar#emailListRichTextToolbar(role='toolbar' aria-label='Text formatting')
+          button.richTextButton(type='button' data-rt-command='bold' title='Bold' aria-label='Bold')
+            b B
+          button.richTextButton(type='button' data-rt-command='italic' title='Italic' aria-label='Italic')
+            i I
+          button.richTextButton(type='button' data-rt-command='underline' title='Underline' aria-label='Underline')
+            u U
+          button.richTextButton(type='button' data-rt-command='insertUnorderedList' title='Bullet list' aria-label='Bullet list') •&nbsp;List
+          button.richTextButton(type='button' data-rt-command='insertOrderedList' title='Numbered list' aria-label='Numbered list') 1.&nbsp;List
+          button.richTextButton(type='button' data-rt-command='createLink' title='Insert link' aria-label='Insert link') Link
+          button.richTextButton(type='button' data-rt-command='removeFormat' title='Clear formatting' aria-label='Clear formatting') Clear
+        div#emailListHtmlBody.dataManagementInput.richTextEditor(contenteditable='true' role='textbox' aria-multiline='true' aria-label='Email content' data-placeholder='Write the email content...')
+    .smallText
+      span Recipient count: &nbsp;
+      span#emailListCount 0
+    .modal-actions
+      button(type='button' id='closeEmailListButton') Close
+      button.secondary(type='button' id='generateEmailListButton') Preview Recipient Count
+      button.primary(type='button' id='requestEmailScheduleButton') Request Email be Scheduled
+
+// Modal overlay for Executives to review a pending email send request (Approve / Reject).
+// Deliberately separate from modalOverlayReview: this data isn't a row_versions
+// current-vs-pending diff, it's a subject/recipient-count/HTML-body request.
+.modal-overlay#modalOverlayEmailRequestReview.hidden
+  .modal(id="modalContainerEmailRequestReview")
+    h2.modal-title Review Email Request
+    .profileEditEntryFieldContainer
+      label Requested by
+      span#emailRequestReviewRequestedBy
+    .profileEditEntryFieldContainer
+      label Requested at
+      span#emailRequestReviewCreatedAt
+    .profileEditEntryFieldContainer
+      label Subject
+      span#emailRequestReviewSubject
+    .profileEditEntryFieldContainer
+      label Recipient count
+      span#emailRequestReviewRecipientCount
+    .profileEditEntryFieldContainer
+      label Content preview
+      iframe#emailRequestReviewPreview(sandbox='' style='width:100%;height:300px;border:1px solid #ccc;background:#fff;')
+    .profileEditEntryFieldContainer
+      label(for='emailRequestReviewComments') Comments
+      textarea#emailRequestReviewComments.dataManagementInput(rows='3' placeholder='Optional review comments')
+    .modal-actions
+      button(type='button' id='closeEmailRequestReviewButton') Cancel
+      button(type='button' id='approveEmailRequestButton') Approve
+      button(type='button' id='rejectEmailRequestButton') Reject
+

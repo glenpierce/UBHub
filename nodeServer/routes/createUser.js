@@ -98,8 +98,10 @@ function setUserPrivileges(normalizedEmail) {
   }
 
   const privileges = preApprovedUser[normalizedEmail];
-  if (!privileges && privileges !== 0) {
-    console.log('Email is not on the pre approval list, skipping setting permissions for user: ', normalizedEmail);
+  // Only promote above the default User level (1); level 0 is reserved for Contacts created
+  // without a password and should not be assigned here.
+  if (privileges == null || privileges < 2) {
+    console.log('Email is not on the pre approval list for elevated privileges, skipping for user: ', normalizedEmail);
     return;
   }
 
