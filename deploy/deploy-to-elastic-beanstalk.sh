@@ -14,6 +14,8 @@
 #   AWS_PROFILE          AWS CLI profile to use               (optional)
 #   EB_S3_BUCKET         bucket for bundles (optional; defaults to Elastic
 #                        Beanstalk's own elasticbeanstalk-<region>-<account>)
+#   EB_S3_KEY_PREFIX     folder in the bucket for bundles (optional; defaults
+#                        to "<EB_APPLICATION_NAME>/")
 #
 # Usage: deploy/deploy-to-elastic-beanstalk.sh [--dry-run] (--latest | nodeServer/.appArchives/app-<N>.zip)
 #   --latest   deploy the highest-numbered app-<N>.zip (nodeServer/.appArchives or nodeServer/)
@@ -58,7 +60,7 @@ done
 if [ -f "$settings_file" ]; then
   while IFS='=' read -r setting_name setting_value || [ -n "$setting_name" ]; do
     case "$setting_name" in
-      EB_APPLICATION_NAME|EB_ENVIRONMENT_NAME|AWS_REGION|AWS_PROFILE|EB_S3_BUCKET)
+      EB_APPLICATION_NAME|EB_ENVIRONMENT_NAME|AWS_REGION|AWS_PROFILE|EB_S3_BUCKET|EB_S3_KEY_PREFIX)
         setting_value="${setting_value%\"}"
         setting_value="${setting_value#\"}"
         if [ -z "${!setting_name:-}" ] && [ -n "$setting_value" ]; then
@@ -135,9 +137,20 @@ query_aws() {
   aws --region "$AWS_REGION" "$@"
 }
 
+# Recent Elastic Beanstalk events for this application (they explain most failures).
+show_recent_events() {
+  echo "Recent Elastic Beanstalk events for $EB_APPLICATION_NAME:" >&2
+  aws --region "$AWS_REGION" elasticbeanstalk describe-events \
+    --application-name "$EB_APPLICATION_NAME" --max-items 15 \
+    --query 'Events[].[EventDate,Severity,Message]' --output text >&2 || true
+}
+
 if [ "$dry_run" = false ]; then
   command -v aws >/dev/null || fail "The AWS CLI (v2) is not installed."
 fi
+
+# AWS CLI v2 pipes output through a pager by default; never pause a script on it.
+export AWS_PAGER=""
 
 # --- 1. Confirm target ------------------------------------------------------------
 
@@ -147,6 +160,18 @@ current_version_label="$(query_aws "<current-version>" elasticbeanstalk describe
   --query 'Environments[0].VersionLabel' --output text)"
 [ "$current_version_label" != "None" ] || fail "Environment $EB_ENVIRONMENT_NAME not found in application $EB_APPLICATION_NAME."
 [ "$current_version_label" != "$version_label" ] || fail "$EB_ENVIRONMENT_NAME is already running $version_label. Build a new bundle first."
+
+# DescribeApplicationVersions returns an empty list (not an error) when the caller
+# lacks IAM permission to read versions, which is indistinguishable from "does not
+# exist". The running version certainly exists, so if it can't be seen, stop now.
+readable_running_version="$(query_aws "$current_version_label" elasticbeanstalk describe-application-versions \
+  --application-name "$EB_APPLICATION_NAME" --version-labels "$current_version_label" \
+  --query 'ApplicationVersions[0].VersionLabel' --output text)"
+if [ "$readable_running_version" != "$current_version_label" ]; then
+  fail "This AWS identity can't read application versions (the running version $current_version_label is invisible to it).
+       Grant elasticbeanstalk:DescribeApplicationVersions, e.g. attach the managed policy
+       AdministratorAccess-AWSElasticBeanstalk, then re-run. Nothing was uploaded or deployed."
+fi
 
 # The app is built and tested against the Node.js 24 platform (see nodeServer/Dockerfile).
 expected_platform="Node.js 24"
@@ -177,7 +202,7 @@ if [ "$dry_run" = false ]; then
   [ "$confirmation" = "$EB_ENVIRONMENT_NAME" ] || fail "Confirmation did not match; nothing was deployed."
 fi
 
-# --- 2. Upload to S3 --------------------------------------------------------------
+# --- 2. Upload to S3 and register the version ---------------------------------------
 
 if [ -n "${EB_S3_BUCKET:-}" ]; then
   bundle_bucket="$EB_S3_BUCKET"
@@ -186,30 +211,68 @@ else
   bundle_bucket="$(query_aws "elasticbeanstalk-$AWS_REGION-<account-id>" elasticbeanstalk create-storage-location \
     --query S3Bucket --output text)"
 fi
-bundle_key="$EB_APPLICATION_NAME/$version_label.zip"
+# Keep bundles in a folder rather than the top level of the bucket.
+bundle_key_prefix="${EB_S3_KEY_PREFIX:-$EB_APPLICATION_NAME/}"
+case "$bundle_key_prefix" in
+  */) ;;
+  *) bundle_key_prefix="$bundle_key_prefix/" ;;
+esac
+bundle_key="$bundle_key_prefix$version_label.zip"
 
-run_aws s3 cp "$bundle_path" "s3://$bundle_bucket/$bundle_key" --only-show-errors
+# A previous run may already have registered this version (for example if it
+# stopped while waiting). Reuse it rather than failing on "already exists".
+existing_version_status="$(query_aws "None" elasticbeanstalk describe-application-versions \
+  --application-name "$EB_APPLICATION_NAME" --version-labels "$version_label" \
+  --query 'ApplicationVersions[0].Status' --output text)"
 
-# --- 3. Register the application version -------------------------------------------
+case "$existing_version_status" in
+  None)
+    run_aws s3 cp "$bundle_path" "s3://$bundle_bucket/$bundle_key" --only-show-errors
 
-run_aws elasticbeanstalk create-application-version \
-  --application-name "$EB_APPLICATION_NAME" \
-  --version-label "$version_label" \
-  --description "$version_description" \
-  --source-bundle "S3Bucket=$bundle_bucket,S3Key=$bundle_key" \
-  --process \
-  --output text --query 'ApplicationVersion.Status'
+    # --- 3. Register the application version -------------------------------------
+    created_version_status="$(run_aws elasticbeanstalk create-application-version \
+      --application-name "$EB_APPLICATION_NAME" \
+      --version-label "$version_label" \
+      --description "$version_description" \
+      --source-bundle "S3Bucket=$bundle_bucket,S3Key=$bundle_key" \
+      --process \
+      --output text --query 'ApplicationVersion.Status')"
+    if [ "$dry_run" = false ]; then
+      echo "Registered $version_label (status: ${created_version_status:-<no response>})"
+    fi
+    ;;
+  FAILED)
+    show_recent_events
+    fail "$version_label already exists with status FAILED. Delete it (console: Application versions) or build a new bundle."
+    ;;
+  *)
+    echo "$version_label is already registered (status: $existing_version_status); reusing it."
+    ;;
+esac
 
 # --process validates the bundle asynchronously; wait until it is PROCESSED.
 if [ "$dry_run" = false ]; then
   echo "Waiting for Elastic Beanstalk to process $version_label..."
+  consecutive_not_found_count=0
   for attempt in $(seq 1 60); do
     version_status="$(aws --region "$AWS_REGION" elasticbeanstalk describe-application-versions \
       --application-name "$EB_APPLICATION_NAME" --version-labels "$version_label" \
       --query 'ApplicationVersions[0].Status' --output text)"
+    echo "  status: $version_status"
     case "$version_status" in
       PROCESSED) break ;;
-      FAILED) fail "Elastic Beanstalk rejected the bundle (status FAILED). Check the Events tab in the console." ;;
+      FAILED)
+        show_recent_events
+        fail "Elastic Beanstalk rejected the bundle (status FAILED); see the events above."
+        ;;
+      None)
+        consecutive_not_found_count=$((consecutive_not_found_count + 1))
+        if [ "$consecutive_not_found_count" -ge 6 ]; then
+          show_recent_events
+          fail "$version_label does not exist in application $EB_APPLICATION_NAME ($AWS_REGION); see the events above."
+        fi
+        ;;
+      *) consecutive_not_found_count=0 ;;
     esac
     [ "$attempt" -lt 60 ] || fail "Timed out waiting for $version_label to be processed (status $version_status)."
     sleep 5
