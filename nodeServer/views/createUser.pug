@@ -94,11 +94,8 @@ body
   div.createUsercontainer
     div.createUserNotice Please create a new user below. Note that only pre-approved users are permitted to register during  our alpha development phase.
 
-  form.createUserForm(id="emailForm" name="emailForm", method="post" onsubmit="submitForm()")
-    div.entryLine
-      div.entryLineItem
-        div.entryLabel Name
-        input.entryInput(name="alias" type="text")
+  form.createUserForm(id="emailForm" name="emailForm", method="post" onsubmit="submitForm()" data-combine-name-fields)
+    +splitNameFields()
     div.entryLine
       div.entryLineItem
         div.entryLabel Title

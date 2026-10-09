@@ -29,9 +29,10 @@ describe('signup view', () => {
   it('re-fills submitted values and escapes the error message', () => {
     const html = renderSignupView({
       errorMessage: '<script>bad</script>',
-      formValues: { alias: 'Pat', email: 'pat@example.org', region: ['EU'] },
+      formValues: { firstName: 'Pat', lastName: 'Person', alias: 'Pat Person', email: 'pat@example.org', region: ['EU'] },
     });
-    expect(html).toContain('value="Pat"');
+    expect(html).toMatch(/id="firstName"[^>]*value="Pat"/);
+    expect(html).toMatch(/id="lastName"[^>]*value="Person"/);
     expect(html).toContain('value="pat@example.org"');
     expect(html).toContain('<option value="EU" selected');
     expect(html).not.toContain('<script>bad</script>');

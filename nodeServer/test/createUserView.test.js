@@ -25,4 +25,13 @@ describe('createUser view', () => {
     expect(html).toContain('const errorMessageFromServer = "Bad \\u003c/script>\\u003cscript>alert(1)"');
     expect(html).not.toContain('</script><script>alert(1)');
   });
+
+  it('shows first and last name fields that are combined into alias on submit', () => {
+    const html = renderCreateUserView();
+    expect(html).toContain('data-combine-name-fields');
+    expect(html).toMatch(/<input[^>]*id="firstName"[^>]*required/);
+    expect(html).toMatch(/<input[^>]*id="lastName"[^>]*required/);
+    expect(html).toContain('<input type="hidden" name="alias">');
+    expect(html).toContain('src="/javascripts/nameFields.js"');
+  });
 });

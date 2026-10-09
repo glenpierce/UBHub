@@ -97,11 +97,8 @@ body
         div.signupError(role='alert')= errorMessage
 
   if !submitted
-    form.signupForm(method='post' action='/signup')
-      div.entryLine
-        div.entryLineItem
-          label.entryLabel(for='alias') Name *
-          input.entryInput#alias(name='alias' type='text' required maxlength='255' autocomplete='name' value=formValues.alias)
+    form.signupForm(method='post' action='/signup' data-combine-name-fields)
+      +splitNameFields(formValues)
       div.entryLine
         div.entryLineItem
           label.entryLabel(for='email') Email *

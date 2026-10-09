@@ -120,3 +120,22 @@ mixin privacyNotice(purpose)
     label(style="display:flex; gap:8px; align-items:flex-start; cursor:pointer;")
       input(type='checkbox' name='privacyConsent' value='yes' required style="margin-top:3px;")
       span I agree to UBHub storing and using my information as described above.
+
+//- "First name" / "Last name" inputs that public/javascripts/nameFields.js joins into
+//- the hidden `alias` input on submit (the server only stores one name). Put
+//- `data-combine-name-fields` on the enclosing form. Both parts are required in
+//- the browser (product requirement); the server still only sees `alias`. Each
+//- part is capped at 127 characters so the combined name fits the 255-character
+//- alias column.
+mixin splitNameFields(values)
+  - const nameValues = values || {}
+  div.entryLine
+    div.entryLineItem
+      label.entryLabel(for='firstName') First name *
+      input.entryInput#firstName(name='firstName' data-name-part='first' type='text' required maxlength='127' autocomplete='given-name' value=nameValues.firstName)
+  div.entryLine
+    div.entryLineItem
+      label.entryLabel(for='lastName') Last name *
+      input.entryInput#lastName(name='lastName' data-name-part='last' type='text' required maxlength='127' autocomplete='family-name' value=nameValues.lastName)
+  input(type='hidden' name='alias')
+  script(type='module' src='/javascripts/nameFields.js')
