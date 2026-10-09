@@ -78,8 +78,9 @@ jobs:
           export default config;
           EOF
 
-      # Docker Hub requests from GitHub runners occasionally time out. Pull the
-      # images up front with retries so one network blip doesn't fail the run.
+      # Images come from public.ecr.aws (AWS's mirror of Docker's official images),
+      # not Docker Hub, whose auth server times out from GitHub runners. Pull them
+      # up front with retries so one network blip doesn't fail the run.
       - name: Pull images (with retries)
         run: |
           base_image="$(grep -m1 '^FROM ' nodeServer/Dockerfile | awk '{print $2}')"

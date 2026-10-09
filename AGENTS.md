@@ -29,7 +29,9 @@ docker compose -f docker-compose.local.yml logs -f --tail=200 node
 If Docker is not available, stop and say so. Do not fall back to host Node.
 
 Runtime: Node 24.21.0 with npm 11.19.0 (`node:24.21.0-bookworm-slim`, see
-`nodeServer/Dockerfile`). This matches the production Elastic Beanstalk platform,
+`nodeServer/Dockerfile`). Base images are pulled from `public.ecr.aws/docker/library/`,
+AWS's mirror of Docker's official images, rather than Docker Hub, whose login
+service times out from GitHub Actions. This matches the production Elastic Beanstalk platform,
 Node.js 24 on Amazon Linux 2023. When AWS ships a new platform version, update the
 image tag and `engines` in `package.json` together. Dependencies
 are pinned to exact versions in `nodeServer/package.json`; never add wildcard or range

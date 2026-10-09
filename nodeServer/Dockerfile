@@ -1,6 +1,9 @@
 # Matches the production Elastic Beanstalk platform "Node.js 24 AL2023" (v6.11.10):
 # Node 24.21.0 with npm 11.19.0. Keep in sync with "engines" in package.json.
-FROM node:24.21.0-bookworm-slim
+# Pulled from AWS's mirror of Docker's official images (identical digests to Docker
+# Hub's node:24.21.0-bookworm-slim), which needs no Docker Hub login: Docker Hub's
+# auth server has repeatedly timed out from GitHub Actions runners.
+FROM public.ecr.aws/docker/library/node:24.21.0-bookworm-slim
 
 # Optional build-time flag to install build tools (set to 1 when native modules or git deps are required)
 ARG INSTALL_BUILD_TOOLS=0

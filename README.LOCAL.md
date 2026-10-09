@@ -102,7 +102,7 @@ Notes and troubleshooting
 
 - node_modules volume: the compose file mounts `nodeServer/` and uses a named volume for `node_modules`, so `npm ci` and module installs happen inside the container and do not modify the host. This keeps the host free of the installed dependencies for better isolation.
 
-- Engine versions: `nodeServer/Dockerfile` uses `node:24.21.0-bookworm-slim` (Node 24.21.0, npm 11.19.0) to match the production Elastic Beanstalk platform (Node.js 24 on Amazon Linux 2023) and the `engines` field in `nodeServer/package.json`. Change all three together.
+- Engine versions: `nodeServer/Dockerfile` uses `node:24.21.0-bookworm-slim` from AWS's public mirror of Docker's official images (`public.ecr.aws/docker/library/`; Node 24.21.0, npm 11.19.0) to match the production Elastic Beanstalk platform (Node.js 24 on Amazon Linux 2023) and the `engines` field in `nodeServer/package.json`. Change all three together.
 
 Useful commands
 
