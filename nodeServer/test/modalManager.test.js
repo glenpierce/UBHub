@@ -196,39 +196,56 @@ describe('ModalManager', () => {
     expect(document.getElementById('modalOverlayReview').classList.contains('hidden')).toBe(true)
   })
 
-  it('handles add submit via _onSubmit and posts payload', async () => {
-    const apiClientMock = { post: vi.fn().mockResolvedValue({}) }
-    managerMock.selectedTable = 'users'
-    managerMock.getPrimaryKeyForSelectedTable.mockReturnValue({ id: 0 })
-
-    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
-
-    // add two inputs to modalForm
-    const input1 = createElementWithId('input', 'name')
-    input1.setAttribute('data-col-name', 'name')
-    input1.value = 'Bob'
-    const input2 = createElementWithId('input', 'email')
-    input2.setAttribute('data-col-name', 'email')
-    input2.value = 'bob@example.com'
-    document.getElementById('modalForm').appendChild(input1)
-    document.getElementById('modalForm').appendChild(input2)
-
-    mm._currentMode = 'add'
-    // simulate submit event
+  function submitAddForm(fieldValues) {
+    Object.entries(fieldValues).forEach(([columnName, value]) => {
+      const input = createElementWithId('input', columnName)
+      input.setAttribute('data-col-name', columnName)
+      input.value = value
+      document.getElementById('modalForm').appendChild(input)
+    })
     const submitEvent = new Event('submit', { cancelable: true })
     document.getElementById('modalForm').dispatchEvent(submitEvent)
-
     // wait a tick for async handlers
-    await new Promise(r => setTimeout(r, 10))
+    return new Promise(resolve => setTimeout(resolve, 10))
+  }
 
-    expect(apiClientMock.post).toHaveBeenCalled()
-    const callArgs = apiClientMock.post.mock.calls[0]
-    expect(callArgs[0]).toBe('/dataManagement/pending-change')
-    expect(callArgs[1]).toBeDefined()
-    expect(callArgs[1].data.name).toBe('Bob')
-    expect(callArgs[1].data.email).toBe('bob@example.com')
+  it('handles add submit via _onSubmit and posts a pending change', async () => {
+    const apiClientMock = { post: vi.fn().mockResolvedValue({}) }
+    managerMock.selectedTable = 'mapButtons'
+
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    mm._currentMode = 'add'
+
+    await submitAddForm({ part_name: 'Bee Count', button_link: 'https://example.org' })
+
+    expect(apiClientMock.post).toHaveBeenCalledTimes(1)
+    const [url, payload] = apiClientMock.post.mock.calls[0]
+    expect(url).toBe('/dataManagement/pending-change')
+    expect(payload).toEqual({
+      tableName: 'mapButtons',
+      rowKey: {},
+      operation: 'insert',
+      data: { part_name: 'Bee Count', button_link: 'https://example.org' },
+    })
 
     // overlays should be hidden
+    expect(document.getElementById('modalOverlay').classList.contains('hidden')).toBe(true)
+  })
+
+  it('handles add submit for the users table by posting directly to the contact endpoint', async () => {
+    const apiClientMock = { post: vi.fn().mockResolvedValue({}) }
+    managerMock.selectedTable = 'users'
+
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+    mm._currentMode = 'add'
+
+    await submitAddForm({ alias: 'Bob', email: 'bob@example.com' })
+
+    expect(apiClientMock.post).toHaveBeenCalledTimes(1)
+    const [url, payload] = apiClientMock.post.mock.calls[0]
+    expect(url).toBe('/dataManagement/contact')
+    expect(payload).toEqual({ alias: 'Bob', email: 'bob@example.com' })
+    expect(managerMock.fetchTableData).toHaveBeenCalledWith('users')
     expect(document.getElementById('modalOverlay').classList.contains('hidden')).toBe(true)
   })
 

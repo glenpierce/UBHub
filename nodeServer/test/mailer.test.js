@@ -42,5 +42,16 @@ describe('mailer service', () => {
 
     config.EMAIL_PROVIDER = originalProvider;
   });
-});
 
+  it('builds the mailing list signup notification text', async () => {
+    const { buildMailingListSignupPlainText } = await import('../services/mailer.js');
+
+    const text = buildMailingListSignupPlainText({ email: 'pat@example.org', alias: 'Pat', region: 'EU,NA', createdAt: '2026-10-09T00:00:00.000Z' });
+
+    expect(text).toContain('Email: pat@example.org');
+    expect(text).toContain('Name: Pat');
+    expect(text).toContain('Institution: \n');
+    expect(text).toContain('Region: EU,NA');
+    expect(text).toContain('Signed Up At: 2026-10-09T00:00:00.000Z');
+  });
+});

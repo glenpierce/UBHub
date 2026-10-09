@@ -1,0 +1,90 @@
+name: CI - Docker Tests
+
+# Runs the nodeServer test suite inside Docker via docker-compose.test.yml,
+# exactly as developers run it locally (npm/node never run on the runner host).
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [develop]
+
+concurrency:
+  group: docker-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  docker-tests:
+    name: Run nodeServer tests in Docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      # Organization policy only allows actions owned by UrbanBiodiversityHub,
+      # so check out with plain git instead of actions/checkout. GITHUB_SHA is
+      # the pushed commit, or the PR merge commit on pull_request events.
+      - name: Checkout repository
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git init --quiet .
+          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+          encoded_credentials="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 --wrap=0)"
+          # Log masking only covers the raw token; mask the derived value too.
+          echo "::add-mask::${encoded_credentials}"
+          authorization_header="AUTHORIZATION: basic ${encoded_credentials}"
+          git -c http.extraheader="$authorization_header" fetch --quiet --depth=1 origin "$GITHUB_SHA"
+          git checkout --quiet --detach FETCH_HEAD
+          git log -1 --oneline
+
+      # config.js is gitignored (it holds secrets). Tests only need it to be
+      # importable, so write a stub with dummy values. SMTP points at a closed
+      # local port so the mailer smoke test fails fast instead of sending mail.
+      - name: Write CI config stub
+        run: |
+          cat > nodeServer/config.js <<'EOF'
+          const config = {
+            secret: 'ci-session-secret',
+            expires: 24 * 60 * 60 * 1000,
+            salt: 'ci-salt',
+            rdsHost: process.env.RDS_HOST || 'mysql-test',
+            rdsUser: process.env.RDS_USER || 'testuser',
+            rdsPassword: process.env.RDS_PASSWORD || 'testpassword',
+            rdsDatabase: process.env.RDS_DATABASE || 'testdb',
+            BREVO_API_KEY: '',
+            EMAIL_PROVIDER: 'smtp',
+            ADMIN_EMAIL: 'admin@example.invalid',
+            EMAIL_FROM: 'admin@example.invalid',
+            SMTP_HOST: '127.0.0.1',
+            SMTP_PORT: 2525,
+            SMTP_USER: '',
+            SMTP_PASS: '',
+            SMTP_SECURE: false,
+            S3_BUCKET: 'ci-bucket',
+            AWS_REGION: 'us-east-1',
+            AWS_ACCESS_KEY_ID: '',
+            AWS_SECRET_ACCESS_KEY: '',
+            S3_PUBLIC_READ: false,
+            S3_KEY_PREFIX: 'uploads/',
+            S3_MAX_FILE_SIZE: 50 * 1024 * 1024,
+            S3_PRESIGN_EXPIRATION_SECONDS: 15 * 60,
+            S3_MULTIPART_THRESHOLD_BYTES: 10 * 1024 * 1024,
+            S3_MULTIPART_PART_SIZE_BYTES: 8 * 1024 * 1024,
+          };
+
+          export default config;
+          EOF
+
+      - name: Run tests
+        run: >
+          docker compose -f docker-compose.test.yml up
+          --build
+          --exit-code-from node-server-test
+          node-server-test
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.test.yml down --volumes --remove-orphans

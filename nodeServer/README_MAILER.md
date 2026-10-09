@@ -1,6 +1,14 @@
 # Mailer service (admin notifications)
 
-This project includes a mailer service used to notify the admin when a new user is created.
+This project includes a mailer service (`services/mailer.js`) used to notify the admin when:
+
+- a new user is created (`/createUser`, `sendAdminNotification`)
+- someone joins the mailing list (`/signup`, `sendMailingListSignupNotification`)
+
+Mailing list signups are stored as Contacts (users rows with `privileges = 0`, no password,
+`createdBy = 'mailingListSignup'`), so they are reachable by the Data Management email-list
+filters and bulk sends (Brevo). A signup for an email already in `users` changes nothing and
+sends no notification, but the visitor sees the same confirmation either way.
 
 Configuration (environment variables)
 

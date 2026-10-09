@@ -1,0 +1,127 @@
+doctype html
+include mixins
+html
+  head
+    meta(name='viewport' content='width=device-width, initial-scale=1')
+    title Join the UBHub Mailing List
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    style.
+        .signupContainer {
+            max-width: 420px;
+            text-align: center;
+            margin: auto;
+            margin-top: 50px;
+            padding: 0 16px;
+        }
+
+        .signupNotice {
+            font-size: 18px;
+            padding: 20px 0;
+        }
+
+        .signupError {
+            color: #b00020;
+            padding-bottom: 10px;
+        }
+
+        .signupForm {
+            padding-bottom: 20px;
+            margin-bottom: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .entryLine {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding-bottom: 5px;
+        }
+
+        .entryLineItem {
+            margin: auto;
+            width: 300px;
+        }
+
+        .entryLabel {
+            display: inline-block;
+            margin-top: 4px;
+        }
+
+        .entryInput {
+            display: inline;
+            float: right;
+            border: solid;
+            border-color: #4c90b6;
+            border-radius: 5px;
+            border-width: 1px;
+            padding: 4px;
+        }
+
+        .regionSelect {
+            width: 100%;
+            margin-top: 4px;
+            float: none;
+        }
+
+        .honeypotField {
+            position: absolute;
+            left: -10000px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        .signupSubmitButton {
+            background-color: #4c90b6;
+            border-radius: 4px;
+            border: none;
+            font-weight: 700;
+            padding: 5px;
+            color: white;
+            cursor: pointer;
+            margin: 20px;
+        }
+
+body
+  +dataManagementHeader
+
+  div.signupContainer
+    if submitted
+      div.signupNotice Thank you for signing up! You'll receive UBHub news and updates at the address you provided.
+    else
+      div.signupNotice Sign up below to receive news and updates from UBHub.
+      if errorMessage
+        div.signupError(role='alert')= errorMessage
+
+  if !submitted
+    form.signupForm(method='post' action='/signup')
+      div.entryLine
+        div.entryLineItem
+          label.entryLabel(for='alias') Name *
+          input.entryInput#alias(name='alias' type='text' required maxlength='255' autocomplete='name' value=formValues.alias)
+      div.entryLine
+        div.entryLineItem
+          label.entryLabel(for='email') Email *
+          input.entryInput#email(name='email' type='email' required maxlength='255' autocomplete='email' autocapitalize='off' spellcheck='false' value=formValues.email)
+      div.entryLine
+        div.entryLineItem
+          label.entryLabel(for='institution') Institution
+          input.entryInput#institution(name='institution' type='text' maxlength='255' autocomplete='organization' value=formValues.institution)
+      div.entryLine
+        div.entryLineItem
+          label.entryLabel(for='title') Title
+          input.entryInput#title(name='title' type='text' maxlength='255' autocomplete='organization-title' value=formValues.title)
+      div.entryLine
+        div.entryLineItem
+          label.entryLabel(for='region') Region(s)
+          - const selectedRegions = [].concat(formValues.region || [])
+          select.entryInput.regionSelect#region(name='region' multiple size=regionDefinitions.length)
+            each regionDefinition in regionDefinitions
+              option(value=regionDefinition.code selected=selectedRegions.includes(regionDefinition.code))= regionDefinition.label
+      div.honeypotField(aria-hidden='true')
+        label(for=honeypotFieldName) Leave this field empty
+        input(id=honeypotFieldName name=honeypotFieldName type='text' tabindex='-1' autocomplete='off')
+      input.signupSubmitButton(type='submit' value='Sign Up')

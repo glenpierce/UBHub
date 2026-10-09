@@ -32,6 +32,7 @@ import {
   coerceToInteger,
   isNonEmptyString,
   isValidEmailAddress,
+  validateRegionCodes,
   isValidOperation,
   isValidReviewDecision,
   normalizeComments,
@@ -235,17 +236,6 @@ router.get('/location-search', isAuthenticated, isContributor, async (request, r
 // These endpoints bypass the approval workflow and write directly to the users
 // table.  Region codes must be from the allowed set.
 // ---------------------------------------------------------------------------
-
-const ALLOWED_REGION_CODES = new Set(['NA', 'LA', 'CAR', 'MECNA', 'AF', 'ESA', 'SA', 'EU', 'OC']);
-
-function validateRegionCodes(regionString) {
-  if (!regionString) return { ok: true, value: '' };
-  const codes = String(regionString).split(',').map(code => code.trim()).filter(Boolean);
-  for (const code of codes) {
-    if (!ALLOWED_REGION_CODES.has(code)) return { ok: false, invalid: code };
-  }
-  return { ok: true, value: codes.join(',') };
-}
 
 /**
  * Create a Contact (user with privileges = 0, no password).

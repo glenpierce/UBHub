@@ -11,6 +11,9 @@ RUN if [ "$INSTALL_BUILD_TOOLS" = "1" ]; then \
       apt-get update && apt-get install -y --no-install-recommends ca-certificates git && rm -rf /var/lib/apt/lists/*; \
     fi
 
+# Pin npm (node:22 ships npm 10); keep in sync with "engines.npm" in package.json
+RUN npm install -g npm@11.6.2 --no-fund --no-audit
+
 # Copy package manifests first for better layer caching
 COPY package.json package-lock.json* ./
 

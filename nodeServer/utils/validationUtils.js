@@ -86,6 +86,41 @@ export function isValidEmailAddress(value) {
 }
 
 /**
+ * Region codes stored (comma-separated) in users.region, with display labels.
+ */
+export const REGION_DEFINITIONS = Object.freeze([
+  { code: 'NA', label: 'Canada, US, and Israel' },
+  { code: 'LA', label: 'Latin America' },
+  { code: 'CAR', label: 'Caribbean and Pacific Islands' },
+  { code: 'MECNA', label: 'Middle East, Central Asia, and Northern Asia' },
+  { code: 'AF', label: 'Africa' },
+  { code: 'ESA', label: 'East and South East Asia' },
+  { code: 'SA', label: 'Southern Asia' },
+  { code: 'EU', label: 'Europe' },
+  { code: 'OC', label: 'Oceania' },
+]);
+
+const ALLOWED_REGION_CODES = new Set(REGION_DEFINITIONS.map(regionDefinition => regionDefinition.code));
+
+/**
+ * Validate a comma-separated string (or array) of region codes against the
+ * allowed set.
+ *
+ * @param {string|string[]|undefined} regionValue
+ * @returns {{ok: true, value: string} | {ok: false, invalid: string}}
+ *   `value` is the normalized comma-separated string ('' when empty).
+ */
+export function validateRegionCodes(regionValue) {
+  if (!regionValue) return { ok: true, value: '' };
+  const rawCodes = Array.isArray(regionValue) ? regionValue : String(regionValue).split(',');
+  const codes = rawCodes.map(code => String(code).trim()).filter(Boolean);
+  for (const code of codes) {
+    if (!ALLOWED_REGION_CODES.has(code)) return { ok: false, invalid: code };
+  }
+  return { ok: true, value: codes.join(',') };
+}
+
+/**
  * Normalize a comments value.
  *
  * If comments is null or undefined, return null.

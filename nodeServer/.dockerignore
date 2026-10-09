@@ -4,3 +4,8 @@ npm-debug.log
 .git
 .gitignore
 .env
+
+# Secrets: never bake into images. Containers get them at runtime via the
+# ./nodeServer bind mount in the docker-compose files.
+config.js
+routes/preApprovedUser.json

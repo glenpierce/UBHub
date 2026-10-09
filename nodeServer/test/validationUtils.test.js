@@ -6,6 +6,7 @@ import {
   isValidOperation,
   isValidReviewDecision,
   normalizeComments,
+  validateRegionCodes,
 } from '../utils/validationUtils.js';
 
 describe('validationUtils', () => {
@@ -200,5 +201,23 @@ describe('validationUtils', () => {
       expect(normalizeComments('')).toBe('');
     });
   });
-});
 
+  describe('validateRegionCodes', () => {
+    it('returns an empty value for empty input', () => {
+      expect(validateRegionCodes('')).toEqual({ ok: true, value: '' });
+      expect(validateRegionCodes(undefined)).toEqual({ ok: true, value: '' });
+    });
+
+    it('normalizes a comma-separated string', () => {
+      expect(validateRegionCodes(' EU, NA ,')).toEqual({ ok: true, value: 'EU,NA' });
+    });
+
+    it('accepts an array of codes', () => {
+      expect(validateRegionCodes(['EU', 'OC'])).toEqual({ ok: true, value: 'EU,OC' });
+    });
+
+    it('reports the first invalid code', () => {
+      expect(validateRegionCodes('EU,XX')).toEqual({ ok: false, invalid: 'XX' });
+    });
+  });
+});
