@@ -133,12 +133,16 @@ CREATE TABLE IF NOT EXISTS email_send_requests (
     KEY idx_email_send_requests_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+# Stored procedures contain ';' in their bodies, so switch the statement delimiter
+# while defining them (needed by the mysql CLI; GUI clients accept it too).
+DELIMITER $$
+
 #createUser procedure – creates an authenticated user with privileges = 1 (User)
 create
     definer = root@`%` procedure createUser(IN emailInput varchar(255), IN passwordHash varchar(255), IN alias varchar(255), IN userAddress varchar(2000), IN title varchar(255), IN institution varchar(255), whatsAppNumber varchar(20))
 BEGIN
     insert into users (email, hashedPassword, alias, userAddress, title, institution, whatsAppNumber, privileges) values(emailInput, passwordHash, alias, userAddress, title, institution, whatsAppNumber, 1);
-END;
+END$$
 
 #createContact procedure – creates a Contact (privileges = 0) with no password
 create
@@ -146,7 +150,7 @@ create
 BEGIN
     insert into users (email, alias, phone, title, institution, region, level, workingGroup, createdBy, privileges)
     values(emailInput, aliasInput, phoneInput, titleInput, institutionInput, regionInput, levelInput, workingGroupInput, createdByInput, 0);
-END;
+END$$
 
 #login procedure
 create
@@ -155,16 +159,6 @@ BEGIN
     SELECT email, hashedPassword, privileges, alias
     FROM users
     WHERE email = emailInput;
-END;
+END$$
 
-# Schema migrations – run once against any database created before the Contacts-to-users branch.
-ALTER TABLE users ADD COLUMN phone VARCHAR(64);
-ALTER TABLE users ADD COLUMN workingGroup VARCHAR(255);
-ALTER TABLE users ADD COLUMN level VARCHAR(255);
-ALTER TABLE users ADD COLUMN createdBy VARCHAR(255);
-ALTER TABLE users ADD COLUMN createdAt DATETIME DEFAULT CURRENT_TIMESTAMP;
-
-# GDPR migration – run before deploying the code that reads these columns.
-ALTER TABLE users ADD COLUMN consentGivenAt DATETIME DEFAULT NULL;
-ALTER TABLE users ADD COLUMN removalRequestedAt DATETIME DEFAULT NULL;
-
+DELIMITER ;

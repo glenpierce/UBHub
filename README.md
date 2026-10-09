@@ -13,7 +13,7 @@ Project goals
 System architecture (high level)
 
 - nodeServer/ — The main server application. A Node.js + Express app that implements the web UI and API endpoints (routes are under `nodeServer/routes/`). Views are server-rendered with Pug templates in `nodeServer/views/` and public assets are under `nodeServer/public/`.
-- MySQL database — Persistent storage for users, submissions and application data. The repository includes `databaseTools.sql` with the schema and seed statements to initialise the database.
+- MySQL database — Persistent storage for users, submissions and application data. The repository includes `databaseTools.sql` with the schema and seed statements to initialise the database, and `databaseMigrations.sql` to upgrade an existing database.
 - Docker — The repository contains compose files to run the app in containers for local development (`docker-compose.local.yml`) and for running tests (`docker-compose.test.yml`). The local compose file expects database connection details via env file and uses `host.docker.internal` on macOS to reach the host DB when required.
 - Tests — Unit and integration tests run inside a Docker test image; test files are located under `nodeServer/test/` and test configuration is in `nodeServer/vitest.config.js`.
 - Tools and utilities — Helper scripts and tooling live in `nodeServer/tools/` (database helpers, session decoding utilities, etc.).
@@ -44,6 +44,8 @@ export default { config };
 2) Initialise the database
 
 Open `databaseTools.sql` in your SQL client and run the script to create the schema and seed any required initial data.
+
+To upgrade an existing database (for example production) after a schema change, run the sections of `databaseMigrations.sql` it hasn't had yet. Each section is labeled, and the newest is at the bottom.
 
 3) Run with Docker (recommended for local development)
 

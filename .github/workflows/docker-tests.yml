@@ -78,6 +78,21 @@ jobs:
           export default config;
           EOF
 
+      # Docker Hub requests from GitHub runners occasionally time out. Pull the
+      # images up front with retries so one network blip doesn't fail the run.
+      - name: Pull images (with retries)
+        run: |
+          base_image="$(grep -m1 '^FROM ' nodeServer/Dockerfile | awk '{print $2}')"
+          for attempt in 1 2 3 4; do
+            if docker pull --quiet "$base_image" && docker compose -f docker-compose.test.yml pull --quiet mysql-test; then
+              exit 0
+            fi
+            echo "Image pull failed (attempt $attempt of 4); retrying in $((attempt * 15))s..."
+            sleep $((attempt * 15))
+          done
+          echo "Could not pull images from Docker Hub after 4 attempts."
+          exit 1
+
       - name: Run tests
         run: >
           docker compose -f docker-compose.test.yml up

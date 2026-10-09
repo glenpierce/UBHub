@@ -42,7 +42,8 @@ values from `config.js` into the workflow or anywhere else in the repository.
 ## Repository layout
 
 ```
-databaseTools.sql            MySQL schema, stored procedures, migrations (source of truth for tables)
+databaseTools.sql            complete current MySQL schema + stored procedures (creates a new database)
+databaseMigrations.sql       ALTERs that upgrade an existing database, one section per change
 docker-compose.local.yml     dev stack: node (nodemon) + mysql-local; env from .env.local
 docker-compose.test.yml      test stack: node-server-test + mysql-test
 deploy/                      Elastic Beanstalk bundle + deploy scripts (run by humans)
@@ -79,7 +80,7 @@ The project follows a hexagonal (ports and adapters) style. Read
 - **`services/tableMetadata.js`** is the single source of truth for which tables and
   columns the data-management UI can see and edit, and for the email-list filter
   fields. Do not define table structures inline in routes.
-- **Database**: MySQL 8. All SQL is parameterized (`?` placeholders). Identifiers
+- **Database**: MySQL 8.4 LTS (`mysql:8.4.11` in the compose files). All SQL is parameterized (`?` placeholders). Identifiers
   that come from requests (table and column names) are checked against
   `tableMetadata.js` allowlists before they are used.
 - **Views**: Pug templates rendered on the server. Pages include `mixins.pug` (for
@@ -256,8 +257,10 @@ deploy command in the same block as another step.
 - **Tests first** for new service logic. Put pure logic in services or utils with
   injected dependencies and test it in `nodeServer/test/<module>.test.js` (Vitest).
   Pug views can be tested by rendering them with `pug.renderFile`.
-- **Schema changes** go in `databaseTools.sql`. Update the `CREATE TABLE` and add an
-  `ALTER TABLE` in the migrations section for existing databases.
+- **Schema changes** need two edits. Update the `CREATE TABLE` in `databaseTools.sql`,
+  which must always create the full current schema on its own. Then append a new
+  numbered section to `databaseMigrations.sql` that upgrades existing databases.
+  Both must run cleanly with the plain `mysql` client.
 - **Public forms** must not reveal whether an email already exists. Return the same
   response either way, as `/signup` does.
 - Keep feature plans in `plans/` when a change spans several layers.
