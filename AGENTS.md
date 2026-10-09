@@ -202,9 +202,14 @@ bundle zip with the contents of `nodeServer/` at the zip root.
 
 ```bash
 deploy/build-bundle.sh                    # Docker tests + nodeServer/.appArchives/app-<N>.zip
-deploy/deploy-to-elastic-beanstalk.sh --dry-run nodeServer/.appArchives/app-<N>.zip
-deploy/deploy-to-elastic-beanstalk.sh nodeServer/.appArchives/app-<N>.zip   # human only
+deploy/deploy-to-elastic-beanstalk.sh --dry-run --latest    # or pass a specific app-<N>.zip path
+deploy/deploy-to-elastic-beanstalk.sh --latest              # human only
 ```
+
+Human-facing instructions are in `README.md` under "Deploying to AWS Elastic
+Beanstalk". Each step there is its own fenced `bash` block, so it can be run from
+IntelliJ's Markdown gutter one step at a time. Keep it that way: never put the
+deploy command in the same block as another step.
 
 - `build-bundle.sh` refuses to build if `nodeServer/` has uncommitted tracked
   changes (`--allow-dirty` overrides this). It runs the Docker tests first

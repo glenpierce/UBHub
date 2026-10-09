@@ -15,19 +15,24 @@
 #   EB_S3_BUCKET         bucket for bundles (optional; defaults to Elastic
 #                        Beanstalk's own elasticbeanstalk-<region>-<account>)
 #
-# Usage: deploy/deploy-to-elastic-beanstalk.sh [--dry-run] nodeServer/.appArchives/app-<N>.zip
+# Usage: deploy/deploy-to-elastic-beanstalk.sh [--dry-run] (--latest | nodeServer/.appArchives/app-<N>.zip)
+#   --latest   deploy the highest-numbered app-<N>.zip (nodeServer/.appArchives or nodeServer/)
 #   --dry-run  print the AWS commands without running any of them
 
 set -euo pipefail
 
 script_directory="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 settings_file="$script_directory/deploy.env"
+server_directory="$(cd "$script_directory/../nodeServer" && pwd)"
+archive_directory="$server_directory/.appArchives"
 
 dry_run=false
+use_latest_bundle=false
 bundle_path=""
 
 print_usage() {
-  sed -n '3,22p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+  # Print the header comment block (everything after the shebang up to the first code line).
+  awk 'NR > 2 && /^#/ { sub(/^# ?/, ""); print; next } NR > 2 { exit }' "${BASH_SOURCE[0]}"
 }
 
 fail() {
@@ -38,6 +43,7 @@ fail() {
 while [ $# -gt 0 ]; do
   case "$1" in
     --dry-run) dry_run=true ;;
+    --latest) use_latest_bundle=true ;;
     -h|--help) print_usage; exit 0 ;;
     -*) print_usage >&2; fail "Unknown option: $1" ;;
     *) [ -z "$bundle_path" ] || fail "Only one bundle path may be given."; bundle_path="$1" ;;
@@ -69,7 +75,25 @@ if [ -n "${AWS_PROFILE:-}" ]; then
   export AWS_PROFILE
 fi
 
-[ -n "$bundle_path" ] || { print_usage >&2; fail "No bundle given. Build one with deploy/build-bundle.sh."; }
+if [ "$use_latest_bundle" = true ]; then
+  [ -z "$bundle_path" ] || fail "Pass either --latest or a bundle path, not both."
+  highest_version_number=0
+  # Same locations build-bundle.sh numbers from (older bundles sit directly in nodeServer/).
+  for existing_bundle in "$archive_directory"/app-*.zip "$server_directory"/app-*.zip; do
+    [ -e "$existing_bundle" ] || continue
+    bundle_number="$(basename "$existing_bundle" .zip)"
+    bundle_number="${bundle_number#app-}"
+    case "$bundle_number" in
+      ''|*[!0-9]*) continue ;;
+    esac
+    if [ "$bundle_number" -gt "$highest_version_number" ]; then
+      highest_version_number="$bundle_number"
+      bundle_path="$existing_bundle"
+    fi
+  done
+  [ -n "$bundle_path" ] || fail "No app-<N>.zip found in nodeServer/.appArchives or nodeServer/. Build one with deploy/build-bundle.sh."
+fi
+[ -n "$bundle_path" ] || { print_usage >&2; fail "No bundle given. Pass --latest or a path; build one with deploy/build-bundle.sh."; }
 [ -f "$bundle_path" ] || fail "Bundle not found: $bundle_path"
 
 version_label="$(basename "$bundle_path" .zip)"
@@ -79,7 +103,9 @@ case "$version_label" in
 esac
 
 unzip -tq "$bundle_path" >/dev/null 2>&1 || fail "$bundle_path is not a valid zip file."
-unzip -Z1 "$bundle_path" | grep -qx "package.json" || fail "$bundle_path has no package.json at its root."
+# Here-string, not a pipe: with pipefail, grep -q exiting early would fail the pipeline.
+bundle_listing="$(unzip -Z1 "$bundle_path")"
+grep -qx "package.json" <<< "$bundle_listing" || fail "$bundle_path has no package.json at its root."
 
 # The build script stores provenance in the zip comment; it becomes the version description.
 version_description="$(unzip -z "$bundle_path" | tail -n +2 | head -1 | cut -c1-200)"
@@ -120,6 +146,7 @@ current_version_label="$(query_aws "<current-version>" elasticbeanstalk describe
   --application-name "$EB_APPLICATION_NAME" --environment-names "$EB_ENVIRONMENT_NAME" \
   --query 'Environments[0].VersionLabel' --output text)"
 [ "$current_version_label" != "None" ] || fail "Environment $EB_ENVIRONMENT_NAME not found in application $EB_APPLICATION_NAME."
+[ "$current_version_label" != "$version_label" ] || fail "$EB_ENVIRONMENT_NAME is already running $version_label. Build a new bundle first."
 
 # The app is built and tested against the Node.js 24 platform (see nodeServer/Dockerfile).
 expected_platform="Node.js 24"

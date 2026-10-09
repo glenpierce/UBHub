@@ -28,7 +28,8 @@ skip_tests=false
 allow_dirty=false
 
 print_usage() {
-  sed -n '3,14p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+  # Print the header comment block (everything after the shebang up to the first code line).
+  awk 'NR > 2 && /^#/ { sub(/^# ?/, ""); print; next } NR > 2 { exit }' "${BASH_SOURCE[0]}"
 }
 
 fail() {
@@ -137,9 +138,10 @@ echo "$bundle_comment" | zip -q -z "$bundle_path"
 
 bundle_listing="$(unzip -Z1 "$bundle_path")"
 for required_file in package.json package-lock.json bin/www app.js $runtime_secret_files; do
-  echo "$bundle_listing" | grep -qx "$required_file" || fail "Bundle is missing $required_file"
+  # Here-string, not a pipe: with pipefail, grep -q exiting early would fail the pipeline.
+  grep -qx "$required_file" <<< "$bundle_listing" || fail "Bundle is missing $required_file"
 done
-if echo "$bundle_listing" | grep -Eq '^(node_modules/|test/|__MACOSX/)'; then
+if grep -Eq '^(node_modules/|test/|__MACOSX/)' <<< "$bundle_listing"; then
   fail "Bundle unexpectedly contains node_modules/, test/, or __MACOSX/"
 fi
 

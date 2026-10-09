@@ -75,6 +75,45 @@ docker compose -f docker-compose.test.yml build node-server-test
 docker compose -f docker-compose.test.yml run --rm node-server-test
 ```
 
+Deploying to AWS Elastic Beanstalk
+
+Production runs on Elastic Beanstalk's **Node.js 24 on Amazon Linux 2023** platform (Node 24.21.0, npm 11.19.0, the same versions as the Docker image). A deploy is a zip of `nodeServer/` (a "source bundle"). Elastic Beanstalk runs `npm install` and then `npm start` on it. The scripts in `deploy/` build and deploy that bundle. Only the deploy step talks to AWS, and a person must run it.
+
+One-time setup
+
+1. Install the [AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and sign in (`aws configure` or `aws sso login`). Your IAM user or role needs Elastic Beanstalk deploy permissions; the AWS managed policy `AdministratorAccess-AWSElasticBeanstalk` covers them.
+2. Copy `deploy/deploy.env.example` to `deploy/deploy.env` (gitignored) and fill in `EB_APPLICATION_NAME`, `EB_ENVIRONMENT_NAME`, and `AWS_REGION` (for example `ca-central-1`). Optionally set `AWS_PROFILE`.
+3. Make sure your local `nodeServer/config.js` and `nodeServer/routes/preApprovedUser.json` hold the **production** values. They are copied into the bundle.
+
+Deploy
+
+Run these steps in order from the repository root. In IntelliJ IDEA, click the green ▶ next to each code block to run it in the terminal. Each step is its own block, so you can check its output before running the next.
+
+Step 1: build the bundle. This runs the tests in Docker, then writes `nodeServer/.appArchives/app-<N>.zip` from committed code.
+
+```bash
+deploy/build-bundle.sh
+```
+
+Step 2: preview. This prints every AWS command the deploy would run, without calling AWS.
+
+```bash
+deploy/deploy-to-elastic-beanstalk.sh --dry-run --latest
+```
+
+Step 3: deploy. This shows the target AWS account, environment, and platform, and asks you to type the environment name to confirm. It then uploads, deploys, waits, and reports health.
+
+```bash
+deploy/deploy-to-elastic-beanstalk.sh --latest
+```
+
+Notes
+
+- `build-bundle.sh` refuses to build if `nodeServer/` has uncommitted changes (`--allow-dirty` overrides this) and runs the tests first (`--skip-tests` skips them). New files must at least be `git add`ed to be included.
+- You can deploy a specific bundle instead of the latest: `deploy/deploy-to-elastic-beanstalk.sh nodeServer/.appArchives/app-433.zip`.
+- The deploy script ends by printing the command to roll back to the previously deployed version. It exits with an error if the environment doesn't end up healthy (Green).
+- Bundles contain production secrets (`config.js`). They are gitignored; never commit or share them.
+
 Development notes and pointers
 
 - Look in `nodeServer/routes/` to see the server routes and `nodeServer/views/` for the Pug templates rendered by the application.
