@@ -42,6 +42,7 @@ values from `config.js` into the workflow or anywhere else in the repository.
 databaseTools.sql            MySQL schema, stored procedures, migrations (source of truth for tables)
 docker-compose.local.yml     dev stack: node (nodemon) + mysql-local; env from .env.local
 docker-compose.test.yml      test stack: node-server-test + mysql-test
+deploy/                      Elastic Beanstalk bundle + deploy scripts (run by humans)
 plans/                       design/implementation plans for in-flight features
 tools/                       DB setup / session-decoding helper scripts (also run in Docker)
 nodeServer/
@@ -185,6 +186,39 @@ world-readable.
   - Enforce access with `authMiddleware.js`.
   - Public forms must not reveal whether an account exists.
   - Never return bulk-email recipient lists to requesters.
+
+## Deployment (AWS Elastic Beanstalk)
+
+**Agents must never run the `aws` (or `eb`) CLI.** Agents may write and edit the
+deploy scripts and test them with `--dry-run` or without AWS, but a human runs the
+real deploy.
+
+Production runs on the Elastic Beanstalk Node.js platform, which runs `npm install`
+and then `npm start` (`node ./bin/www`, listening on `PORT`). A deploy is a source
+bundle zip with the contents of `nodeServer/` at the zip root.
+
+```bash
+deploy/build-bundle.sh                    # Docker tests + nodeServer/.appArchives/app-<N>.zip
+deploy/deploy-to-elastic-beanstalk.sh --dry-run nodeServer/.appArchives/app-<N>.zip
+deploy/deploy-to-elastic-beanstalk.sh nodeServer/.appArchives/app-<N>.zip   # human only
+```
+
+- `build-bundle.sh` refuses to build if `nodeServer/` has uncommitted tracked
+  changes (`--allow-dirty` overrides this). It runs the Docker tests first
+  (`--skip-tests` overrides this). It bundles the git-tracked files minus
+  tests/dev files, plus the gitignored runtime secrets `config.js` and
+  `routes/preApprovedUser.json`. It numbers bundles after the existing
+  `app-<N>.zip` files and records the source commit in the zip comment.
+- `deploy-to-elastic-beanstalk.sh` reads `deploy/deploy.env` (gitignored; see
+  `deploy.env.example`). It confirms the AWS account and environment and asks you
+  to type the environment name. It then:
+  1. uploads the bundle to S3
+  2. runs `create-application-version --process`
+  3. runs `update-environment`
+  4. waits for the update
+  5. reports health and prints the rollback command
+- Bundles contain production secrets: they are gitignored and must never be
+  shared or committed.
 
 ## Conventions
 
