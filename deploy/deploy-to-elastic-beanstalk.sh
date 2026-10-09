@@ -251,14 +251,22 @@ case "$existing_version_status" in
 esac
 
 # --process validates the bundle asynchronously; wait until it is PROCESSED.
+# Processing a ~16 MB bundle can take several minutes, so allow up to 15.
+processing_timeout_seconds=900
+processing_poll_interval_seconds=10
 if [ "$dry_run" = false ]; then
-  echo "Waiting for Elastic Beanstalk to process $version_label..."
+  echo "Waiting for Elastic Beanstalk to process $version_label (up to $((processing_timeout_seconds / 60)) minutes)..."
   consecutive_not_found_count=0
-  for attempt in $(seq 1 60); do
+  previous_version_status=""
+  elapsed_seconds=0
+  while true; do
     version_status="$(aws --region "$AWS_REGION" elasticbeanstalk describe-application-versions \
       --application-name "$EB_APPLICATION_NAME" --version-labels "$version_label" \
       --query 'ApplicationVersions[0].Status' --output text)"
-    echo "  status: $version_status"
+    if [ "$version_status" != "$previous_version_status" ]; then
+      echo "  [$((elapsed_seconds / 60))m$((elapsed_seconds % 60))s] status: $version_status"
+      previous_version_status="$version_status"
+    fi
     case "$version_status" in
       PROCESSED) break ;;
       FAILED)
@@ -274,8 +282,12 @@ if [ "$dry_run" = false ]; then
         ;;
       *) consecutive_not_found_count=0 ;;
     esac
-    [ "$attempt" -lt 60 ] || fail "Timed out waiting for $version_label to be processed (status $version_status)."
-    sleep 5
+    if [ "$elapsed_seconds" -ge "$processing_timeout_seconds" ]; then
+      fail "Timed out after $((processing_timeout_seconds / 60)) minutes waiting for $version_label to be processed (status $version_status).
+       Nothing was deployed. Re-run the deploy later: it will find $version_label already registered and resume waiting."
+    fi
+    sleep "$processing_poll_interval_seconds"
+    elapsed_seconds=$((elapsed_seconds + processing_poll_interval_seconds))
   done
 fi
 
