@@ -47,9 +47,20 @@ done
 
 # --- Settings -------------------------------------------------------------------
 
+# Read known KEY=value lines from deploy.env (it is parsed, never executed).
+# Variables already set in the environment take precedence over the file.
 if [ -f "$settings_file" ]; then
-  # shellcheck source=/dev/null
-  . "$settings_file"
+  while IFS='=' read -r setting_name setting_value || [ -n "$setting_name" ]; do
+    case "$setting_name" in
+      EB_APPLICATION_NAME|EB_ENVIRONMENT_NAME|AWS_REGION|AWS_PROFILE|EB_S3_BUCKET)
+        setting_value="${setting_value%\"}"
+        setting_value="${setting_value#\"}"
+        if [ -z "${!setting_name:-}" ] && [ -n "$setting_value" ]; then
+          export "$setting_name=$setting_value"
+        fi
+        ;;
+    esac
+  done < "$settings_file"
 fi
 [ -n "${EB_APPLICATION_NAME:-}" ] || fail "EB_APPLICATION_NAME is not set (see deploy/deploy.env.example)."
 [ -n "${EB_ENVIRONMENT_NAME:-}" ] || fail "EB_ENVIRONMENT_NAME is not set (see deploy/deploy.env.example)."
@@ -66,6 +77,9 @@ case "$version_label" in
   app-[0-9]*) ;;
   *) fail "Bundle must be named app-<N>.zip (got $(basename "$bundle_path"))." ;;
 esac
+
+unzip -tq "$bundle_path" >/dev/null 2>&1 || fail "$bundle_path is not a valid zip file."
+unzip -Z1 "$bundle_path" | grep -qx "package.json" || fail "$bundle_path has no package.json at its root."
 
 # The build script stores provenance in the zip comment; it becomes the version description.
 version_description="$(unzip -z "$bundle_path" | tail -n +2 | head -1 | cut -c1-200)"
@@ -107,6 +121,19 @@ current_version_label="$(query_aws "<current-version>" elasticbeanstalk describe
   --query 'Environments[0].VersionLabel' --output text)"
 [ "$current_version_label" != "None" ] || fail "Environment $EB_ENVIRONMENT_NAME not found in application $EB_APPLICATION_NAME."
 
+# The app is built and tested against the Node.js 24 platform (see nodeServer/Dockerfile).
+expected_platform="Node.js 24"
+environment_platform="$(query_aws "64bit Amazon Linux 2023 <version> running $expected_platform" elasticbeanstalk describe-environments \
+  --application-name "$EB_APPLICATION_NAME" --environment-names "$EB_ENVIRONMENT_NAME" \
+  --query 'Environments[0].SolutionStackName' --output text)"
+case "$environment_platform" in
+  *"running $expected_platform") ;;
+  *)
+    echo "WARNING: $EB_ENVIRONMENT_NAME runs \"$environment_platform\", but this app is built and"
+    echo "         tested for \"$expected_platform\". Move the environment to the Node.js 24 platform first."
+    ;;
+esac
+
 echo
 echo "About to deploy:"
 echo "  bundle       $bundle_path ($(du -h "$bundle_path" | cut -f1))"
@@ -115,6 +142,7 @@ echo "  account      $aws_account (profile: ${AWS_PROFILE:-default})"
 echo "  region       $AWS_REGION"
 echo "  application  $EB_APPLICATION_NAME"
 echo "  environment  $EB_ENVIRONMENT_NAME (currently running: $current_version_label)"
+echo "  platform     $environment_platform"
 echo
 
 if [ "$dry_run" = false ]; then

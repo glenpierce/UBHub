@@ -1,4 +1,6 @@
-FROM node:22-bullseye-slim
+# Matches the production Elastic Beanstalk platform "Node.js 24 AL2023" (v6.11.10):
+# Node 24.21.0 with npm 11.19.0. Keep in sync with "engines" in package.json.
+FROM node:24.21.0-bookworm-slim
 
 # Optional build-time flag to install build tools (set to 1 when native modules or git deps are required)
 ARG INSTALL_BUILD_TOOLS=0
@@ -10,9 +12,6 @@ WORKDIR /usr/src/app
 RUN if [ "$INSTALL_BUILD_TOOLS" = "1" ]; then \
       apt-get update && apt-get install -y --no-install-recommends ca-certificates git && rm -rf /var/lib/apt/lists/*; \
     fi
-
-# Pin npm (node:22 ships npm 10); keep in sync with "engines.npm" in package.json
-RUN npm install -g npm@11.6.2 --no-fund --no-audit
 
 # Copy package manifests first for better layer caching
 COPY package.json package-lock.json* ./

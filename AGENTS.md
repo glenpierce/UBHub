@@ -28,7 +28,10 @@ docker compose -f docker-compose.local.yml logs -f --tail=200 node
 
 If Docker is not available, stop and say so. Do not fall back to host Node.
 
-Runtime: Node 22 (`node:22-bullseye-slim`, see `nodeServer/Dockerfile`). Dependencies
+Runtime: Node 24.21.0 with npm 11.19.0 (`node:24.21.0-bookworm-slim`, see
+`nodeServer/Dockerfile`). This matches the production Elastic Beanstalk platform,
+Node.js 24 on Amazon Linux 2023. When AWS ships a new platform version, update the
+image tag and `engines` in `package.json` together. Dependencies
 are pinned to exact versions in `nodeServer/package.json`; never add wildcard or range
 versions. CI (`.github/workflows/docker-tests.yml`) runs the same
 `docker-compose.test.yml` stack on every pull request and on pushes to `develop`.
@@ -139,7 +142,7 @@ bcrypt (`services/passwordUtils.js`).
 - `services/brevoService.js`: the Brevo transactional API, used for approved bulk
   sends.
 
-Fire-and-forget sends must catch their own errors. In Node 22 an unhandled promise
+Fire-and-forget sends must catch their own errors. In Node 24 an unhandled promise
 rejection crashes the process.
 
 ### External integrations and config
@@ -210,8 +213,9 @@ deploy/deploy-to-elastic-beanstalk.sh nodeServer/.appArchives/app-<N>.zip   # hu
   `routes/preApprovedUser.json`. It numbers bundles after the existing
   `app-<N>.zip` files and records the source commit in the zip comment.
 - `deploy-to-elastic-beanstalk.sh` reads `deploy/deploy.env` (gitignored; see
-  `deploy.env.example`). It confirms the AWS account and environment and asks you
-  to type the environment name. It then:
+  `deploy.env.example`). It confirms the AWS account and environment, warns if
+  the environment isn't on the Node.js 24 platform, and asks you to type the
+  environment name. It then:
   1. uploads the bundle to S3
   2. runs `create-application-version --process`
   3. runs `update-environment`
