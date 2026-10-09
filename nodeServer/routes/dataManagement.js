@@ -26,6 +26,7 @@ import {
   markEmailSendRequestSent,
 } from '../services/emailSendRequestService.js';
 import {sendToAllRecipientsIndividually} from '../services/brevoService.js';
+import {filterSendableRecipients} from '../services/privacyRemovalService.js';
 import config from '../config.js';
 import {approveVersion, rejectVersion} from '../services/approvalService.js';
 import {
@@ -457,10 +458,17 @@ router.post('/email-requests', isAuthenticated, isApprover, async (request, resp
 async function sendApprovedEmailRequestInBackground(id, approvedRequest) {
   console.log(`[EmailSendRequest #${id}] background send starting (${(approvedRequest.recipients || []).length} recipient(s))`);
   try {
+    // Recipients were snapshotted when the request was made. Re-check them now so
+    // anyone who requested GDPR removal (or was deleted) since then is not emailed.
+    const {sendable, excluded} = await filterSendableRecipients(makeDbCallAsPromise, approvedRequest.recipients);
+    if (excluded.length > 0) {
+      console.log(`[EmailSendRequest #${id}] skipping ${excluded.length} recipient(s) who requested removal or no longer exist`);
+    }
+
     const {succeeded, failed} = await sendToAllRecipientsIndividually({
       apiKey: config.BREVO_API_KEY,
       senderEmail: config.EMAIL_FROM,
-      recipients: approvedRequest.recipients,
+      recipients: sendable,
       subject: approvedRequest.subject,
       htmlContent: approvedRequest.htmlBody,
     });

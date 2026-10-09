@@ -127,6 +127,7 @@ body
       div.entryLineItem
         div.entryLabel Verify Password
         input.entryInput(name="verifyPassword" type="password")
+    +privacyNotice('account')
     input.createAccountSubmitButton(type="submit" value="Create User")
 
   script.
@@ -141,7 +142,8 @@ body
   script.
     window.onload = function (ev) {
       const errorFromServer = !{errorFromServer};
+      const errorMessageFromServer = !{JSON.stringify(typeof errorMessage !== 'undefined' && errorMessage ? errorMessage : '').replace(/</g, '\\u003c')};
       if (errorFromServer) {
-        window.alert("There was a problem creating that user, the name is probably in use. Please try again.");
+        window.alert(errorMessageFromServer || "There was a problem creating that user, the name is probably in use. Please try again.");
       }
     }

@@ -47,7 +47,8 @@ function normalizeOptionalText(value, fieldLabel) {
  *
  * @param {object} formFields - Raw request body.
  * @returns {{email: string, alias: string, title: string, institution: string, region: string}}
- * @throws {Error} with code 'INVALID_SIGNUP' when a field is missing or invalid.
+ * @throws {Error} with code 'INVALID_SIGNUP' when a field is missing or invalid,
+ *   including when privacyConsent is not 'yes'.
  */
 export function normalizeSignupFormFields(formFields) {
   const fields = formFields || {};
@@ -63,6 +64,11 @@ export function normalizeSignupFormFields(formFields) {
   const alias = normalizeOptionalText(fields.alias, 'Name');
   if (!alias) {
     throwInvalidSignup('Name is required');
+  }
+
+  // GDPR: consent must be an explicit opt-in (the form's checkbox is unticked by default).
+  if (fields.privacyConsent !== 'yes') {
+    throwInvalidSignup('Please confirm that you agree to the privacy notice');
   }
 
   const regionValidation = validateRegionCodes(fields.region);
@@ -91,7 +97,7 @@ export function normalizeSignupFormFields(formFields) {
 export async function createMailingListSignup(executeQuery, formFields) {
   const signup = normalizeSignupFormFields(formFields);
 
-  const insertSql = 'INSERT IGNORE INTO users (email, alias, title, institution, region, createdBy, privileges) VALUES (?, ?, ?, ?, ?, ?, 0)';
+  const insertSql = 'INSERT IGNORE INTO users (email, alias, title, institution, region, createdBy, privileges, consentGivenAt) VALUES (?, ?, ?, ?, ?, ?, 0, NOW())';
   const insertResult = await executeQuery(insertSql, [
     signup.email,
     signup.alias,

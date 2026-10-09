@@ -11,6 +11,7 @@ const validFormFields = {
   title: 'Director',
   institution: 'City Zoo',
   region: ['EU', 'NA'],
+  privacyConsent: 'yes',
 };
 
 describe('normalizeSignupFormFields', () => {
@@ -29,7 +30,7 @@ describe('normalizeSignupFormFields', () => {
   });
 
   it('allows optional fields to be omitted', () => {
-    expect(normalizeSignupFormFields({ email: 'person@example.org', alias: 'Pat' })).toEqual({
+    expect(normalizeSignupFormFields({ email: 'person@example.org', alias: 'Pat', privacyConsent: 'yes' })).toEqual({
       email: 'person@example.org',
       alias: 'Pat',
       title: '',
@@ -44,6 +45,8 @@ describe('normalizeSignupFormFields', () => {
     [{ ...validFormFields, alias: '   ' }, 'Name is required'],
     [{ ...validFormFields, region: ['EU', 'MARS'] }, 'Invalid region: MARS'],
     [{ ...validFormFields, title: 'x'.repeat(256) }, 'Title must be 255 characters or fewer'],
+    [{ ...validFormFields, privacyConsent: undefined }, 'Please confirm that you agree to the privacy notice'],
+    [{ ...validFormFields, privacyConsent: 'on' }, 'Please confirm that you agree to the privacy notice'],
   ])('rejects invalid input with INVALID_SIGNUP (%#)', (formFields, expectedMessage) => {
     expect(() => normalizeSignupFormFields(formFields)).toThrow(expectedMessage);
     try {
@@ -59,7 +62,7 @@ describe('normalizeSignupFormFields', () => {
 });
 
 describe('createMailingListSignup', () => {
-  it('inserts a Contact (privileges 0, no password) with parameterized values', async () => {
+  it('inserts a Contact (privileges 0, no password, consent timestamp) with parameterized values', async () => {
     const executeQuery = vi.fn().mockResolvedValue({ affectedRows: 1 });
 
     const result = await createMailingListSignup(executeQuery, validFormFields);
@@ -69,7 +72,7 @@ describe('createMailingListSignup', () => {
     expect(executeQuery).toHaveBeenCalledTimes(1);
     const [sql, parameters] = executeQuery.mock.calls[0];
     expect(sql).toMatch(/^INSERT IGNORE INTO users/);
-    expect(sql).toMatch(/privileges\) VALUES \(\?, \?, \?, \?, \?, \?, 0\)/);
+    expect(sql).toMatch(/privileges, consentGivenAt\) VALUES \(\?, \?, \?, \?, \?, \?, 0, NOW\(\)\)/);
     expect(sql).not.toMatch(/hashedPassword/);
     expect(parameters).toEqual([
       'person@example.org', 'Pat Person', 'Director', 'City Zoo', 'EU,NA', MAILING_LIST_SIGNUP_CREATED_BY,

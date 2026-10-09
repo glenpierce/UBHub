@@ -145,6 +145,25 @@ bcrypt (`services/passwordUtils.js`).
 Fire-and-forget sends must catch their own errors. In Node 24 an unhandled promise
 rejection crashes the process.
 
+### Privacy (GDPR)
+
+- **Consent:** `/signup` and `/createUser` show the shared `+privacyNotice` mixin
+  (`views/mixins.pug`), with an unticked, required `privacyConsent` checkbox. The
+  server rejects submissions where `privacyConsent` isn't `'yes'`, and records
+  `users.consentGivenAt`.
+- **Removal requests:** `POST /account/privacy-removal-request` (authenticated) sets
+  `users.removalRequestedAt` for the session's own email (never an address from the
+  request) and emails the admin. A human deletes the data. Code never deletes it
+  automatically.
+- **Never email a flagged address:**
+  - `userFilterQueryBuilder.js` excludes `removalRequestedAt IS NOT NULL`.
+  - `filterSendableRecipients` (`privacyRemovalService.js`) re-checks a bulk send's
+    snapshotted recipients right before sending.
+  - Any new path that emails users must do the same.
+- **Contacts can't use the endpoint:** they have no password, so they can't log in.
+  Their removal requests must reach a human some other way, and that person checks
+  they own the address before acting.
+
 ### External integrations and config
 
 `nodeServer/config.js` is gitignored and must never be committed. Server code reads

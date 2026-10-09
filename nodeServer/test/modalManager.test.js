@@ -249,6 +249,41 @@ describe('ModalManager', () => {
     expect(document.getElementById('modalOverlay').classList.contains('hidden')).toBe(true)
   })
 
+  it('requestPrivacyRemoval posts to the removal endpoint after confirmation', async () => {
+    const apiClientMock = { post: vi.fn().mockResolvedValue({ success: true }) }
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+
+    await expect(mm.requestPrivacyRemoval()).resolves.toBe(true)
+
+    expect(confirmSpy).toHaveBeenCalledTimes(1)
+    expect(apiClientMock.post).toHaveBeenCalledWith('/account/privacy-removal-request', {})
+    expect(alertSpy.mock.calls[0][0]).toContain('has been recorded')
+  })
+
+  it('requestPrivacyRemoval does nothing when the user cancels', async () => {
+    const apiClientMock = { post: vi.fn() }
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+
+    await expect(mm.requestPrivacyRemoval()).resolves.toBe(false)
+
+    expect(apiClientMock.post).not.toHaveBeenCalled()
+  })
+
+  it('requestPrivacyRemoval reports a failed request', async () => {
+    const apiClientMock = { post: vi.fn().mockRejectedValue(new Error('Server error')) }
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })
+
+    await expect(mm.requestPrivacyRemoval()).resolves.toBe(false)
+
+    expect(alertSpy.mock.calls[0][0]).toContain('could not be recorded')
+  })
+
   it('hides approve/reject buttons when the submission is already decided', async () => {
     const apiClientMock = { post: vi.fn().mockResolvedValue({}) }
     const mm = new ModalManager(managerMock, { apiClient: apiClientMock, focusTrap: focusTrapMock, renderer: rendererMock })

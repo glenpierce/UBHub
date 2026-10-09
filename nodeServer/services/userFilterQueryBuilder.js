@@ -122,9 +122,10 @@ export function buildUserEmailFilterQuery(filterCriteria) {
     throw error;
   }
 
+  // Never select anyone who has requested GDPR removal.
   const sql =
     `SELECT DISTINCT email FROM users WHERE ${whereFragments.join(' AND ')} ` +
-    "AND email IS NOT NULL AND TRIM(email) <> ''";
+    "AND email IS NOT NULL AND TRIM(email) <> '' AND removalRequestedAt IS NULL";
 
   return {sql, parameters};
 }

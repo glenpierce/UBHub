@@ -35,6 +35,7 @@ describe('userFilterQueryBuilder', () => {
       expect(result.sql).toContain('SELECT DISTINCT email FROM users WHERE');
       expect(result.sql).toContain('FIND_IN_SET(?, `region`)');
       expect(result.sql).toContain("email IS NOT NULL AND TRIM(email) <> ''");
+      expect(result.sql).toContain('AND removalRequestedAt IS NULL');
       expect(result.parameters).toEqual(['EU']);
     });
 

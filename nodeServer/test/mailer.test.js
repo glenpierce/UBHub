@@ -54,4 +54,15 @@ describe('mailer service', () => {
     expect(text).toContain('Region: EU,NA');
     expect(text).toContain('Signed Up At: 2026-10-09T00:00:00.000Z');
   });
+
+  it('builds the privacy removal request notification text', async () => {
+    const { buildPrivacyRemovalRequestPlainText } = await import('../services/mailer.js');
+
+    const text = buildPrivacyRemovalRequestPlainText({ email: 'pat@example.org', alias: 'Pat', removalRequestedAt: '2026-10-09T00:00:00.000Z' });
+
+    expect(text).toContain('requested GDPR removal');
+    expect(text).toContain('Email: pat@example.org');
+    expect(text).toContain('Requested At: 2026-10-09T00:00:00.000Z');
+    expect(text).toContain('excluded from all bulk emails');
+  });
 });

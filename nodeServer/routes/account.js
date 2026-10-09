@@ -2,6 +2,9 @@ import express from 'express';
 const router = express.Router();
 import { makeDbCallAsPromise } from '../ConnectionPool.js';
 import { comparePassword, generatePasswordHash } from '../services/passwordUtils.js';
+import { isAuthenticated } from '../middleware/authMiddleware.js';
+import { requestPrivacyRemoval } from '../services/privacyRemovalService.js';
+import { sendPrivacyRemovalRequestNotification } from '../services/mailer.js';
 
 // Return current user profile data (JSON). Uses session email to query users table.
 router.post('/me', async function (request, response) {
@@ -98,6 +101,37 @@ router.post('/resetPassword', async function (request, response) {
   } catch (connectionError) {
     console.error(connectionError);
     return response.send(false);
+  }
+});
+
+/**
+ * GDPR removal request for the logged-in account holder's own data.
+ * Flags users.removalRequestedAt (excluding the address from every bulk send)
+ * and notifies the admin; a human performs the actual deletion.
+ * The address always comes from the session, never from the request body, so
+ * nobody can flag an address they haven't proven they own.
+ */
+router.post('/privacy-removal-request', isAuthenticated, async function (request, response) {
+  const sessionEmail = request.session.email;
+  if (!sessionEmail) return response.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const { newlyRequested, removalRequestedAt } = await requestPrivacyRemoval(makeDbCallAsPromise, sessionEmail);
+
+    if (newlyRequested) {
+      console.log('GDPR removal requested by account holder:', sessionEmail);
+      sendPrivacyRemovalRequestNotification({
+        email: sessionEmail,
+        alias: request.session.user,
+        removalRequestedAt: new Date(removalRequestedAt).toISOString(),
+      });
+    }
+
+    return response.json({ success: true, newlyRequested, removalRequestedAt });
+  } catch (error) {
+    if (error.code === 'USER_NOT_FOUND') return response.status(404).json({ error: 'User not found' });
+    console.error('Error recording GDPR removal request:', error);
+    return response.status(500).json({ error: 'Server error' });
   }
 });
 

@@ -51,12 +51,14 @@ For more details about Docker and macOS-specific recommendations see the local d
 
 A minimal command to start the app with the repository's local compose file is:
 
-```bash
 # build and start (detached)
+```bash
 docker compose -f docker-compose.local.yml up -d --build
+```
 
 # stop and remove containers
-# docker compose -f docker-compose.local.yml down
+```bash
+docker compose -f docker-compose.local.yml down
 ```
 
 After the containers are up you can access the app at:

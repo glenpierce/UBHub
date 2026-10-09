@@ -1151,6 +1151,31 @@ export class ModalManager {
     alert('Unknown modal mode: ' + this._currentMode);
   }
 
+  /**
+   * Ask the server to flag the logged-in user's own data for GDPR removal.
+   * The server takes the address from the session, so no email is sent here.
+   *
+   * @returns {Promise<boolean>} true when the request was recorded.
+   */
+  async requestPrivacyRemoval() {
+    const confirmed = window.confirm(
+      'Request removal of your personal data?\n\n' +
+      'We will stop emailing you immediately, and an administrator will delete your account and data. ' +
+      'This cannot be undone once your data is deleted.'
+    );
+    if (!confirmed) return false;
+
+    try {
+      await this.apiClient.post('/account/privacy-removal-request', {});
+      alert('Your removal request has been recorded. We will no longer email you, and an administrator will delete your data.');
+      return true;
+    } catch (err) {
+      console.error('Privacy removal request failed', err);
+      alert('Your removal request could not be recorded. Please try again or contact us. ' + err.message);
+      return false;
+    }
+  }
+
   async _onProfileSubmit(event) {
     event.preventDefault();
     if (!this.profileFormElement) return;

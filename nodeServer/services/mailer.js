@@ -51,3 +51,22 @@ export async function sendMailingListSignupNotification({ email, alias, institut
     console.error('Error sending mailing list signup notification email:', sendMailError);
   }
 }
+
+export function buildPrivacyRemovalRequestPlainText({ email, alias, removalRequestedAt }) {
+  return `A UBHub account holder has requested GDPR removal of their personal data.\n\nEmail: ${email}\nName: ${alias || ''}\nRequested At: ${removalRequestedAt || new Date().toISOString()}\n\nThis address is now excluded from all bulk emails. Please delete their row from the users table (and any other personal data held about them) and confirm with them once done.\n`;
+}
+
+export async function sendPrivacyRemovalRequestNotification({ email, alias, removalRequestedAt }) {
+  try {
+    const mail = {
+      from: config.EMAIL_FROM,
+      to: config.ADMIN_EMAIL,
+      subject: `GDPR removal requested: ${email}`,
+      text: buildPrivacyRemovalRequestPlainText({ email, alias, removalRequestedAt }),
+    };
+
+    return await transporter.sendMail(mail);
+  } catch (sendMailError) {
+    console.error('Error sending privacy removal request notification email:', sendMailError);
+  }
+}

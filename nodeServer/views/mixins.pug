@@ -103,3 +103,20 @@ script.
     console.log(JSON.parse(dataAsJson));
     xmlHttp.send(dataAsJson);
   }
+
+//- GDPR privacy notice plus a required, unticked consent checkbox.
+//- purpose: 'mailingList' (signup) or 'account' (createUser).
+mixin privacyNotice(purpose)
+  div.privacyNotice(style="max-width:420px; margin:10px auto; padding:12px 16px; text-align:left; font-size:14px; line-height:1.4; border:1px solid #4c90b6; border-radius:5px;")
+    strong How we use your information
+    if purpose === 'account'
+      p UBHub (Urban Biodiversity Hub) stores the details you enter here (name, title, institution, mailing address, email, WhatsApp number) and a securely hashed copy of your password. We use them to run your account and to contact you about UBHub. We do not sell your information or share it for marketing.
+    else
+      p UBHub (Urban Biodiversity Hub) stores the details you enter here (name, email, and optionally your institution, title and region). We use them only to send you UBHub news and updates. We do not sell your information or share it for marketing.
+    p Our legal basis is your consent. Your data is stored on servers run by Amazon Web Services, and our emails are sent through our email provider, Brevo. We keep your information until you withdraw consent or ask us to delete it.
+    p
+      | You can ask to see, correct or delete your information, or withdraw your consent, at any time.
+      |  Once logged in, you can request removal from your account; we stop emailing you and delete your data.
+    label(style="display:flex; gap:8px; align-items:flex-start; cursor:pointer;")
+      input(type='checkbox' name='privacyConsent' value='yes' required style="margin-top:3px;")
+      span I agree to UBHub storing and using my information as described above.

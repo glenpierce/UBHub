@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS `ubhub` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `ubhub`;
+
 -- Privilege levels: 0 = Contact (no password), 1 = User, 2 = Contributor, 3 = Approver, 4 = Executive
 CREATE TABLE IF NOT EXISTS users(
     email VARCHAR(255) NOT NULL,
@@ -19,6 +22,8 @@ CREATE TABLE IF NOT EXISTS users(
     level VARCHAR(255), -- contact engagement level (e.g. "Observer", "Senior Member")
     createdBy VARCHAR(255),
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    consentGivenAt DATETIME DEFAULT NULL, -- when the person agreed to the privacy notice (signup / createUser)
+    removalRequestedAt DATETIME DEFAULT NULL, -- GDPR erasure requested by the account holder; never email; a human deletes the row
     PRIMARY KEY (email),
     UNIQUE INDEX (email),
     INDEX idx_users_alias (alias(255))
@@ -158,4 +163,8 @@ ALTER TABLE users ADD COLUMN workingGroup VARCHAR(255);
 ALTER TABLE users ADD COLUMN level VARCHAR(255);
 ALTER TABLE users ADD COLUMN createdBy VARCHAR(255);
 ALTER TABLE users ADD COLUMN createdAt DATETIME DEFAULT CURRENT_TIMESTAMP;
+
+# GDPR migration – run before deploying the code that reads these columns.
+ALTER TABLE users ADD COLUMN consentGivenAt DATETIME DEFAULT NULL;
+ALTER TABLE users ADD COLUMN removalRequestedAt DATETIME DEFAULT NULL;
 

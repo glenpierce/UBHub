@@ -18,6 +18,7 @@ export function initializeDataManagement(config = window.dataManagementConfigFro
   window.closeModal = () => modalManager.close();
   window.openMyProfileModalFunction = () => modalManager.open('profile');
   window.closeMyProfileModalFunction = () => modalManager.close();
+  window.requestPrivacyRemoval = () => modalManager.requestPrivacyRemoval();
   window.addNewEntry = () => { if (!tableManager.selectedTable) { alert('Please select a table first.'); return; } modalManager.open('add', tableManager.selectedTable); };
 
   window.closeMapOverlay = () => {

@@ -10,6 +10,15 @@ router.get('/', function(req, res) {
 });
 
 router.post('/', async function(req, res) {
+  // GDPR: consent must be an explicit opt-in (the form's checkbox is unticked by default).
+  if (!req.body || req.body.privacyConsent !== 'yes') {
+    res.status(400).render('createUser', {
+      errorFromServer: true,
+      errorMessage: 'Please confirm that you agree to the privacy notice before creating an account.',
+    });
+    return;
+  }
+
   try {
     const userIsUnique = await isUserEmailUnique(req, res);
     if (!userIsUnique) {
@@ -68,6 +77,7 @@ function createUser(req, res) {
     .then(rows => {
       // pass the normalized email string (not JSON.stringify of rows) to setUserPrivileges
       setUserPrivileges(req.body.email);
+      recordPrivacyConsent(req.body.email);
       console.log('The user db has created a user: ', JSON.stringify(rows));
       // Redirect to login with a query flag so the login page can display a success popup
       res.redirect('/login?created=1');
@@ -113,6 +123,14 @@ function setUserPrivileges(normalizedEmail) {
       .catch(error => {
         console.error('Error setting user permissions: ', error);
       });
+}
+
+// Record when the new user agreed to the privacy notice (validated in the POST handler).
+function recordPrivacyConsent(normalizedEmail) {
+  makeDbCallAsPromise('UPDATE users SET consentGivenAt = NOW() WHERE email = ?', [normalizedEmail])
+    .catch(error => {
+      console.error('Error recording privacy consent for user: ', normalizedEmail, error);
+    });
 }
 
 function normalizeAndSanitizeEmail(rawEmail) {

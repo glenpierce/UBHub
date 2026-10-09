@@ -140,6 +140,8 @@ const tableDisplayMetadata = {
       { name: 'workingGroup', label: 'Working Group', visible: false },
       { name: 'assignedSite', label: 'Assigned Sites', visible: true, renderFunction: 'assignRenderer' },
       { name: 'lastActive', label: 'Last Active', visible: true, renderFunction: 'lastActiveRenderer' },
+      // GDPR: set when the account holder requested removal; a human deletes these rows.
+      { name: 'removalRequestedAt', label: 'Removal Requested', visible: true, type: 'date' },
     ],
   },
 };
@@ -175,6 +177,7 @@ const executiveUserColumns = [
   { name: 'primaryContact', label: 'Primary Contact', visible: true },
   { name: 'createdBy', label: 'Created By', visible: false },
   { name: 'createdAt', label: 'Created At', visible: false },
+  { name: 'consentGivenAt', label: 'Privacy Consent Given', visible: false },
   { name: 'notes', label: 'Notes', visible: false },
   { button: 'edit', label: 'Edit', visible: true, onClickFunction: 'openEditUserModal' },
 ];

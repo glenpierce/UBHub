@@ -37,6 +37,18 @@ describe('signup view', () => {
     expect(html).not.toContain('<script>bad</script>');
   });
 
+  it('shows the GDPR privacy notice with a required, unticked consent checkbox', () => {
+    const html = renderSignupView()
+    expect(html).toContain('How we use your information')
+    expect(html).toContain('only to send you UBHub news and updates')
+    expect(html).toContain('withdraw your consent, at any time')
+    const consentCheckbox = html.match(/<input[^>]*name="privacyConsent"[^>]*>/)[0]
+    expect(consentCheckbox).toContain('type="checkbox"')
+    expect(consentCheckbox).toContain('value="yes"')
+    expect(consentCheckbox).toContain('required')
+    expect(consentCheckbox).not.toContain('checked')
+  });
+
   it('shows the confirmation instead of the form once submitted', () => {
     const html = renderSignupView({ submitted: true });
     expect(html).toContain('Thank you for signing up');

@@ -121,6 +121,7 @@ body
           select.entryInput.regionSelect#region(name='region' multiple size=regionDefinitions.length)
             each regionDefinition in regionDefinitions
               option(value=regionDefinition.code selected=selectedRegions.includes(regionDefinition.code))= regionDefinition.label
+      +privacyNotice('mailingList')
       div.honeypotField(aria-hidden='true')
         label(for=honeypotFieldName) Leave this field empty
         input(id=honeypotFieldName name=honeypotFieldName type='text' tabindex='-1' autocomplete='off')

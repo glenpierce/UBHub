@@ -123,6 +123,14 @@ html
       div.modal-actions
         button.button-margin(onclick="changePassword()") Change password
 
+    // GDPR: account holders can ask for their own data to be removed (POST /account/privacy-removal-request)
+    div.largeMarginBottom
+      div.profileEditEntryFieldContainer
+        b Privacy
+      div Request removal of your personal data. We stop emailing you immediately, and an administrator deletes your account and data.
+      div.modal-actions
+        button.button-margin(type="button" onclick="requestPrivacyRemoval()") Request data removal
+
 // Modal overlay for generating filtered email lists from the Users table
 .modal-overlay#modalOverlayEmailList.hidden
   .modal(id="modalContainerEmailList")
