@@ -4,6 +4,7 @@ import { makeDbCallAsPromise } from '../ConnectionPool.js';
 import { createMailingListSignup } from '../services/mailingListSignupService.js';
 import { sendMailingListSignupNotification } from '../services/mailer.js';
 import { REGION_DEFINITIONS } from '../utils/validationUtils.js';
+import { SIGNUP_INTEREST_DEFINITIONS } from '../services/tableMetadata.js';
 
 // Hidden form field that humans never fill in; bots that auto-fill every
 // input do. A filled honeypot gets the normal success page but no DB write.
@@ -12,6 +13,7 @@ const HONEYPOT_FIELD_NAME = 'website';
 function renderSignupPage(response, { statusCode = 200, submitted = false, errorMessage = '', formValues = {} } = {}) {
   response.status(statusCode).render('signup', {
     regionDefinitions: REGION_DEFINITIONS,
+    signupInterestDefinitions: SIGNUP_INTEREST_DEFINITIONS,
     honeypotFieldName: HONEYPOT_FIELD_NAME,
     submitted,
     errorMessage,
@@ -41,7 +43,14 @@ router.post('/', async function(request, response) {
 
     if (created) {
       console.log('Mailing list signup created:', signup.email);
-      sendMailingListSignupNotification({ ...signup, createdAt: new Date().toISOString() });
+      sendMailingListSignupNotification({
+        ...signup,
+        selectedInterestLabels: SIGNUP_INTEREST_DEFINITIONS
+          .filter(interestDefinition => signup.interests[interestDefinition.key])
+          .map(interestDefinition => interestDefinition.formLabel),
+        contactRequested: signup.interests.contactRequest === true,
+        createdAt: new Date().toISOString(),
+      });
     } else {
       console.log('Mailing list signup skipped, email already exists in users:', signup.email);
     }

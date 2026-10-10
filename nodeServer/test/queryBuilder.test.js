@@ -52,6 +52,22 @@ describe('queryBuilder', () => {
       expect(result.parameters).toEqual([]);
     });
 
+    it('reads a jsonPath column from the JSON column named by jsonColumn', () => {
+      const result = buildTableDataQuery({
+        tableName: 'users',
+        serverMeta: {
+          columns: [
+            { name: 'email', visible: true },
+            { name: 'contactRequest', jsonColumn: 'signupInterests', jsonPath: '$.contactRequest', visible: true },
+          ],
+        },
+      });
+
+      expect(result.sql).toContain(
+        "JSON_UNQUOTE(JSON_EXTRACT(`users`.`signupInterests`, '$.contactRequest')) AS `contactRequest`",
+      );
+    });
+
     it('builds a JSON_EXTRACT expression for a plain jsonPath column (no crossReferenceTable)', () => {
       const result = buildTableDataQuery({
         tableName: 'email_send_requests',

@@ -21,6 +21,34 @@ describe('TableManager', () => {
     vi.restoreAllMocks()
   })
 
+  describe('boolean columns', () => {
+    it('getRowValueForColumn returns the displayed Yes/blank text for boolean columns', () => {
+      const booleanColumn = { name: 'contactRequest', type: 'boolean' }
+      expect(manager.getRowValueForColumn({ contactRequest: 'true' }, 'contactRequest', booleanColumn)).toBe('Yes')
+      expect(manager.getRowValueForColumn({ contactRequest: 'false' }, 'contactRequest', booleanColumn)).toBe('')
+      expect(manager.getRowValueForColumn({ contactRequest: null }, 'contactRequest', booleanColumn)).toBe('')
+      expect(manager.getRowValueForColumn({ contactRequest: 'true' }, 'contactRequest')).toBe('true')
+    })
+
+    it('a column filter of "yes" matches rows where the boolean is true', () => {
+      manager.tables = { users: { columns: [
+        { name: 'email', visible: true },
+        { name: 'contactRequest', type: 'boolean', visible: true },
+      ] } }
+      manager.tableDataCache = { users: [
+        { email: 'asked@example.org', contactRequest: 'true' },
+        { email: 'quiet@example.org', contactRequest: 'false' },
+      ] }
+      manager.tableView = { populateTable: vi.fn() }
+      manager.columnFilter = { columnName: 'contactRequest', filterValue: 'yes' }
+
+      manager.applyFiltersAndSort('users')
+
+      const [shownRows] = manager.tableView.populateTable.mock.calls[0]
+      expect(shownRows.map(row => row.email)).toEqual(['asked@example.org'])
+    })
+  })
+
   describe('getRowValueForColumn', () => {
     it('returns empty string for falsy row', () => {
       expect(manager.getRowValueForColumn(null, 'name')).toBe('')

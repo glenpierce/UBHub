@@ -3,12 +3,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import pug from 'pug';
 import { REGION_DEFINITIONS } from '../utils/validationUtils.js';
+import { SIGNUP_INTEREST_DEFINITIONS } from '../services/tableMetadata.js';
 
 const viewPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'views', 'signup.pug');
 
 function renderSignupView(locals) {
   return pug.renderFile(viewPath, {
     regionDefinitions: REGION_DEFINITIONS,
+    signupInterestDefinitions: SIGNUP_INTEREST_DEFINITIONS,
     honeypotFieldName: 'website',
     submitted: false,
     errorMessage: '',
@@ -48,6 +50,23 @@ describe('signup view', () => {
     expect(consentCheckbox).toContain('value="yes"')
     expect(consentCheckbox).toContain('required')
     expect(consentCheckbox).not.toContain('checked')
+  });
+
+  it('shows the three interest checkboxes, unticked, under the PM heading', () => {
+    const html = renderSignupView()
+    expect(html).toContain('<legend>In addition to being added to the mailing list:</legend>')
+    expect(html).toContain('I am interested in partnership and collaboration opportunities as an organization.')
+    expect(html).toContain('I would like to be a part of the UBHub network as an individual.')
+    expect(html).toContain('I have a specific request. Please contact me.')
+    const interestCheckboxes = html.match(/<input[^>]*name="interests"[^>]*>/g)
+    expect(interestCheckboxes).toHaveLength(3)
+    interestCheckboxes.forEach(checkbox => expect(checkbox).not.toContain('checked'))
+  });
+
+  it('keeps interest checkboxes ticked when the form is re-shown after an error', () => {
+    const html = renderSignupView({ formValues: { interests: ['contactRequest'] } })
+    expect(html).toMatch(/<input[^>]*value="contactRequest"[^>]*checked/)
+    expect(html).not.toMatch(/<input[^>]*value="partnershipCollaboration"[^>]*checked/)
   });
 
   it('shows the confirmation instead of the form once submitted', () => {

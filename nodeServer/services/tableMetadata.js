@@ -14,6 +14,30 @@
 // query builder to construct SELECT / JOIN clauses.
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Mailing-list signup interest checkboxes, stored as JSON in users.signupInterests
+// ({ [key]: true|false } for every key). Single source of truth for the signup
+// form (formLabel), server-side validation (key) and the users table (tableLabel).
+// ---------------------------------------------------------------------------
+
+export const SIGNUP_INTEREST_DEFINITIONS = Object.freeze([
+  {
+    key: 'partnershipCollaboration',
+    formLabel: 'I am interested in partnership and collaboration opportunities as an organization.',
+    tableLabel: 'Partnership Interest',
+  },
+  {
+    key: 'individualNetworkMember',
+    formLabel: 'I would like to be a part of the UBHub network as an individual.',
+    tableLabel: 'Network Interest (Individual)',
+  },
+  {
+    key: 'contactRequest',
+    formLabel: 'I have a specific request. Please contact me.',
+    tableLabel: 'Contact Requested',
+  },
+]);
+
 const tableDisplayMetadata = {
   mapButtons: {
     displayName: 'Programs',
@@ -142,6 +166,15 @@ const tableDisplayMetadata = {
       { name: 'lastActive', label: 'Last Active', visible: true, renderFunction: 'lastActiveRenderer' },
       // GDPR: set when the account holder requested removal; a human deletes these rows.
       { name: 'removalRequestedAt', label: 'Removal Requested', visible: true, type: 'date' },
+      // Mailing-list signup checkboxes, read from the users.signupInterests JSON column.
+      ...SIGNUP_INTEREST_DEFINITIONS.map(interestDefinition => ({
+        name: interestDefinition.key,
+        jsonColumn: 'signupInterests',
+        jsonPath: `$.${interestDefinition.key}`,
+        label: interestDefinition.tableLabel,
+        visible: true,
+        type: 'boolean',
+      })),
     ],
   },
 };

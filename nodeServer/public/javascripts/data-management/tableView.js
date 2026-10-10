@@ -1,4 +1,4 @@
-import { formatDateTime } from './utils.js';
+import { formatDateTime, formatBooleanForDisplay } from './utils.js';
 
 export class TableView {
   constructor(tableManager, selectors = {}) {
@@ -285,6 +285,10 @@ export class TableView {
     const cellData = rowData[column.name];
     if (cellData === null || cellData === undefined) { tableCell.textContent = ''; return; }
     if (typeof cellData === 'object') { tableCell.textContent = JSON.stringify(cellData); return; }
+    if (column.type === 'boolean') {
+      tableCell.textContent = formatBooleanForDisplay(cellData);
+      return;
+    }
     if (column.type === 'date') {
       const date = new Date(cellData);
       const formatted = formatDateTime(date);

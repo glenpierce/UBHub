@@ -1,5 +1,5 @@
 import { RendererRegistry } from './rendererRegistry.js';
-import { fetchJson } from './utils.js';
+import { fetchJson, formatBooleanForDisplay } from './utils.js';
 
 export class TableManager {
   constructor({tables = {}, editableColumns = {}, navMenu = []}) {
@@ -153,9 +153,11 @@ export class TableManager {
       });
   }
 
-  getRowValueForColumn(rowData, columnName) {
+  getRowValueForColumn(rowData, columnName, columnDefinition = null) {
     if (!rowData) return '';
     const value = rowData[columnName];
+    // Search/filter/sort boolean columns by what the table shows ('Yes' or blank).
+    if (columnDefinition && columnDefinition.type === 'boolean') return formatBooleanForDisplay(value);
     if (value === null || value === undefined) return '';
     if (typeof value === 'object') return JSON.stringify(value);
     return String(value);
@@ -175,7 +177,7 @@ export class TableManager {
       if (this.globalSearchQuery && this.globalSearchQuery.trim()) {
         const normalizedQuery = this.globalSearchQuery.trim().toLowerCase();
         const isMatch = searchableColumns.some(column => {
-          const cellText = this.getRowValueForColumn(row, column.name).toLowerCase();
+          const cellText = this.getRowValueForColumn(row, column.name, column).toLowerCase();
           return cellText.indexOf(normalizedQuery) !== -1;
         });
         if (!isMatch) return false;
@@ -183,7 +185,8 @@ export class TableManager {
 
       if (this.columnFilter.columnName && this.columnFilter.filterValue && this.columnFilter.filterValue.trim()) {
         const normalizedColumnQuery = this.columnFilter.filterValue.trim().toLowerCase();
-        const cellText = this.getRowValueForColumn(row, this.columnFilter.columnName).toLowerCase();
+        const filterColumnDefinition = tableColumns.find(column => column.name === this.columnFilter.columnName) || null;
+        const cellText = this.getRowValueForColumn(row, this.columnFilter.columnName, filterColumnDefinition).toLowerCase();
         if (cellText.indexOf(normalizedColumnQuery) === -1) return false;
       }
 
@@ -192,10 +195,11 @@ export class TableManager {
 
     if (this.sortState.columnName) {
       const sortColumnName = this.sortState.columnName;
+      const sortColumnDefinition = tableColumns.find(column => column.name === sortColumnName) || null;
       const sortDirectionMultiplier = this.sortState.direction === 'desc' ? -1 : 1;
       filteredRows.sort((rowA, rowB) => {
-        const valueA = this.getRowValueForColumn(rowA, sortColumnName);
-        const valueB = this.getRowValueForColumn(rowB, sortColumnName);
+        const valueA = this.getRowValueForColumn(rowA, sortColumnName, sortColumnDefinition);
+        const valueB = this.getRowValueForColumn(rowB, sortColumnName, sortColumnDefinition);
 
         const numericA = Number(valueA);
         const numericB = Number(valueB);

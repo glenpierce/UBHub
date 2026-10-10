@@ -21,3 +21,6 @@ ALTER TABLE users ADD COLUMN createdAt DATETIME DEFAULT CURRENT_TIMESTAMP;
 # 2. GDPR consent and removal requests. Run BEFORE deploying the code that reads these columns.
 ALTER TABLE users ADD COLUMN consentGivenAt DATETIME DEFAULT NULL;
 ALTER TABLE users ADD COLUMN removalRequestedAt DATETIME DEFAULT NULL;
+
+# 3. Mailing-list signup interest checkboxes (JSON of true/false per interest).
+ALTER TABLE users ADD COLUMN signupInterests JSON DEFAULT NULL;

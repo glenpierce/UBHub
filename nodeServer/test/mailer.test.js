@@ -46,13 +46,17 @@ describe('mailer service', () => {
   it('builds the mailing list signup notification text', async () => {
     const { buildMailingListSignupPlainText } = await import('../services/mailer.js');
 
-    const text = buildMailingListSignupPlainText({ email: 'pat@example.org', alias: 'Pat', region: 'EU,NA', createdAt: '2026-10-09T00:00:00.000Z' });
+    const text = buildMailingListSignupPlainText({
+      email: 'pat@example.org', alias: 'Pat', region: 'EU,NA', createdAt: '2026-10-09T00:00:00.000Z',
+      selectedInterestLabels: ['I have a specific request. Please contact me.'],
+    });
 
     expect(text).toContain('Email: pat@example.org');
     expect(text).toContain('Name: Pat');
     expect(text).toContain('Institution: \n');
     expect(text).toContain('Region: EU,NA');
     expect(text).toContain('Signed Up At: 2026-10-09T00:00:00.000Z');
+    expect(text).toContain('In addition to the mailing list:\n  - I have a specific request. Please contact me.');
   });
 
   it('builds the privacy removal request notification text', async () => {

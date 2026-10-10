@@ -183,10 +183,12 @@ export function buildTableDataQuery({ tableName, serverMeta, limit = 2000 }) {
       }
       selectParts.push(fragment.selectExpression);
     } else if (column.name && column.jsonPath) {
-      // A scalar value nested in this table's own JSON blob column (e.g. a
-      // `data` column) exposed as a plain top-level column — no join involved.
+      // A scalar value nested in one of this table's own JSON columns (`data`
+      // unless the column names another via jsonColumn) exposed as a plain
+      // top-level column — no join involved.
+      const jsonColumnName = column.jsonColumn || 'data';
       selectParts.push(
-        `JSON_UNQUOTE(JSON_EXTRACT(\`${tableName}\`.\`data\`, '${column.jsonPath}')) AS \`${column.name}\``,
+        `JSON_UNQUOTE(JSON_EXTRACT(\`${tableName}\`.\`${jsonColumnName}\`, '${column.jsonPath}')) AS \`${column.name}\``,
       );
     } else if (column.name) {
       selectParts.push(`\`${tableName}\`.\`${column.name}\` AS \`${column.name}\``);

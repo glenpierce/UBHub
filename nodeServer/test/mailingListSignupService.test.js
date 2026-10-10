@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   createMailingListSignup,
   normalizeSignupFormFields,
+  normalizeSignupInterests,
   MAILING_LIST_SIGNUP_CREATED_BY,
 } from '../services/mailingListSignupService.js';
 
@@ -12,7 +13,10 @@ const validFormFields = {
   institution: 'City Zoo',
   region: ['EU', 'NA'],
   privacyConsent: 'yes',
+  interests: ['partnershipCollaboration', 'contactRequest'],
 };
+
+const noInterests = { partnershipCollaboration: false, individualNetworkMember: false, contactRequest: false };
 
 describe('normalizeSignupFormFields', () => {
   it('trims and lowercases email and trims other fields', () => {
@@ -22,6 +26,7 @@ describe('normalizeSignupFormFields', () => {
       title: 'Director',
       institution: 'City Zoo',
       region: 'EU,NA',
+      interests: { partnershipCollaboration: true, individualNetworkMember: false, contactRequest: true },
     });
   });
 
@@ -36,6 +41,7 @@ describe('normalizeSignupFormFields', () => {
       title: '',
       institution: '',
       region: '',
+      interests: noInterests,
     });
   });
 
@@ -47,6 +53,7 @@ describe('normalizeSignupFormFields', () => {
     [{ ...validFormFields, title: 'x'.repeat(256) }, 'Title must be 255 characters or fewer'],
     [{ ...validFormFields, privacyConsent: undefined }, 'Please confirm that you agree to the privacy notice'],
     [{ ...validFormFields, privacyConsent: 'on' }, 'Please confirm that you agree to the privacy notice'],
+    [{ ...validFormFields, interests: ['contactRequest', 'freeIceCream'] }, 'Invalid interest: freeIceCream'],
   ])('rejects invalid input with INVALID_SIGNUP (%#)', (formFields, expectedMessage) => {
     expect(() => normalizeSignupFormFields(formFields)).toThrow(expectedMessage);
     try {
@@ -61,6 +68,22 @@ describe('normalizeSignupFormFields', () => {
   });
 });
 
+describe('normalizeSignupInterests', () => {
+  it('returns every interest as false when none are checked', () => {
+    expect(normalizeSignupInterests(undefined)).toEqual(noInterests);
+    expect(normalizeSignupInterests([])).toEqual(noInterests);
+  });
+
+  it('accepts a single checked box posted as a string', () => {
+    expect(normalizeSignupInterests('individualNetworkMember')).toEqual({ ...noInterests, individualNetworkMember: true });
+  });
+
+  it('accepts all three checked', () => {
+    expect(normalizeSignupInterests(['partnershipCollaboration', 'individualNetworkMember', 'contactRequest']))
+      .toEqual({ partnershipCollaboration: true, individualNetworkMember: true, contactRequest: true });
+  });
+});
+
 describe('createMailingListSignup', () => {
   it('inserts a Contact (privileges 0, no password, consent timestamp) with parameterized values', async () => {
     const executeQuery = vi.fn().mockResolvedValue({ affectedRows: 1 });
@@ -72,10 +95,12 @@ describe('createMailingListSignup', () => {
     expect(executeQuery).toHaveBeenCalledTimes(1);
     const [sql, parameters] = executeQuery.mock.calls[0];
     expect(sql).toMatch(/^INSERT IGNORE INTO users/);
-    expect(sql).toMatch(/privileges, consentGivenAt\) VALUES \(\?, \?, \?, \?, \?, \?, 0, NOW\(\)\)/);
+    expect(sql).toMatch(/region, signupInterests, createdBy, privileges, consentGivenAt\) VALUES \(\?, \?, \?, \?, \?, \?, \?, 0, NOW\(\)\)/);
     expect(sql).not.toMatch(/hashedPassword/);
     expect(parameters).toEqual([
-      'person@example.org', 'Pat Person', 'Director', 'City Zoo', 'EU,NA', MAILING_LIST_SIGNUP_CREATED_BY,
+      'person@example.org', 'Pat Person', 'Director', 'City Zoo', 'EU,NA',
+      '{"partnershipCollaboration":true,"individualNetworkMember":false,"contactRequest":true}',
+      MAILING_LIST_SIGNUP_CREATED_BY,
     ]);
   });
 

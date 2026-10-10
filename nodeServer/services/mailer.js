@@ -33,17 +33,20 @@ export async function sendAdminNotification({ newUserEmail, alias, institution, 
   }
 }
 
-export function buildMailingListSignupPlainText({ email, alias, institution, title, region, createdAt }) {
-  return `Someone has signed up for the UBHub mailing list.\n\nEmail: ${email}\nName: ${alias || ''}\nInstitution: ${institution || ''}\nTitle: ${title || ''}\nRegion: ${region || ''}\nSigned Up At: ${createdAt || new Date().toISOString()}\n`;
+export function buildMailingListSignupPlainText({ email, alias, institution, title, region, selectedInterestLabels, createdAt }) {
+  const interestLines = (selectedInterestLabels && selectedInterestLabels.length > 0)
+    ? selectedInterestLabels.map(interestLabel => `  - ${interestLabel}`).join('\n')
+    : '  (none)';
+  return `Someone has signed up for the UBHub mailing list.\n\nEmail: ${email}\nName: ${alias || ''}\nInstitution: ${institution || ''}\nTitle: ${title || ''}\nRegion: ${region || ''}\nSigned Up At: ${createdAt || new Date().toISOString()}\n\nIn addition to the mailing list:\n${interestLines}\n`;
 }
 
-export async function sendMailingListSignupNotification({ email, alias, institution, title, region, createdAt }) {
+export async function sendMailingListSignupNotification({ email, alias, institution, title, region, selectedInterestLabels, contactRequested, createdAt }) {
   try {
     const mail = {
       from: config.EMAIL_FROM,
       to: config.ADMIN_EMAIL,
-      subject: `New UBHub mailing list signup: ${email}`,
-      text: buildMailingListSignupPlainText({ email, alias, institution, title, region, createdAt }),
+      subject: `${contactRequested ? '[Contact requested] ' : ''}New UBHub mailing list signup: ${email}`,
+      text: buildMailingListSignupPlainText({ email, alias, institution, title, region, selectedInterestLabels, createdAt }),
     };
 
     return await transporter.sendMail(mail);

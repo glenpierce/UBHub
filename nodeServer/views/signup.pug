@@ -66,6 +66,27 @@ html
             float: none;
         }
 
+        .signupInterests {
+            width: 300px;
+            margin: 10px auto;
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid #4c90b6;
+            border-radius: 5px;
+        }
+
+        .signupInterestOption {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            margin: 6px 0;
+            cursor: pointer;
+        }
+
+        .signupInterestOption input {
+            margin-top: 3px;
+        }
+
         .honeypotField {
             position: absolute;
             left: -10000px;
@@ -118,6 +139,13 @@ body
           select.entryInput.regionSelect#region(name='region' multiple size=regionDefinitions.length)
             each regionDefinition in regionDefinitions
               option(value=regionDefinition.code selected=selectedRegions.includes(regionDefinition.code))= regionDefinition.label
+      fieldset.signupInterests
+        legend In addition to being added to the mailing list:
+        - const selectedInterests = [].concat(formValues.interests || [])
+        each interestDefinition in signupInterestDefinitions
+          label.signupInterestOption
+            input(type='checkbox' name='interests' value=interestDefinition.key checked=selectedInterests.includes(interestDefinition.key))
+            span= interestDefinition.formLabel
       +privacyNotice('mailingList')
       div.honeypotField(aria-hidden='true')
         label(for=honeypotFieldName) Leave this field empty

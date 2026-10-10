@@ -30,3 +30,14 @@ export function formatDateTime(date) {
   const seconds = zeroPad(date.getSeconds());
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
+
+/**
+ * Display text for a boolean table cell. JSON booleans read through
+ * JSON_UNQUOTE arrive as the strings 'true'/'false'.
+ *
+ * @param {*} value
+ * @returns {string} 'Yes' for true, '' otherwise.
+ */
+export function formatBooleanForDisplay(value) {
+  return (value === true || value === 'true' || value === 1 || value === '1') ? 'Yes' : '';
+}

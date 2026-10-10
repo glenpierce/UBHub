@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS users(
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     consentGivenAt DATETIME DEFAULT NULL, -- when the person agreed to the privacy notice (signup / createUser)
     removalRequestedAt DATETIME DEFAULT NULL, -- GDPR erasure requested by the account holder; never email; a human deletes the row
+    signupInterests JSON DEFAULT NULL, -- mailing-list signup checkboxes, e.g. {"partnershipCollaboration": true, "individualNetworkMember": false, "contactRequest": true}
     PRIMARY KEY (email),
     UNIQUE INDEX (email),
     INDEX idx_users_alias (alias(255))
